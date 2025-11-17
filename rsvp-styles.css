@@ -4,27 +4,27 @@
 
 /* RSVP Hero */
 .rsvp-hero {
-    min-height: 50vh;
+    min-height: 40vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 6rem 2rem 3rem;
+    padding: 4rem 2rem 2rem;
     margin-top: 80px;
 }
 
 .rsvp-subtitle {
     font-family: var(--font-heading);
-    font-size: 1rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    margin-top: 1rem;
+    margin-top: 0.8rem;
 }
 
 /* RSVP Form Section */
 .rsvp-form-section {
-    padding: 4rem 0 6rem;
+    padding: 3rem 0 4rem;
 }
 
 .rsvp-form {
@@ -34,7 +34,7 @@
 
 /* Form Groups */
 .form-group {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .form-group label {
@@ -89,15 +89,15 @@
 /* Event RSVP Heading */
 .event-rsvp-heading {
     font-family: var(--font-title);
-    font-size: 2rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
     color: var(--color-dark-green);
     text-align: center;
 }
 
 .event-label {
     font-family: var(--font-heading);
-    font-size: 1.1rem;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     font-weight: 500;
@@ -237,21 +237,29 @@
 
 /* Event Groups */
 .event-group {
-    padding: 1.5rem;
+    padding: 1.2rem;
     background-color: rgba(26, 58, 46, 0.02);
     border-left: 3px solid var(--color-dark-green);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .rsvp-hero {
-        min-height: 40vh;
-        padding: 5rem 1.5rem 2rem;
+        min-height: 35vh;
+        padding: 3rem 1.5rem 1.5rem;
     }
 
     .rsvp-subtitle {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
+    }
+
+    .rsvp-form-section {
+        padding: 2rem 0 3rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
     }
 
     .form-group input[type="text"],
@@ -261,12 +269,12 @@
         font-size: 16px; /* Prevents iOS zoom on focus */
     }
 
-    .invitation-heading {
+    .event-rsvp-heading {
         font-size: 1.5rem;
     }
 
-    .invited-events-list li {
-        font-size: 1rem;
+    .event-label {
+        font-size: 0.9rem;
     }
 
     .event-group {
