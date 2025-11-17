@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP - Adina & Andrew</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="rsvp-styles.css">
+    <script src="guests.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="nav-content">
+            <a href="index.html" class="site-title">Adina & Andrew</a>
+            <ul class="nav-links">
+                <li><a href="index.html#weekend">The Weekend</a></li>
+                <li><a href="index.html#stay">Travel & Stay</a></li>
+                <li><a href="index.html#things-to-do">Things to Do</a></li>
+                <li><a href="rsvp.html">RSVP</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- RSVP Hero -->
+    <section class="rsvp-hero">
+        <h1 class="couple-names">RSVP</h1>
+        <p class="rsvp-subtitle">Please respond by March 1, 2025</p>
+    </section>
+
+    <!-- RSVP Form -->
+    <section class="rsvp-form-section">
+        <div class="content-wrapper">
+            <form class="rsvp-form" id="rsvpForm">
+
+                <!-- Guest Name Selection -->
+                <div class="form-group">
+                    <label for="guestSelect">Please select your name *</label>
+                    <select id="guestSelect" name="guestSelect" required>
+                        <option value="">-- Select your name --</option>
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Invitation Details (shown after selection) -->
+                <div id="invitationDetails" class="invitation-details" style="display: none;">
+                    <h3 class="invitation-heading">You're invited to:</h3>
+                    <ul id="invitedEventsList" class="invited-events-list"></ul>
+                </div>
+
+                <!-- Main Form (shown after selection) -->
+                <div id="mainForm" style="display: none;">
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+
+                    <!-- Overall Attendance -->
+                    <div class="form-group">
+                        <label>Will you be attending? *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="attending" value="yes" required>
+                                <span>Joyfully accepts</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="attending" value="no" required>
+                                <span>Regretfully declines</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Attending Details (shown if yes) -->
+                    <div id="attendingDetails" style="display: none;">
+
+                        <!-- Number of Guests -->
+                        <div class="form-group" id="guestCountGroup">
+                            <label for="guestCount">Number of Guests Attending *</label>
+                            <select id="guestCount" name="guestCount">
+                                <!-- Options will be populated based on maxGuests -->
+                            </select>
+                        </div>
+
+                        <!-- Friday Events -->
+                        <div class="form-group event-group" id="fridayGroup" style="display: none;">
+                            <label>Will you join us for Friday Welcome Drinks?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="fridayAttending" value="yes">
+                                    <span>Yes</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="fridayAttending" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Saturday Events (always shown if attending, since everyone invited to Saturday) -->
+                        <div class="form-group event-group" id="saturdayGroup" style="display: none;">
+                            <label>Will you join us for Saturday Wedding?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="saturdayAttending" value="yes">
+                                    <span>Yes</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="saturdayAttending" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Sunday Brunch -->
+                        <div class="form-group event-group" id="sundayGroup" style="display: none;">
+                            <label>Will you join us for Sunday Brunch?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="sundayAttending" value="yes">
+                                    <span>Yes</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="sundayAttending" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Dietary Restrictions -->
+                        <div class="form-group" id="dietaryGroup">
+                            <label for="dietary">Dietary Restrictions or Allergies</label>
+                            <textarea id="dietary" name="dietary" rows="3" placeholder="Please let us know of any dietary needs..."></textarea>
+                        </div>
+
+                        <!-- Song Request -->
+                        <div class="form-group">
+                            <label for="songRequest">Song Request</label>
+                            <input type="text" id="songRequest" name="songRequest" placeholder="What song will get you on the dance floor?">
+                        </div>
+
+                    </div>
+                    <!-- End Attending Details -->
+
+                    <!-- Additional Message (shown regardless of attendance) -->
+                    <div class="form-group">
+                        <label for="message">Additional Message</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Any message for the happy couple..."></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="cta-button">Submit RSVP</button>
+
+                </div>
+                <!-- End Main Form -->
+
+            </form>
+
+            <div id="confirmationMessage" class="confirmation-message" style="display: none;">
+                <h3>Thank You!</h3>
+                <p>Your RSVP has been received. We can't wait to celebrate with you!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Adina & Andrew</p>
+    </footer>
+
+    <script src="rsvp-script.js"></script>
+</body>
+</html>
