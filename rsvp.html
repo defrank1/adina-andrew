@@ -33,19 +33,19 @@
         <div class="content-wrapper">
             <form class="rsvp-form" id="rsvpForm">
 
-                <!-- Guest Name Selection -->
+                <!-- Guest Name Search -->
                 <div class="form-group">
-                    <label for="guestSelect">Please select your name *</label>
-                    <select id="guestSelect" name="guestSelect" required>
-                        <option value="">-- Select your name --</option>
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
-                </div>
-
-                <!-- Invitation Details (shown after selection) -->
-                <div id="invitationDetails" class="invitation-details" style="display: none;">
-                    <h3 class="invitation-heading">You're invited to:</h3>
-                    <ul id="invitedEventsList" class="invited-events-list"></ul>
+                    <label for="guestSearch">Start typing your name *</label>
+                    <input
+                        type="text"
+                        id="guestSearch"
+                        name="guestSearch"
+                        placeholder="Type your name..."
+                        autocomplete="off"
+                        required
+                    >
+                    <div id="guestSuggestions" class="guest-suggestions"></div>
+                    <input type="hidden" id="selectedGuestId" name="selectedGuestId">
                 </div>
 
                 <!-- Main Form (shown after selection) -->
@@ -57,22 +57,57 @@
                         <input type="email" id="email" name="email" required placeholder="your.email@example.com">
                     </div>
 
-                    <!-- Overall Attendance -->
+                    <!-- Event RSVP Section -->
                     <div class="form-group">
-                        <label>Will you be attending? *</label>
+                        <h3 class="event-rsvp-heading">Please RSVP for each event:</h3>
+                    </div>
+
+                    <!-- Friday Event -->
+                    <div class="form-group event-group" id="fridayGroup" style="display: none;">
+                        <label class="event-label">Friday Welcome Drinks</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="attending" value="yes" required>
+                                <input type="radio" name="fridayAttending" value="yes" class="event-radio">
                                 <span>Joyfully accepts</span>
                             </label>
                             <label class="radio-label">
-                                <input type="radio" name="attending" value="no" required>
+                                <input type="radio" name="fridayAttending" value="no" class="event-radio">
                                 <span>Regretfully declines</span>
                             </label>
                         </div>
                     </div>
 
-                    <!-- Attending Details (shown if yes) -->
+                    <!-- Saturday Event -->
+                    <div class="form-group event-group" id="saturdayGroup" style="display: none;">
+                        <label class="event-label">Saturday Wedding</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="saturdayAttending" value="yes" class="event-radio">
+                                <span>Joyfully accepts</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="saturdayAttending" value="no" class="event-radio">
+                                <span>Regretfully declines</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sunday Event -->
+                    <div class="form-group event-group" id="sundayGroup" style="display: none;">
+                        <label class="event-label">Sunday Brunch</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="sundayAttending" value="yes" class="event-radio">
+                                <span>Joyfully accepts</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="sundayAttending" value="no" class="event-radio">
+                                <span>Regretfully declines</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Attending Details (shown if any yes) -->
                     <div id="attendingDetails" style="display: none;">
 
                         <!-- Number of Guests -->
@@ -81,51 +116,6 @@
                             <select id="guestCount" name="guestCount">
                                 <!-- Options will be populated based on maxGuests -->
                             </select>
-                        </div>
-
-                        <!-- Friday Events -->
-                        <div class="form-group event-group" id="fridayGroup" style="display: none;">
-                            <label>Will you join us for Friday Welcome Drinks?</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="fridayAttending" value="yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="fridayAttending" value="no">
-                                    <span>No</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Saturday Events (always shown if attending, since everyone invited to Saturday) -->
-                        <div class="form-group event-group" id="saturdayGroup" style="display: none;">
-                            <label>Will you join us for Saturday Wedding?</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="saturdayAttending" value="yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="saturdayAttending" value="no">
-                                    <span>No</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Sunday Brunch -->
-                        <div class="form-group event-group" id="sundayGroup" style="display: none;">
-                            <label>Will you join us for Sunday Brunch?</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="sundayAttending" value="yes">
-                                    <span>Yes</span>
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="sundayAttending" value="no">
-                                    <span>No</span>
-                                </label>
-                            </div>
                         </div>
 
                         <!-- Dietary Restrictions -->

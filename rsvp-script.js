@@ -1,12 +1,11 @@
-// RSVP Form Handling with Guest List
+// RSVP Form with Autocomplete Search and Individual Event RSVPs
 document.addEventListener('DOMContentLoaded', function() {
     // Get DOM elements
     const form = document.getElementById('rsvpForm');
-    const guestSelect = document.getElementById('guestSelect');
-    const invitationDetails = document.getElementById('invitationDetails');
-    const invitedEventsList = document.getElementById('invitedEventsList');
+    const guestSearchInput = document.getElementById('guestSearch');
+    const guestSuggestions = document.getElementById('guestSuggestions');
+    const selectedGuestIdInput = document.getElementById('selectedGuestId');
     const mainForm = document.getElementById('mainForm');
-    const attendingRadios = document.querySelectorAll('input[name="attending"]');
     const attendingDetails = document.getElementById('attendingDetails');
     const guestCountSelect = document.getElementById('guestCount');
     const confirmationMessage = document.getElementById('confirmationMessage');
@@ -16,59 +15,91 @@ document.addEventListener('DOMContentLoaded', function() {
     const saturdayGroup = document.getElementById('saturdayGroup');
     const sundayGroup = document.getElementById('sundayGroup');
 
+    // Event radio buttons
+    const eventRadios = document.querySelectorAll('.event-radio');
+
     let selectedGuest = null;
+    let filteredGuests = [];
 
-    // Populate guest dropdown
-    function populateGuestDropdown() {
-        // Sort guests alphabetically by name
-        const sortedGuests = [...guestList].sort((a, b) =>
-            a.name.localeCompare(b.name)
-        );
+    // ====== AUTOCOMPLETE FUNCTIONALITY ======
 
-        sortedGuests.forEach(guest => {
-            const option = document.createElement('option');
-            option.value = guest.id;
-            option.textContent = guest.name;
-            guestSelect.appendChild(option);
-        });
-    }
+    // Handle typing in search box
+    guestSearchInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim().toLowerCase();
 
-    // Handle guest selection
-    guestSelect.addEventListener('change', function() {
-        const guestId = parseInt(this.value);
-
-        if (!guestId) {
-            // Reset if no guest selected
-            invitationDetails.style.display = 'none';
-            mainForm.style.display = 'none';
-            selectedGuest = null;
+        // If empty, clear suggestions and hide
+        if (searchTerm === '') {
+            guestSuggestions.style.display = 'none';
+            guestSuggestions.innerHTML = '';
+            clearSelection();
             return;
         }
 
-        // Find selected guest
-        selectedGuest = guestList.find(g => g.id === guestId);
+        // Filter guests by search term
+        filteredGuests = guestList.filter(guest =>
+            guest.name.toLowerCase().includes(searchTerm)
+        );
 
-        if (selectedGuest) {
-            displayInvitationDetails(selectedGuest);
-            showMainForm(selectedGuest);
+        // Display filtered suggestions
+        displaySuggestions(filteredGuests);
+    });
+
+    // Display guest suggestions
+    function displaySuggestions(guests) {
+        guestSuggestions.innerHTML = '';
+
+        if (guests.length === 0) {
+            guestSuggestions.style.display = 'none';
+            return;
+        }
+
+        guests.forEach(guest => {
+            const div = document.createElement('div');
+            div.className = 'guest-suggestion-item';
+            div.textContent = guest.name;
+            div.dataset.guestId = guest.id;
+
+            // Click handler for selection
+            div.addEventListener('click', function() {
+                selectGuest(guest);
+            });
+
+            guestSuggestions.appendChild(div);
+        });
+
+        guestSuggestions.style.display = 'block';
+    }
+
+    // Select a guest from suggestions
+    function selectGuest(guest) {
+        selectedGuest = guest;
+        guestSearchInput.value = guest.name;
+        selectedGuestIdInput.value = guest.id;
+        guestSuggestions.style.display = 'none';
+        guestSuggestions.innerHTML = '';
+
+        // Show the form for this guest
+        showFormForGuest(guest);
+    }
+
+    // Clear selection
+    function clearSelection() {
+        selectedGuest = null;
+        selectedGuestIdInput.value = '';
+        mainForm.style.display = 'none';
+        attendingDetails.style.display = 'none';
+    }
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!guestSearchInput.contains(e.target) && !guestSuggestions.contains(e.target)) {
+            guestSuggestions.style.display = 'none';
         }
     });
 
-    // Display what events the guest is invited to
-    function displayInvitationDetails(guest) {
-        invitedEventsList.innerHTML = '';
+    // ====== FORM DISPLAY FOR SELECTED GUEST ======
 
-        guest.invitedTo.forEach(eventKey => {
-            const li = document.createElement('li');
-            li.textContent = eventNames[eventKey];
-            invitedEventsList.appendChild(li);
-        });
-
-        invitationDetails.style.display = 'block';
-    }
-
-    // Show main form and configure for guest
-    function showMainForm(guest) {
+    function showFormForGuest(guest) {
         // Pre-fill email if available
         const emailInput = document.getElementById('email');
         if (guest.email) {
@@ -77,13 +108,22 @@ document.addEventListener('DOMContentLoaded', function() {
             emailInput.value = '';
         }
 
+        // Show/hide event groups based on invitation
+        fridayGroup.style.display = guest.invitedTo.includes('friday') ? 'block' : 'none';
+        saturdayGroup.style.display = guest.invitedTo.includes('saturday') ? 'block' : 'none';
+        sundayGroup.style.display = guest.invitedTo.includes('sunday') ? 'block' : 'none';
+
         // Populate guest count dropdown
         populateGuestCount(guest.maxGuests);
 
+        // Reset event selections
+        resetEventSelections();
+
+        // Show main form
         mainForm.style.display = 'block';
     }
 
-    // Populate guest count options based on maxGuests
+    // Populate guest count options
     function populateGuestCount(maxGuests) {
         guestCountSelect.innerHTML = '<option value="">Select number</option>';
 
@@ -95,35 +135,60 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Handle overall attendance selection
-    attendingRadios.forEach(radio => {
+    // Reset all event radio selections
+    function resetEventSelections() {
+        eventRadios.forEach(radio => {
+            radio.checked = false;
+        });
+        attendingDetails.style.display = 'none';
+    }
+
+    // ====== INDIVIDUAL EVENT RSVP LOGIC ======
+
+    // Monitor event radio changes
+    eventRadios.forEach(radio => {
         radio.addEventListener('change', function() {
-            if (this.value === 'yes') {
-                showAttendingDetails();
-            } else {
-                attendingDetails.style.display = 'none';
-            }
+            checkIfAnyEventAccepted();
         });
     });
 
-    // Show attending details and event-specific questions
-    function showAttendingDetails() {
-        if (!selectedGuest) return;
+    // Check if any event has been accepted (yes)
+    function checkIfAnyEventAccepted() {
+        const anyYes = Array.from(eventRadios).some(radio =>
+            radio.checked && radio.value === 'yes'
+        );
 
-        attendingDetails.style.display = 'block';
-
-        // Show/hide event groups based on what they're invited to
-        fridayGroup.style.display = selectedGuest.invitedTo.includes('friday') ? 'block' : 'none';
-        saturdayGroup.style.display = selectedGuest.invitedTo.includes('saturday') ? 'block' : 'none';
-        sundayGroup.style.display = selectedGuest.invitedTo.includes('sunday') ? 'block' : 'none';
+        // Show attending details (guest count, dietary, etc.) if any event accepted
+        if (anyYes) {
+            attendingDetails.style.display = 'block';
+        } else {
+            attendingDetails.style.display = 'none';
+        }
     }
 
-    // Form submission
+    // ====== FORM SUBMISSION ======
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();
 
         if (!selectedGuest) {
-            alert('Please select your name from the dropdown.');
+            alert('Please search for and select your name from the suggestions.');
+            return;
+        }
+
+        // Check that they've responded to at least one event they're invited to
+        const invitedEvents = selectedGuest.invitedTo;
+        let hasResponded = false;
+
+        invitedEvents.forEach(eventKey => {
+            const radioChecked = document.querySelector(`input[name="${eventKey}Attending"]:checked`);
+            if (radioChecked) {
+                hasResponded = true;
+            }
+        });
+
+        if (!hasResponded) {
+            alert('Please RSVP to at least one event.');
             return;
         }
 
@@ -132,31 +197,30 @@ document.addEventListener('DOMContentLoaded', function() {
             guestId: selectedGuest.id,
             guestName: selectedGuest.name,
             email: document.getElementById('email').value,
-            attending: document.querySelector('input[name="attending"]:checked').value,
+            events: {}
         };
 
-        // If attending, collect additional details
-        if (formData.attending === 'yes') {
-            formData.guestCount = document.getElementById('guestCount').value;
-
-            // Collect event-specific responses
-            formData.events = {};
-
-            if (selectedGuest.invitedTo.includes('friday')) {
-                const fridayResponse = document.querySelector('input[name="fridayAttending"]:checked');
-                formData.events.friday = fridayResponse ? fridayResponse.value : 'not answered';
+        // Collect individual event responses
+        invitedEvents.forEach(eventKey => {
+            const radioChecked = document.querySelector(`input[name="${eventKey}Attending"]:checked`);
+            if (radioChecked) {
+                formData.events[eventKey] = radioChecked.value;
+            } else {
+                formData.events[eventKey] = 'not answered';
             }
+        });
 
-            if (selectedGuest.invitedTo.includes('saturday')) {
-                const saturdayResponse = document.querySelector('input[name="saturdayAttending"]:checked');
-                formData.events.saturday = saturdayResponse ? saturdayResponse.value : 'not answered';
+        // Check if attending any event
+        const attendingAny = Object.values(formData.events).includes('yes');
+
+        if (attendingAny) {
+            // Collect guest count
+            const guestCount = document.getElementById('guestCount').value;
+            if (!guestCount) {
+                alert('Please select the number of guests attending.');
+                return;
             }
-
-            if (selectedGuest.invitedTo.includes('sunday')) {
-                const sundayResponse = document.querySelector('input[name="sundayAttending"]:checked');
-                formData.events.sunday = sundayResponse ? sundayResponse.value : 'not answered';
-            }
-
+            formData.guestCount = guestCount;
             formData.dietary = document.getElementById('dietary').value;
             formData.songRequest = document.getElementById('songRequest').value;
         }
@@ -195,7 +259,4 @@ document.addEventListener('DOMContentLoaded', function() {
         confirmationMessage.style.display = 'block';
         confirmationMessage.scrollIntoView({ behavior: 'smooth' });
     });
-
-    // Initialize: populate dropdown on load
-    populateGuestDropdown();
 });

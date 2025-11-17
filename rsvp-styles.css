@@ -47,6 +47,62 @@
     color: var(--color-dark-green);
 }
 
+/* Guest Search Autocomplete */
+#guestSearch {
+    position: relative;
+}
+
+.guest-suggestions {
+    position: absolute;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: var(--color-soft-white);
+    border: 2px solid var(--color-dark-green);
+    border-top: none;
+    z-index: 100;
+    display: none;
+}
+
+.guest-suggestion-item {
+    padding: 1rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--color-dark-green);
+    border-bottom: 1px solid rgba(26, 58, 46, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.guest-suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.guest-suggestion-item:hover {
+    background-color: rgba(26, 58, 46, 0.05);
+}
+
+.guest-suggestion-item.selected {
+    background-color: rgba(26, 58, 46, 0.1);
+}
+
+/* Event RSVP Heading */
+.event-rsvp-heading {
+    font-family: var(--font-title);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-dark-green);
+    text-align: center;
+}
+
+.event-label {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+}
+
 /* Input Fields */
 .form-group input[type="text"],
 .form-group input[type="email"],
