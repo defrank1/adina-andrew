@@ -45,7 +45,7 @@ const guestList = [
     },
     {
         id: 6,
-        name: "Emily and David Martinez",
+        name: "Emily and David Murtinez",
         email: "",
         invitedTo: ["saturday"],
         maxGuests: 2,
