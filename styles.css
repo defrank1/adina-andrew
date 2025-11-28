@@ -10,37 +10,32 @@
     box-sizing: border-box;
 }
 
-/* Custom Font Loading
-   Note: You'll need to add @font-face rules for your licensed fonts
-   or link to them via web font services */
+/* Custom Font Loading */
 
-/* Example font-face structure - replace with actual font files:
 @font-face {
-    font-family: 'Canora';
-    src: url('fonts/Canora.woff2') format('woff2'),
-         url('fonts/Canora.woff') format('woff');
-    font-weight: normal;
+    font-family: 'PP Playground';
+    src: url('fonts/PPPlayground-Medium.woff2') format('woff2'),
+         url('fonts/PPPlayground-Medium.woff') format('woff');
+    font-weight: 500;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Akzidenz-Grotesk';
-    src: url('fonts/AkzidenzGrotesk.woff2') format('woff2'),
-         url('fonts/AkzidenzGrotesk.woff') format('woff');
-    font-weight: normal;
+    font-family: 'PP Watch';
+    src: url('fonts/PPWatch-Bold.woff2') format('woff2'),
+         url('fonts/PPWatch-Bold.woff') format('woff');
+    font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Mrs Eaves';
-    src: url('fonts/MrsEaves.woff2') format('woff2'),
-         url('fonts/MrsEaves.woff') format('woff');
-    font-weight: normal;
+    font-family: 'Sentient';
+    src: url('fonts/Sentient-Regular.woff2') format('woff2'),
+         url('fonts/Sentient-Regular.woff') format('woff');
+    font-weight: 400;
     font-style: normal;
 }
-*/
 
-/* Temporary fallback fonts until you add the actual font files */
 :root {
     /* Colors */
     --color-dark-green: #1a3a2e;
@@ -48,9 +43,9 @@
     --color-accent: #2d5a4a;
 
     /* Fonts */
-    --font-title: 'Canora', 'Brush Script MT', cursive;
-    --font-heading: 'Akzidenz-Grotesk', 'Helvetica Neue', Arial, sans-serif;
-    --font-body: 'Mrs Eaves', 'Baskerville', Georgia, serif;
+    --font-title: 'PP Playground', 'Brush Script MT', cursive;
+    --font-heading: 'PP Watch', 'Helvetica Neue', Arial, sans-serif;
+    --font-body: 'Sentient', 'Baskerville', Georgia, serif;
 }
 
 /* Body & Typography */
