@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
         // See google-apps-script.js file for setup instructions
-        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQrznLPkXruwC24_YVfgg6TGUVtBGonZhst_GCxQs1_Y6mx073DyytyMQPk79A3xb-/exec';
 
         // Send to Google Sheets
         fetch(GOOGLE_SCRIPT_URL, {
