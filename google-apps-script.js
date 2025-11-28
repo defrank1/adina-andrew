@@ -96,54 +96,216 @@ function doPost(e) {
 
 // Send confirmation email to guest
 function sendConfirmationEmail(guestName, email, events, guestCount, dietary, songRequest, message) {
-  // Build the email body
-  let emailBody = `Dear ${guestName},\n\n`;
-  emailBody += `Thank you for submitting your RSVP for Adina & Andrew's wedding on October 17, 2026 in Washington, DC!\n\n`;
-  emailBody += `Here's a summary of your response:\n\n`;
+  // Build HTML email body
+  let htmlBody = `
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: 'Georgia', 'Baskerville', serif;
+            color: #1a3a2e;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #1a3a2e;
+          }
+          .header h1 {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 32px;
+            margin: 0;
+            color: #1a3a2e;
+          }
+          .greeting {
+            margin: 30px 0 20px;
+            font-size: 18px;
+          }
+          .content {
+            background-color: #faf9f6;
+            padding: 25px;
+            border-left: 4px solid #1a3a2e;
+            margin: 20px 0;
+          }
+          .section-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #1a3a2e;
+          }
+          .event-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+          }
+          .event-item:last-child {
+            border-bottom: none;
+          }
+          .event-name {
+            font-weight: 500;
+            margin-right: 10px;
+          }
+          .attending {
+            color: #2d5a4a;
+            font-weight: bold;
+          }
+          .not-attending {
+            color: #888;
+          }
+          .detail-row {
+            padding: 8px 0;
+          }
+          .detail-label {
+            font-weight: 500;
+            margin-right: 8px;
+          }
+          .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #1a3a2e;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+          }
+          .signature {
+            margin-top: 30px;
+            font-style: italic;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Adina & Andrew</h1>
+          <p style="margin: 10px 0 0; font-size: 14px; letter-spacing: 2px;">October 17, 2026 • Washington, DC</p>
+        </div>
+
+        <p class="greeting">Dear ${guestName},</p>
+
+        <p>Thank you for submitting your RSVP! We're so excited to celebrate with you.</p>
+
+        <div class="content">
+          <div class="section-title">Your RSVP Summary</div>`;
 
   // Event attendance
-  emailBody += `EVENT ATTENDANCE:\n`;
   if (events.friday) {
-    const status = events.friday === 'yes' ? '✓ Attending' : '✗ Not attending';
-    emailBody += `  Friday Welcome Drinks: ${status}\n`;
-  }
-  if (events.saturday) {
-    const status = events.saturday === 'yes' ? '✓ Attending' : '✗ Not attending';
-    emailBody += `  Saturday Wedding: ${status}\n`;
-  }
-  if (events.sunday) {
-    const status = events.sunday === 'yes' ? '✓ Attending' : '✗ Not attending';
-    emailBody += `  Sunday Brunch: ${status}\n`;
+    const isAttending = events.friday === 'yes';
+    htmlBody += `
+          <div class="event-item">
+            <span class="event-name">Friday Welcome Drinks:</span>
+            <span class="${isAttending ? 'attending' : 'not-attending'}">
+              ${isAttending ? '✓ Attending' : 'Not attending'}
+            </span>
+          </div>`;
   }
 
-  // Additional details if attending any event
+  if (events.saturday) {
+    const isAttending = events.saturday === 'yes';
+    htmlBody += `
+          <div class="event-item">
+            <span class="event-name">Saturday Wedding:</span>
+            <span class="${isAttending ? 'attending' : 'not-attending'}">
+              ${isAttending ? '✓ Attending' : 'Not attending'}
+            </span>
+          </div>`;
+  }
+
+  if (events.sunday) {
+    const isAttending = events.sunday === 'yes';
+    htmlBody += `
+          <div class="event-item">
+            <span class="event-name">Sunday Brunch:</span>
+            <span class="${isAttending ? 'attending' : 'not-attending'}">
+              ${isAttending ? '✓ Attending' : 'Not attending'}
+            </span>
+          </div>`;
+  }
+
+  // Additional details
   const attendingAny = Object.values(events).includes('yes');
   if (attendingAny && guestCount) {
-    emailBody += `\nNumber of guests: ${guestCount}\n`;
+    htmlBody += `
+          <div class="detail-row" style="margin-top: 20px;">
+            <span class="detail-label">Number of guests:</span>
+            <span>${guestCount}</span>
+          </div>`;
 
     if (dietary) {
-      emailBody += `Dietary restrictions: ${dietary}\n`;
+      htmlBody += `
+          <div class="detail-row">
+            <span class="detail-label">Dietary restrictions:</span>
+            <span>${dietary}</span>
+          </div>`;
     }
 
     if (songRequest) {
-      emailBody += `Song request: ${songRequest}\n`;
+      htmlBody += `
+          <div class="detail-row">
+            <span class="detail-label">Song request:</span>
+            <span>${songRequest}</span>
+          </div>`;
     }
   }
 
   if (message) {
-    emailBody += `\nYour message: ${message}\n`;
+    htmlBody += `
+          <div class="detail-row" style="margin-top: 20px;">
+            <span class="detail-label">Your message:</span>
+            <div style="margin-top: 8px; font-style: italic;">${message}</div>
+          </div>`;
   }
 
-  emailBody += `\n---\n\n`;
-  emailBody += `If you need to make any changes to your RSVP, please contact us directly.\n\n`;
-  emailBody += `We can't wait to celebrate with you!\n\n`;
-  emailBody += `Love,\nAdina & Andrew`;
+  htmlBody += `
+        </div>
 
-  // Send the email
+        <p>If you need to make any changes to your RSVP, please contact us directly.</p>
+
+        <p class="signature">We can't wait to celebrate with you!<br><br>Love,<br>Adina & Andrew</p>
+
+        <div class="footer">
+          This is an automated confirmation email for your RSVP.
+        </div>
+      </body>
+    </html>`;
+
+  // Plain text version for email clients that don't support HTML
+  let plainTextBody = `Dear ${guestName},\n\n`;
+  plainTextBody += `Thank you for submitting your RSVP for Adina & Andrew's wedding on October 17, 2026 in Washington, DC!\n\n`;
+  plainTextBody += `Here's a summary of your response:\n\n`;
+
+  if (events.friday) {
+    const status = events.friday === 'yes' ? '✓ Attending' : '✗ Not attending';
+    plainTextBody += `Friday Welcome Drinks: ${status}\n`;
+  }
+  if (events.saturday) {
+    const status = events.saturday === 'yes' ? '✓ Attending' : '✗ Not attending';
+    plainTextBody += `Saturday Wedding: ${status}\n`;
+  }
+  if (events.sunday) {
+    const status = events.sunday === 'yes' ? '✓ Attending' : '✗ Not attending';
+    plainTextBody += `Sunday Brunch: ${status}\n`;
+  }
+
+  if (attendingAny && guestCount) {
+    plainTextBody += `\nNumber of guests: ${guestCount}\n`;
+    if (dietary) plainTextBody += `Dietary restrictions: ${dietary}\n`;
+    if (songRequest) plainTextBody += `Song request: ${songRequest}\n`;
+  }
+
+  if (message) plainTextBody += `\nYour message: ${message}\n`;
+
+  plainTextBody += `\nIf you need to make any changes to your RSVP, please contact us directly.\n\n`;
+  plainTextBody += `We can't wait to celebrate with you!\n\nLove,\nAdina & Andrew`;
+
+  // Send the email with both HTML and plain text
   MailApp.sendEmail({
     to: email,
     subject: 'RSVP Confirmation - Adina & Andrew\'s Wedding',
-    body: emailBody
+    body: plainTextBody,
+    htmlBody: htmlBody
   });
 }
 
