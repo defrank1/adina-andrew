@@ -70,6 +70,11 @@ function doPost(e) {
     // Auto-resize columns for better readability
     sheet.autoResizeColumns(1, 10);
 
+    // Send confirmation email if email address provided
+    if (email) {
+      sendConfirmationEmail(guestName, email, data.events, guestCount, dietary, songRequest, message);
+    }
+
     // Return success response
     return ContentService
       .createTextOutput(JSON.stringify({
@@ -87,6 +92,59 @@ function doPost(e) {
       }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// Send confirmation email to guest
+function sendConfirmationEmail(guestName, email, events, guestCount, dietary, songRequest, message) {
+  // Build the email body
+  let emailBody = `Dear ${guestName},\n\n`;
+  emailBody += `Thank you for submitting your RSVP for Adina & Andrew's wedding on October 17, 2026 in Washington, DC!\n\n`;
+  emailBody += `Here's a summary of your response:\n\n`;
+
+  // Event attendance
+  emailBody += `EVENT ATTENDANCE:\n`;
+  if (events.friday) {
+    const status = events.friday === 'yes' ? '✓ Attending' : '✗ Not attending';
+    emailBody += `  Friday Welcome Drinks: ${status}\n`;
+  }
+  if (events.saturday) {
+    const status = events.saturday === 'yes' ? '✓ Attending' : '✗ Not attending';
+    emailBody += `  Saturday Wedding: ${status}\n`;
+  }
+  if (events.sunday) {
+    const status = events.sunday === 'yes' ? '✓ Attending' : '✗ Not attending';
+    emailBody += `  Sunday Brunch: ${status}\n`;
+  }
+
+  // Additional details if attending any event
+  const attendingAny = Object.values(events).includes('yes');
+  if (attendingAny && guestCount) {
+    emailBody += `\nNumber of guests: ${guestCount}\n`;
+
+    if (dietary) {
+      emailBody += `Dietary restrictions: ${dietary}\n`;
+    }
+
+    if (songRequest) {
+      emailBody += `Song request: ${songRequest}\n`;
+    }
+  }
+
+  if (message) {
+    emailBody += `\nYour message: ${message}\n`;
+  }
+
+  emailBody += `\n---\n\n`;
+  emailBody += `If you need to make any changes to your RSVP, please contact us directly.\n\n`;
+  emailBody += `We can't wait to celebrate with you!\n\n`;
+  emailBody += `Love,\nAdina & Andrew`;
+
+  // Send the email
+  MailApp.sendEmail({
+    to: email,
+    subject: 'RSVP Confirmation - Adina & Andrew\'s Wedding',
+    body: emailBody
+  });
 }
 
 // Test function to verify the script works
