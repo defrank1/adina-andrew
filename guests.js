@@ -50,6 +50,14 @@ const guestList = [
         invitedTo: ["saturday"],
         maxGuests: 2,
         notes: "Couple"
+    },
+    {
+        id: 7,
+        name: "Laura Nelson",
+        email: "",
+        invitedTo: ["friday", "saturday", "sunday"],
+        maxGuests: 2,
+        notes: "Bride's mom"
     }
     // Add more guests below...
     // Copy the format above for each guest/party

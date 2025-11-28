@@ -227,36 +227,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
         formData.message = document.getElementById('message').value;
 
-        // Log form data (in production, send to server/Google Sheets)
+        // Log form data for debugging
         console.log('RSVP Submission:', formData);
 
-        // TODO: In production, integrate with:
-        // - Squarespace form submission
-        // - Google Sheets via Google Apps Script
-        // - A backend API
-        // - Email service
+        // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
+        // See google-apps-script.js file for setup instructions
+        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
 
-        // Example: Sending to Google Sheets
-        // fetch('YOUR_GOOGLE_APPS_SCRIPT_URL', {
-        //     method: 'POST',
-        //     body: JSON.stringify(formData),
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     }
-        // })
-        // .then(response => response.json())
-        // .then(data => {
-        //     form.style.display = 'none';
-        //     confirmationMessage.style.display = 'block';
-        // })
-        // .catch(error => {
-        //     console.error('Error:', error);
-        //     alert('There was an error submitting your RSVP. Please try again.');
-        // });
-
-        // For now, show confirmation message
-        form.style.display = 'none';
-        confirmationMessage.style.display = 'block';
-        confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+        // Send to Google Sheets
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Required for Google Apps Script
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(() => {
+            // Note: no-cors mode means we can't read the response
+            // but we can assume it worked if no error was thrown
+            form.style.display = 'none';
+            confirmationMessage.style.display = 'block';
+            confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error submitting your RSVP. Please try again or contact us directly.');
+        });
     });
 });
