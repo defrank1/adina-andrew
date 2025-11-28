@@ -102,7 +102,7 @@ function sendConfirmationEmail(guestName, email, events, guestCount, dietary, so
       <head>
         <style>
           body {
-            font-family: 'Georgia', 'Baskerville', serif;
+            font-family: 'Sentient', 'Georgia', 'Baskerville', serif;
             color: #1a3a2e;
             line-height: 1.6;
             max-width: 600px;
@@ -115,7 +115,7 @@ function sendConfirmationEmail(guestName, email, events, guestCount, dietary, so
             border-bottom: 2px solid #1a3a2e;
           }
           .header h1 {
-            font-family: 'Brush Script MT', cursive;
+            font-family: 'PP Playground', 'Brush Script MT', cursive;
             font-size: 32px;
             margin: 0;
             color: #1a3a2e;
@@ -131,6 +131,7 @@ function sendConfirmationEmail(guestName, email, events, guestCount, dietary, so
             margin: 20px 0;
           }
           .section-title {
+            font-family: 'PP Watch', 'Helvetica Neue', Arial, sans-serif;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -180,7 +181,7 @@ function sendConfirmationEmail(guestName, email, events, guestCount, dietary, so
       <body>
         <div class="header">
           <h1>Adina & Andrew</h1>
-          <p style="margin: 10px 0 0; font-size: 14px; letter-spacing: 2px;">October 17, 2026 • Washington, DC</p>
+          <p style="margin: 10px 0 0; font-size: 14px; letter-spacing: 2px; font-family: 'PP Watch', 'Helvetica Neue', Arial, sans-serif;">October 17, 2026 • Washington, DC</p>
         </div>
 
         <p class="greeting">Dear ${guestName},</p>
