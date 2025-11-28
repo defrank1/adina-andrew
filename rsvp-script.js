@@ -1,5 +1,5 @@
 // RSVP Form with Autocomplete Search and Individual Event RSVPs
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Get DOM elements
     const form = document.getElementById('rsvpForm');
     const guestSearchInput = document.getElementById('guestSearch');
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====== AUTOCOMPLETE FUNCTIONALITY ======
 
     // Handle typing in search box
-    guestSearchInput.addEventListener('input', function() {
+    guestSearchInput.addEventListener('input', function () {
         const searchTerm = this.value.trim().toLowerCase();
 
         // If empty, clear suggestions and hide
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             div.dataset.guestId = guest.id;
 
             // Click handler for selection
-            div.addEventListener('click', function() {
+            div.addEventListener('click', function () {
                 selectGuest(guest);
             });
 
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Close suggestions when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!guestSearchInput.contains(e.target) && !guestSuggestions.contains(e.target)) {
             guestSuggestions.style.display = 'none';
         }
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Monitor event radio changes
     eventRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
+        radio.addEventListener('change', function () {
             checkIfAnyEventAccepted();
         });
     });
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ====== FORM SUBMISSION ======
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function (e) {
         e.preventDefault();
 
         if (!selectedGuest) {
@@ -243,16 +243,16 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(formData)
         })
-        .then(() => {
-            // Note: no-cors mode means we can't read the response
-            // but we can assume it worked if no error was thrown
-            form.style.display = 'none';
-            confirmationMessage.style.display = 'block';
-            confirmationMessage.scrollIntoView({ behavior: 'smooth' });
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('There was an error submitting your RSVP. Please try again or contact us directly.');
-        });
+            .then(() => {
+                // Note: no-cors mode means we can't read the response
+                // but we can assume it worked if no error was thrown
+                form.style.display = 'none';
+                confirmationMessage.style.display = 'block';
+                confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting your RSVP. Please try again or contact us directly.');
+            });
     });
 });
