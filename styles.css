@@ -225,6 +225,17 @@ body {
     line-height: 1.7;
 }
 
+/* Page Header (for subpages) */
+.page-header {
+    padding: 6rem 2rem 2rem;
+    margin-top: 80px;
+    text-align: center;
+}
+
+.page-header .section-heading {
+    margin-bottom: 0;
+}
+
 /* Our Story Section */
 .our-story {
     padding: 3rem 0;
