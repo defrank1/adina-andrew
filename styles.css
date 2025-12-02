@@ -559,6 +559,55 @@ footer {
     margin-top: 2rem;
 }
 
+/* Save the Date Page */
+.save-the-date-content {
+    padding: 3rem 0 5rem;
+    text-align: center;
+}
+
+.std-announcement {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.std-text {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.std-names {
+    font-family: var(--font-title);
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+.std-date {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 1rem;
+}
+
+.std-location {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.std-divider {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    letter-spacing: 0.8rem;
+    margin: 2rem 0;
+}
+
+.std-message {
+    font-style: italic;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
 @media (max-width: 768px) {
     .photo-gallery {
         grid-template-columns: 1fr;
@@ -594,5 +643,13 @@ footer {
     .faq-question,
     .attraction-name {
         font-size: 1rem;
+    }
+
+    .std-names {
+        font-size: 2.5rem;
+    }
+
+    .std-date {
+        font-size: 1.1rem;
     }
 }
