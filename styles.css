@@ -239,6 +239,7 @@ body {
 /* Our Story Section */
 .our-story {
     padding: 3rem 0;
+    text-align: center;
 }
 
 .section-heading {
@@ -349,6 +350,11 @@ body {
     margin-bottom: 1.5rem;
     font-size: 1rem;
     line-height: 1.7;
+}
+
+.where-to-stay .content-wrapper,
+.things-to-do .content-wrapper {
+    text-align: center;
 }
 
 /* Call to Action Button */
@@ -492,7 +498,7 @@ footer {
 
 .faq-item {
     margin-bottom: 2rem;
-    text-align: left;
+    text-align: center;
 }
 
 .faq-item:last-child {
@@ -515,6 +521,7 @@ footer {
 /* Attractions Section */
 .attractions-section {
     padding: 3rem 0;
+    text-align: center;
 }
 
 .attractions-list {
@@ -528,7 +535,7 @@ footer {
 }
 
 .attraction-item {
-    text-align: left;
+    text-align: center;
 }
 
 .attraction-name {
@@ -617,7 +624,7 @@ footer {
 
 .std-hotel {
     margin-bottom: 2.5rem;
-    text-align: left;
+    text-align: center;
 }
 
 .std-hotel:last-child {
