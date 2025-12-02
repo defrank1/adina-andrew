@@ -566,46 +566,92 @@ footer {
 }
 
 .std-announcement {
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: 700px;
+    margin: 0 auto 4rem;
 }
 
-.std-text {
+.std-heading {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+.std-intro {
+    font-family: var(--font-body);
     font-size: 1.1rem;
+    line-height: 1.7;
     margin-bottom: 1.5rem;
 }
 
 .std-names {
     font-family: var(--font-title);
     font-size: 3.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     font-weight: 400;
 }
 
-.std-date {
+.std-details {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.std-travel {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-top: 3rem;
+    border-top: 1px solid rgba(26, 58, 46, 0.2);
+}
+
+.std-section-title {
     font-family: var(--font-heading);
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.15em;
+    margin-bottom: 2.5rem;
+    font-weight: 400;
+}
+
+.std-hotel {
+    margin-bottom: 2.5rem;
+    text-align: left;
+}
+
+.std-hotel:last-child {
+    margin-bottom: 0;
+}
+
+.std-hotel-name {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+}
+
+.std-hotel-description {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.7;
     margin-bottom: 1rem;
 }
 
-.std-location {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-}
-
-.std-divider {
+.std-hotel-link {
+    display: inline-block;
     font-family: var(--font-heading);
-    font-size: 1.2rem;
-    letter-spacing: 0.8rem;
-    margin: 2rem 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-dark-green);
+    text-decoration: underline;
+    transition: opacity 0.3s ease;
 }
 
-.std-message {
-    font-style: italic;
-    font-size: 1rem;
-    opacity: 0.8;
+.std-hotel-link:hover {
+    opacity: 0.6;
 }
 
 @media (max-width: 768px) {
@@ -649,7 +695,24 @@ footer {
         font-size: 2.5rem;
     }
 
-    .std-date {
-        font-size: 1.1rem;
+    .std-heading {
+        font-size: 1.2rem;
+    }
+
+    .std-section-title {
+        font-size: 1.2rem;
+    }
+
+    .std-intro,
+    .std-details {
+        font-size: 1rem;
+    }
+
+    .std-hotel-name {
+        font-size: 1rem;
+    }
+
+    .std-hotel-description {
+        font-size: 0.95rem;
     }
 }
