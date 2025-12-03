@@ -101,6 +101,47 @@
         #protected-content.unlocked {
             display: block;
         }
+
+        /* Decorative icons */
+        .decorative-icons {
+            position: relative;
+        }
+
+        .icon-dupont {
+            position: absolute;
+            top: 2rem;
+            right: 1rem;
+            width: 200px;
+            height: auto;
+            opacity: 0.9;
+        }
+
+        .icon-rowhouse {
+            position: absolute;
+            top: 40%;
+            left: 1rem;
+            width: 180px;
+            height: auto;
+            opacity: 0.9;
+        }
+
+        .icon-flag {
+            position: absolute;
+            bottom: 8rem;
+            right: 1rem;
+            width: 190px;
+            height: auto;
+            opacity: 0.9;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .icon-dupont,
+            .icon-rowhouse,
+            .icon-flag {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -122,7 +163,12 @@
     <!-- Protected Content -->
     <div id="protected-content">
         <!-- Save the Date Content -->
-        <section class="save-the-date-content">
+        <section class="save-the-date-content decorative-icons">
+            <!-- Decorative DC Icons -->
+            <img src="images/icons/Dupont.png" alt="" class="icon-dupont">
+            <img src="images/icons/rowhouse.png" alt="" class="icon-rowhouse">
+            <img src="images/icons/flag.png" alt="" class="icon-flag">
+
             <div class="content-wrapper">
                 <div class="std-announcement">
                     <p class="std-intro">Kindly save the date for the wedding ceremony and celebration of</p>
