@@ -6,9 +6,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adina & Andrew - October 17, 2026</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Password protection overlay */
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-soft-white);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        #password-overlay.hidden {
+            display: none;
+        }
+
+        .password-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .password-container h2 {
+            font-family: var(--font-title);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--color-dark-green);
+        }
+
+        .password-container p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            color: var(--color-dark-green);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 1rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            border: 2px solid var(--color-dark-green);
+            background-color: var(--color-soft-white);
+            color: var(--color-dark-green);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .password-submit {
+            width: 100%;
+            padding: 1rem 2rem;
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--color-soft-white);
+            background-color: var(--color-dark-green);
+            border: 2px solid var(--color-dark-green);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .password-submit:hover {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+
+        .password-error {
+            color: #c41e3a;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        #protected-content {
+            display: none;
+        }
+
+        #protected-content.unlocked {
+            display: block;
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Welcome</h2>
+            <p>Please enter the password to view this page</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
     <!-- Navigation -->
     <nav class="main-nav">
         <div class="nav-content">
@@ -51,6 +163,46 @@
     <footer>
         <p>&copy; 2026 Adina & Andrew</p>
     </footer>
+    </div>
+
+    <script>
+        // Password protection script
+        const correctPassword = '1234';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        // Check if user has already unlocked (session storage)
+        if (sessionStorage.getItem('homepageUnlocked') === 'true') {
+            unlockContent();
+        }
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const enteredPassword = passwordInput.value;
+
+            if (enteredPassword === correctPassword) {
+                sessionStorage.setItem('homepageUnlocked', 'true');
+                unlockContent();
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        function unlockContent() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+        }
+
+        // Hide error message when user starts typing again
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
+        });
+    </script>
 
 </body>
 
