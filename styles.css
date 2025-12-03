@@ -656,9 +656,9 @@ footer {
 .std-hotel-link {
     display: inline-block;
     font-family: var(--font-heading);
-    font-size: 1rem;
+    font-size: 0.9rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
     color: var(--color-dark-green);
     text-decoration: underline;
     transition: opacity 0.3s ease;
