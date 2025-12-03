@@ -105,36 +105,50 @@
         /* Decorative icons */
         .decorative-icons {
             position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .icon-dupont {
             position: absolute;
             top: 2rem;
-            right: 1rem;
-            width: 200px;
+            right: -180px;
+            width: 160px;
             height: auto;
             opacity: 0.9;
         }
 
         .icon-rowhouse {
             position: absolute;
-            top: 40%;
-            left: 1rem;
-            width: 180px;
+            top: 45%;
+            left: -160px;
+            width: 140px;
             height: auto;
             opacity: 0.9;
         }
 
         .icon-flag {
             position: absolute;
-            bottom: 8rem;
-            right: 1rem;
-            width: 190px;
+            bottom: 10rem;
+            right: -170px;
+            width: 150px;
             height: auto;
             opacity: 0.9;
         }
 
         /* Responsive adjustments */
+        @media (max-width: 1400px) {
+            .icon-dupont {
+                right: 1rem;
+            }
+            .icon-rowhouse {
+                left: 1rem;
+            }
+            .icon-flag {
+                right: 1rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .icon-dupont,
             .icon-rowhouse,
