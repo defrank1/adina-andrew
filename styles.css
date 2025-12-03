@@ -644,7 +644,7 @@ footer {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 0.75rem;
-    text-align: right;
+    text-align: left;
 }
 
 .std-hotel-description {
@@ -656,8 +656,10 @@ footer {
 
 .std-hotel-link {
     display: inline-block;
-    font-family: var(--font-body);
+    font-family: var(--font-heading);
     font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     color: var(--color-dark-green);
     text-decoration: underline;
     transition: opacity 0.3s ease;
