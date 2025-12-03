@@ -631,7 +631,7 @@ footer {
 
 .std-hotel {
     margin-bottom: 2.5rem;
-    text-align: center;
+    text-align: left;
 }
 
 .std-hotel:last-child {
@@ -644,7 +644,6 @@ footer {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 0.75rem;
-    text-align: left;
 }
 
 .std-hotel-description {
