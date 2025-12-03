@@ -600,6 +600,15 @@ footer {
     font-weight: 400;
 }
 
+.std-names-image {
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .std-details {
     font-family: var(--font-body);
     font-size: 1.1rem;
@@ -700,6 +709,10 @@ footer {
 
     .std-names {
         font-size: 2.5rem;
+    }
+
+    .std-names-image {
+        max-width: 90%;
     }
 
     .std-heading {
