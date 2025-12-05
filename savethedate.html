@@ -137,6 +137,11 @@
             opacity: 0.9;
         }
 
+        /* Hide mobile icons on desktop */
+        .mobile-icons-container {
+            display: none;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 900px) {
             .icon-dupont {
@@ -151,22 +156,36 @@
         }
 
         @media (max-width: 768px) {
-            .icon-dupont {
-                width: 120px;
-                right: 5px;
-                top: 45%;
+            /* Hide desktop absolutely positioned icons */
+            .desktop-icon {
+                display: none;
             }
 
-            .icon-rowhouse {
-                width: 110px;
-                left: 5px;
-                top: 50%;
+            /* Show and style mobile inline icons */
+            .mobile-icons-container {
+                display: block;
+                text-align: right;
+                margin-top: 2rem;
+                padding-right: 0;
             }
 
-            .icon-flag {
-                width: 115px;
-                right: 5px;
-                bottom: 15rem;
+            .mobile-icon {
+                display: inline-block;
+                margin: 0.25rem;
+                opacity: 0.75;
+                vertical-align: middle;
+            }
+
+            .mobile-icon.icon-dupont {
+                width: 70px;
+            }
+
+            .mobile-icon.icon-rowhouse {
+                width: 65px;
+            }
+
+            .mobile-icon.icon-flag {
+                width: 68px;
             }
         }
     </style>
@@ -191,10 +210,10 @@
     <div id="protected-content">
         <!-- Save the Date Content -->
         <section class="save-the-date-content decorative-icons">
-            <!-- Decorative DC Icons -->
-            <img src="images/icons/Dupont.png" alt="" class="icon-dupont">
-            <img src="images/icons/rowhouse.png" alt="" class="icon-rowhouse">
-            <img src="images/icons/flag.png" alt="" class="icon-flag">
+            <!-- Decorative DC Icons (Desktop only - positioned absolutely) -->
+            <img src="images/icons/Dupont.png" alt="" class="icon-dupont desktop-icon">
+            <img src="images/icons/rowhouse.png" alt="" class="icon-rowhouse desktop-icon">
+            <img src="images/icons/flag.png" alt="" class="icon-flag desktop-icon">
 
             <div class="content-wrapper">
                 <div class="std-announcement">
@@ -243,6 +262,13 @@
                             do not have a room block reserved at this hotel.</p>
                         <a href="https://www.marriott.com/en-us/hotels/waszc-citizenm-washington-capitol/overview/"
                             class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
+                    </div>
+
+                    <!-- Mobile Icons Container -->
+                    <div class="mobile-icons-container">
+                        <img src="images/icons/rowhouse.png" alt="" class="icon-rowhouse mobile-icon">
+                        <img src="images/icons/Dupont.png" alt="" class="icon-dupont mobile-icon">
+                        <img src="images/icons/flag.png" alt="" class="icon-flag mobile-icon">
                     </div>
                 </div>
             </div>
