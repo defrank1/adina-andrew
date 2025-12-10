@@ -656,12 +656,12 @@ footer {
 .std-hotel-link {
     display: inline-block;
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-soft-white);
     background: linear-gradient(135deg, var(--color-dark-green) 0%, #2a5a48 100%);
-    padding: 0.65rem 1.5rem;
+    padding: 0.5rem 1rem;
     border-radius: 6px;
     text-decoration: none;
     box-shadow: 0 4px 12px rgba(26, 58, 46, 0.15);
