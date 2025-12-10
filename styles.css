@@ -673,7 +673,7 @@ footer {
 }
 
 .std-hotel-link:hover {
-    background-color: var(--color-dark-green);
+    background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
     color: var(--color-soft-white);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
