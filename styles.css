@@ -661,19 +661,20 @@ footer {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--color-soft-white);
-    background-color: var(--color-dark-green);
+    color: var(--color-dark-green);
+    background-color: transparent;
     padding: 0.5rem 1.2rem;
     border-radius: 25px;
     text-decoration: none;
-    border: none;
-    box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
+    border: 2px solid var(--color-dark-green);
+    box-shadow: none;
     transition: all 0.3s ease;
     position: relative;
 }
 
 .std-hotel-link:hover {
-    background-color: #2a5a48;
+    background-color: var(--color-dark-green);
+    color: var(--color-soft-white);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
 }
