@@ -55,6 +55,8 @@ body {
     color: var(--color-dark-green);
     line-height: 1.6;
     font-size: 18px;
+    /* Embossed effect for all text */
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
 }
 
 /* Navigation */
