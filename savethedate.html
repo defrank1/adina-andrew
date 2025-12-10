@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Password protection overlay */
+        body.locked {
+            overflow: hidden;
+        }
+
         #password-overlay {
             position: fixed;
             top: 0;
@@ -318,6 +322,12 @@
         function unlockContent() {
             passwordOverlay.classList.add('hidden');
             protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+        }
+
+        // Initially lock body if password not entered
+        if (sessionStorage.getItem('saveTheDateUnlocked') !== 'true') {
+            document.body.classList.add('locked');
         }
 
         // Hide error message when user starts typing again
