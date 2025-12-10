@@ -654,6 +654,8 @@ footer {
 }
 
 .std-hotel-link {
+    --glow-color: rgba(133, 187, 144, 0.4);
+    --glow-spread-color: rgba(133, 187, 144, 0.15);
     display: inline-block;
     font-family: var(--font-heading);
     font-size: 0.7rem;
@@ -667,11 +669,11 @@ footer {
     border-radius: 25px;
     text-decoration: none;
     box-shadow:
-        0px 2px 8px rgba(26, 58, 46, 0.12),
-        0px 1px 3px rgba(26, 58, 46, 0.08),
-        inset 0px 0.5px 0px rgba(255, 255, 255, 0.1);
+        0 0 0.3em 0.05em var(--glow-color),
+        0 0 1em 0.2em var(--glow-spread-color),
+        inset 0 0 0.3em 0.05em var(--glow-color);
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(133, 187, 144, 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -707,9 +709,9 @@ footer {
 .std-hotel-link:hover {
     transform: translateY(-1px);
     box-shadow:
-        0px 4px 12px rgba(26, 58, 46, 0.18),
-        0px 2px 6px rgba(26, 58, 46, 0.12),
-        inset 0px 0.5px 0px rgba(255, 255, 255, 0.15);
+        0 0 0.4em 0.08em var(--glow-color),
+        0 0 1.5em 0.3em var(--glow-spread-color),
+        inset 0 0 0.4em 0.08em var(--glow-color);
 }
 
 @media (max-width: 768px) {
