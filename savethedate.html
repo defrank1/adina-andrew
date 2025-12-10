@@ -456,11 +456,32 @@
 
         // Dark mode toggle script
         const darkModeBtn = document.getElementById('dark-mode-btn');
+        const namesImage = document.querySelector('.std-names-image');
+        const dupontIcons = document.querySelectorAll('.icon-dupont');
+        const rowhouseIcons = document.querySelectorAll('.icon-rowhouse');
+        const flagIcons = document.querySelectorAll('.icon-flag');
+
+        function updateImages(isDarkMode) {
+            if (isDarkMode) {
+                // Switch to dark mode images
+                namesImage.src = 'images/names-image-dark.png';
+                dupontIcons.forEach(icon => icon.src = 'images/icons/Dupont-dark.png');
+                rowhouseIcons.forEach(icon => icon.src = 'images/icons/rowhouse-dark.png');
+                flagIcons.forEach(icon => icon.src = 'images/icons/flag-dark.png');
+            } else {
+                // Switch back to light mode images
+                namesImage.src = 'images/names-image.png';
+                dupontIcons.forEach(icon => icon.src = 'images/icons/Dupont.png');
+                rowhouseIcons.forEach(icon => icon.src = 'images/icons/rowhouse.png');
+                flagIcons.forEach(icon => icon.src = 'images/icons/flag.png');
+            }
+        }
 
         // Check if dark mode preference is saved
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
             darkModeBtn.textContent = 'Light Mode';
+            updateImages(true);
         }
 
         darkModeBtn.addEventListener('click', function () {
@@ -469,9 +490,11 @@
             if (document.body.classList.contains('dark-mode')) {
                 localStorage.setItem('darkMode', 'enabled');
                 darkModeBtn.textContent = 'Light Mode';
+                updateImages(true);
             } else {
                 localStorage.setItem('darkMode', 'disabled');
                 darkModeBtn.textContent = 'Dark Mode';
+                updateImages(false);
             }
         });
     </script>
