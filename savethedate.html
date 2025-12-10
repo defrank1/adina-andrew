@@ -343,7 +343,7 @@
 
                     <!-- Mobile Icon Below Announcement -->
                     <div class="mobile-announcement-icon">
-                        <img src="images/icons/Dupont.png" alt="" class="icon-dupont">
+                        <img src="images/icons/Dupont.png" alt="" class="mobile-dupont-icon">
                     </div>
                 </div>
 
@@ -458,6 +458,7 @@
         const darkModeBtn = document.getElementById('dark-mode-btn');
         const namesImage = document.querySelector('.std-names-image');
         const dupontIcons = document.querySelectorAll('.icon-dupont');
+        const mobileDupontIcon = document.querySelector('.mobile-dupont-icon');
         const rowhouseIcons = document.querySelectorAll('.icon-rowhouse');
         const flagIcons = document.querySelectorAll('.icon-flag');
 
@@ -466,12 +467,14 @@
                 // Switch to dark mode images
                 namesImage.src = 'images/names-image-dark.png';
                 dupontIcons.forEach(icon => icon.src = 'images/icons/Dupont-dark.png');
+                if (mobileDupontIcon) mobileDupontIcon.src = 'images/icons/Dupont-dark.png';
                 rowhouseIcons.forEach(icon => icon.src = 'images/icons/rowhouse-dark.png');
                 flagIcons.forEach(icon => icon.src = 'images/icons/flag-dark.png');
             } else {
                 // Switch back to light mode images
                 namesImage.src = 'images/names-image.png';
                 dupontIcons.forEach(icon => icon.src = 'images/icons/Dupont.png');
+                if (mobileDupontIcon) mobileDupontIcon.src = 'images/icons/Dupont.png';
                 rowhouseIcons.forEach(icon => icon.src = 'images/icons/rowhouse.png');
                 flagIcons.forEach(icon => icon.src = 'images/icons/flag.png');
             }
