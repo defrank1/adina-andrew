@@ -654,64 +654,34 @@ footer {
 }
 
 .std-hotel-link {
-    --glow-color: rgba(133, 187, 144, 0.4);
-    --glow-spread-color: rgba(133, 187, 144, 0.15);
+    --glow-color: rgb(133, 187, 144);
+    --glow-spread-color: rgba(133, 187, 144, 0.6);
     display: inline-block;
     font-family: var(--font-heading);
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-soft-white);
-    background:
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
-        linear-gradient(to bottom, var(--color-dark-green) 0%, #85BB90 100%);
+    background-color: var(--color-dark-green);
     padding: 0.5rem 1.2rem;
     border-radius: 25px;
     text-decoration: none;
+    border: 0.2em solid var(--glow-color);
     box-shadow:
-        0 0 0.3em 0.05em var(--glow-color),
-        0 0 1em 0.2em var(--glow-spread-color),
-        inset 0 0 0.3em 0.05em var(--glow-color);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(133, 187, 144, 0.2);
+        0 0 0.5em 0.1em var(--glow-color),
+        0 0 2em 0.5em var(--glow-spread-color),
+        inset 0 0 0.5em 0.1em var(--glow-color);
+    transition: all 0.3s;
     position: relative;
-    overflow: hidden;
-}
-
-.std-hotel-link::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image:
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
-        radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
-    pointer-events: none;
-    border-radius: inherit;
-}
-
-.std-hotel-link::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.035;
-    pointer-events: none;
-    border-radius: inherit;
-    mix-blend-mode: overlay;
 }
 
 .std-hotel-link:hover {
-    transform: translateY(-1px);
+    color: var(--color-dark-green);
+    background-color: var(--glow-color);
     box-shadow:
-        0 0 0.4em 0.08em var(--glow-color),
-        0 0 1.5em 0.3em var(--glow-spread-color),
-        inset 0 0 0.4em 0.08em var(--glow-color);
+        0 0 0.5em 0.1em var(--glow-color),
+        0 0 2.5em 1em var(--glow-spread-color),
+        inset 0 0 0.5em 0.1em var(--glow-color);
 }
 
 @media (max-width: 768px) {
