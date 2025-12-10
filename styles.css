@@ -660,26 +660,42 @@ footer {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-soft-white);
-    background: linear-gradient(to bottom, var(--color-dark-green) 0%, #2a5a48 50%, #1f4a3c 100%);
+    background:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        var(--color-dark-green);
     padding: 0.5rem 1.2rem;
     border-radius: 25px;
     text-decoration: none;
     box-shadow:
-        0px 4px 12px rgba(26, 58, 46, 0.2),
-        0px 2px 6px rgba(26, 58, 46, 0.15),
-        inset 0px 1px 1px rgba(233, 209, 255, 0.15),
-        inset 0px -1px 2px rgba(137, 222, 246, 0.2);
+        0px 2px 8px rgba(26, 58, 46, 0.12),
+        0px 1px 3px rgba(26, 58, 46, 0.08),
+        inset 0px 0.5px 0px rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.std-hotel-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    border-radius: inherit;
 }
 
 .std-hotel-link:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow:
-        0px 6px 16px rgba(26, 58, 46, 0.3),
-        0px 3px 8px rgba(26, 58, 46, 0.2),
-        inset 0px 1px 1px rgba(233, 209, 255, 0.2),
-        inset 0px -1px 2px rgba(137, 222, 246, 0.25);
+        0px 4px 12px rgba(26, 58, 46, 0.18),
+        0px 2px 6px rgba(26, 58, 46, 0.12),
+        inset 0px 0.5px 0px rgba(255, 255, 255, 0.15);
 }
 
 @media (max-width: 768px) {
