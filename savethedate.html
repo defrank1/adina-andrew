@@ -151,6 +151,14 @@
 
         .mobile-announcement-icon {
             display: none;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .mobile-announcement-icon img {
+            width: 120px;
+            height: auto;
+            opacity: 0.9;
         }
 
         /* Line break control */
@@ -285,17 +293,9 @@
                 display: none;
             }
 
-            /* Show icon below announcement */
+            /* Show icon below announcement on mobile */
             .mobile-announcement-icon {
-                display: block;
-                text-align: center;
-                margin-top: 3rem;
-            }
-
-            .mobile-announcement-icon .mobile-icon {
-                width: 120px; /* Adjust this value to change the size */
-                height: auto;
-                opacity: 0.9;
+                display: block !important;
             }
 
             /* Switch line breaks for mobile */
@@ -343,7 +343,7 @@
 
                     <!-- Mobile Icon Below Announcement -->
                     <div class="mobile-announcement-icon">
-                        <img src="images/icons/Dupont.png" alt="" class="icon-dupont mobile-icon">
+                        <img src="images/icons/Dupont.png" alt="" class="icon-dupont">
                     </div>
                 </div>
 
