@@ -149,6 +149,10 @@
             display: none;
         }
 
+        .mobile-announcement-icon {
+            display: none;
+        }
+
         /* Line break control */
         .mobile-break {
             display: none;
@@ -276,12 +280,22 @@
                 display: none;
             }
 
-            /* Show and style mobile inline icons */
+            /* Hide bottom mobile icons container */
             .mobile-icons-container {
+                display: none;
+            }
+
+            /* Show icon below announcement */
+            .mobile-announcement-icon {
                 display: block;
-                text-align: right;
-                margin-top: 2rem;
-                padding-right: 0;
+                text-align: center;
+                margin-top: 3rem;
+            }
+
+            .mobile-announcement-icon .mobile-icon {
+                width: 120px; /* Adjust this value to change the size */
+                height: auto;
+                opacity: 0.9;
             }
 
             /* Switch line breaks for mobile */
@@ -291,25 +305,6 @@
 
             .desktop-break {
                 display: none;
-            }
-
-            .mobile-icon {
-                display: inline-block;
-                margin: 0.25rem;
-                opacity: 0.75;
-                vertical-align: middle;
-            }
-
-            .mobile-icon.icon-dupont {
-                width: 70px;
-            }
-
-            .mobile-icon.icon-rowhouse {
-                width: 65px;
-            }
-
-            .mobile-icon.icon-flag {
-                width: 68px;
             }
         }
     </style>
@@ -345,6 +340,11 @@
                     <img src="images/names-image.png" alt="Adina Nelson & Andrew DeFrank" class="std-names-image">
                     <p class="std-details"><strong>October 17, 2026</strong><br>Washington, D.C.<br>InterContinental at
                         The Wharf<br><br><em>Formal invitation to follow.</em></p>
+
+                    <!-- Mobile Icon Below Announcement -->
+                    <div class="mobile-announcement-icon">
+                        <img src="images/icons/Dupont.png" alt="" class="icon-dupont mobile-icon">
+                    </div>
                 </div>
 
                 <!-- Travel Section -->
