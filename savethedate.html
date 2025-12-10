@@ -149,14 +149,14 @@
             display: none;
         }
 
-        .mobile-announcement-icon {
+        .announcement-icon {
             display: block;
             text-align: center;
             margin-top: 2.0rem;
         }
 
-        .mobile-announcement-icon img {
-            width: 175px;
+        .announcement-icon img {
+            width: 250px;
             height: auto;
             opacity: 0.9;
         }
@@ -175,12 +175,24 @@
             filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
         }
 
+        /* Apply embossed effect to Dupont icon */
+        .dupont-icon {
+            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+        }
+
         /* Dark Mode Styles */
         body.dark-mode {
             background-color: var(--color-dark-green);
             color: var(--color-soft-white);
             /* Inverted embossed effect for dark mode */
             text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5), 0 -1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Subtle glow effect for bold text in dark mode */
+        body.dark-mode strong,
+        body.dark-mode b {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.02em;
         }
 
         body.dark-mode #password-overlay {
@@ -225,6 +237,11 @@
 
         /* Inverted emboss for names image in dark mode */
         body.dark-mode .std-names-image {
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+        }
+
+        /* Inverted emboss for Dupont icon in dark mode */
+        body.dark-mode .dupont-icon {
             filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
         }
 
@@ -301,6 +318,12 @@
             .desktop-break {
                 display: none;
             }
+
+            /* Mobile-specific Dupont fountain size */
+            .announcement-icon img {
+                width: 175px;
+                /* Change this for mobile size */
+            }
         }
     </style>
 </head>
@@ -324,22 +347,18 @@
     <div id="protected-content">
         <!-- Save the Date Content -->
         <section class="save-the-date-content decorative-icons">
-            <!-- Decorative DC Icons (Desktop only - positioned absolutely) -->
-            <img src="images/icons/Dupont.png" alt="" class="icon-dupont desktop-icon">
-            <img src="images/icons/rowhouse.png" alt="" class="icon-rowhouse desktop-icon">
-            <img src="images/icons/flag.png" alt="" class="icon-flag desktop-icon">
-
             <div class="content-wrapper">
                 <div class="std-announcement">
-                    <p class="std-intro">Kindly save the date<br class="desktop-break">for the wedding <span
-                            class="no-break">ceremony<br class="mobile-break"> and celebration of</span></p>
+                    <p class="std-intro">Kindly save the date<br class="desktop-break"> for the <br class="mobile-break">wedding ceremony and celebration of</p>
                     <img src="images/names-image.png" alt="Adina Nelson & Andrew DeFrank" class="std-names-image">
-                    <p class="std-details"><strong>October 17, 2026</strong><br>Washington, D.C.<br>InterContinental at
-                        The Wharf<br><br><em>Formal invitation to follow.</em></p>
+                    <p class="std-details"><strong>October 17, 2026</strong><br>Washington, D.C.<br><br>
+                        InterContinental
+                        at
+                        The Wharf<br>801 Wharf Street SW<br><br><em>Formal invitation to follow.</em></p>
 
                     <!-- Mobile Icon Below Announcement -->
-                    <div class="mobile-announcement-icon">
-                        <img src="images/icons/Dupont.png" alt="" class="mobile-dupont-icon">
+                    <div class="announcement-icon">
+                        <img src="images/icons/Dupont.png" alt="" class="dupont-icon">
                     </div>
                 </div>
 
@@ -386,12 +405,6 @@
                             class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
                     </div>
 
-                    <!-- Mobile Icons Container -->
-                    <div class="mobile-icons-container">
-                        <img src="images/icons/rowhouse.png" alt="" class="icon-rowhouse mobile-icon">
-                        <img src="images/icons/Dupont.png" alt="" class="icon-dupont mobile-icon">
-                        <img src="images/icons/flag.png" alt="" class="icon-flag mobile-icon">
-                    </div>
                 </div>
             </div>
         </section>
@@ -454,26 +467,17 @@
         // Dark mode toggle script
         const darkModeBtn = document.getElementById('dark-mode-btn');
         const namesImage = document.querySelector('.std-names-image');
-        const dupontIcons = document.querySelectorAll('.icon-dupont');
-        const mobileDupontIcon = document.querySelector('.mobile-dupont-icon');
-        const rowhouseIcons = document.querySelectorAll('.icon-rowhouse');
-        const flagIcons = document.querySelectorAll('.icon-flag');
+        const dupontIcon = document.querySelector('.dupont-icon');
 
         function updateImages(isDarkMode) {
             if (isDarkMode) {
                 // Switch to dark mode images
                 namesImage.src = 'images/names-image-dark.png';
-                dupontIcons.forEach(icon => icon.src = 'images/icons/Dupont-dark.png');
-                if (mobileDupontIcon) mobileDupontIcon.src = 'images/icons/Dupont-dark.png';
-                rowhouseIcons.forEach(icon => icon.src = 'images/icons/rowhouse-dark.png');
-                flagIcons.forEach(icon => icon.src = 'images/icons/flag-dark.png');
+                if (dupontIcon) dupontIcon.src = 'images/icons/Dupont-dark.png';
             } else {
                 // Switch back to light mode images
                 namesImage.src = 'images/names-image.png';
-                dupontIcons.forEach(icon => icon.src = 'images/icons/Dupont.png');
-                if (mobileDupontIcon) mobileDupontIcon.src = 'images/icons/Dupont.png';
-                rowhouseIcons.forEach(icon => icon.src = 'images/icons/rowhouse.png');
-                flagIcons.forEach(icon => icon.src = 'images/icons/flag.png');
+                if (dupontIcon) dupontIcon.src = 'images/icons/Dupont.png';
             }
         }
 
