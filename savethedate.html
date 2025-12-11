@@ -116,39 +116,6 @@
             margin: 0 auto;
         }
 
-        .icon-dupont {
-            position: absolute;
-            top: 50%;
-            right: -225px;
-            width: 213px;
-            height: auto;
-            opacity: 0.9;
-            transform: translateY(-50%);
-        }
-
-        .icon-rowhouse {
-            position: absolute;
-            top: 55%;
-            left: -195px;
-            width: 150px;
-            height: auto;
-            opacity: 0.9;
-        }
-
-        .icon-flag {
-            position: absolute;
-            bottom: 10rem;
-            right: -210px;
-            width: 150px;
-            height: auto;
-            opacity: 0.9;
-        }
-
-        /* Hide mobile icons on desktop */
-        .mobile-icons-container {
-            display: none;
-        }
-
         .announcement-icon {
             display: block;
             text-align: center;
@@ -186,13 +153,6 @@
             color: var(--color-soft-white);
             /* Inverted embossed effect for dark mode */
             text-shadow: 0 2px 3px rgba(0, 0, 0, 0.5), 0 -1px 1px rgba(255, 255, 255, 0.1);
-        }
-
-        /* Subtle glow effect for bold text in dark mode */
-        body.dark-mode strong,
-        body.dark-mode b {
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.15);
-            letter-spacing: 0.02em;
         }
 
         body.dark-mode #password-overlay {
@@ -284,31 +244,7 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 900px) {
-            .icon-dupont {
-                right: 5px;
-            }
-
-            .icon-rowhouse {
-                left: 5px;
-            }
-
-            .icon-flag {
-                right: 5px;
-            }
-        }
-
         @media (max-width: 768px) {
-
-            /* Hide desktop absolutely positioned icons */
-            .desktop-icon {
-                display: none;
-            }
-
-            /* Hide bottom mobile icons container */
-            .mobile-icons-container {
-                display: none;
-            }
 
             /* Switch line breaks for mobile */
             .mobile-break {
@@ -350,7 +286,7 @@
             <div class="content-wrapper">
                 <div class="std-announcement">
                     <p class="std-intro">Kindly save the date<br class="desktop-break"> for the <br class="mobile-break">wedding ceremony and celebration of</p>
-                    <img src="images/names-image.png" alt="Adina Nelson & Andrew DeFrank" class="std-names-image">
+                    <img src="images/names/names-image.png" alt="Adina Nelson & Andrew DeFrank" class="std-names-image">
                     <p class="std-details"><strong>October 17, 2026</strong><br>Washington, D.C.<br><br>
                         InterContinental
                         at
@@ -472,11 +408,11 @@
         function updateImages(isDarkMode) {
             if (isDarkMode) {
                 // Switch to dark mode images
-                namesImage.src = 'images/names-image-dark.png';
+                namesImage.src = 'images/names/names-image-dark.png';
                 if (dupontIcon) dupontIcon.src = 'images/icons/Dupont-dark.png';
             } else {
                 // Switch back to light mode images
-                namesImage.src = 'images/names-image.png';
+                namesImage.src = 'images/names/names-image.png';
                 if (dupontIcon) dupontIcon.src = 'images/icons/Dupont.png';
             }
         }
