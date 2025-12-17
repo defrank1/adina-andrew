@@ -50,44 +50,66 @@
         .password-container p {
             font-family: var(--font-body);
             font-size: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 0.5rem;
             color: var(--color-dark-green);
         }
 
+        #password-form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         .password-input {
-            width: 100%;
-            padding: 1rem;
-            font-family: var(--font-body);
-            font-size: 1rem;
+            width: auto;
+            max-width: 100%;
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            font-weight: 400;
             border: 2px solid var(--color-dark-green);
-            background-color: var(--color-soft-white);
+            background-color: transparent;
             color: var(--color-dark-green);
             text-align: center;
-            margin-bottom: 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .password-input::placeholder {
+            font-family: var(--font-heading);
+            font-weight: 300;
+            color: var(--color-dark-green);
+            opacity: 0.65;
         }
 
         .password-input:focus {
             outline: none;
-            border-color: var(--color-accent);
+            border-color: var(--color-dark-green);
         }
 
         .password-submit {
-            width: 100%;
-            padding: 1rem 2rem;
+            width: auto;
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-heading);
-            font-size: 1rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: var(--color-soft-white);
-            background-color: var(--color-dark-green);
+            letter-spacing: 0.1em;
+            color: var(--color-dark-green);
+            background-color: transparent;
             border: 2px solid var(--color-dark-green);
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            border-radius: 25px;
+            text-shadow: none;
+            display: inline-block;
         }
 
         .password-submit:hover {
-            background-color: var(--color-accent);
-            border-color: var(--color-accent);
+            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            color: var(--color-soft-white);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
         }
 
         .password-error {
@@ -109,13 +131,7 @@
             display: block;
         }
 
-        /* Decorative icons */
-        .decorative-icons {
-            position: relative;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
+        /* Announcement icon (Dupont fountain) */
         .announcement-icon {
             display: block;
             text-align: center;
@@ -155,6 +171,11 @@
             text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
         }
 
+        /* Dark mode grain texture */
+        body.dark-mode::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
         body.dark-mode #password-overlay {
             background-color: var(--color-dark-green);
         }
@@ -165,20 +186,25 @@
         }
 
         body.dark-mode .password-input {
-            background-color: var(--color-dark-green);
+            background-color: transparent;
             color: var(--color-soft-white);
             border-color: var(--color-soft-white);
         }
 
+        body.dark-mode .password-input::placeholder {
+            color: var(--color-soft-white);
+            opacity: 0.65;
+        }
+
         body.dark-mode .password-submit {
-            background-color: var(--color-soft-white);
-            color: var(--color-dark-green);
+            background-color: transparent;
+            color: var(--color-soft-white);
             border-color: var(--color-soft-white);
         }
 
         body.dark-mode .password-submit:hover {
-            background-color: #d4cfc8;
-            border-color: #d4cfc8;
+            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            color: var(--color-dark-green);
         }
 
         body.dark-mode .std-travel {
@@ -208,7 +234,9 @@
         /* Dark Mode Toggle Button */
         .dark-mode-toggle {
             text-align: center;
-            padding: 2rem 0 1rem;
+            padding: 1rem 0;
+            position: relative;
+            z-index: 10;
         }
 
         .dark-mode-btn {
@@ -243,8 +271,25 @@
             color: var(--color-dark-green);
         }
 
+        /* Dark mode footer pattern */
+        body.dark-mode footer {
+            background-image: url('images/textures/footer-dark.png?v=4');
+            filter: brightness(1.2);
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
+
+            /* Shrink "Save the Date" heading on mobile */
+            .password-container h2 {
+                font-size: 3.5rem;
+            }
+
+            /* Stack password form on mobile */
+            #password-form {
+                flex-direction: column;
+                align-items: center;
+            }
 
             /* Switch line breaks for mobile */
             .mobile-break {
@@ -260,6 +305,18 @@
                 width: 175px;
                 /* Change this for mobile size */
             }
+
+            /* Mobile-specific dark mode button size (2/3rds) */
+            .dark-mode-btn {
+                font-size: 0.47rem;
+                padding: 0.33rem 0.8rem;
+                border-radius: 16.67px;
+                border: 1.33px solid var(--color-dark-green);
+            }
+
+            body.dark-mode .dark-mode-btn {
+                border-color: var(--color-soft-white);
+            }
         }
     </style>
 </head>
@@ -269,7 +326,7 @@
     <div id="password-overlay">
         <div class="password-container">
             <h2>Save the Date</h2>
-            <p>Please enter the password to view this page</p>
+            <p>Please enter the password:</p>
             <form id="password-form">
                 <input type="password" id="password-input" class="password-input" placeholder="Enter password"
                     autocomplete="off">
@@ -282,7 +339,7 @@
     <!-- Protected Content -->
     <div id="protected-content">
         <!-- Save the Date Content -->
-        <section class="save-the-date-content decorative-icons">
+        <section class="save-the-date-content">
             <div class="content-wrapper">
                 <div class="std-announcement">
                     <p class="std-intro">Kindly save the date<br class="desktop-break"> for the <br class="mobile-break">wedding ceremony and celebration of</p>
@@ -303,12 +360,12 @@
                     <h3 class="std-section-title">Travel</h3>
 
                     <div class="std-hotel">
-                        <h4 class="std-hotel-name">Intercontinental</h4>
+                        <h4 class="std-hotel-name">InterContinental</h4>
                         <p class="std-hotel-description">We have reserved a hotel room block at the wedding venue, which
-                            is the Intercontinental Washington, DC - The Wharf. The link and group code are forthcoming.
+                            is the InterContinental Washington, DC - The Wharf. Please book using the link below by September 16, 2026. The group code is AAW.
                         </p>
-                        <span class="std-hotel-link" style="cursor: default; opacity: 0.6; pointer-events: none;">Visit
-                            Website (forthcoming)</span>
+                        <a href="https://www.ihg.com/intercontinental/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qIta=99801505&icdv=99801505&qSlH=WASHC&qCiD=16&qCiMy=092026&qCoD=18&qCoMy=092026&qGrpCd=AAW&setPMCookies=true&qSHBrC=IC&qDest=801%20Wharf%20Street%20SW,%20Washington,%20DC,%20US&showApp=true&adjustMonth=false&srb_u=1&qRmFltr="
+                            class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
                     </div>
 
                     <div class="std-hotel">
@@ -345,14 +402,11 @@
             </div>
         </section>
 
-        <!-- Dark Mode Toggle -->
-        <div class="dark-mode-toggle">
-            <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
-        </div>
-
         <!-- Footer -->
         <footer>
-            <p style="font-family: var(--font-title); font-size: 2rem; font-weight: 400;">♥</p>
+            <div class="dark-mode-toggle">
+                <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
+            </div>
         </footer>
     </div>
 

@@ -15,7 +15,7 @@
 @font-face {
     font-family: 'PP Playground';
     src: url('fonts/PPPlayground-Medium.woff2') format('woff2'),
-         url('fonts/PPPlayground-Medium.woff') format('woff');
+        url('fonts/PPPlayground-Medium.woff') format('woff');
     font-weight: 500;
     font-style: normal;
 }
@@ -23,7 +23,7 @@
 @font-face {
     font-family: 'PP Watch';
     src: url('fonts/PPWatch-Bold.woff2') format('woff2'),
-         url('fonts/PPWatch-Bold.woff') format('woff');
+        url('fonts/PPWatch-Bold.woff') format('woff');
     font-weight: 700;
     font-style: normal;
 }
@@ -31,7 +31,7 @@
 @font-face {
     font-family: 'Sentient';
     src: url('fonts/Sentient-Regular.woff2') format('woff2'),
-         url('fonts/Sentient-Regular.woff') format('woff');
+        url('fonts/Sentient-Regular.woff') format('woff');
     font-weight: 400;
     font-style: normal;
 }
@@ -57,6 +57,24 @@ body {
     font-size: 18px;
     /* Enhanced embossed effect for all text */
     text-shadow: 0 2px 3px rgba(255, 255, 255, 0.9), 0 -1px 1px rgba(26, 58, 46, 0.1);
+    /* Subtle film grain effect */
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('../images/textures/grain.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 /* Navigation */
@@ -134,7 +152,7 @@ body {
     z-index: 0;
 }
 
-.hero > * {
+.hero>* {
     position: relative;
     z-index: 1;
 }
@@ -199,6 +217,7 @@ body {
     0% {
         transform: translateX(0);
     }
+
     100% {
         transform: translateX(-50%);
     }
@@ -397,12 +416,17 @@ body {
 /* Footer */
 footer {
     text-align: center;
-    padding: 2rem 2rem;
+    padding: 0 0 50px 0;
     font-family: var(--font-heading);
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    border-top: 1px solid rgba(26, 58, 46, 0.1);
+    position: relative;
+    background-image: url('../images/textures/footer.png?v=4');
+    background-repeat: repeat-x;
+    background-position: center bottom 10px;
+    background-size: auto 30%;
+    filter: brightness(0.95);
 }
 
 /* Responsive Design */
@@ -463,11 +487,24 @@ footer {
         font-size: 1.8rem;
     }
 
+    footer {
+        background-position: center bottom 10px;
+    }
+
     .content-wrapper {
         padding: 0 1.5rem;
     }
 
-    .intro, .our-story, .the-weekend, .where-to-stay, .things-to-do, .rsvp-section, .photos-section, .faq-section, .attractions-section, .registry-section {
+    .intro,
+    .our-story,
+    .the-weekend,
+    .where-to-stay,
+    .things-to-do,
+    .rsvp-section,
+    .photos-section,
+    .faq-section,
+    .attractions-section,
+    .registry-section {
         padding: 2rem 0;
     }
 
