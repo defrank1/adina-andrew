@@ -230,11 +230,24 @@
         body.dark-mode .std-hotel-link {
             color: var(--color-soft-white);
             border-color: var(--color-soft-white);
+            background-color: transparent;
         }
 
         body.dark-mode .std-hotel-link:hover {
-            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
             color: var(--color-dark-green);
+            animation: flashGradientDark 0.5s ease forwards;
+        }
+
+        @keyframes flashGradientDark {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 100% 0%;
+            }
         }
 
         /* Inverted emboss for names image in dark mode */
@@ -266,16 +279,28 @@
             border-radius: 25px;
             border: 2px solid var(--color-dark-green);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
             text-shadow: none;
             box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
         }
 
         .dark-mode-btn:hover {
-            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
             color: var(--color-soft-white);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
+            animation: flashGradient 0.5s ease forwards;
+        }
+
+        @keyframes flashGradient {
+            0% {
+                background-position: 0% 0%;
+            }
+            100% {
+                background-position: 100% 0%;
+            }
         }
 
         .dark-mode-btn:active,
@@ -289,11 +314,15 @@
         body.dark-mode .dark-mode-btn {
             color: var(--color-soft-white);
             border-color: var(--color-soft-white);
+            background-color: transparent;
         }
 
         body.dark-mode .dark-mode-btn:hover {
-            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
             color: var(--color-dark-green);
+            animation: flashGradientDark 0.5s ease forwards;
         }
 
         body.dark-mode .dark-mode-btn:active,

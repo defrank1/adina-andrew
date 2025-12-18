@@ -385,17 +385,29 @@ body::before {
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
-    color: var(--color-soft-white);
-    background-color: var(--color-dark-green);
+    color: var(--color-dark-green);
+    background-color: transparent;
     padding: 1rem 3rem;
     text-decoration: none;
-    transition: background-color 0.3s ease;
+    transition: all 0.5s ease;
     border: 2px solid var(--color-dark-green);
 }
 
 .cta-button:hover {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-soft-white);
+    animation: flashGradient 0.5s ease forwards;
+}
+
+@keyframes flashGradient {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 100% 0%;
+    }
 }
 
 /* RSVP Section */
@@ -714,16 +726,19 @@ footer {
     text-decoration: none;
     border: 2px solid var(--color-dark-green);
     box-shadow: none;
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
     position: relative;
     text-shadow: none;
 }
 
 .std-hotel-link:hover {
-    background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
     color: var(--color-soft-white);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
+    animation: flashGradient 0.5s ease forwards;
 }
 
 @media (max-width: 768px) {
