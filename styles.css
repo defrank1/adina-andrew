@@ -63,7 +63,7 @@ body {
 
 body::before {
     content: '';
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
@@ -73,7 +73,7 @@ body::before {
     pointer-events: none;
     background-image: url('../images/textures/grain.png');
     background-size: cover;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     background-position: center;
 }
 
@@ -416,7 +416,7 @@ body::before {
 /* Footer */
 footer {
     text-align: center;
-    padding: 0 0 50px 0;
+    padding: 0 0 60px 0;
     font-family: var(--font-heading);
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -424,9 +424,9 @@ footer {
     position: relative;
     background-image: url('../images/textures/footer.png?v=4');
     background-repeat: repeat-x;
-    background-position: center bottom 10px;
+    background-position: center bottom 5px;
     background-size: auto 30%;
-    filter: brightness(0.95);
+    filter: brightness(0.9);
 }
 
 /* Responsive Design */
@@ -488,7 +488,8 @@ footer {
     }
 
     footer {
-        background-position: center bottom 10px;
+        background-position: center bottom 5px;
+        padding-bottom: 60px;
     }
 
     .content-wrapper {
@@ -663,9 +664,17 @@ footer {
 
 .std-section-title {
     font-family: var(--font-title);
-    font-size: 3rem;
-    margin-bottom: 2.5rem;
+    font-size: 4.5rem;
+    margin-bottom: 1rem;
     font-weight: 400;
+}
+
+.std-travel-intro {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 3.5rem;
+    text-align: left;
 }
 
 .std-hotel {
@@ -767,7 +776,7 @@ footer {
     }
 
     .std-section-title {
-        font-size: 2rem;
+        font-size: 2.75rem;
     }
 
     .std-intro,
