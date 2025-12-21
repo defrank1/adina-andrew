@@ -354,6 +354,11 @@
                 align-items: center;
             }
 
+            /* Prevent mobile zoom on input focus */
+            .password-input {
+                font-size: 16px;
+            }
+
             /* Switch line breaks for mobile */
             .mobile-break {
                 display: inline;
@@ -499,6 +504,14 @@
             passwordOverlay.classList.add('hidden');
             protectedContent.classList.add('unlocked');
             document.body.classList.remove('locked');
+
+            // Reset mobile zoom by temporarily updating viewport meta tag
+            const viewport = document.querySelector('meta[name=viewport]');
+            const originalContent = viewport.content;
+            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            setTimeout(() => {
+                viewport.content = originalContent;
+            }, 100);
         }
 
         // Initially lock body if password not entered
