@@ -4,16 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adina & Andrew - October 17, 2026</title>
+    <meta name="description" content="Adina and Andrew are getting married!">
+    <title>Adina & Andrew</title>
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
-    <meta http-equiv="refresh" content="0; url=/savethedate">
-    <script>
-        window.location.href = "/savethedate";
-    </script>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* Password protection overlay */
+        body.locked {
+            overflow: hidden;
+        }
+
         #password-overlay {
             position: fixed;
             top: 0;
@@ -37,56 +38,76 @@
             max-width: 400px;
             width: 100%;
             text-align: center;
+            position: relative;
+            z-index: 2;
         }
 
         .password-container h2 {
             font-family: var(--font-title);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 5.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
             color: var(--color-dark-green);
         }
 
         .password-container p {
             font-family: var(--font-body);
             font-size: 1rem;
-            margin-bottom: 2rem;
+            margin-bottom: 0.5rem;
             color: var(--color-dark-green);
         }
 
+        #password-form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 600px;
+            margin: 0 auto;
+            flex-wrap: nowrap;
+        }
+
         .password-input {
-            width: 100%;
-            padding: 1rem;
+            width: 200px;
+            min-width: 150px;
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-body);
-            font-size: 1rem;
+            font-size: 0.7rem;
             border: 2px solid var(--color-dark-green);
-            background-color: var(--color-soft-white);
-            color: var(--color-dark-green);
+            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-align: center;
-            margin-bottom: 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
         }
 
         .password-input:focus {
             outline: none;
-            border-color: var(--color-accent);
+            border-color: var(--color-dark-green);
         }
 
         .password-submit {
-            width: 100%;
-            padding: 1rem 2rem;
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-heading);
-            font-size: 1rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.1em;
             color: var(--color-soft-white);
-            background-color: var(--color-dark-green);
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
             border: 2px solid var(--color-dark-green);
+            border-radius: 25px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-position 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
         }
 
         .password-submit:hover {
-            background-color: var(--color-accent);
-            border-color: var(--color-accent);
+            background-position: 100% 0%;
         }
 
         .password-error {
@@ -107,6 +128,182 @@
         #protected-content.unlocked {
             display: block;
         }
+
+        /* Film grain effect for password overlay */
+        #password-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url('../images/textures/grain.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        body.dark-mode #password-overlay::before {
+            background-image: url('../images/textures/grain-dark.png');
+        }
+
+        /* Apply embossed effect to names image */
+        .home-names-image {
+            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: var(--color-dark-green);
+            color: var(--color-soft-white);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        body.dark-mode::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        body.dark-mode #password-overlay {
+            background-color: var(--color-dark-green);
+        }
+
+        body.dark-mode .password-container h2,
+        body.dark-mode .password-container p {
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-input {
+            border-color: var(--color-soft-white);
+            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-mode .password-submit {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-submit:hover {
+            background-position: 100% 0%;
+        }
+
+        body.dark-mode .home-names-image {
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            text-align: center;
+            padding: 1rem 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .dark-mode-btn {
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-dark-green);
+            background-color: transparent;
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            border: 2px solid var(--color-dark-green);
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-shadow: none;
+            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
+        }
+
+        .dark-mode-btn:hover {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-soft-white);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
+            animation: flashGradient 0.5s ease forwards;
+        }
+
+        @keyframes flashGradient {
+            0% {
+                background-position: 0% 0%;
+            }
+
+            100% {
+                background-position: 100% 0%;
+            }
+        }
+
+        .dark-mode-btn:active,
+        .dark-mode-btn:focus {
+            outline: none;
+            background-color: transparent;
+            transform: none;
+            box-shadow: none;
+        }
+
+        body.dark-mode .dark-mode-btn {
+            color: var(--color-soft-white);
+            border-color: var(--color-soft-white);
+            background-color: transparent;
+        }
+
+        body.dark-mode .dark-mode-btn:hover {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-dark-green);
+            animation: flashGradientDark 0.5s ease forwards;
+        }
+
+        @keyframes flashGradientDark {
+            0% {
+                background-position: 0% 0%;
+            }
+
+            100% {
+                background-position: 100% 0%;
+            }
+        }
+
+        body.dark-mode .dark-mode-btn:active,
+        body.dark-mode .dark-mode-btn:focus {
+            outline: none;
+            background: transparent;
+            color: var(--color-soft-white);
+            transform: none;
+            box-shadow: none;
+        }
+
+        body.dark-mode footer {
+            background-image: url('images/textures/footer-dark.png?v=4');
+            filter: brightness(1.5);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .password-container h2 {
+                font-size: 3.5rem;
+            }
+
+            #password-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .password-input {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -115,7 +312,7 @@
     <div id="password-overlay">
         <div class="password-container">
             <h2>Welcome</h2>
-            <p>Please enter the password to view this page</p>
+            <p>Please enter the password:</p>
             <form id="password-form">
                 <input type="password" id="password-input" class="password-input" placeholder="Enter password"
                     autocomplete="off">
@@ -127,48 +324,23 @@
 
     <!-- Protected Content -->
     <div id="protected-content">
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="nav-content">
-            <a href="/" class="site-title">Adina & Andrew</a>
-            <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/our-story">Our Story</a></li>
-                <li><a href="/photos">Photos</a></li>
-                <li><a href="/faq">FAQ</a></li>
-                <li><a href="/travel">Travel</a></li>
-                <li><a href="/attractions">DC Attractions</a></li>
-                <li><a href="/registry">Registry</a></li>
-                <li><a href="/rsvp">RSVP</a></li>
-            </ul>
-        </div>
-    </nav>
+        <!-- Home Content -->
+        <section class="save-the-date-content">
+            <div class="content-wrapper">
+                <div class="std-announcement">
+                    <p class="std-intro">Welcome to the wedding website for</p>
+                    <p class="std-details"><strong>Adina & Andrew</strong><br><br><strong>October 17,
+                            2026</strong><br>Washington, D.C.</p>
+                </div>
+            </div>
+        </section>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1 class="hero-title">We're Getting Married</h1>
-        <h2 class="couple-names">Adina & Andrew</h2>
-        <p class="event-date">10.17.26 Washington, DC</p>
-    </section>
-
-    <!-- Animated Marquee -->
-    <div class="marquee-container">
-        <div class="marquee">
-            <span>See you in DC ✦ See you in DC ✦ See you in DC ✦ See you in DC ✦</span>
-        </div>
-    </div>
-
-    <!-- Introduction -->
-    <section class="intro">
-        <div class="content-wrapper">
-            <p>Welcome to our wedding website! We're so excited to celebrate with you in Washington, DC.</p>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 Adina & Andrew</p>
-    </footer>
+        <!-- Footer -->
+        <footer>
+            <div class="dark-mode-toggle">
+                <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
+            </div>
+        </footer>
     </div>
 
     <script>
@@ -202,14 +374,48 @@
         function unlockContent() {
             passwordOverlay.classList.add('hidden');
             protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+
+            // Reset mobile zoom by temporarily updating viewport meta tag
+            const viewport = document.querySelector('meta[name=viewport]');
+            const originalContent = viewport.content;
+            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            setTimeout(() => {
+                viewport.content = originalContent;
+            }, 100);
+        }
+
+        // Initially lock body if password not entered
+        if (sessionStorage.getItem('homepageUnlocked') !== 'true') {
+            document.body.classList.add('locked');
         }
 
         // Hide error message when user starts typing again
         passwordInput.addEventListener('input', function () {
             passwordError.classList.remove('show');
         });
-    </script>
 
+        // Dark mode toggle script
+        const darkModeBtn = document.getElementById('dark-mode-btn');
+
+        // Check for saved user preference and set initial mode
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeBtn.textContent = 'Light Mode';
+        }
+
+        darkModeBtn.addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeBtn.textContent = 'Light Mode';
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeBtn.textContent = 'Dark Mode';
+            }
+        });
+    </script>
 </body>
 
 </html>
