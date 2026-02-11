@@ -4,226 +4,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=/savethedate">
+    <meta name="description" content="Adina and Andrew are getting married!">
     <title>Adina & Andrew - Travel</title>
-    <script>window.location.href = '/savethedate';</script>
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Apply embossed effect to images */
-        .embossed-image {
-            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+        /* Password protection overlay */
+        body.locked {
+            overflow: hidden;
         }
 
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: var(--color-dark-green);
-            color: var(--color-soft-white);
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-soft-white);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
         }
 
-        body.dark-mode::before {
-            background-image: url('images/textures/grain-dark.png');
+        #password-overlay.hidden {
+            display: none;
         }
 
-        body.dark-mode .embossed-image {
-            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
-        }
-
-        body.dark-mode .std-travel {
-            border-top-color: rgba(241, 237, 234, 0.2);
-        }
-
-        body.dark-mode .std-hotel-link {
-            color: var(--color-soft-white);
-            border-color: var(--color-soft-white);
-            background-color: transparent;
-        }
-
-        body.dark-mode .std-hotel-link:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-dark-green);
-            animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        @keyframes flashGradientDark {
-            0% {
-                background-position: 0% 0%;
-            }
-
-            100% {
-                background-position: 100% 0%;
-            }
-        }
-
-        /* Dark Mode Toggle Button */
-        .dark-mode-toggle {
+        .password-container {
+            max-width: 400px;
+            width: 100%;
             text-align: center;
-            padding: 1rem 0;
             position: relative;
-            z-index: 10;
+            z-index: 2;
         }
 
-        .dark-mode-btn {
+        .password-container h2 {
+            font-family: var(--font-title);
+            font-size: 5.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        .password-container p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        #password-form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 600px;
+            margin: 0 auto;
+            flex-wrap: nowrap;
+        }
+
+        .password-input {
+            width: 200px;
+            min-width: 150px;
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            border: 2px solid var(--color-dark-green);
+            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--color-dark-green);
+        }
+
+        .password-submit {
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-heading);
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--color-dark-green);
-            background-color: transparent;
-            padding: 0.5rem 1.2rem;
-            border-radius: 25px;
-            border: 2px solid var(--color-dark-green);
-            cursor: pointer;
-            transition: all 0.5s ease;
-            text-shadow: none;
-            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
-        }
-
-        .dark-mode-btn:hover {
+            color: var(--color-soft-white);
             background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
             background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-soft-white);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
-            animation: flashGradient 0.5s ease forwards;
+            background-position: 0% 0%;
+            border: 2px solid var(--color-dark-green);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-position 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
         }
 
-        @keyframes flashGradient {
-            0% {
-                background-position: 0% 0%;
+        .password-submit:hover {
+            background-position: 100% 0%;
+        }
+
+        .password-error {
+            color: #c41e3a;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        /* Film grain effect for password overlay */
+        #password-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url('../images/textures/grain.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .password-container h2 {
+                font-size: 3.5rem;
             }
 
-            100% {
-                background-position: 100% 0%;
+            #password-form {
+                flex-direction: column;
+                align-items: center;
             }
-        }
 
-        .dark-mode-btn:active,
-        .dark-mode-btn:focus {
-            outline: none;
-            background-color: transparent;
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode .dark-mode-btn {
-            color: var(--color-soft-white);
-            border-color: var(--color-soft-white);
-            background-color: transparent;
-        }
-
-        body.dark-mode .dark-mode-btn:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-dark-green);
-            animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        body.dark-mode .dark-mode-btn:active,
-        body.dark-mode .dark-mode-btn:focus {
-            outline: none;
-            background: transparent;
-            color: var(--color-soft-white);
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode footer {
-            background-image: url('images/textures/footer-dark.png?v=4');
-            filter: brightness(1.5);
+            .password-input {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <!-- Travel Content -->
-    <section class="save-the-date-content">
-        <div class="content-wrapper">
-            <!-- Travel Section -->
-            <div class="std-travel">
-                <h3 class="std-section-title">Travel</h3>
-
-                <p class="std-travel-intro">Please see a few hotel options below to help with any early travel
-                    planning. More travel details, including transportation and other logistics, will be available
-                    on the full wedding website in the coming months.</p>
-
-                <div class="std-hotel">
-                    <h4 class="std-hotel-name">InterContinental</h4>
-                    <p class="std-hotel-description">We have reserved a hotel room block at the wedding venue, which
-                        is the InterContinental Washington, DC - The Wharf. Please book using the link below by
-                        September 16, 2026. The group code is AAW.
-                    </p>
-                    <a href="https://www.ihg.com/intercontinental/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qIta=99801505&icdv=99801505&qSlH=WASHC&qCiD=16&qCiMy=092026&qCoD=18&qCoMy=092026&qGrpCd=AAW&setPMCookies=true&qSHBrC=IC&qDest=801%20Wharf%20Street%20SW,%20Washington,%20DC,%20US&showApp=true&adjustMonth=false&srb_u=1&qRmFltr="
-                        class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
-                </div>
-
-                <div class="std-hotel">
-                    <h4 class="std-hotel-name">Canopy by Hilton</h4>
-                    <p class="std-hotel-description">We have reserved a hotel room block at the Canopy by Hilton
-                        Washington DC The Wharf, which is a very short walk (2-3 minutes) from the wedding venue.
-                        Please book
-                        using the link below by September 16, 2026. The group
-                        code is 908.</p>
-                    <a href="https://www.hilton.com/en/book/reservation/rooms/?ctyhocn=DCACUPY&arrivalDate=2026-10-16&departureDate=2026-10-18&groupCode=908&room1NumAdults=1&displayCurrency=USD&aarpRate="
-                        class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
-                </div>
-
-                <div class="std-hotel">
-                    <h4 class="std-hotel-name">Residence Inn</h4>
-                    <p class="std-hotel-description">We have reserved a hotel room block at the Residence Inn
-                        Washington, DC National Mall, which is a 15-20 minute walk from the wedding venue. Please
-                        book using the link below by September 18, 2026. The
-                        group code is NDF.</p>
-                    <a href="https://www.marriott.com/event-reservations/reservation-link.mi?id=1763049644521&key=GRP&app=resvlink&_branch_match_id=1312088118907015526&_branch_referrer=H4sIAAAAAAAAA8soKSkottLXTywo0MtNLCrKzC8p0UvOz9UvSi3OyczLtgdK2ALZZSCOWmaKraG5mbGBiaWZiYmpkaFadmqlrXtQgFpdUWpaKlB3Xnp8UlF%2BeXFqka1zRlF%2BbioA%2B91nT2AAAAA%3D"
-                        class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
-                </div>
-
-                <div class="std-hotel">
-                    <h4 class="std-hotel-name">citizenM</h4>
-                    <p class="std-hotel-description">Another hotel option near the venue is the citizenM Washington
-                        Capitol, which is a 12-15 minute walk from the wedding venue. Please note that we
-                        do not have a room block reserved at this hotel.</p>
-                    <a href="https://www.marriott.com/en-us/hotels/waszc-citizenm-washington-capitol/overview/"
-                        class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
-                </div>
-
-            </div>
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Save the Date</h2>
+            <p>Please enter the password:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="dark-mode-toggle">
-            <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
-        </div>
-    </footer>
+    </div>
 
     <script>
-        // Dark mode toggle script
-        const darkModeBtn = document.getElementById('dark-mode-btn');
-
-        // Check for saved user preference and set initial mode
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeBtn.textContent = 'Light Mode';
+        // If already unlocked, redirect immediately
+        if (sessionStorage.getItem('saveTheDateUnlocked') === 'true') {
+            window.location.href = '/savethedate';
         }
 
-        darkModeBtn.addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
+        document.body.classList.add('locked');
 
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('darkMode', 'enabled');
-                darkModeBtn.textContent = 'Light Mode';
+        const correctPassword = 'october17';
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem('saveTheDateUnlocked', 'true');
+                window.location.href = '/savethedate';
             } else {
-                localStorage.setItem('darkMode', 'disabled');
-                darkModeBtn.textContent = 'Dark Mode';
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
             }
+        });
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
         });
     </script>
 </body>

@@ -4,285 +4,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0; url=/savethedate">
+    <meta name="description" content="Adina and Andrew are getting married!">
     <title>Adina & Andrew - RSVP</title>
-    <script>window.location.href = '/savethedate';</script>
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="rsvp-styles.css">
-    <script src="guests.js"></script>
     <style>
-        /* Apply embossed effect to images */
-        .embossed-image {
-            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+        /* Password protection overlay */
+        body.locked {
+            overflow: hidden;
         }
 
-        /* Dark Mode Styles */
-        body.dark-mode {
-            background-color: var(--color-dark-green);
-            color: var(--color-soft-white);
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-soft-white);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
         }
 
-        body.dark-mode::before {
-            background-image: url('images/textures/grain-dark.png');
+        #password-overlay.hidden {
+            display: none;
         }
 
-        body.dark-mode .embossed-image {
-            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
-        }
-
-        /* Dark Mode Toggle Button */
-        .dark-mode-toggle {
+        .password-container {
+            max-width: 400px;
+            width: 100%;
             text-align: center;
-            padding: 1rem 0;
             position: relative;
-            z-index: 10;
+            z-index: 2;
         }
 
-        .dark-mode-btn {
+        .password-container h2 {
+            font-family: var(--font-title);
+            font-size: 5.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        .password-container p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        #password-form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 600px;
+            margin: 0 auto;
+            flex-wrap: nowrap;
+        }
+
+        .password-input {
+            width: 200px;
+            min-width: 150px;
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            border: 2px solid var(--color-dark-green);
+            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--color-dark-green);
+        }
+
+        .password-submit {
+            padding: 0.5rem 1.2rem;
             font-family: var(--font-heading);
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--color-dark-green);
-            background-color: transparent;
-            padding: 0.5rem 1.2rem;
-            border-radius: 25px;
-            border: 2px solid var(--color-dark-green);
-            cursor: pointer;
-            transition: all 0.5s ease;
-            text-shadow: none;
-            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
-        }
-
-        .dark-mode-btn:hover {
+            color: var(--color-soft-white);
             background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
             background-size: 300% 100%;
+            background-position: 0% 0%;
+            border: 2px solid var(--color-dark-green);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-position 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .password-submit:hover {
             background-position: 100% 0%;
-            color: var(--color-soft-white);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
-            animation: flashGradient 0.5s ease forwards;
         }
 
-        @keyframes flashGradient {
-            0% {
-                background-position: 0% 0%;
+        .password-error {
+            color: #c41e3a;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        /* Film grain effect for password overlay */
+        #password-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url('../images/textures/grain.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .password-container h2 {
+                font-size: 3.5rem;
             }
 
-            100% {
-                background-position: 100% 0%;
-            }
-        }
-
-        .dark-mode-btn:active,
-        .dark-mode-btn:focus {
-            outline: none;
-            background-color: transparent;
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode .dark-mode-btn {
-            color: var(--color-soft-white);
-            border-color: var(--color-soft-white);
-            background-color: transparent;
-        }
-
-        body.dark-mode .dark-mode-btn:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-dark-green);
-            animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        @keyframes flashGradientDark {
-            0% {
-                background-position: 0% 0%;
+            #password-form {
+                flex-direction: column;
+                align-items: center;
             }
 
-            100% {
-                background-position: 100% 0%;
+            .password-input {
+                font-size: 16px;
             }
-        }
-
-        body.dark-mode .dark-mode-btn:active,
-        body.dark-mode .dark-mode-btn:focus {
-            outline: none;
-            background: transparent;
-            color: var(--color-soft-white);
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode footer {
-            background-image: url('images/textures/footer-dark.png?v=4');
-            filter: brightness(1.5);
         }
     </style>
 </head>
 
 <body>
-    <!-- RSVP Hero -->
-    <section class="rsvp-hero">
-        <h1 class="couple-names">RSVP</h1>
-        <p class="rsvp-subtitle">Please respond by March 1, 2025</p>
-    </section>
-
-    <!-- RSVP Form -->
-    <section class="rsvp-form-section">
-        <div class="content-wrapper">
-            <form class="rsvp-form" id="rsvpForm">
-
-                <!-- Guest Name Search -->
-                <div class="form-group">
-                    <label for="guestSearch">Start typing your name *</label>
-                    <input type="text" id="guestSearch" name="guestSearch" placeholder="Type your name..."
-                        autocomplete="off" required>
-                    <div id="guestSuggestions" class="guest-suggestions"></div>
-                    <input type="hidden" id="selectedGuestId" name="selectedGuestId">
-                </div>
-
-                <!-- Main Form (shown after selection) -->
-                <div id="mainForm" style="display: none;">
-
-                    <!-- Email -->
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
-                    </div>
-
-                    <!-- Event RSVP Section -->
-                    <div class="form-group">
-                        <h3 class="event-rsvp-heading">Please RSVP for each event:</h3>
-                    </div>
-
-                    <!-- Friday Event -->
-                    <div class="form-group event-group" id="fridayGroup" style="display: none;">
-                        <label class="event-label">Friday Welcome Drinks</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="fridayAttending" value="yes" class="event-radio">
-                                <span>Joyfully accepts</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="fridayAttending" value="no" class="event-radio">
-                                <span>Regretfully declines</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Saturday Event -->
-                    <div class="form-group event-group" id="saturdayGroup" style="display: none;">
-                        <label class="event-label">Saturday Wedding</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="saturdayAttending" value="yes" class="event-radio">
-                                <span>Joyfully accepts</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="saturdayAttending" value="no" class="event-radio">
-                                <span>Regretfully declines</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Sunday Event -->
-                    <div class="form-group event-group" id="sundayGroup" style="display: none;">
-                        <label class="event-label">Sunday Brunch</label>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input type="radio" name="sundayAttending" value="yes" class="event-radio">
-                                <span>Joyfully accepts</span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="sundayAttending" value="no" class="event-radio">
-                                <span>Regretfully declines</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Attending Details (shown if any yes) -->
-                    <div id="attendingDetails" style="display: none;">
-
-                        <!-- Number of Guests -->
-                        <div class="form-group" id="guestCountGroup">
-                            <label for="guestCount">Number of Guests Attending *</label>
-                            <select id="guestCount" name="guestCount">
-                                <!-- Options will be populated based on maxGuests -->
-                            </select>
-                        </div>
-
-                        <!-- Dietary Restrictions -->
-                        <div class="form-group" id="dietaryGroup">
-                            <label for="dietary">Dietary Restrictions or Allergies</label>
-                            <textarea id="dietary" name="dietary" rows="3"
-                                placeholder="Please let us know of any dietary needs..."></textarea>
-                        </div>
-
-                        <!-- Song Request -->
-                        <div class="form-group">
-                            <label for="songRequest">Song Request</label>
-                            <input type="text" id="songRequest" name="songRequest"
-                                placeholder="What song will get you on the dance floor?">
-                        </div>
-
-                    </div>
-                    <!-- End Attending Details -->
-
-                    <!-- Additional Message (shown regardless of attendance) -->
-                    <div class="form-group">
-                        <label for="message">Additional Message</label>
-                        <textarea id="message" name="message" rows="4"
-                            placeholder="Any message for the happy couple..."></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="cta-button">Submit RSVP</button>
-
-                </div>
-                <!-- End Main Form -->
-
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Save the Date</h2>
+            <p>Please enter the password:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
             </form>
-
-            <div id="confirmationMessage" class="confirmation-message" style="display: none;">
-                <h3>Thank You!</h3>
-                <p>Your RSVP has been received. We can't wait to celebrate with you!</p>
-            </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="dark-mode-toggle">
-            <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
-        </div>
-    </footer>
-
-    <script src="rsvp-script.js"></script>
     <script>
-        // Dark mode toggle script
-        const darkModeBtn = document.getElementById('dark-mode-btn');
-
-        // Check for saved user preference and set initial mode
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            darkModeBtn.textContent = 'Light Mode';
+        // If already unlocked, redirect immediately
+        if (sessionStorage.getItem('saveTheDateUnlocked') === 'true') {
+            window.location.href = '/savethedate';
         }
 
-        darkModeBtn.addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
+        document.body.classList.add('locked');
 
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('darkMode', 'enabled');
-                darkModeBtn.textContent = 'Light Mode';
+        const correctPassword = 'october17';
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem('saveTheDateUnlocked', 'true');
+                window.location.href = '/savethedate';
             } else {
-                localStorage.setItem('darkMode', 'disabled');
-                darkModeBtn.textContent = 'Dark Mode';
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
             }
+        });
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
         });
     </script>
 </body>
