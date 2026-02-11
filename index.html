@@ -353,7 +353,7 @@
         const passwordError = document.getElementById('password-error');
 
         // Check if user has already unlocked (session storage)
-        if (sessionStorage.getItem('homepageUnlocked') === 'true') {
+        if (sessionStorage.getItem('saveTheDateUnlocked') === 'true') {
             unlockContent();
         }
 
@@ -362,7 +362,7 @@
             const enteredPassword = passwordInput.value;
 
             if (enteredPassword === correctPassword) {
-                sessionStorage.setItem('homepageUnlocked', 'true');
+                sessionStorage.setItem('saveTheDateUnlocked', 'true');
                 unlockContent();
             } else {
                 passwordError.classList.add('show');
@@ -372,21 +372,12 @@
         });
 
         function unlockContent() {
-            passwordOverlay.classList.add('hidden');
-            protectedContent.classList.add('unlocked');
-            document.body.classList.remove('locked');
-
-            // Reset mobile zoom by temporarily updating viewport meta tag
-            const viewport = document.querySelector('meta[name=viewport]');
-            const originalContent = viewport.content;
-            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-            setTimeout(() => {
-                viewport.content = originalContent;
-            }, 100);
+            // Redirect to save the date page after password entry
+            window.location.href = '/savethedate';
         }
 
         // Initially lock body if password not entered
-        if (sessionStorage.getItem('homepageUnlocked') !== 'true') {
+        if (sessionStorage.getItem('saveTheDateUnlocked') !== 'true') {
             document.body.classList.add('locked');
         }
 
