@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registry Admin — Adina & Andrew</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Password protection overlay */
+        body.locked {
+            overflow: hidden;
+        }
+
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-soft-white);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        #password-overlay.hidden {
+            display: none;
+        }
+
+        .password-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .password-container h2 {
+            font-family: var(--font-title);
+            font-size: 5.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        .password-container p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        #password-form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 600px;
+            margin: 0 auto;
+            flex-wrap: nowrap;
+        }
+
+        .password-input {
+            width: 200px;
+            min-width: 150px;
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            border: 2px solid var(--color-dark-green);
+            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+        }
+
+        .password-submit {
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-soft-white);
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            border: 2px solid var(--color-dark-green);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-position 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .password-submit:hover {
+            background-position: 100% 0%;
+        }
+
+        .password-error {
+            color: #c41e3a;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        #protected-content {
+            display: none;
+        }
+
+        #protected-content.unlocked {
+            display: block;
+        }
+
+        /* Film grain effect for password overlay */
+        #password-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url('images/textures/grain.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        body.dark-mode #password-overlay::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background-color: var(--color-dark-green);
+            color: var(--color-soft-white);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        body.dark-mode::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        body.dark-mode #password-overlay {
+            background-color: var(--color-dark-green);
+        }
+
+        body.dark-mode .password-container h2,
+        body.dark-mode .password-container p {
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-input {
+            border-color: var(--color-soft-white);
+            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-mode .password-submit {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-submit:hover {
+            background-position: 100% 0%;
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            text-align: center;
+            padding: 1rem 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .dark-mode-btn {
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-dark-green);
+            background-color: transparent;
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            border: 2px solid var(--color-dark-green);
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-shadow: none;
+            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
+        }
+
+        .dark-mode-btn:hover {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-soft-white);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
+            animation: flashGradient 0.5s ease forwards;
+        }
+
+        @keyframes flashGradient {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 0%; }
+        }
+
+        .dark-mode-btn:active,
+        .dark-mode-btn:focus {
+            outline: none;
+            background-color: transparent;
+            transform: none;
+            box-shadow: none;
+        }
+
+        body.dark-mode .dark-mode-btn {
+            color: var(--color-soft-white);
+            border-color: var(--color-soft-white);
+            background-color: transparent;
+        }
+
+        body.dark-mode .dark-mode-btn:hover {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-dark-green);
+            animation: flashGradientDark 0.5s ease forwards;
+        }
+
+        @keyframes flashGradientDark {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 0%; }
+        }
+
+        body.dark-mode .dark-mode-btn:active,
+        body.dark-mode .dark-mode-btn:focus {
+            outline: none;
+            background: transparent;
+            color: var(--color-soft-white);
+            transform: none;
+            box-shadow: none;
+        }
+
+        body.dark-mode footer {
+            background-image: url('images/textures/footer-dark.png?v=4');
+            filter: brightness(1.5);
+        }
+
+        /* ===========================
+           Admin Page Layout
+           =========================== */
+        .admin-page {
+            padding: 4rem 2rem 4rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .admin-title {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            font-weight: 400;
+            color: var(--color-dark-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .admin-subtitle {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--color-dark-green);
+            opacity: 0.6;
+        }
+
+        body.dark-mode .admin-title,
+        body.dark-mode .admin-subtitle {
+            color: var(--color-soft-white);
+        }
+
+        /* Admin Item Row */
+        .admin-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(26, 58, 46, 0.12);
+        }
+
+        body.dark-mode .admin-item {
+            border-bottom-color: rgba(241, 237, 234, 0.12);
+        }
+
+        .admin-item:last-child {
+            border-bottom: none;
+        }
+
+        .admin-item-info {
+            flex: 1;
+        }
+
+        .admin-item-name {
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-dark-green);
+            margin-bottom: 0.2rem;
+        }
+
+        .admin-item-retailer {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--color-dark-green);
+            opacity: 0.6;
+            margin-bottom: 0.5rem;
+        }
+
+        body.dark-mode .admin-item-name,
+        body.dark-mode .admin-item-retailer {
+            color: var(--color-soft-white);
+        }
+
+        .admin-claim-status {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--color-dark-green);
+        }
+
+        body.dark-mode .admin-claim-status {
+            color: var(--color-soft-white);
+        }
+
+        .claim-badge {
+            display: inline-block;
+            font-family: var(--font-heading);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.2rem 0.6rem;
+            border-radius: 25px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .claim-badge.pending {
+            border: 1.5px solid var(--color-dark-green);
+            color: var(--color-dark-green);
+            opacity: 0.6;
+        }
+
+        .claim-badge.confirmed {
+            background-color: var(--color-dark-green);
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .claim-badge.pending {
+            border-color: var(--color-soft-white);
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .claim-badge.confirmed {
+            background-color: var(--color-soft-white);
+            color: var(--color-dark-green);
+        }
+
+        .admin-item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .admin-action-btn {
+            font-family: var(--font-heading);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.35rem 0.9rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .admin-confirm-btn {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-soft-white);
+            border: 2px solid var(--color-dark-green);
+        }
+
+        .admin-confirm-btn:hover {
+            background-position: 100% 0%;
+        }
+
+        .admin-clear-btn {
+            background: transparent;
+            color: var(--color-dark-green);
+            border: 2px solid var(--color-dark-green);
+        }
+
+        .admin-clear-btn:hover {
+            opacity: 0.6;
+        }
+
+        body.dark-mode .admin-confirm-btn {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        body.dark-mode .admin-clear-btn {
+            color: var(--color-soft-white);
+            border-color: var(--color-soft-white);
+        }
+
+        .unclaimed-text {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--color-dark-green);
+            opacity: 0.4;
+        }
+
+        body.dark-mode .unclaimed-text {
+            color: var(--color-soft-white);
+        }
+
+        /* Summary bar */
+        .admin-summary {
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-dark-green);
+            opacity: 0.5;
+            text-align: right;
+            margin-bottom: 1.5rem;
+        }
+
+        body.dark-mode .admin-summary {
+            color: var(--color-soft-white);
+        }
+
+        /* ===========================
+           Responsive
+           =========================== */
+        @media (max-width: 768px) {
+            .password-container h2 {
+                font-size: 3.5rem;
+            }
+
+            #password-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .password-input {
+                font-size: 16px;
+            }
+
+            .admin-item {
+                flex-direction: column;
+            }
+
+            .admin-item-actions {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Admin Password Overlay -->
+    <!-- TODO: Change the admin password below before sharing this page -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Admin</h2>
+            <p>Registry admin access:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
+
+        <main class="admin-page">
+
+            <div class="admin-header">
+                <h1 class="admin-title">Registry Admin</h1>
+                <p class="admin-subtitle">View and manage specialty item claims.</p>
+            </div>
+
+            <p class="admin-summary" id="admin-summary"></p>
+
+            <div id="admin-items-list">
+                <!-- Rendered by JavaScript -->
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="dark-mode-toggle">
+                <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // ===========================
+        // Specialty Items Data (must match registry.html)
+        // ===========================
+        const SPECIALTY_ITEMS = [
+            { id: 'item-1', name: 'Vintage Serve Ware Set',           retailer: 'Etsy',        price: '$85'  },
+            { id: 'item-2', name: 'Linen Table Runner (Set of 2)',     retailer: 'Society6',    price: '$45'  },
+            { id: 'item-3', name: 'Copper Moscow Mule Mugs (Set of 4)',retailer: 'Amazon',      price: '$60'  },
+            { id: 'item-4', name: 'Monogrammed Cheese Board',          retailer: 'Pottery Barn',price: '$120' }
+        ];
+
+        // ===========================
+        // localStorage Helpers
+        // ===========================
+        const LS_KEY = 'registryPendingItems';
+
+        function getPendingItems() {
+            try {
+                return JSON.parse(localStorage.getItem(LS_KEY)) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        function savePendingItems(data) {
+            localStorage.setItem(LS_KEY, JSON.stringify(data));
+        }
+
+        // ===========================
+        // Render Admin List
+        // ===========================
+        function renderAdminList() {
+            const list = document.getElementById('admin-items-list');
+            const summary = document.getElementById('admin-summary');
+            const pending = getPendingItems();
+            list.innerHTML = '';
+
+            const claimedCount = Object.keys(pending).length;
+            summary.textContent = `${claimedCount} of ${SPECIALTY_ITEMS.length} items claimed`;
+
+            SPECIALTY_ITEMS.forEach(item => {
+                const claim = pending[item.id];
+                const row = document.createElement('div');
+                row.className = 'admin-item';
+                row.dataset.itemId = item.id;
+
+                let claimHTML;
+                let actionsHTML;
+
+                if (claim) {
+                    const date = new Date(claim.timestamp).toLocaleDateString('en-US', {
+                        month: 'short', day: 'numeric', year: 'numeric'
+                    });
+                    const badge = claim.confirmed
+                        ? `<span class="claim-badge confirmed">Confirmed</span>`
+                        : `<span class="claim-badge pending">Pending</span>`;
+
+                    claimHTML = `
+                        <p class="admin-claim-status">
+                            ${escapeHtml(claim.name)} (${escapeHtml(claim.email)}) &mdash; ${date}
+                            ${badge}
+                        </p>
+                    `;
+                    actionsHTML = `
+                        <button class="admin-action-btn admin-confirm-btn" data-action="confirm" data-item-id="${item.id}">
+                            Confirm
+                        </button>
+                        <button class="admin-action-btn admin-clear-btn" data-action="clear" data-item-id="${item.id}">
+                            Clear
+                        </button>
+                    `;
+                } else {
+                    claimHTML = `<p class="unclaimed-text">Unclaimed</p>`;
+                    actionsHTML = '';
+                }
+
+                row.innerHTML = `
+                    <div class="admin-item-info">
+                        <p class="admin-item-name">${escapeHtml(item.name)}</p>
+                        <p class="admin-item-retailer">${escapeHtml(item.retailer)} &middot; ${escapeHtml(item.price)}</p>
+                        ${claimHTML}
+                    </div>
+                    <div class="admin-item-actions">${actionsHTML}</div>
+                `;
+
+                list.appendChild(row);
+            });
+
+            // Attach action button listeners
+            list.querySelectorAll('[data-action]').forEach(btn => {
+                btn.addEventListener('click', () => handleAction(btn.dataset.action, btn.dataset.itemId));
+            });
+        }
+
+        function handleAction(action, itemId) {
+            const pending = getPendingItems();
+
+            if (action === 'confirm' && pending[itemId]) {
+                pending[itemId].confirmed = true;
+                savePendingItems(pending);
+            } else if (action === 'clear') {
+                delete pending[itemId];
+                savePendingItems(pending);
+            }
+
+            renderAdminList();
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        // ===========================
+        // Admin Password Protection
+        // ===========================
+        // TODO: Change 'registry-admin-2026' to your desired admin password
+        const adminPassword = 'registry-admin-2026';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        if (sessionStorage.getItem('registryAdminUnlocked') === 'true') {
+            unlockAdmin();
+        }
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === adminPassword) {
+                sessionStorage.setItem('registryAdminUnlocked', 'true');
+                unlockAdmin();
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        function unlockAdmin() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+            renderAdminList();
+        }
+
+        if (sessionStorage.getItem('registryAdminUnlocked') !== 'true') {
+            document.body.classList.add('locked');
+        }
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
+        });
+
+        // ===========================
+        // Dark Mode Toggle
+        // ===========================
+        const darkModeBtn = document.getElementById('dark-mode-btn');
+
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeBtn.textContent = 'Light Mode';
+        }
+
+        darkModeBtn.addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeBtn.textContent = 'Light Mode';
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeBtn.textContent = 'Dark Mode';
+            }
+        });
+    </script>
+</body>
+
+</html>

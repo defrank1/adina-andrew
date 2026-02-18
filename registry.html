@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adina and Andrew's wedding registry.">
+    <title>Adina & Andrew - Registry</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Password protection overlay */
+        body.locked {
+            overflow: hidden;
+        }
+
+        #password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-soft-white);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        #password-overlay.hidden {
+            display: none;
+        }
+
+        .password-container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .password-container h2 {
+            font-family: var(--font-title);
+            font-size: 5.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        .password-container p {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-dark-green);
+        }
+
+        #password-form {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 600px;
+            margin: 0 auto;
+            flex-wrap: nowrap;
+        }
+
+        .password-input {
+            width: 200px;
+            min-width: 150px;
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+            border: 2px solid var(--color-dark-green);
+            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: var(--color-dark-green);
+        }
+
+        .password-submit {
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-soft-white);
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            border: 2px solid var(--color-dark-green);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-position 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .password-submit:hover {
+            background-position: 100% 0%;
+        }
+
+        .password-error {
+            color: #c41e3a;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .password-error.show {
+            display: block;
+        }
+
+        #protected-content {
+            display: none;
+        }
+
+        #protected-content.unlocked {
+            display: block;
+        }
+
+        /* Film grain effect for password overlay */
+        #password-overlay::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url('images/textures/grain.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        body.dark-mode #password-overlay::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background-color: var(--color-dark-green);
+            color: var(--color-soft-white);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        body.dark-mode::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        body.dark-mode #password-overlay {
+            background-color: var(--color-dark-green);
+        }
+
+        body.dark-mode .password-container h2,
+        body.dark-mode .password-container p {
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-input {
+            border-color: var(--color-soft-white);
+            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-mode .password-submit {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-submit:hover {
+            background-position: 100% 0%;
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            text-align: center;
+            padding: 1rem 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .dark-mode-btn {
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-dark-green);
+            background-color: transparent;
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            border: 2px solid var(--color-dark-green);
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-shadow: none;
+            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
+        }
+
+        .dark-mode-btn:hover {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-soft-white);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
+            animation: flashGradient 0.5s ease forwards;
+        }
+
+        @keyframes flashGradient {
+            0% {
+                background-position: 0% 0%;
+            }
+
+            100% {
+                background-position: 100% 0%;
+            }
+        }
+
+        .dark-mode-btn:active,
+        .dark-mode-btn:focus {
+            outline: none;
+            background-color: transparent;
+            transform: none;
+            box-shadow: none;
+        }
+
+        body.dark-mode .dark-mode-btn {
+            color: var(--color-soft-white);
+            border-color: var(--color-soft-white);
+            background-color: transparent;
+        }
+
+        body.dark-mode .dark-mode-btn:hover {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-dark-green);
+            animation: flashGradientDark 0.5s ease forwards;
+        }
+
+        @keyframes flashGradientDark {
+            0% {
+                background-position: 0% 0%;
+            }
+
+            100% {
+                background-position: 100% 0%;
+            }
+        }
+
+        body.dark-mode .dark-mode-btn:active,
+        body.dark-mode .dark-mode-btn:focus {
+            outline: none;
+            background: transparent;
+            color: var(--color-soft-white);
+            transform: none;
+            box-shadow: none;
+        }
+
+        body.dark-mode footer {
+            background-image: url('images/textures/footer-dark.png?v=4');
+            filter: brightness(1.5);
+        }
+
+        /* ===========================
+           Navigation
+           =========================== */
+        body.dark-mode .main-nav {
+            background-color: var(--color-dark-green);
+            border-bottom-color: rgba(241, 237, 234, 0.1);
+        }
+
+        body.dark-mode .site-title,
+        body.dark-mode .nav-links a {
+            color: var(--color-soft-white);
+        }
+
+        /* ===========================
+           Page Layout
+           =========================== */
+        .registry-page {
+            padding-top: 6rem;
+            /* offset for fixed nav */
+        }
+
+        /* ===========================
+           Registry Section
+           =========================== */
+        .registry-section {
+            padding: 4rem 0 3rem;
+            text-align: center;
+        }
+
+        .registry-section-title {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            font-weight: 400;
+            color: var(--color-dark-green);
+            margin-bottom: 0.75rem;
+        }
+
+        .registry-section-intro {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--color-dark-green);
+            margin-bottom: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .registry-cards {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .registry-card {
+            display: block;
+            text-decoration: none;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+
+        .registry-card img {
+            display: block;
+            width: 180px;
+            height: auto;
+            /* Embossed effect matching the site's text-shadow style */
+            filter: drop-shadow(0px 2px 3px rgba(255, 255, 255, 0.9)) drop-shadow(0px -1px 1px rgba(26, 58, 46, 0.1));
+        }
+
+        .registry-card:hover img {
+            opacity: 0.65;
+        }
+
+        body.dark-mode .registry-card img {
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+        }
+
+        body.dark-mode .registry-card:hover img {
+            opacity: 0.65;
+        }
+
+        /* Section divider */
+        .section-divider {
+            border: none;
+            border-top: 1px solid rgba(26, 58, 46, 0.15);
+            margin: 0 2rem;
+        }
+
+        body.dark-mode .section-divider {
+            border-top-color: rgba(241, 237, 234, 0.15);
+        }
+
+        /* ===========================
+           Specialty Items Section
+           =========================== */
+        .specialty-section {
+            padding: 3rem 0 4rem;
+            text-align: center;
+        }
+
+        .specialty-section-title {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            font-weight: 400;
+            color: var(--color-dark-green);
+            margin-bottom: 0.75rem;
+        }
+
+        .specialty-section-intro {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: var(--color-dark-green);
+            margin-bottom: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .specialty-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .specialty-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Item image */
+        .item-image-wrap {
+            width: 100%;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            border: 1px solid rgba(26, 58, 46, 0.12);
+            margin-bottom: 1rem;
+            background-color: rgba(26, 58, 46, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Placeholder used when no real image is supplied */
+        .item-image-placeholder {
+            font-family: var(--font-heading);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-dark-green);
+            opacity: 0.35;
+        }
+
+        body.dark-mode .item-image-wrap {
+            border-color: rgba(241, 237, 234, 0.12);
+            background-color: rgba(241, 237, 234, 0.04);
+        }
+
+        body.dark-mode .item-image-placeholder {
+            color: var(--color-soft-white);
+        }
+
+        .item-name {
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-dark-green);
+            margin-bottom: 0.3rem;
+        }
+
+        .item-meta {
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--color-dark-green);
+            opacity: 0.7;
+            margin-bottom: 1rem;
+        }
+
+        body.dark-mode .item-name,
+        body.dark-mode .item-meta {
+            color: var(--color-soft-white);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Reuse .std-hotel-link styling inline */
+        .item-link,
+        .item-claim-btn {
+            font-family: var(--font-heading);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.45rem 1rem;
+            border-radius: 25px;
+            border: 2px solid var(--color-dark-green);
+            background-color: transparent;
+            color: var(--color-dark-green);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .item-link:hover,
+        .item-claim-btn:hover:not(:disabled) {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-soft-white);
+            animation: flashGradient 0.5s ease forwards;
+        }
+
+        body.dark-mode .item-link,
+        body.dark-mode .item-claim-btn {
+            border-color: var(--color-soft-white);
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .item-link:hover,
+        body.dark-mode .item-claim-btn:hover:not(:disabled) {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-dark-green);
+            animation: flashGradientDark 0.5s ease forwards;
+        }
+
+        /* Pending state for claim button */
+        .item-claim-btn.pending {
+            opacity: 0.5;
+            cursor: default;
+            font-size: 0.6rem;
+        }
+
+        .item-claim-btn.pending:hover {
+            background: transparent;
+            color: var(--color-dark-green);
+            animation: none;
+        }
+
+        body.dark-mode .item-claim-btn.pending:hover {
+            background: transparent;
+            color: var(--color-soft-white);
+            animation: none;
+        }
+
+        /* ===========================
+           Claim Modal
+           =========================== */
+        #claim-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 58, 46, 0.45);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        #claim-modal-overlay.visible {
+            display: flex;
+        }
+
+        .claim-modal {
+            background-color: var(--color-soft-white);
+            border: 2px solid var(--color-dark-green);
+            border-radius: 4px;
+            padding: 2.5rem 2rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        body.dark-mode .claim-modal {
+            background-color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        .claim-modal-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            background: none;
+            border: none;
+            color: var(--color-dark-green);
+            cursor: pointer;
+            text-shadow: none;
+            opacity: 0.5;
+            line-height: 1;
+        }
+
+        .claim-modal-close:hover {
+            opacity: 1;
+        }
+
+        body.dark-mode .claim-modal-close {
+            color: var(--color-soft-white);
+        }
+
+        .claim-modal-item-name {
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-dark-green);
+            margin-bottom: 0.25rem;
+        }
+
+        body.dark-mode .claim-modal-item-name {
+            color: var(--color-soft-white);
+        }
+
+        .claim-modal-label {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            color: var(--color-dark-green);
+            margin-bottom: 1.25rem;
+        }
+
+        body.dark-mode .claim-modal-label {
+            color: var(--color-soft-white);
+        }
+
+        .claim-modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .claim-input {
+            width: 100%;
+            padding: 0.5rem 1.2rem;
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            border: 2px solid var(--color-dark-green);
+            background: transparent;
+            color: var(--color-dark-green);
+            border-radius: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .claim-input:focus {
+            outline: none;
+        }
+
+        body.dark-mode .claim-input {
+            border-color: var(--color-soft-white);
+            color: var(--color-soft-white);
+        }
+
+        .claim-modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .claim-submit-btn,
+        .claim-cancel-btn {
+            font-family: var(--font-heading);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.45rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-shadow: none;
+            white-space: nowrap;
+        }
+
+        .claim-submit-btn {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-soft-white);
+            border: 2px solid var(--color-dark-green);
+        }
+
+        .claim-submit-btn:hover {
+            background-position: 100% 0%;
+        }
+
+        .claim-cancel-btn {
+            background: transparent;
+            color: var(--color-dark-green);
+            border: 2px solid var(--color-dark-green);
+        }
+
+        .claim-cancel-btn:hover {
+            opacity: 0.6;
+        }
+
+        body.dark-mode .claim-submit-btn {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        body.dark-mode .claim-cancel-btn {
+            color: var(--color-soft-white);
+            border-color: var(--color-soft-white);
+        }
+
+        .claim-modal-error {
+            color: #c41e3a;
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .claim-modal-error.show {
+            display: block;
+        }
+
+        /* ===========================
+           Responsive
+           =========================== */
+        @media (max-width: 768px) {
+            .password-container h2 {
+                font-size: 3.5rem;
+            }
+
+            #password-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .password-input {
+                font-size: 16px;
+            }
+
+            .registry-section-title,
+            .specialty-section-title {
+                font-size: 2.2rem;
+            }
+
+            .specialty-grid {
+                grid-template-columns: 1fr;
+                max-width: 420px;
+            }
+
+            .registry-cards {
+                gap: 2rem;
+            }
+
+            .registry-card img {
+                width: 130px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Registry</h2>
+            <p>Please enter the password:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <div class="nav-content">
+                <a href="/savethedate" class="site-title">Adina & Andrew</a>
+                <ul class="nav-links">
+                    <li><a href="/savethedate">Save the Date</a></li>
+                    <li><a href="/registry">Registry</a></li>
+                    <li><a href="/rsvp">RSVP</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="registry-page">
+
+            <!-- Section 1: Registries -->
+            <section class="registry-section">
+                <div class="content-wrapper">
+                    <h1 class="registry-section-title">Registries</h1>
+                    <p class="registry-section-intro">We are registered with the following stores. Please click the link
+                        to visit each respective registry.</p>
+                    <div class="registry-cards">
+                        <!-- TODO: Replace href="#" with your actual registry URLs -->
+                        <a href="#" class="registry-card" target="_blank" rel="noopener noreferrer">
+                            <img src="vectors/bloomingdales.svg" alt="Bloomingdale's Registry" class="registry-logo"
+                                data-light="vectors/bloomingdales.svg" data-dark="vectors/bloomingdales-dark.svg">
+                        </a>
+                        <a href="#" class="registry-card" target="_blank" rel="noopener noreferrer">
+                            <img src="vectors/crate-and-barrel.svg" alt="Crate & Barrel Registry" class="registry-logo"
+                                data-light="vectors/crate-and-barrel.svg" data-dark="vectors/crate-and-barrel-dark.svg">
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="section-divider">
+
+            <!-- Section 2: Specialty Items -->
+            <section class="specialty-section">
+                <div class="content-wrapper" style="max-width: 900px;">
+                    <h2 class="specialty-section-title">Additional Gifts</h2>
+                    <p class="specialty-section-intro">This is a list of special, one-of-a-kind items, if you're
+                        interested in something a little different. If you're
+                        buying an item, let us know — we'll flag it so others don't duplicate.</p>
+                </div>
+
+                <div class="specialty-grid" id="specialty-grid">
+                    <!-- Items are rendered by JavaScript below -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="dark-mode-toggle">
+                <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Claim Modal -->
+    <div id="claim-modal-overlay">
+        <div class="claim-modal" role="dialog" aria-modal="true" aria-labelledby="claim-modal-item-name">
+            <button class="claim-modal-close" id="claim-modal-close" aria-label="Close">&times;</button>
+            <p class="claim-modal-item-name" id="claim-modal-item-name"></p>
+            <p class="claim-modal-label">Let us know you're buying this item:</p>
+            <form class="claim-modal-form" id="claim-modal-form" novalidate>
+                <input type="text" class="claim-input" id="claim-name-input" placeholder="Your name"
+                    autocomplete="name">
+                <input type="email" class="claim-input" id="claim-email-input" placeholder="Your email"
+                    autocomplete="email">
+            </form>
+            <div class="claim-modal-actions">
+                <button class="claim-submit-btn" id="claim-submit-btn">I'm buying this</button>
+                <button class="claim-cancel-btn" id="claim-cancel-btn">Cancel</button>
+            </div>
+            <p class="claim-modal-error" id="claim-modal-error">Please enter your name and email.</p>
+        </div>
+    </div>
+
+    <script>
+        // ===========================
+        // Specialty Items Data
+        // ===========================
+        // TODO: Replace placeholder image paths and purchase URLs with real ones.
+        // For images, replace the `image` value with a relative path like 'images/registry/item-name.jpg'
+        // or a full URL. Leave as null to show a styled placeholder.
+        const SPECIALTY_ITEMS = [
+            {
+                id: 'item-1',
+                name: 'Vintage Serve Ware Set',
+                retailer: 'Etsy',
+                price: '$85',
+                purchaseUrl: '#', // TODO: add real URL
+                image: null       // TODO: add real image path
+            },
+            {
+                id: 'item-2',
+                name: 'Linen Table Runner (Set of 2)',
+                retailer: 'Society6',
+                price: '$45',
+                purchaseUrl: '#', // TODO: add real URL
+                image: null       // TODO: add real image path
+            },
+            {
+                id: 'item-3',
+                name: 'Copper Moscow Mule Mugs (Set of 4)',
+                retailer: 'Amazon',
+                price: '$60',
+                purchaseUrl: '#', // TODO: add real URL
+                image: null       // TODO: add real image path
+            },
+            {
+                id: 'item-4',
+                name: 'Monogrammed Cheese Board',
+                retailer: 'Pottery Barn',
+                price: '$120',
+                purchaseUrl: '#', // TODO: add real URL
+                image: null       // TODO: add real image path
+            }
+        ];
+
+        // ===========================
+        // localStorage Helpers
+        // ===========================
+        const LS_KEY = 'registryPendingItems';
+
+        function getPendingItems() {
+            try {
+                return JSON.parse(localStorage.getItem(LS_KEY)) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        function savePendingItems(data) {
+            localStorage.setItem(LS_KEY, JSON.stringify(data));
+        }
+
+        // ===========================
+        // Render Specialty Grid
+        // ===========================
+        function renderSpecialtyGrid() {
+            const grid = document.getElementById('specialty-grid');
+            const pending = getPendingItems();
+            grid.innerHTML = '';
+
+            SPECIALTY_ITEMS.forEach(item => {
+                const claim = pending[item.id];
+                const isPending = !!claim;
+
+                const card = document.createElement('div');
+                card.className = 'specialty-item';
+                card.dataset.itemId = item.id;
+
+                // Image or placeholder
+                let imageHTML;
+                if (item.image) {
+                    imageHTML = `<img src="${item.image}" alt="${item.name}">`;
+                } else {
+                    imageHTML = `<span class="item-image-placeholder">Image coming soon</span>`;
+                }
+
+                // Claim button label
+                const claimLabel = isPending
+                    ? `Pending &mdash; ${escapeHtml(claim.name)}`
+                    : `I&rsquo;m buying this`;
+
+                card.innerHTML = `
+                    <div class="item-image-wrap">${imageHTML}</div>
+                    <p class="item-name">${escapeHtml(item.name)}</p>
+                    <p class="item-meta">${escapeHtml(item.retailer)} &middot; ${escapeHtml(item.price)}</p>
+                    <div class="item-actions">
+                        <a href="${item.purchaseUrl}" class="item-link" target="_blank" rel="noopener noreferrer">Shop Item</a>
+                        <button
+                            class="item-claim-btn${isPending ? ' pending' : ''}"
+                            data-item-id="${item.id}"
+                            ${isPending ? 'disabled' : ''}
+                        >${claimLabel}</button>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            // Attach claim button listeners
+            grid.querySelectorAll('.item-claim-btn:not(.pending)').forEach(btn => {
+                btn.addEventListener('click', () => openClaimModal(btn.dataset.itemId));
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        // ===========================
+        // Claim Modal Logic
+        // ===========================
+        let activeItemId = null;
+
+        const modalOverlay = document.getElementById('claim-modal-overlay');
+        const modalItemName = document.getElementById('claim-modal-item-name');
+        const modalForm = document.getElementById('claim-modal-form');
+        const nameInput = document.getElementById('claim-name-input');
+        const emailInput = document.getElementById('claim-email-input');
+        const modalError = document.getElementById('claim-modal-error');
+        const submitBtn = document.getElementById('claim-submit-btn');
+        const cancelBtn = document.getElementById('claim-cancel-btn');
+        const closeBtn = document.getElementById('claim-modal-close');
+
+        function openClaimModal(itemId) {
+            activeItemId = itemId;
+            const item = SPECIALTY_ITEMS.find(i => i.id === itemId);
+            modalItemName.textContent = item.name;
+            nameInput.value = '';
+            emailInput.value = '';
+            modalError.classList.remove('show');
+            modalOverlay.classList.add('visible');
+            nameInput.focus();
+        }
+
+        function closeClaimModal() {
+            modalOverlay.classList.remove('visible');
+            activeItemId = null;
+        }
+
+        function submitClaim() {
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+
+            if (!name || !email) {
+                modalError.classList.add('show');
+                return;
+            }
+
+            const pending = getPendingItems();
+            pending[activeItemId] = {
+                name,
+                email,
+                timestamp: new Date().toISOString(),
+                confirmed: false
+            };
+            savePendingItems(pending);
+            closeClaimModal();
+            renderSpecialtyGrid();
+        }
+
+        submitBtn.addEventListener('click', submitClaim);
+        cancelBtn.addEventListener('click', closeClaimModal);
+        closeBtn.addEventListener('click', closeClaimModal);
+
+        // Close on backdrop click
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) closeClaimModal();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalOverlay.classList.contains('visible')) {
+                closeClaimModal();
+            }
+        });
+
+        // Submit on Enter in form inputs
+        modalForm.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitClaim();
+            }
+        });
+
+        // ===========================
+        // Password Protection
+        // ===========================
+        const correctPassword = 'beautifulsuperstar';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        if (sessionStorage.getItem('registryUnlocked') === 'true') {
+            unlockContent();
+        }
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem('registryUnlocked', 'true');
+                unlockContent();
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        function unlockContent() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+            renderSpecialtyGrid();
+
+            const viewport = document.querySelector('meta[name=viewport]');
+            const originalContent = viewport.content;
+            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            setTimeout(() => { viewport.content = originalContent; }, 100);
+        }
+
+        if (sessionStorage.getItem('registryUnlocked') !== 'true') {
+            document.body.classList.add('locked');
+        }
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
+        });
+
+        // ===========================
+        // Dark Mode Toggle
+        // ===========================
+        const darkModeBtn = document.getElementById('dark-mode-btn');
+
+        function updateRegistryLogos(isDarkMode) {
+            document.querySelectorAll('.registry-logo').forEach(img => {
+                img.src = isDarkMode ? img.dataset.dark : img.dataset.light;
+            });
+        }
+
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeBtn.textContent = 'Light Mode';
+            updateRegistryLogos(true);
+        }
+
+        darkModeBtn.addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            if (isDark) {
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeBtn.textContent = 'Light Mode';
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeBtn.textContent = 'Dark Mode';
+            }
+            updateRegistryLogos(isDark);
+        });
+    </script>
+</body>
+
+</html>
