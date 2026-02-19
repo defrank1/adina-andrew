@@ -434,7 +434,7 @@ footer {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     position: relative;
-    background-image: url('../images/textures/footer.png?v=4');
+    background-image: url('../images/textures/footer.png');
     background-repeat: repeat-x;
     background-position: center bottom 5px;
     background-size: auto 30%;
