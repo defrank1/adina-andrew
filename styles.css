@@ -13,7 +13,7 @@
 /* Custom Font Loading */
 
 @font-face {
-    font-family: 'PP Playground';
+    font-family: 'PP Playground Light';
     src: url('fonts/PPPlayground-Medium.woff2') format('woff2'),
         url('fonts/PPPlayground-Medium.woff') format('woff');
     font-weight: 500;
@@ -43,7 +43,7 @@
     --color-accent: #2d5a4a;
 
     /* Fonts */
-    --font-title: 'PP Playground', 'Brush Script MT', cursive;
+    --font-title: 'PP Playground Light', 'Brush Script MT', cursive;
     --font-heading: 'PP Watch', 'Helvetica Neue', Arial, sans-serif;
     --font-body: 'Sentient', 'Baskerville', Georgia, serif;
 }
