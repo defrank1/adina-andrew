@@ -8,8 +8,8 @@
     <title>Adina & Andrew - Registry</title>
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+    <link rel="stylesheet" href="styles.css">
     <style>
         /* Password protection overlay */
         body.locked {
@@ -199,81 +199,91 @@
             z-index: 10;
         }
 
-        .dark-mode-btn {
-            font-family: var(--font-heading);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--color-dark-green);
-            background-color: transparent;
-            padding: 0.5rem 1.2rem;
-            border-radius: 25px;
-            border: 2px solid var(--color-dark-green);
+        /* Menu toggle — hidden on desktop */
+        .menu-toggle {
+            display: none;
+        }
+
+        /* Platform light toggle */
+        .platform-light-toggle {
+            background: none;
+            border: none;
             cursor: pointer;
-            transition: all 0.5s ease;
-            text-shadow: none;
-            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
+            padding: 0.5rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.2s ease;
         }
 
-        .dark-mode-btn:hover {
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-soft-white);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
-            animation: flashGradient 0.5s ease forwards;
+        .platform-light-toggle:hover {
+            transform: scale(1.1);
         }
 
-        @keyframes flashGradient {
-            0% {
-                background-position: 0% 0%;
-            }
-
-            100% {
-                background-position: 100% 0%;
-            }
+        .toggle-icon {
+            width: 36px;
+            height: 36px;
+            display: block;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
         }
 
-        .dark-mode-btn:active,
-        .dark-mode-btn:focus {
-            outline: none;
-            background-color: transparent;
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode .dark-mode-btn {
-            color: var(--color-soft-white);
-            border-color: var(--color-soft-white);
-            background-color: transparent;
-        }
-
-        body.dark-mode .dark-mode-btn:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
+        .toggle-label {
+            font-family: var(--font-heading);
+            font-size: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
             color: var(--color-dark-green);
-            animation: flashGradientDark 0.5s ease forwards;
+            opacity: 0.5;
+            transition: color 0.3s ease;
         }
 
-        @keyframes flashGradientDark {
-            0% {
-                background-position: 0% 0%;
-            }
-
-            100% {
-                background-position: 100% 0%;
-            }
-        }
-
-        body.dark-mode .dark-mode-btn:active,
-        body.dark-mode .dark-mode-btn:focus {
-            outline: none;
-            background: transparent;
+        body.dark-mode .toggle-label {
             color: var(--color-soft-white);
-            transform: none;
-            box-shadow: none;
+            opacity: 0.5;
+        }
+
+        .platform-light-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 235, 180, 0.25) 0%, rgba(255, 235, 180, 0) 70%);
+            pointer-events: none;
+            z-index: -1;
+            animation: glowPulseWarm 3s ease-in-out infinite;
+        }
+
+        body.dark-mode .platform-light-toggle::before {
+            background: radial-gradient(circle, rgba(200, 220, 255, 0.15) 0%, rgba(200, 220, 255, 0) 70%);
+            animation: glowPulseCool 4s ease-in-out infinite;
+        }
+
+        @keyframes glowPulseWarm {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
+        }
+
+        @keyframes glowPulseCool {
+            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 0 0 20px 0;
+            position: relative;
+            background-image: url('images/textures/footer.png');
+            background-repeat: repeat-x;
+            background-position: center bottom 5px;
+            background-size: auto 30%;
+            filter: brightness(0.9);
         }
 
         body.dark-mode footer {
@@ -281,9 +291,7 @@
             filter: brightness(1.5);
         }
 
-        /* ===========================
-           Navigation
-           =========================== */
+        /* Navigation dark mode */
         body.dark-mode .main-nav {
             background-color: var(--color-dark-green);
             border-bottom-color: rgba(241, 237, 234, 0.1);
@@ -294,465 +302,106 @@
             color: var(--color-soft-white);
         }
 
-        body.dark-mode .registry-section-title,
-        body.dark-mode .registry-section-intro,
-        body.dark-mode .specialty-section-title,
-        body.dark-mode .specialty-section-intro {
-            color: var(--color-soft-white);
-        }
-
         /* ===========================
            Page Layout
            =========================== */
+
+        /* Full-height flex layout so footer hugs the bottom */
+        #protected-content.unlocked {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
         .registry-page {
-            padding-top: 6rem;
-            /* offset for fixed nav */
+            padding-top: 170px;
+            flex: 1;
+        }
+
+        @media (min-width: 769px) {
+            .dark-mode-toggle {
+                text-align: center;
+                padding: 1rem 0;
+            }
+        }
+
+        .registry-page .content-wrapper {
+            max-width: 700px;
         }
 
         /* ===========================
            Registry Section
            =========================== */
         .registry-section {
-            padding: 4rem 0 3rem;
-            text-align: center;
-        }
-
-        .registry-section-title {
-            font-family: var(--font-title);
-            font-size: 3rem;
-            font-weight: 400;
-            color: var(--color-dark-green);
-            margin-bottom: 0.75rem;
-        }
-
-        .registry-section-intro {
-            font-family: var(--font-body);
-            font-size: 1rem;
-            color: var(--color-dark-green);
-            margin-bottom: 2.5rem;
-            opacity: 0.8;
-        }
-
-        .registry-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .registry-card {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            width: 240px;
-            height: 56px;
-            padding: 0 1.5rem;
-            border-radius: 50px;
-            border: 2px solid var(--color-dark-green);
-            background-color: transparent;
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            transition: background-position 0.5s ease, box-shadow 0.3s ease;
-            box-shadow: 0 2px 10px rgba(26, 58, 46, 0.15);
-        }
-
-        .registry-card:hover {
-            background-position: 100% 0%;
-            box-shadow: 0 4px 16px rgba(26, 58, 46, 0.25);
-            animation: flashGradient 0.5s ease forwards;
-        }
-
-        .registry-card img {
-            display: block;
-            max-width: 160px;
-            max-height: 28px;
-            width: auto;
-            height: auto;
-            filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.2));
-        }
-
-        body.dark-mode .registry-card {
-            border-color: var(--color-soft-white);
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        body.dark-mode .registry-card:hover {
-            background-position: 100% 0%;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-            animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        body.dark-mode .registry-card img {
-            filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));
-        }
-
-        /* Section divider */
-        .section-divider {
-            border: none;
-            border-top: 1px solid rgba(26, 58, 46, 0.15);
-            margin: 0 2rem;
-        }
-
-        body.dark-mode .section-divider {
-            border-top-color: rgba(241, 237, 234, 0.15);
-        }
-
-        /* ===========================
-           Specialty Items Section
-           =========================== */
-        .specialty-section {
             padding: 3rem 0 4rem;
-            text-align: center;
         }
 
-        .specialty-section-title {
+        .registry-title {
             font-family: var(--font-title);
-            font-size: 3rem;
+            font-size: clamp(4rem, 8vw, 5.5rem);
             font-weight: 400;
             color: var(--color-dark-green);
-            margin-bottom: 0.75rem;
-        }
-
-        .specialty-section-intro {
-            font-family: var(--font-body);
-            font-size: 1rem;
-            color: var(--color-dark-green);
-            margin-bottom: 2.5rem;
-            opacity: 0.8;
-        }
-
-        .specialty-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2.5rem;
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        .specialty-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin-bottom: 1.5rem;
+            line-height: 1;
             text-align: center;
         }
 
-        /* Item image */
-        .item-image-wrap {
-            width: 100%;
-            aspect-ratio: 4/3;
-            overflow: hidden;
-            border: 1px solid rgba(26, 58, 46, 0.12);
-            margin-bottom: 1rem;
-            background-color: rgba(26, 58, 46, 0.04);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .item-image-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .registry-illustration {
             display: block;
+            margin: 0 auto 2rem;
+            width: auto;
+            max-width: 240px;
+            max-height: 300px;
+            height: auto;
+            object-fit: contain;
+            float: none;
+            opacity: 0.9;
+            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
         }
 
-        /* Placeholder used when no real image is supplied */
-        .item-image-placeholder {
-            font-family: var(--font-heading);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--color-dark-green);
-            opacity: 0.35;
+        body.dark-mode .registry-illustration {
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
         }
 
-        body.dark-mode .item-image-wrap {
-            border-color: rgba(241, 237, 234, 0.12);
-            background-color: rgba(241, 237, 234, 0.04);
-        }
-
-        body.dark-mode .item-image-placeholder {
-            color: var(--color-soft-white);
-        }
-
-        .item-name {
-            font-family: var(--font-heading);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--color-dark-green);
-            margin-bottom: 0.3rem;
-        }
-
-        .item-meta {
+        .registry-intro {
             font-family: var(--font-body);
-            font-size: 0.9rem;
+            font-style: normal;
+            font-size: 1.05rem;
+            line-height: 1.7;
             color: var(--color-dark-green);
-            opacity: 0.7;
-            margin-bottom: 1rem;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0.85;
+            text-align: center;
         }
 
-        body.dark-mode .item-name,
-        body.dark-mode .item-meta {
+        .registry-cta {
+            clear: none;
+            padding-top: 0;
+            text-align: center;
+        }
+
+        .registry-cta .std-hotel-link {
+            font-size: 0.8rem;
+            padding: 0.6rem 1.8rem;
+        }
+
+        body.dark-mode .registry-title,
+        body.dark-mode .registry-intro {
             color: var(--color-soft-white);
         }
 
-        .item-actions {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        /* Reuse .std-hotel-link styling inline */
-        .item-link,
-        .item-claim-btn {
-            font-family: var(--font-heading);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0.45rem 1rem;
-            border-radius: 25px;
-            border: 2px solid var(--color-dark-green);
-            background-color: transparent;
-            color: var(--color-dark-green);
-            text-decoration: none;
-            cursor: pointer;
-            transition: all 0.5s ease;
-            text-shadow: none;
-            white-space: nowrap;
-        }
-
-        .item-link:hover,
-        .item-claim-btn:hover:not(:disabled) {
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
+        body.dark-mode .registry-section .std-hotel-link {
             color: var(--color-soft-white);
-            animation: flashGradient 0.5s ease forwards;
-        }
-
-        body.dark-mode .item-link,
-        body.dark-mode .item-claim-btn {
             border-color: var(--color-soft-white);
-            color: var(--color-soft-white);
         }
 
-        body.dark-mode .item-link:hover,
-        body.dark-mode .item-claim-btn:hover:not(:disabled) {
+        body.dark-mode .registry-section .std-hotel-link:hover {
             background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
             background-size: 300% 100%;
             background-position: 100% 0%;
             color: var(--color-dark-green);
             animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        /* Pending state for claim button */
-        .item-claim-btn.pending {
-            opacity: 0.5;
-            cursor: default;
-            font-size: 0.6rem;
-        }
-
-        .item-claim-btn.pending:hover {
-            background: transparent;
-            color: var(--color-dark-green);
-            animation: none;
-        }
-
-        body.dark-mode .item-claim-btn.pending:hover {
-            background: transparent;
-            color: var(--color-soft-white);
-            animation: none;
-        }
-
-        /* ===========================
-           Claim Modal
-           =========================== */
-        #claim-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(26, 58, 46, 0.45);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            display: none;
-        }
-
-        #claim-modal-overlay.visible {
-            display: flex;
-        }
-
-        .claim-modal {
-            background-color: var(--color-soft-white);
-            border: 2px solid var(--color-dark-green);
-            border-radius: 4px;
-            padding: 2.5rem 2rem;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            position: relative;
-        }
-
-        body.dark-mode .claim-modal {
-            background-color: var(--color-dark-green);
-            border-color: var(--color-soft-white);
-        }
-
-        .claim-modal-close {
-            position: absolute;
-            top: 0.75rem;
-            right: 1rem;
-            font-family: var(--font-heading);
-            font-size: 1rem;
-            background: none;
-            border: none;
-            color: var(--color-dark-green);
-            cursor: pointer;
-            text-shadow: none;
-            opacity: 0.5;
-            line-height: 1;
-        }
-
-        .claim-modal-close:hover {
-            opacity: 1;
-        }
-
-        body.dark-mode .claim-modal-close {
-            color: var(--color-soft-white);
-        }
-
-        .claim-modal-item-name {
-            font-family: var(--font-heading);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--color-dark-green);
-            margin-bottom: 0.25rem;
-        }
-
-        body.dark-mode .claim-modal-item-name {
-            color: var(--color-soft-white);
-        }
-
-        .claim-modal-label {
-            font-family: var(--font-body);
-            font-size: 0.85rem;
-            color: var(--color-dark-green);
-            margin-bottom: 1.25rem;
-        }
-
-        body.dark-mode .claim-modal-label {
-            color: var(--color-soft-white);
-        }
-
-        .claim-modal-form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .claim-input {
-            width: 100%;
-            padding: 0.5rem 1.2rem;
-            font-family: var(--font-body);
-            font-size: 0.85rem;
-            border: 2px solid var(--color-dark-green);
-            background: transparent;
-            color: var(--color-dark-green);
-            border-radius: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .claim-input:focus {
-            outline: none;
-        }
-
-        body.dark-mode .claim-input {
-            border-color: var(--color-soft-white);
-            color: var(--color-soft-white);
-        }
-
-        .claim-modal-actions {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .claim-submit-btn,
-        .claim-cancel-btn {
-            font-family: var(--font-heading);
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0.45rem 1.2rem;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.5s ease;
-            text-shadow: none;
-            white-space: nowrap;
-        }
-
-        .claim-submit-btn {
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            color: var(--color-soft-white);
-            border: 2px solid var(--color-dark-green);
-        }
-
-        .claim-submit-btn:hover {
-            background-position: 100% 0%;
-        }
-
-        .claim-cancel-btn {
-            background: transparent;
-            color: var(--color-dark-green);
-            border: 2px solid var(--color-dark-green);
-        }
-
-        .claim-cancel-btn:hover {
-            opacity: 0.6;
-        }
-
-        body.dark-mode .claim-submit-btn {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            color: var(--color-dark-green);
-            border-color: var(--color-soft-white);
-        }
-
-        body.dark-mode .claim-cancel-btn {
-            color: var(--color-soft-white);
-            border-color: var(--color-soft-white);
-        }
-
-        .claim-modal-error {
-            color: #c41e3a;
-            font-family: var(--font-body);
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            display: none;
-        }
-
-        .claim-modal-error.show {
-            display: block;
         }
 
         /* ===========================
@@ -772,22 +421,135 @@
                 font-size: 16px;
             }
 
-            .registry-section-title,
-            .specialty-section-title {
-                font-size: 2.2rem;
+            .registry-title {
+                font-size: 3.8rem;
+                margin-bottom: 0.5rem;
+                text-align: left;
             }
 
-            .specialty-grid {
-                grid-template-columns: 1fr;
-                max-width: 420px;
+            .registry-illustration {
+                float: right;
+                display: inline;
+                width: 42%;
+                max-width: 260px;
+                max-height: none;
+                margin: 0 0 12px 16px;
+                shape-outside: margin-box;
             }
 
-            .registry-cards {
-                gap: 2rem;
+            .registry-intro {
+                font-style: normal;
+                font-size: 1.05rem;
+                max-width: none;
+                margin: 0 0 2rem;
+                text-align: left;
             }
 
-            .registry-card img {
-                width: 130px;
+            .registry-cta {
+                clear: both;
+                text-align: center;
+            }
+
+            /* Mobile nav: row layout */
+            .nav-content {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            /* Smaller monogram on mobile */
+            .nav-monogram {
+                height: 56px;
+                width: 40px;
+            }
+
+            /* Hide nav links by default on mobile */
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: calc(100% + 16px);
+                right: 16px;
+                background-color: var(--color-soft-white);
+                border: 1px solid rgba(26, 58, 46, 0.12);
+                border-radius: 12px;
+                padding: 1.5rem 2rem;
+                flex-direction: column;
+                align-items: center;
+                gap: 1.2rem;
+                min-width: 180px;
+                transform-origin: top right;
+                transform: scale(0);
+                opacity: 0;
+                transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+                z-index: 100;
+            }
+
+            /* When menu is open */
+            .nav-links.open {
+                display: flex;
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            .nav-links a {
+                color: var(--color-dark-green);
+                font-size: 0.85rem;
+                text-shadow: none;
+            }
+
+            /* Show the Menu button on mobile */
+            .menu-toggle {
+                display: block;
+                font-family: var(--font-heading);
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                color: var(--color-dark-green);
+                background-color: transparent;
+                padding: 0.4rem 1rem;
+                border-radius: 25px;
+                border: 2px solid var(--color-dark-green);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-shadow: none;
+            }
+
+            .menu-toggle:hover {
+                opacity: 0.7;
+            }
+
+            /* Dark mode adjustments */
+            body.dark-mode .menu-toggle {
+                color: var(--color-soft-white);
+                border-color: var(--color-soft-white);
+            }
+
+            body.dark-mode .nav-links {
+                background-color: var(--color-dark-green);
+                border-color: rgba(241, 237, 234, 0.15);
+            }
+
+            body.dark-mode .nav-links a {
+                color: var(--color-soft-white);
+                text-shadow: none;
+            }
+
+            /* Reduce page top padding since mobile nav is shorter */
+            .registry-page {
+                padding-top: 100px;
+            }
+
+            /* Platform light fixed bottom-right on mobile */
+            .dark-mode-toggle {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 50;
+                padding: 0;
+            }
+
+            footer {
+                padding-bottom: 70px;
             }
         }
     </style>
@@ -814,280 +576,64 @@
         <!-- Navigation -->
         <nav class="main-nav">
             <div class="nav-content">
-                <a href="/savethedate" class="site-title">Adina & Andrew</a>
-                <ul class="nav-links">
+                <a href="/savethedate" class="site-title"><img src="images/Monogram/monogram-green.png" alt="Adina & Andrew" class="nav-monogram" id="nav-monogram" data-light="images/Monogram/monogram-green.png" data-dark="images/Monogram/monogram-white.png" width="40" height="56"></a>
+                <ul class="nav-links" id="nav-links">
                     <li><a href="/savethedate">Save the Date</a></li>
                     <li><a href="/registry">Registry</a></li>
                     <li><a href="/rsvp">RSVP</a></li>
                 </ul>
+                <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">Menu</button>
             </div>
         </nav>
 
         <main class="registry-page">
-
-            <!-- Section 1: Registries -->
             <section class="registry-section">
                 <div class="content-wrapper">
-                    <h1 class="registry-section-title">Registries</h1>
-                    <p class="registry-section-intro">We are registered with the following stores. Please click the link
-                        to visit each respective registry.</p>
-                    <div class="registry-cards">
-                        <!-- TODO: Replace href="#" with your actual registry URLs -->
-                        <a href="#" class="registry-card" target="_blank" rel="noopener noreferrer">
-                            <img src="vectors/bloomingdales-dark.svg" alt="Bloomingdale's Registry" class="registry-logo"
-                                data-light="vectors/bloomingdales-dark.svg" data-dark="vectors/bloomingdales.svg">
-                        </a>
-                        <a href="#" class="registry-card" target="_blank" rel="noopener noreferrer">
-                            <img src="vectors/crate-and-barrel-dark.svg" alt="Crate & Barrel Registry" class="registry-logo"
-                                data-light="vectors/crate-and-barrel-dark.svg" data-dark="vectors/crate-and-barrel.svg">
-                        </a>
+                    <h1 class="registry-title">Registry</h1>
+                    <img
+                        src="vectors/rowhouse.svg"
+                        alt="A D.C. rowhouse illustration"
+                        class="registry-illustration"
+                        id="registry-illustration"
+                        data-light="vectors/rowhouse.svg"
+                        data-dark="vectors/rowhouse-dark.svg"
+                    >
+                    <p class="registry-intro">We can't wait to celebrate with you! Your presence at the wedding is the best gift. If you'd like to give something more, we've put together a list of items we'll use and love for years to come. Please find the link to our registry below.</p>
+                    <div class="registry-cta">
+                        <a href="https://www.zola.com/registry/adinaandandrew2026" class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Our Registry</a>
                     </div>
                 </div>
             </section>
-
-            <hr class="section-divider">
-
-            <!-- Section 2: Specialty Items -->
-            <section class="specialty-section">
-                <div class="content-wrapper" style="max-width: 900px;">
-                    <h2 class="specialty-section-title">Additional Gifts</h2>
-                    <p class="specialty-section-intro">This is a list of special, one-of-a-kind items, if you're
-                        interested in something a little different. If you're
-                        buying an item, let us know — we'll flag it so others don't duplicate.</p>
-                </div>
-
-                <div class="specialty-grid" id="specialty-grid">
-                    <!-- Items are rendered by JavaScript below -->
-                </div>
-            </section>
-
         </main>
 
         <!-- Footer -->
         <footer>
             <div class="dark-mode-toggle">
-                <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
+                <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
+                    <img
+                        src="images/illustrations/dark-mode-button.png"
+                        alt="Toggle dark mode"
+                        class="toggle-icon"
+                        id="toggle-icon"
+                        data-light="images/illustrations/dark-mode-button.png"
+                        data-dark="images/illustrations/light-mode-button.png"
+                        width="40"
+                        height="40"
+                    >
+                    <span class="toggle-label" id="toggle-label">Dark</span>
+                </button>
             </div>
         </footer>
 
     </div>
 
-    <!-- Claim Modal -->
-    <div id="claim-modal-overlay">
-        <div class="claim-modal" role="dialog" aria-modal="true" aria-labelledby="claim-modal-item-name">
-            <button class="claim-modal-close" id="claim-modal-close" aria-label="Close">&times;</button>
-            <p class="claim-modal-item-name" id="claim-modal-item-name"></p>
-            <p class="claim-modal-label">Let us know you're buying this item:</p>
-            <form class="claim-modal-form" id="claim-modal-form" novalidate>
-                <input type="text" class="claim-input" id="claim-name-input" placeholder="Your name"
-                    autocomplete="name">
-                <input type="email" class="claim-input" id="claim-email-input" placeholder="Your email"
-                    autocomplete="email">
-            </form>
-            <div class="claim-modal-actions">
-                <button class="claim-submit-btn" id="claim-submit-btn">I'm buying this</button>
-                <button class="claim-cancel-btn" id="claim-cancel-btn">Cancel</button>
-            </div>
-            <p class="claim-modal-error" id="claim-modal-error">Please enter your name and email.</p>
-        </div>
-    </div>
-
     <script>
-        // ===========================
-        // Specialty Items Data
-        // ===========================
-        // TODO: Replace placeholder image paths and purchase URLs with real ones.
-        // For images, replace the `image` value with a relative path like 'images/registry/item-name.jpg'
-        // or a full URL. Leave as null to show a styled placeholder.
-        const SPECIALTY_ITEMS = [
-            {
-                id: 'item-1',
-                name: 'Vintage Serve Ware Set',
-                retailer: 'Etsy',
-                price: '$85',
-                purchaseUrl: '#', // TODO: add real URL
-                image: null       // TODO: add real image path
-            },
-            {
-                id: 'item-2',
-                name: 'Linen Table Runner (Set of 2)',
-                retailer: 'Society6',
-                price: '$45',
-                purchaseUrl: '#', // TODO: add real URL
-                image: null       // TODO: add real image path
-            },
-            {
-                id: 'item-3',
-                name: 'Copper Moscow Mule Mugs (Set of 4)',
-                retailer: 'Amazon',
-                price: '$60',
-                purchaseUrl: '#', // TODO: add real URL
-                image: null       // TODO: add real image path
-            },
-            {
-                id: 'item-4',
-                name: 'Monogrammed Cheese Board',
-                retailer: 'Pottery Barn',
-                price: '$120',
-                purchaseUrl: '#', // TODO: add real URL
-                image: null       // TODO: add real image path
-            }
-        ];
-
-        // ===========================
-        // localStorage Helpers
-        // ===========================
-        const LS_KEY = 'registryPendingItems';
-
-        function getPendingItems() {
-            try {
-                return JSON.parse(localStorage.getItem(LS_KEY)) || {};
-            } catch {
-                return {};
-            }
-        }
-
-        function savePendingItems(data) {
-            localStorage.setItem(LS_KEY, JSON.stringify(data));
-        }
-
-        // ===========================
-        // Render Specialty Grid
-        // ===========================
-        function renderSpecialtyGrid() {
-            const grid = document.getElementById('specialty-grid');
-            const pending = getPendingItems();
-            grid.innerHTML = '';
-
-            SPECIALTY_ITEMS.forEach(item => {
-                const claim = pending[item.id];
-                const isPending = !!claim;
-
-                const card = document.createElement('div');
-                card.className = 'specialty-item';
-                card.dataset.itemId = item.id;
-
-                // Image or placeholder
-                let imageHTML;
-                if (item.image) {
-                    imageHTML = `<img src="${item.image}" alt="${item.name}">`;
-                } else {
-                    imageHTML = `<span class="item-image-placeholder">Image coming soon</span>`;
-                }
-
-                // Claim button label
-                const claimLabel = isPending
-                    ? `Pending &mdash; ${escapeHtml(claim.name)}`
-                    : `I&rsquo;m buying this`;
-
-                card.innerHTML = `
-                    <div class="item-image-wrap">${imageHTML}</div>
-                    <p class="item-name">${escapeHtml(item.name)}</p>
-                    <p class="item-meta">${escapeHtml(item.retailer)} &middot; ${escapeHtml(item.price)}</p>
-                    <div class="item-actions">
-                        <a href="${item.purchaseUrl}" class="item-link" target="_blank" rel="noopener noreferrer">Shop Item</a>
-                        <button
-                            class="item-claim-btn${isPending ? ' pending' : ''}"
-                            data-item-id="${item.id}"
-                            ${isPending ? 'disabled' : ''}
-                        >${claimLabel}</button>
-                    </div>
-                `;
-
-                grid.appendChild(card);
-            });
-
-            // Attach claim button listeners
-            grid.querySelectorAll('.item-claim-btn:not(.pending)').forEach(btn => {
-                btn.addEventListener('click', () => openClaimModal(btn.dataset.itemId));
-            });
-        }
-
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.appendChild(document.createTextNode(str));
-            return div.innerHTML;
-        }
-
-        // ===========================
-        // Claim Modal Logic
-        // ===========================
-        let activeItemId = null;
-
-        const modalOverlay = document.getElementById('claim-modal-overlay');
-        const modalItemName = document.getElementById('claim-modal-item-name');
-        const modalForm = document.getElementById('claim-modal-form');
-        const nameInput = document.getElementById('claim-name-input');
-        const emailInput = document.getElementById('claim-email-input');
-        const modalError = document.getElementById('claim-modal-error');
-        const submitBtn = document.getElementById('claim-submit-btn');
-        const cancelBtn = document.getElementById('claim-cancel-btn');
-        const closeBtn = document.getElementById('claim-modal-close');
-
-        function openClaimModal(itemId) {
-            activeItemId = itemId;
-            const item = SPECIALTY_ITEMS.find(i => i.id === itemId);
-            modalItemName.textContent = item.name;
-            nameInput.value = '';
-            emailInput.value = '';
-            modalError.classList.remove('show');
-            modalOverlay.classList.add('visible');
-            nameInput.focus();
-        }
-
-        function closeClaimModal() {
-            modalOverlay.classList.remove('visible');
-            activeItemId = null;
-        }
-
-        function submitClaim() {
-            const name = nameInput.value.trim();
-            const email = emailInput.value.trim();
-
-            if (!name || !email) {
-                modalError.classList.add('show');
-                return;
-            }
-
-            const pending = getPendingItems();
-            pending[activeItemId] = {
-                name,
-                email,
-                timestamp: new Date().toISOString(),
-                confirmed: false
-            };
-            savePendingItems(pending);
-            closeClaimModal();
-            renderSpecialtyGrid();
-        }
-
-        submitBtn.addEventListener('click', submitClaim);
-        cancelBtn.addEventListener('click', closeClaimModal);
-        closeBtn.addEventListener('click', closeClaimModal);
-
-        // Close on backdrop click
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) closeClaimModal();
-        });
-
-        // Close on Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modalOverlay.classList.contains('visible')) {
-                closeClaimModal();
-            }
-        });
-
-        // Submit on Enter in form inputs
-        modalForm.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                submitClaim();
-            }
-        });
-
         // ===========================
         // Password Protection
         // ===========================
+        if (location.hash.includes('figmacapture=')) {
+            sessionStorage.setItem('registryUnlocked', 'true');
+        }
         const correctPassword = 'beautifulsuperstar';
         const passwordOverlay = document.getElementById('password-overlay');
         const protectedContent = document.getElementById('protected-content');
@@ -1115,12 +661,6 @@
             passwordOverlay.classList.add('hidden');
             protectedContent.classList.add('unlocked');
             document.body.classList.remove('locked');
-            renderSpecialtyGrid();
-
-            const viewport = document.querySelector('meta[name=viewport]');
-            const originalContent = viewport.content;
-            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-            setTimeout(() => { viewport.content = originalContent; }, 100);
         }
 
         if (sessionStorage.getItem('registryUnlocked') !== 'true') {
@@ -1135,31 +675,86 @@
         // Dark Mode Toggle
         // ===========================
         const darkModeBtn = document.getElementById('dark-mode-btn');
+        const illustration = document.getElementById('registry-illustration');
+        const navMonogram = document.getElementById('nav-monogram');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const toggleLabel = document.getElementById('toggle-label');
 
-        function updateRegistryLogos(isDarkMode) {
-            document.querySelectorAll('.registry-logo').forEach(img => {
-                img.src = isDarkMode ? img.dataset.dark : img.dataset.light;
-            });
+        function updateImages(isDark) {
+            illustration.src = isDark ? illustration.dataset.dark : illustration.dataset.light;
+            navMonogram.src = isDark ? navMonogram.dataset.dark : navMonogram.dataset.light;
+            if (toggleIcon) {
+                toggleIcon.src = isDark ? toggleIcon.dataset.dark : toggleIcon.dataset.light;
+            }
         }
 
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
-            darkModeBtn.textContent = 'Light Mode';
-            updateRegistryLogos(true);
+            document.documentElement.classList.add('dark-mode');
+            updateImages(true);
+            if (toggleLabel) { toggleLabel.textContent = 'Light'; }
         }
 
         darkModeBtn.addEventListener('click', function () {
             document.body.classList.toggle('dark-mode');
+            document.documentElement.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
-            if (isDark) {
-                localStorage.setItem('darkMode', 'enabled');
-                darkModeBtn.textContent = 'Light Mode';
-            } else {
-                localStorage.setItem('darkMode', 'disabled');
-                darkModeBtn.textContent = 'Dark Mode';
-            }
-            updateRegistryLogos(isDark);
+            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+            updateImages(isDark);
+            if (toggleLabel) { toggleLabel.textContent = isDark ? 'Light' : 'Dark'; }
         });
+
+        // ===========================
+        // Mobile Menu Toggle
+        // ===========================
+        const menuToggle = document.getElementById('menu-toggle');
+        const navLinks = document.getElementById('nav-links');
+
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', function() {
+                const isOpen = navLinks.classList.contains('open');
+
+                if (isOpen) {
+                    navLinks.style.transform = 'scale(0)';
+                    navLinks.style.opacity = '0';
+                    setTimeout(() => {
+                        navLinks.classList.remove('open');
+                        navLinks.style.transform = '';
+                        navLinks.style.opacity = '';
+                    }, 300);
+                    menuToggle.textContent = 'Menu';
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                } else {
+                    navLinks.classList.add('open');
+                    menuToggle.textContent = 'Close';
+                    menuToggle.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('open');
+                    menuToggle.textContent = 'Menu';
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                    if (navLinks.classList.contains('open')) {
+                        navLinks.style.transform = 'scale(0)';
+                        navLinks.style.opacity = '0';
+                        setTimeout(() => {
+                            navLinks.classList.remove('open');
+                            navLinks.style.transform = '';
+                            navLinks.style.opacity = '';
+                        }, 300);
+                        menuToggle.textContent = 'Menu';
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        }
     </script>
 </body>
 
