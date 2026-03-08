@@ -191,32 +191,90 @@
             background-position: 100% 0%;
         }
 
-        /* Dark Mode Toggle Button */
-        .dark-mode-toggle {
-            text-align: right;
-            padding: 0 2rem 0 0;
-        }
-
         /* Menu toggle — hidden on desktop */
         .menu-toggle {
             display: none;
         }
 
-        /* Platform light toggle */
+        /* ===========================
+           Footer
+           =========================== */
+        .site-footer {
+            border-top: 1px solid rgba(26, 58, 46, 0.1);
+            margin-top: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Grain texture inside footer */
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url('images/textures/grain.png');
+            background-size: 800px auto;
+            background-repeat: repeat;
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Decorative heart pattern — subtle background */
+        .site-footer::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background-image: url('images/textures/footer.png');
+            background-repeat: repeat-x;
+            background-position: center bottom 4px;
+            background-size: auto 20%;
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 2rem 2rem 1.5rem;
+        }
+
+        .footer-info {
+            font-family: var(--font-heading);
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--color-dark-green);
+            opacity: 0.4;
+            margin: 0;
+            align-self: flex-end;
+            padding-bottom: 4px;
+        }
+
+        /* Toggle container */
+        .dark-mode-toggle {
+            padding: 0;
+        }
+
         .platform-light-toggle {
             background-color: var(--color-soft-white);
-            border: 1px solid rgba(26, 58, 46, 0.12);
+            border: 1px solid rgba(26, 58, 46, 0.1);
             border-radius: 12px;
             cursor: pointer;
-            padding: 12px 16px 8px;
+            padding: 10px 14px 6px;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             transition: transform 0.2s ease, background-color 0.3s ease;
             margin: 0;
-            margin-left: auto;
             overflow: hidden;
         }
 
@@ -224,7 +282,7 @@
             transform: scale(1.05);
         }
 
-        /* Grain texture inside the toggle box */
+        /* Grain texture inside toggle box */
         .platform-light-toggle::after {
             content: '';
             position: absolute;
@@ -239,8 +297,8 @@
         }
 
         .toggle-icon {
-            width: 48px;
-            height: 48px;
+            width: 36px;
+            height: 36px;
             display: block;
             object-fit: contain;
             transition: opacity 0.3s ease;
@@ -250,20 +308,39 @@
 
         .toggle-label {
             font-family: var(--font-heading);
-            font-size: 0.55rem;
+            font-size: 0.45rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--color-dark-green);
-            opacity: 0.6;
+            opacity: 0.5;
             transition: color 0.3s ease;
-            margin-bottom: 0;
             position: relative;
             z-index: 1;
         }
 
+        /* ===========================
+           Footer Dark Mode
+           =========================== */
+        body.dark-mode .site-footer {
+            border-top-color: rgba(241, 237, 234, 0.1);
+        }
+
+        body.dark-mode .site-footer::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        body.dark-mode .site-footer::after {
+            background-image: url('images/textures/footer-dark.png');
+        }
+
+        body.dark-mode .footer-info {
+            color: var(--color-soft-white);
+            opacity: 0.35;
+        }
+
         body.dark-mode .platform-light-toggle {
             background-color: var(--color-dark-green);
-            border-color: rgba(241, 237, 234, 0.15);
+            border-color: rgba(241, 237, 234, 0.12);
         }
 
         body.dark-mode .platform-light-toggle::after {
@@ -272,29 +349,7 @@
 
         body.dark-mode .toggle-label {
             color: var(--color-soft-white);
-            opacity: 0.6;
-        }
-
-        footer {
-            text-align: right;
-            padding: 2.5rem 0 36px 0;
-            position: relative;
-            background-image: url('images/textures/footer.png');
-            background-repeat: repeat-x;
-            background-position: center bottom 5px;
-            background-size: auto 24%;
-            filter: brightness(0.9);
-            margin-top: auto;
-        }
-
-        body.dark-mode footer {
-            background-image: url('images/textures/footer-dark.png');
-            filter: brightness(1.5);
-        }
-
-        .dark-mode-toggle {
-            text-align: center;
-            padding: 0 0 1rem 0;
+            opacity: 0.5;
         }
 
         /* Navigation dark mode */
@@ -602,8 +657,21 @@
                 padding: 1.5rem 0 1rem;
             }
 
-            .dark-mode-toggle {
-                padding: 0 1.5rem 0 0;
+            .footer-content {
+                padding: 1.5rem 1.5rem 1.2rem;
+            }
+
+            .footer-info {
+                font-size: 0.5rem;
+            }
+
+            .toggle-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .platform-light-toggle {
+                padding: 8px 12px 5px;
             }
 
             .registry-page {
@@ -677,21 +745,24 @@
         </main>
 
         <!-- Footer -->
-        <footer>
-            <div class="dark-mode-toggle">
-                <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
-                    <img
-                        src="images/illustrations/dark-mode-button.png"
-                        alt="Toggle dark mode"
-                        class="toggle-icon"
-                        id="toggle-icon"
-                        data-light="images/illustrations/dark-mode-button.png"
-                        data-dark="images/illustrations/light-mode-button.png"
-                        width="48"
-                        height="48"
-                    >
-                    <span class="toggle-label" id="toggle-label">Dark Mode</span>
-                </button>
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p class="footer-info">Adina &amp; Andrew · October 17, 2026</p>
+                <div class="dark-mode-toggle">
+                    <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
+                        <img
+                            src="images/illustrations/dark-mode-button.png"
+                            alt="Toggle dark mode"
+                            class="toggle-icon"
+                            id="toggle-icon"
+                            data-light="images/illustrations/dark-mode-button.png"
+                            data-dark="images/illustrations/light-mode-button.png"
+                            width="48"
+                            height="48"
+                        >
+                        <span class="toggle-label" id="toggle-label">Dark Mode</span>
+                    </button>
+                </div>
             </div>
         </footer>
 
