@@ -204,22 +204,38 @@
 
         /* Platform light toggle */
         .platform-light-toggle {
-            background: none;
-            border: none;
+            background-color: var(--color-soft-white);
+            border: 1px solid rgba(26, 58, 46, 0.12);
+            border-radius: 12px;
             cursor: pointer;
-            padding: 0.5rem;
+            padding: 12px 16px 8px;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.3s ease;
             margin: 0;
             margin-left: auto;
+            overflow: hidden;
         }
 
         .platform-light-toggle:hover {
-            transform: scale(1.1);
+            transform: scale(1.05);
+        }
+
+        /* Grain texture inside the toggle box */
+        .platform-light-toggle::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url('images/textures/grain.png');
+            background-size: 800px auto;
+            background-repeat: repeat;
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 12px;
         }
 
         .toggle-icon {
@@ -228,52 +244,35 @@
             display: block;
             object-fit: contain;
             transition: opacity 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
 
         .toggle-label {
             font-family: var(--font-heading);
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--color-dark-green);
-            opacity: 0.5;
+            opacity: 0.6;
             transition: color 0.3s ease;
-            margin-bottom: 4px;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        body.dark-mode .platform-light-toggle {
+            background-color: var(--color-dark-green);
+            border-color: rgba(241, 237, 234, 0.15);
+        }
+
+        body.dark-mode .platform-light-toggle::after {
+            background-image: url('images/textures/grain-dark.png');
         }
 
         body.dark-mode .toggle-label {
             color: var(--color-soft-white);
-            opacity: 0.5;
-        }
-
-        .platform-light-toggle::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 235, 180, 0.25) 0%, rgba(255, 235, 180, 0) 70%);
-            pointer-events: none;
-            z-index: -1;
-            animation: glowPulseWarm 3s ease-in-out infinite;
-        }
-
-        body.dark-mode .platform-light-toggle::before {
-            background: radial-gradient(circle, rgba(200, 220, 255, 0.15) 0%, rgba(200, 220, 255, 0) 70%);
-            animation: glowPulseCool 4s ease-in-out infinite;
-        }
-
-        @keyframes glowPulseWarm {
-            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
-        }
-
-        @keyframes glowPulseCool {
-            0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+            opacity: 0.6;
         }
 
         footer {
@@ -455,34 +454,38 @@
 
             .registry-title {
                 font-size: 3.8rem;
-                margin-bottom: 1.25rem;
+                margin-bottom: 1rem;
                 text-align: center;
             }
 
             .registry-illustration {
-                float: right;
-                display: inline;
-                width: 36%;
-                max-width: 190px;
-                max-height: 240px;
+                display: block;
+                float: none;
+                margin: 0 auto 1.5rem;
+                width: auto;
+                max-width: 180px;
+                max-height: 220px;
+                height: auto;
                 object-fit: contain;
-                margin: 0.25rem 0 12px 14px;
-                shape-outside: margin-box;
             }
 
             .registry-intro {
                 font-style: normal;
-                font-size: 1.1rem;
-                line-height: 1.6;
+                font-size: 1rem;
+                line-height: 1.65;
                 max-width: none;
                 margin: 0 0 1.5rem;
-                text-align: left;
+                text-align: center;
             }
 
             .registry-cta {
-                clear: both;
+                clear: none;
                 text-align: center;
-                padding-top: 0.5rem;
+                padding-top: 0;
+            }
+
+            .registry-section {
+                padding: 1.5rem 0 1.5rem;
             }
 
             /* Mobile nav: row layout */
@@ -517,6 +520,7 @@
                 opacity: 0;
                 transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
                 z-index: 100;
+                overflow: hidden;
             }
 
             /* When menu is open */
@@ -526,10 +530,30 @@
                 opacity: 1;
             }
 
+            /* Grain texture inside menu card */
+            .nav-links::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: url('images/textures/grain.png');
+                background-size: 800px auto;
+                background-repeat: repeat;
+                opacity: 1;
+                pointer-events: none;
+                z-index: 0;
+                border-radius: 12px;
+            }
+
+            body.dark-mode .nav-links::before {
+                background-image: url('images/textures/grain-dark.png');
+            }
+
             .nav-links a {
                 color: var(--color-dark-green);
                 font-size: 0.85rem;
                 text-shadow: none;
+                position: relative;
+                z-index: 1;
             }
 
             /* Show the Menu button on mobile */
@@ -571,7 +595,7 @@
 
             /* Reduce page top padding since mobile nav is shorter */
             .registry-page {
-                padding-top: 90px;
+                padding-top: 120px;
             }
 
             .registry-section {
@@ -580,6 +604,22 @@
 
             .dark-mode-toggle {
                 padding: 0 1.5rem 0 0;
+            }
+
+            .registry-page {
+                transition: opacity 0.3s ease;
+            }
+
+            .registry-page.menu-open {
+                opacity: 0.4;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+
+            footer.menu-open {
+                opacity: 0.4;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
             }
         }
     </style>
@@ -744,6 +784,9 @@
             menuToggle.addEventListener('click', function() {
                 const isOpen = navLinks.classList.contains('open');
 
+                const registryPage = document.querySelector('.registry-page');
+                const footerEl = document.querySelector('footer');
+
                 if (isOpen) {
                     navLinks.style.transform = 'scale(0)';
                     navLinks.style.opacity = '0';
@@ -754,10 +797,14 @@
                     }, 300);
                     menuToggle.textContent = 'Menu';
                     menuToggle.setAttribute('aria-expanded', 'false');
+                    if (registryPage) registryPage.classList.remove('menu-open');
+                    if (footerEl) footerEl.classList.remove('menu-open');
                 } else {
                     navLinks.classList.add('open');
                     menuToggle.textContent = 'Close';
                     menuToggle.setAttribute('aria-expanded', 'true');
+                    if (registryPage) registryPage.classList.add('menu-open');
+                    if (footerEl) footerEl.classList.add('menu-open');
                 }
             });
 
@@ -766,6 +813,10 @@
                     navLinks.classList.remove('open');
                     menuToggle.textContent = 'Menu';
                     menuToggle.setAttribute('aria-expanded', 'false');
+                    const registryPage = document.querySelector('.registry-page');
+                    const footerEl = document.querySelector('footer');
+                    if (registryPage) registryPage.classList.remove('menu-open');
+                    if (footerEl) footerEl.classList.remove('menu-open');
                 });
             });
 
@@ -781,6 +832,10 @@
                         }, 300);
                         menuToggle.textContent = 'Menu';
                         menuToggle.setAttribute('aria-expanded', 'false');
+                        const registryPage = document.querySelector('.registry-page');
+                        const footerEl = document.querySelector('footer');
+                        if (registryPage) registryPage.classList.remove('menu-open');
+                        if (footerEl) footerEl.classList.remove('menu-open');
                     }
                 }
             });
