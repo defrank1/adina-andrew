@@ -193,10 +193,8 @@
 
         /* Dark Mode Toggle Button */
         .dark-mode-toggle {
-            text-align: center;
-            padding: 1rem 0;
-            position: relative;
-            z-index: 10;
+            text-align: right;
+            padding: 0 2rem 0 0;
         }
 
         /* Menu toggle — hidden on desktop */
@@ -216,6 +214,8 @@
             align-items: center;
             gap: 4px;
             transition: transform 0.2s ease;
+            margin: 0;
+            margin-left: auto;
         }
 
         .platform-light-toggle:hover {
@@ -223,8 +223,8 @@
         }
 
         .toggle-icon {
-            width: 36px;
-            height: 36px;
+            width: 48px;
+            height: 48px;
             display: block;
             object-fit: contain;
             transition: opacity 0.3s ease;
@@ -232,12 +232,13 @@
 
         .toggle-label {
             font-family: var(--font-heading);
-            font-size: 0.5rem;
+            font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             color: var(--color-dark-green);
             opacity: 0.5;
             transition: color 0.3s ease;
+            margin-bottom: 4px;
         }
 
         body.dark-mode .toggle-label {
@@ -251,8 +252,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 56px;
-            height: 56px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(255, 235, 180, 0.25) 0%, rgba(255, 235, 180, 0) 70%);
             pointer-events: none;
@@ -276,19 +277,25 @@
         }
 
         footer {
-            text-align: center;
-            padding: 0 0 20px 0;
+            text-align: right;
+            padding: 2.5rem 0 36px 0;
             position: relative;
             background-image: url('images/textures/footer.png');
             background-repeat: repeat-x;
             background-position: center bottom 5px;
-            background-size: auto 30%;
+            background-size: auto 24%;
             filter: brightness(0.9);
+            margin-top: auto;
         }
 
         body.dark-mode footer {
             background-image: url('images/textures/footer-dark.png');
             filter: brightness(1.5);
+        }
+
+        .dark-mode-toggle {
+            text-align: center;
+            padding: 0 0 1rem 0;
         }
 
         /* Navigation dark mode */
@@ -318,13 +325,6 @@
             flex: 1;
         }
 
-        @media (min-width: 769px) {
-            .dark-mode-toggle {
-                text-align: center;
-                padding: 1rem 0;
-            }
-        }
-
         .registry-page .content-wrapper {
             max-width: 700px;
         }
@@ -350,8 +350,8 @@
             display: block;
             margin: 0 auto 2rem;
             width: auto;
-            max-width: 240px;
-            max-height: 300px;
+            max-width: 200px;
+            max-height: 250px;
             height: auto;
             object-fit: contain;
             float: none;
@@ -383,7 +383,30 @@
 
         .registry-cta .std-hotel-link {
             font-size: 0.8rem;
-            padding: 0.6rem 1.8rem;
+            padding: 0.7rem 2rem;
+            background-color: var(--color-dark-green);
+            color: var(--color-soft-white);
+            border: 2px solid var(--color-dark-green);
+            text-shadow: none;
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            transition: all 0.5s ease;
+        }
+
+        .registry-cta .std-hotel-link:hover {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-soft-white);
+            border-color: var(--color-dark-green);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
+            animation: flashGradient 0.5s ease forwards;
+        }
+
+        .registry-cta .std-hotel-link:active {
+            transform: translateY(0);
+            box-shadow: none;
         }
 
         body.dark-mode .registry-title,
@@ -391,17 +414,26 @@
             color: var(--color-soft-white);
         }
 
-        body.dark-mode .registry-section .std-hotel-link {
-            color: var(--color-soft-white);
+        body.dark-mode .registry-cta .std-hotel-link {
+            background-color: var(--color-soft-white);
+            color: var(--color-dark-green);
             border-color: var(--color-soft-white);
         }
 
-        body.dark-mode .registry-section .std-hotel-link:hover {
+        body.dark-mode .registry-cta .std-hotel-link:hover {
             background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
             background-size: 300% 100%;
             background-position: 100% 0%;
             color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(241, 237, 234, 0.2);
             animation: flashGradientDark 0.5s ease forwards;
+        }
+
+        body.dark-mode .registry-cta .std-hotel-link:active {
+            transform: translateY(0);
+            box-shadow: none;
         }
 
         /* ===========================
@@ -423,31 +455,34 @@
 
             .registry-title {
                 font-size: 3.8rem;
-                margin-bottom: 0.5rem;
-                text-align: left;
+                margin-bottom: 1.25rem;
+                text-align: center;
             }
 
             .registry-illustration {
                 float: right;
                 display: inline;
-                width: 42%;
-                max-width: 260px;
-                max-height: none;
-                margin: 0 0 12px 16px;
+                width: 36%;
+                max-width: 190px;
+                max-height: 240px;
+                object-fit: contain;
+                margin: 0.25rem 0 12px 14px;
                 shape-outside: margin-box;
             }
 
             .registry-intro {
                 font-style: normal;
-                font-size: 1.05rem;
+                font-size: 1.1rem;
+                line-height: 1.6;
                 max-width: none;
-                margin: 0 0 2rem;
+                margin: 0 0 1.5rem;
                 text-align: left;
             }
 
             .registry-cta {
                 clear: both;
                 text-align: center;
+                padding-top: 0.5rem;
             }
 
             /* Mobile nav: row layout */
@@ -459,8 +494,8 @@
 
             /* Smaller monogram on mobile */
             .nav-monogram {
-                height: 56px;
-                width: 40px;
+                height: 72px;
+                width: 52px;
             }
 
             /* Hide nav links by default on mobile */
@@ -536,20 +571,15 @@
 
             /* Reduce page top padding since mobile nav is shorter */
             .registry-page {
-                padding-top: 100px;
+                padding-top: 90px;
             }
 
-            /* Platform light fixed bottom-right on mobile */
+            .registry-section {
+                padding: 1.5rem 0 1rem;
+            }
+
             .dark-mode-toggle {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 50;
-                padding: 0;
-            }
-
-            footer {
-                padding-bottom: 70px;
+                padding: 0 1.5rem 0 0;
             }
         }
     </style>
@@ -576,7 +606,7 @@
         <!-- Navigation -->
         <nav class="main-nav">
             <div class="nav-content">
-                <a href="/savethedate" class="site-title"><img src="images/Monogram/monogram-green.png" alt="Adina & Andrew" class="nav-monogram" id="nav-monogram" data-light="images/Monogram/monogram-green.png" data-dark="images/Monogram/monogram-white.png" width="40" height="56"></a>
+                <a href="/savethedate" class="site-title"><img src="images/Monogram/monogram-green.png" alt="Adina & Andrew" class="nav-monogram" id="nav-monogram" data-light="images/Monogram/monogram-green.png" data-dark="images/Monogram/monogram-white.png" width="69" height="96"></a>
                 <ul class="nav-links" id="nav-links">
                     <li><a href="/savethedate">Save the Date</a></li>
                     <li><a href="/registry">Registry</a></li>
@@ -617,10 +647,10 @@
                         id="toggle-icon"
                         data-light="images/illustrations/dark-mode-button.png"
                         data-dark="images/illustrations/light-mode-button.png"
-                        width="40"
-                        height="40"
+                        width="48"
+                        height="48"
                     >
-                    <span class="toggle-label" id="toggle-label">Dark</span>
+                    <span class="toggle-label" id="toggle-label">Dark Mode</span>
                 </button>
             </div>
         </footer>
@@ -692,7 +722,7 @@
             document.body.classList.add('dark-mode');
             document.documentElement.classList.add('dark-mode');
             updateImages(true);
-            if (toggleLabel) { toggleLabel.textContent = 'Light'; }
+            if (toggleLabel) { toggleLabel.textContent = 'Light Mode'; }
         }
 
         darkModeBtn.addEventListener('click', function () {
@@ -701,7 +731,7 @@
             const isDark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
             updateImages(isDark);
-            if (toggleLabel) { toggleLabel.textContent = isDark ? 'Light' : 'Dark'; }
+            if (toggleLabel) { toggleLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode'; }
         });
 
         // ===========================

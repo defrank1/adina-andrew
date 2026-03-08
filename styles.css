@@ -74,9 +74,8 @@ body::before {
     z-index: -1;
     pointer-events: none;
     background-image: url('images/textures/grain.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+    background-size: 800px auto;
+    background-repeat: repeat;
 }
 
 body.dark-mode::before {
@@ -92,7 +91,7 @@ body.dark-mode::before {
     left: 0;
     right: 0;
     background-color: var(--color-soft-white);
-    padding: 1.5rem 2rem;
+    padding: 1.2rem 2rem;
     z-index: 1000;
     border-bottom: var(--border-hairline);
 }
@@ -114,8 +113,8 @@ body.dark-mode::before {
 }
 
 .nav-monogram {
-    height: 72px;
-    width: 51px;
+    height: 96px;
+    width: 69px;
     display: block;
     object-fit: contain;
 }
@@ -125,9 +124,8 @@ body.dark-mode::before {
     position: absolute;
     inset: 0;
     background-image: url('images/textures/grain.png');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+    background-size: 800px auto;
+    background-repeat: repeat;
     opacity: 1;
     pointer-events: none;
     z-index: -1;
