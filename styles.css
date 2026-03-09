@@ -74,10 +74,16 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    background-color: var(--color-soft-white);
+    background-color: rgba(241, 237, 234, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     padding: 0.75rem 0;
     z-index: 1000;
     border-bottom: var(--border-hairline);
+}
+
+body.dark-mode .main-nav {
+    background-color: rgba(26, 58, 46, 0.85);
 }
 
 .nav-content {
@@ -427,25 +433,36 @@ body {
     text-align: center;
 }
 
-/* Global grain overlay — single source of truth for texture */
-.grain-overlay {
+/* Grain texture — behind all content */
+body::before {
+    content: '';
     position: fixed;
     inset: 0;
-    z-index: 10000;
+    z-index: 0;
     pointer-events: none;
     background-image: url('images/textures/grain.png');
     background-size: 400px 400px;
     background-repeat: repeat;
-    opacity: 0.6;
 }
 
-body.dark-mode .grain-overlay {
+body.dark-mode::before {
     background-image: url('images/textures/grain-dark.png');
 }
 
 /* Footer */
-footer, .site-footer {
+.site-footer {
+    border-top: 1px solid rgba(26, 58, 46, 0.1);
+    margin-top: auto;
     position: relative;
+    overflow: hidden;
+    background-color: rgba(241, 237, 234, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+body.dark-mode .site-footer {
+    border-top-color: rgba(241, 237, 234, 0.1);
+    background-color: rgba(26, 58, 46, 0.85);
 }
 
 /* Disable transitions during theme switch to prevent flash */
