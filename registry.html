@@ -242,7 +242,7 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            padding: 2rem 2rem 1.5rem;
+            padding: 1.2rem 2rem 1rem;
         }
 
         .footer-info {
@@ -257,43 +257,33 @@
             padding-bottom: 4px;
         }
 
+        .footer-nowrap {
+            white-space: nowrap;
+        }
+
         /* Toggle container */
         .dark-mode-toggle {
             padding: 0;
         }
 
         .platform-light-toggle {
-            background-color: var(--color-soft-white);
-            border: 1px solid rgba(26, 58, 46, 0.1);
-            border-radius: 12px;
+            background-color: transparent;
+            border: none;
+            border-radius: 0;
             cursor: pointer;
-            padding: 10px 14px 6px;
+            padding: 8px;
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 3px;
-            transition: transform 0.2s ease, background-color 0.3s ease;
+            transition: transform 0.2s ease;
             margin: 0;
-            overflow: hidden;
+            overflow: visible;
         }
 
         .platform-light-toggle:hover {
             transform: scale(1.05);
-        }
-
-        /* Grain texture inside toggle box */
-        .platform-light-toggle::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: url('images/textures/grain.png');
-            background-size: 800px auto;
-            background-repeat: repeat;
-            opacity: 1;
-            pointer-events: none;
-            z-index: 0;
-            border-radius: 12px;
         }
 
         .toggle-icon {
@@ -338,15 +328,6 @@
             opacity: 0.35;
         }
 
-        body.dark-mode .platform-light-toggle {
-            background-color: var(--color-dark-green);
-            border-color: rgba(241, 237, 234, 0.12);
-        }
-
-        body.dark-mode .platform-light-toggle::after {
-            background-image: url('images/textures/grain-dark.png');
-        }
-
         body.dark-mode .toggle-label {
             color: var(--color-soft-white);
             opacity: 0.5;
@@ -375,7 +356,7 @@
         }
 
         .registry-page {
-            padding-top: 170px;
+            padding-top: 140px;
             flex: 1;
         }
 
@@ -387,7 +368,7 @@
            Registry Section
            =========================== */
         .registry-section {
-            padding: 3rem 0 4rem;
+            padding: 1.5rem 0 2rem;
         }
 
         .registry-title {
@@ -402,7 +383,7 @@
 
         .registry-illustration {
             display: block;
-            margin: 0 auto 2rem;
+            margin: 0 auto 1.2rem;
             width: auto;
             max-width: 200px;
             max-height: 250px;
@@ -424,7 +405,7 @@
             line-height: 1.7;
             color: var(--color-dark-green);
             max-width: 600px;
-            margin: 0 auto 2.5rem;
+            margin: 0 auto 1.5rem;
             opacity: 0.85;
             text-align: center;
         }
@@ -650,7 +631,7 @@
 
             /* Reduce page top padding since mobile nav is shorter */
             .registry-page {
-                padding-top: 120px;
+                padding-top: 100px;
             }
 
             .registry-section {
@@ -662,7 +643,7 @@
             }
 
             .footer-info {
-                font-size: 0.5rem;
+                font-size: 0.45rem;
             }
 
             .toggle-icon {
@@ -671,7 +652,7 @@
             }
 
             .platform-light-toggle {
-                padding: 8px 12px 5px;
+                padding: 6px;
             }
 
             .registry-page {
@@ -747,7 +728,7 @@
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-content">
-                <p class="footer-info">Adina &amp; Andrew · October 17, 2026</p>
+                <p class="footer-info">Adina &amp; Andrew · <span class="footer-nowrap">October 17, 2026</span> · Washington, DC</p>
                 <div class="dark-mode-toggle">
                     <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
                         <img
@@ -837,12 +818,18 @@
         }
 
         darkModeBtn.addEventListener('click', function () {
+            document.body.classList.add('theme-transitioning');
             document.body.classList.toggle('dark-mode');
             document.documentElement.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
             updateImages(isDark);
             if (toggleLabel) { toggleLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode'; }
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    document.body.classList.remove('theme-transitioning');
+                });
+            });
         });
 
         // ===========================
