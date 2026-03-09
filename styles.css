@@ -88,7 +88,171 @@ body.theme-transitioning *::after {
 }
 
 /* ===========================
-   Navigation — Floating SVG Pill
+   Password Overlay — Shared
+   =========================== */
+
+body.locked {
+    overflow: hidden;
+}
+
+#password-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-soft-white);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+#password-overlay.hidden {
+    display: none;
+}
+
+/* Grain on password overlay (solid bg blocks body grain) */
+#password-overlay::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: url('images/textures/grain.png');
+    background-size: 400px 400px;
+    background-repeat: repeat;
+}
+
+body.dark-mode #password-overlay::before {
+    background-image: url('images/textures/grain-dark.png');
+}
+
+body.dark-mode #password-overlay {
+    background-color: var(--color-dark-green);
+}
+
+.password-container {
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.password-container h2 {
+    font-family: var(--font-title);
+    font-size: 5.2rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    color: var(--color-dark-green);
+}
+
+.password-container p {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-dark-green);
+}
+
+body.dark-mode .password-container h2,
+body.dark-mode .password-container p {
+    color: var(--color-soft-white);
+}
+
+#password-form {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: stretch;
+    max-width: 600px;
+    margin: 0 auto;
+    flex-wrap: nowrap;
+}
+
+.password-input {
+    width: 200px;
+    min-width: 150px;
+    padding: 0.5rem 1.2rem;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    border: 2px solid var(--color-dark-green);
+    background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.password-input:focus {
+    outline: none;
+    border-color: var(--color-dark-green);
+}
+
+body.dark-mode .password-input {
+    border-color: var(--color-soft-white);
+    background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.password-submit {
+    padding: 0.5rem 1.2rem;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-soft-white);
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    border: 2px solid var(--color-dark-green);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-position 0.5s ease;
+    text-shadow: none;
+    white-space: nowrap;
+}
+
+.password-submit:hover {
+    background-position: 100% 0%;
+}
+
+body.dark-mode .password-submit {
+    background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    color: var(--color-dark-green);
+    border-color: var(--color-soft-white);
+}
+
+body.dark-mode .password-submit:hover {
+    background-position: 100% 0%;
+}
+
+.password-error {
+    color: #c41e3a;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.password-error.show {
+    display: block;
+}
+
+/* Protected content hidden by default; .unlocked display is page-specific */
+#protected-content {
+    display: none;
+}
+
+/* ===========================
+   Navigation — Simple Corner Layout
    =========================== */
 
 .main-nav {
@@ -97,27 +261,24 @@ body.theme-transitioning *::after {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 10px 20px;
     background: transparent;
-    pointer-events: none;
+    border-bottom: var(--border-hairline);
+    padding: 0.75rem 0;
+}
+
+body.dark-mode .main-nav {
+    border-bottom: var(--border-hairline-dark);
 }
 
 .nav-content {
-    pointer-events: all;
-    max-width: 900px;
-    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: nowrap;
-    padding: 8px 24px;
-    background-image: url('vectors/floating-header-green.svg');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-}
-
-body.dark-mode .nav-content {
-    background-image: url('vectors/floating-header-white.svg');
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
 }
 
 /* Monogram link */
@@ -135,7 +296,7 @@ body.dark-mode .nav-content {
     object-fit: contain;
 }
 
-/* Menu toggle — plain text, no border */
+/* Menu toggle — outlined pill button */
 .menu-toggle {
     display: block;
     font-family: var(--font-heading);
@@ -144,28 +305,45 @@ body.dark-mode .nav-content {
     letter-spacing: 0.1em;
     color: var(--color-dark-green);
     background: transparent;
-    border: none;
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    border: 2px solid var(--color-dark-green);
+    border-radius: 25px;
+    padding: 0.5rem 1.2rem;
     cursor: pointer;
-    padding: 4px 0;
     text-shadow: none;
-    transition: opacity 0.3s ease;
+    transition: all 0.5s ease;
     flex-shrink: 0;
 }
 
 .menu-toggle:hover {
-    opacity: 0.6;
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-soft-white);
+    animation: flashGradient 0.5s ease forwards;
 }
 
 body.dark-mode .menu-toggle {
     color: var(--color-soft-white);
+    border-color: var(--color-soft-white);
+    background-color: transparent;
+}
+
+body.dark-mode .menu-toggle:hover {
+    background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-dark-green);
+    animation: flashGradientDark 0.5s ease forwards;
 }
 
 /* Nav dropdown */
 .nav-links {
     display: none;
     position: absolute;
-    top: calc(100% + 8px);
-    left: 20px;
+    top: calc(100% + 12px);
+    left: 0;
     background-color: rgba(241, 237, 234, 0.95);
     border: 1px solid rgba(26, 58, 46, 0.12);
     border-radius: 12px;
@@ -242,10 +420,6 @@ body.dark-mode .nav-links a {
     text-shadow: none;
 }
 
-.footer-separator {
-    /* visible at wide viewports, hidden at narrow */
-}
-
 .footer-line {
     display: inline;
 }
@@ -298,6 +472,145 @@ body.dark-mode .footer-info {
 body.dark-mode .toggle-label {
     color: var(--color-soft-white);
     opacity: 0.5;
+}
+
+/* ===========================
+   Buttons
+   =========================== */
+
+/* Gradient keyframes */
+@keyframes flashGradient {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 0%; }
+}
+
+@keyframes flashGradientDark {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 100% 0%; }
+}
+
+/* Normal button — outlined, transparent bg, fills on hover */
+.btn-normal {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-dark-green);
+    background-color: transparent;
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    padding: 0.5rem 1.2rem;
+    border-radius: 25px;
+    border: 2px solid var(--color-dark-green);
+    text-decoration: none;
+    text-shadow: none;
+    cursor: pointer;
+    transition: all 0.5s ease;
+}
+
+.btn-normal:hover {
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-soft-white);
+    animation: flashGradient 0.5s ease forwards;
+}
+
+body.dark-mode .btn-normal {
+    color: var(--color-soft-white);
+    border-color: var(--color-soft-white);
+    background-color: transparent;
+}
+
+body.dark-mode .btn-normal:hover {
+    background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-dark-green);
+    animation: flashGradientDark 0.5s ease forwards;
+}
+
+/* Priority button — filled by default, sweeps to outlined on hover */
+.btn-priority {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 2rem;
+    border-radius: 25px;
+    border: 2px solid var(--color-dark-green);
+    text-decoration: none;
+    text-shadow: none;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-dark-green) 33%, rgba(26, 58, 46, 0) 67%, rgba(26, 58, 46, 0) 100%);
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    color: var(--color-soft-white);
+}
+
+.btn-priority:hover {
+    background-position: 100% 0%;
+    color: var(--color-dark-green);
+    animation: flashGradient 0.5s ease forwards;
+}
+
+body.dark-mode .btn-priority {
+    border-color: var(--color-soft-white);
+    background: linear-gradient(90deg, var(--color-soft-white) 0%, var(--color-soft-white) 33%, rgba(241, 237, 234, 0) 67%, rgba(241, 237, 234, 0) 100%);
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    color: var(--color-dark-green);
+}
+
+body.dark-mode .btn-priority:hover {
+    background-position: 100% 0%;
+    color: var(--color-soft-white);
+    animation: flashGradientDark 0.5s ease forwards;
+}
+
+/* Standard hotel link — alias for .btn-normal (used on savethedate hotel buttons) */
+.std-hotel-link {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-dark-green);
+    background-color: transparent;
+    background-size: 300% 100%;
+    background-position: 0% 0%;
+    padding: 0.5rem 1.2rem;
+    border-radius: 25px;
+    text-decoration: none;
+    border: 2px solid var(--color-dark-green);
+    text-shadow: none;
+    cursor: pointer;
+    transition: all 0.5s ease;
+}
+
+.std-hotel-link:hover {
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-soft-white);
+    animation: flashGradient 0.5s ease forwards;
+}
+
+body.dark-mode .std-hotel-link {
+    color: var(--color-soft-white);
+    border-color: var(--color-soft-white);
+    background-color: transparent;
+}
+
+body.dark-mode .std-hotel-link:hover {
+    background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+    background-size: 300% 100%;
+    background-position: 100% 0%;
+    color: var(--color-dark-green);
+    animation: flashGradientDark 0.5s ease forwards;
 }
 
 /* ===========================
@@ -451,73 +764,6 @@ body.dark-mode .toggle-label {
 .where-to-stay .content-wrapper,
 .things-to-do .content-wrapper {
     text-align: center;
-}
-
-/* ===========================
-   Buttons
-   =========================== */
-
-/* CTA Button (outlined style) */
-.cta-button {
-    display: inline-block;
-    font-family: var(--font-heading);
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--color-dark-green);
-    background-color: transparent;
-    padding: 1rem 3rem;
-    text-decoration: none;
-    transition: all 0.5s ease;
-    border: 2px solid var(--color-dark-green);
-    text-shadow: none;
-}
-
-.cta-button:hover {
-    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-    background-size: 300% 100%;
-    background-position: 100% 0%;
-    color: var(--color-soft-white);
-    animation: flashGradient 0.5s ease forwards;
-}
-
-/* Pill button (hotel links, registry CTAs) */
-.std-hotel-link {
-    display: inline-block;
-    font-family: var(--font-heading);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-dark-green);
-    background-color: transparent;
-    padding: 0.5rem 1.2rem;
-    border-radius: 25px;
-    text-decoration: none;
-    border: 2px solid var(--color-dark-green);
-    box-shadow: none;
-    transition: all 0.5s ease;
-    text-shadow: none;
-}
-
-.std-hotel-link:hover {
-    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-    background-size: 300% 100%;
-    background-position: 100% 0%;
-    color: var(--color-soft-white);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
-    animation: flashGradient 0.5s ease forwards;
-}
-
-/* Gradient keyframes */
-@keyframes flashGradient {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 0%; }
-}
-
-@keyframes flashGradientDark {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 0%; }
 }
 
 /* ===========================
@@ -841,10 +1087,18 @@ body.dark-mode .toggle-label {
 @media (max-width: 900px) {
     /* Nav — smaller monogram */
     .nav-monogram {
-        height: 56px;
+        height: 40px;
     }
 
-    /* Footer — stack text to 3 lines */
+    /* Footer — stack vertically and center */
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.2rem 1.5rem;
+    }
+
+    /* Footer text — wrap and center */
     .footer-info {
         white-space: normal;
         text-align: center;
@@ -857,10 +1111,6 @@ body.dark-mode .toggle-label {
 
     .footer-line {
         display: block;
-    }
-
-    .footer-content {
-        padding: 1.2rem 1.5rem;
     }
 }
 
@@ -917,6 +1167,20 @@ body.dark-mode .toggle-label {
     .attractions-list {
         gap: 1.5rem;
     }
+
+    /* Password overlay — mobile */
+    .password-container h2 {
+        font-size: 3.5rem;
+    }
+
+    #password-form {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .password-input {
+        font-size: 16px;
+    }
 }
 
 /* ===========================
@@ -934,11 +1198,6 @@ body.dark-mode .toggle-label {
 
     .section-heading {
         font-size: 1.8rem;
-    }
-
-    .cta-button {
-        padding: 0.8rem 2rem;
-        font-size: 0.85rem;
     }
 
     .marquee-large .marquee span {

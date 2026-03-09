@@ -11,173 +11,9 @@
     <link rel="stylesheet" href="styles.css">
     <style>
         /* ===========================
-           Password Overlay
-           =========================== */
-        body.locked {
-            overflow: hidden;
-        }
-
-        #password-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--color-soft-white);
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-        }
-
-        #password-overlay.hidden {
-            display: none;
-        }
-
-        /* Grain on password overlay (solid bg blocks body grain) */
-        #password-overlay::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            background-image: url('images/textures/grain.png');
-            background-size: 400px 400px;
-            background-repeat: repeat;
-        }
-
-        body.dark-mode #password-overlay::before {
-            background-image: url('images/textures/grain-dark.png');
-        }
-
-        .password-container {
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .password-container h2 {
-            font-family: var(--font-title);
-            font-size: 5.2rem;
-            font-weight: 400;
-            margin-bottom: 0.5rem;
-            color: var(--color-dark-green);
-        }
-
-        .password-container p {
-            font-family: var(--font-body);
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--color-dark-green);
-        }
-
-        #password-form {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            align-items: stretch;
-            max-width: 600px;
-            margin: 0 auto;
-            flex-wrap: nowrap;
-        }
-
-        .password-input {
-            width: 200px;
-            min-width: 150px;
-            padding: 0.5rem 1.2rem;
-            font-family: var(--font-body);
-            font-size: 0.7rem;
-            border: 2px solid var(--color-dark-green);
-            background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-
-        .password-input:focus {
-            outline: none;
-            border-color: var(--color-dark-green);
-        }
-
-        .password-submit {
-            padding: 0.5rem 1.2rem;
-            font-family: var(--font-heading);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--color-soft-white);
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            border: 2px solid var(--color-dark-green);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: background-position 0.5s ease;
-            text-shadow: none;
-            white-space: nowrap;
-        }
-
-        .password-submit:hover {
-            background-position: 100% 0%;
-        }
-
-        .password-error {
-            color: #c41e3a;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            display: none;
-        }
-
-        .password-error.show {
-            display: block;
-        }
-
-        #protected-content {
-            display: none;
-        }
-
-        /* Dark mode password overlay */
-        body.dark-mode #password-overlay {
-            background-color: var(--color-dark-green);
-        }
-
-        body.dark-mode .password-container h2,
-        body.dark-mode .password-container p {
-            color: var(--color-soft-white);
-        }
-
-        body.dark-mode .password-input {
-            border-color: var(--color-soft-white);
-            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        body.dark-mode .password-submit {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            color: var(--color-dark-green);
-            border-color: var(--color-soft-white);
-        }
-
-        body.dark-mode .password-submit:hover {
-            background-position: 100% 0%;
-        }
-
-        /* ===========================
            Page Layout
            =========================== */
 
-        /* Full-height flex so footer stays at bottom */
         #protected-content.unlocked {
             display: flex;
             flex-direction: column;
@@ -251,49 +87,9 @@
             text-align: center;
         }
 
-        /* CTA button — filled green by default, sweeps to transparent (grain shows) on hover */
-        .registry-cta .std-hotel-link {
-            font-size: 0.8rem;
-            padding: 0.7rem 2rem;
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-dark-green) 33%, rgba(26, 58, 46, 0) 67%, rgba(26, 58, 46, 0) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            color: var(--color-soft-white);
-            border-color: var(--color-dark-green);
-        }
-
-        .registry-cta .std-hotel-link:hover {
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-dark-green) 33%, rgba(26, 58, 46, 0) 67%, rgba(26, 58, 46, 0) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-dark-green);
-            transform: none;
-            box-shadow: none;
-            animation: flashGradient 0.5s ease forwards;
-        }
-
         body.dark-mode .registry-title,
         body.dark-mode .registry-intro {
             color: var(--color-soft-white);
-        }
-
-        /* Dark mode: filled white by default, sweeps to transparent on hover */
-        body.dark-mode .registry-cta .std-hotel-link {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, var(--color-soft-white) 33%, rgba(241, 237, 234, 0) 67%, rgba(241, 237, 234, 0) 100%);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-            color: var(--color-dark-green);
-            border-color: var(--color-soft-white);
-        }
-
-        body.dark-mode .registry-cta .std-hotel-link:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, var(--color-soft-white) 33%, rgba(241, 237, 234, 0) 67%, rgba(241, 237, 234, 0) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-soft-white);
-            transform: none;
-            box-shadow: none;
-            animation: flashGradientDark 0.5s ease forwards;
         }
 
         /* ===========================
@@ -301,19 +97,6 @@
            =========================== */
 
         @media (max-width: 768px) {
-            .password-container h2 {
-                font-size: 3.5rem;
-            }
-
-            #password-form {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .password-input {
-                font-size: 16px;
-            }
-
             .registry-title {
                 font-size: 3.8rem;
                 margin-bottom: 1rem;
@@ -395,7 +178,7 @@
                     >
                     <p class="registry-intro">We can't wait to celebrate with you! Your presence at the wedding is the best gift. If you'd like to give something more, we've put together a list of items we'll use and love for years to come. Please find the link to our registry below.</p>
                     <div class="registry-cta">
-                        <a href="https://www.zola.com/registry/adinaandandrew2026" class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Our Registry</a>
+                        <a href="https://www.zola.com/registry/adinaandandrew2026" class="btn-priority" target="_blank" rel="noopener noreferrer">Visit Our Registry</a>
                     </div>
                 </div>
             </section>

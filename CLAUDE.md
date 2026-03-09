@@ -21,7 +21,7 @@ This is the design specification for adinaandrew2026.com. Claude Code should rea
 - `index.html` — Homepage (currently minimal, needs redesign as a hub/landing page)
 - `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer**
 - `registry.html` — Registry with link to Zola
-- `rsvp.html` — RSVP form (integrates with Google Sheets via google-apps-script.js)
+- `rsvp.html` — RSVP form (integrates with Google Sheets via rsvp-workflow/google-apps-script.js)
 - `registry-admin.html` — Admin interface for registry tracking
 
 ---
