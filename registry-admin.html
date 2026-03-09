@@ -9,7 +9,9 @@
     <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Password protection overlay */
+        /* ===========================
+           Password Overlay
+           =========================== */
         body.locked {
             overflow: hidden;
         }
@@ -31,6 +33,22 @@
 
         #password-overlay.hidden {
             display: none;
+        }
+
+        /* Grain on password overlay (solid bg blocks body grain) */
+        #password-overlay::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url('images/textures/grain.png');
+            background-size: 400px 400px;
+            background-repeat: repeat;
+        }
+
+        body.dark-mode #password-overlay::before {
+            background-image: url('images/textures/grain-dark.png');
         }
 
         .password-container {
@@ -127,38 +145,6 @@
             display: block;
         }
 
-        /* Film grain effect for password overlay */
-        #password-overlay::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 1;
-            z-index: 1;
-            pointer-events: none;
-            background-image: url('images/textures/grain.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-
-        body.dark-mode #password-overlay::before {
-            background-image: url('images/textures/grain-dark.png');
-        }
-
-        /* Dark Mode */
-        body.dark-mode {
-            background-color: var(--color-dark-green);
-            color: var(--color-soft-white);
-            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        body.dark-mode::before {
-            background-image: url('images/textures/grain-dark.png');
-        }
-
         body.dark-mode #password-overlay {
             background-color: var(--color-dark-green);
         }
@@ -188,91 +174,11 @@
             background-position: 100% 0%;
         }
 
-        /* Dark Mode Toggle */
-        .dark-mode-toggle {
-            text-align: center;
-            padding: 1rem 0;
-            position: relative;
-            z-index: 10;
-        }
-
-        .dark-mode-btn {
-            font-family: var(--font-heading);
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--color-dark-green);
-            background-color: transparent;
-            padding: 0.5rem 1.2rem;
-            border-radius: 25px;
-            border: 2px solid var(--color-dark-green);
-            cursor: pointer;
-            transition: all 0.5s ease;
-            text-shadow: none;
-            box-shadow: 0 2px 8px rgba(26, 58, 46, 0.15);
-        }
-
-        .dark-mode-btn:hover {
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-soft-white);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(26, 58, 46, 0.2);
-            animation: flashGradient 0.5s ease forwards;
-        }
-
-        @keyframes flashGradient {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 0%; }
-        }
-
-        .dark-mode-btn:active,
-        .dark-mode-btn:focus {
-            outline: none;
-            background-color: transparent;
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode .dark-mode-btn {
-            color: var(--color-soft-white);
-            border-color: var(--color-soft-white);
-            background-color: transparent;
-        }
-
-        body.dark-mode .dark-mode-btn:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-dark-green);
-            animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        @keyframes flashGradientDark {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 0%; }
-        }
-
-        body.dark-mode .dark-mode-btn:active,
-        body.dark-mode .dark-mode-btn:focus {
-            outline: none;
-            background: transparent;
-            color: var(--color-soft-white);
-            transform: none;
-            box-shadow: none;
-        }
-
-        body.dark-mode footer {
-            background-image: url('images/textures/footer-dark.png');
-            filter: brightness(1.5);
-        }
-
         /* ===========================
            Admin Page Layout
            =========================== */
         .admin-page {
-            padding: 4rem 2rem 4rem;
+            padding: 6rem 2rem 4rem;
             max-width: 800px;
             margin: 0 auto;
         }
@@ -500,7 +406,6 @@
 
 <body>
     <!-- Admin Password Overlay -->
-    <!-- TODO: Change the admin password below before sharing this page -->
     <div id="password-overlay">
         <div class="password-container">
             <h2>Admin</h2>
@@ -516,6 +421,26 @@
 
     <!-- Protected Content -->
     <div id="protected-content">
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <div class="nav-content">
+                <a href="/" class="site-title">
+                    <img src="images/Monogram/monogram-green.png" alt="Adina & Andrew — Home"
+                        class="nav-monogram" id="nav-monogram"
+                        data-light="images/Monogram/monogram-green.png"
+                        data-dark="images/Monogram/monogram-white.png"
+                        width="52" height="72">
+                </a>
+                <button class="menu-toggle" id="menu-toggle"
+                    aria-label="Toggle navigation menu" aria-expanded="false">Menu</button>
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="/savethedate">Save the Date</a></li>
+                    <li><a href="/registry">Registry</a></li>
+                    <li><a href="/rsvp">RSVP</a></li>
+                </ul>
+            </div>
+        </nav>
 
         <main class="admin-page">
 
@@ -533,9 +458,30 @@
         </main>
 
         <!-- Footer -->
-        <footer>
-            <div class="dark-mode-toggle">
-                <button id="dark-mode-btn" class="dark-mode-btn">Dark Mode</button>
+        <footer class="site-footer">
+            <div class="footer-content">
+                <p class="footer-info">
+                    <span class="footer-line">Adina &amp; Andrew</span>
+                    <span class="footer-separator"> · </span>
+                    <span class="footer-line">October 17, 2026</span>
+                    <span class="footer-separator"> · </span>
+                    <span class="footer-line">Washington, DC</span>
+                </p>
+                <div class="dark-mode-toggle">
+                    <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
+                        <img
+                            src="images/illustrations/dark-mode-button.png"
+                            alt="Toggle dark mode"
+                            class="toggle-icon"
+                            id="toggle-icon"
+                            data-light="images/illustrations/dark-mode-button.png"
+                            data-dark="images/illustrations/light-mode-button.png"
+                            width="48"
+                            height="48"
+                        >
+                        <span class="toggle-label" id="toggle-label">Dark Mode</span>
+                    </button>
+                </div>
             </div>
         </footer>
 
@@ -658,7 +604,6 @@
         // ===========================
         // Admin Password Protection
         // ===========================
-        // TODO: Change 'registry-admin-2026' to your desired admin password
         const adminPassword = 'registry-admin-2026';
         const passwordOverlay = document.getElementById('password-overlay');
         const protectedContent = document.getElementById('protected-content');
@@ -701,22 +646,90 @@
         // Dark Mode Toggle
         // ===========================
         const darkModeBtn = document.getElementById('dark-mode-btn');
+        const navMonogram = document.getElementById('nav-monogram');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const toggleLabel = document.getElementById('toggle-label');
+
+        function updateImages(isDark) {
+            if (navMonogram) navMonogram.src = isDark ? navMonogram.dataset.dark : navMonogram.dataset.light;
+            if (toggleIcon) toggleIcon.src = isDark ? toggleIcon.dataset.dark : toggleIcon.dataset.light;
+        }
 
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
-            darkModeBtn.textContent = 'Light Mode';
+            document.documentElement.classList.add('dark-mode');
+            updateImages(true);
+            if (toggleLabel) toggleLabel.textContent = 'Light Mode';
         }
 
-        darkModeBtn.addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('darkMode', 'enabled');
-                darkModeBtn.textContent = 'Light Mode';
-            } else {
-                localStorage.setItem('darkMode', 'disabled');
-                darkModeBtn.textContent = 'Dark Mode';
-            }
-        });
+        if (darkModeBtn) {
+            darkModeBtn.addEventListener('click', function () {
+                document.body.classList.add('theme-transitioning');
+                document.body.classList.toggle('dark-mode');
+                document.documentElement.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+                updateImages(isDark);
+                if (toggleLabel) toggleLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        document.body.classList.remove('theme-transitioning');
+                    });
+                });
+            });
+        }
+
+        // ===========================
+        // Menu Toggle
+        // ===========================
+        const menuToggle = document.getElementById('menu-toggle');
+        const navLinks = document.getElementById('nav-links');
+
+        if (menuToggle && navLinks) {
+            menuToggle.addEventListener('click', function () {
+                const isOpen = navLinks.classList.contains('open');
+
+                if (isOpen) {
+                    navLinks.style.transform = 'scale(0)';
+                    navLinks.style.opacity = '0';
+                    setTimeout(() => {
+                        navLinks.classList.remove('open');
+                        navLinks.style.transform = '';
+                        navLinks.style.opacity = '';
+                    }, 300);
+                    menuToggle.textContent = 'Menu';
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                } else {
+                    navLinks.classList.add('open');
+                    menuToggle.textContent = 'Close';
+                    menuToggle.setAttribute('aria-expanded', 'true');
+                }
+            });
+
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('open');
+                    menuToggle.textContent = 'Menu';
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                    if (navLinks.classList.contains('open')) {
+                        navLinks.style.transform = 'scale(0)';
+                        navLinks.style.opacity = '0';
+                        setTimeout(() => {
+                            navLinks.classList.remove('open');
+                            navLinks.style.transform = '';
+                            navLinks.style.opacity = '';
+                        }, 300);
+                        menuToggle.textContent = 'Menu';
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+        }
     </script>
 </body>
 

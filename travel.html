@@ -121,21 +121,49 @@
             display: block;
         }
 
-        /* Film grain effect for password overlay */
+        /* Grain on password overlay (solid bg blocks body grain) */
         #password-overlay::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 1;
+            inset: 0;
             z-index: 1;
             pointer-events: none;
-            background-image: url('../images/textures/grain.png');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background-image: url('images/textures/grain.png');
+            background-size: 400px 400px;
+            background-repeat: repeat;
+        }
+
+        body.dark-mode #password-overlay::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        body.dark-mode #password-overlay {
+            background-color: var(--color-dark-green);
+        }
+
+        body.dark-mode .password-container h2,
+        body.dark-mode .password-container p {
+            color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-input {
+            border-color: var(--color-soft-white);
+            background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.dark-mode .password-submit {
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
+            border-color: var(--color-soft-white);
+        }
+
+        body.dark-mode .password-submit:hover {
+            background-position: 100% 0%;
         }
 
         /* Responsive adjustments */
@@ -178,6 +206,12 @@
         }
 
         document.body.classList.add('locked');
+
+        // Apply saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            document.documentElement.classList.add('dark-mode');
+        }
 
         const correctPassword = 'october17';
         const passwordForm = document.getElementById('password-form');
