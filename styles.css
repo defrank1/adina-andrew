@@ -74,14 +74,14 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    background-color: rgba(241, 237, 234, 0.7);
+    background-color: transparent;
     padding: 0.75rem 0;
     z-index: 1000;
     border-bottom: var(--border-hairline);
 }
 
 body.dark-mode .main-nav {
-    background-color: rgba(26, 58, 46, 0.7);
+    background-color: transparent;
     border-bottom-color: rgba(241, 237, 234, 0.1);
 }
 
@@ -454,12 +454,12 @@ body.dark-mode::before {
     margin-top: auto;
     position: relative;
     overflow: hidden;
-    background-color: rgba(241, 237, 234, 0.7);
+    background-color: transparent;
 }
 
 body.dark-mode .site-footer {
     border-top-color: rgba(241, 237, 234, 0.1);
-    background-color: rgba(26, 58, 46, 0.7);
+    background-color: transparent;
 }
 
 /* Disable transitions during theme switch to prevent flash */
