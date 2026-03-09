@@ -483,18 +483,6 @@ body.theme-transitioning *::after {
 }
 
 @media (max-width: 768px) {
-    .nav-content {
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-
-    .nav-links {
-        gap: 0.5rem;
-        font-size: 0.7rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
     .hero {
         padding: 3rem 1.5rem 2rem;
     }
