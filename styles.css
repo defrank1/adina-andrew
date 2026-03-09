@@ -68,24 +68,6 @@ body {
     text-rendering: optimizeLegibility;
 }
 
-body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    opacity: 1;
-    z-index: -1;
-    pointer-events: none;
-    background-image: url('images/textures/grain.png');
-    background-size: 800px auto;
-    background-repeat: repeat;
-}
-
-body.dark-mode::before {
-    background-image: url('images/textures/grain-dark.png');
-}
-
-
-
 /* Navigation */
 .main-nav {
     position: fixed;
@@ -123,22 +105,6 @@ body.dark-mode::before {
     width: 52px;
     display: block;
     object-fit: contain;
-}
-
-.main-nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('images/textures/grain.png');
-    background-size: 800px auto;
-    background-repeat: repeat;
-    opacity: 1;
-    pointer-events: none;
-    z-index: -1;
-}
-
-body.dark-mode .main-nav::before {
-    background-image: url('images/textures/grain-dark.png');
 }
 
 .nav-links {
@@ -459,6 +425,22 @@ body.dark-mode .main-nav::before {
 
 .rsvp-section .content-wrapper {
     text-align: center;
+}
+
+/* Global grain overlay — single source of truth for texture */
+.grain-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    pointer-events: none;
+    background-image: url('images/textures/grain.png');
+    background-size: 400px 400px;
+    background-repeat: repeat;
+    opacity: 0.6;
+}
+
+body.dark-mode .grain-overlay {
+    background-image: url('images/textures/grain-dark.png');
 }
 
 /* Footer */
