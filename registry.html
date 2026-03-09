@@ -251,10 +251,25 @@
             text-align: center;
         }
 
-        /* CTA button — size only; outlined style and hover from global .std-hotel-link */
+        /* CTA button — filled green by default, hovers to outlined (unfilled) */
         .registry-cta .std-hotel-link {
             font-size: 0.8rem;
             padding: 0.7rem 2rem;
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 40%, var(--color-soft-white) 80%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-soft-white);
+            border-color: var(--color-dark-green);
+        }
+
+        .registry-cta .std-hotel-link:hover {
+            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 40%, var(--color-soft-white) 80%, var(--color-soft-white) 100%);
+            background-size: 300% 100%;
+            background-position: 100% 0%;
+            color: var(--color-dark-green);
+            transform: none;
+            box-shadow: none;
+            animation: flashGradient 0.5s ease forwards;
         }
 
         body.dark-mode .registry-title,
@@ -262,16 +277,22 @@
             color: var(--color-soft-white);
         }
 
+        /* Dark mode: filled white by default, hovers to outlined (unfilled) */
         body.dark-mode .registry-cta .std-hotel-link {
-            color: var(--color-soft-white);
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 40%, var(--color-dark-green) 80%, var(--color-dark-green) 100%);
+            background-size: 300% 100%;
+            background-position: 0% 0%;
+            color: var(--color-dark-green);
             border-color: var(--color-soft-white);
         }
 
         body.dark-mode .registry-cta .std-hotel-link:hover {
-            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
+            background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 40%, var(--color-dark-green) 80%, var(--color-dark-green) 100%);
             background-size: 300% 100%;
             background-position: 100% 0%;
-            color: var(--color-dark-green);
+            color: var(--color-soft-white);
+            transform: none;
+            box-shadow: none;
             animation: flashGradientDark 0.5s ease forwards;
         }
 
