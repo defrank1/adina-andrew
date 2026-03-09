@@ -333,11 +333,6 @@
             opacity: 0.5;
         }
 
-        /* Center the monogram in its grid column */
-        .site-title {
-            justify-self: center;
-        }
-
         /* Navigation dark mode */
         body.dark-mode .main-nav {
             background-color: var(--color-dark-green);
@@ -551,7 +546,6 @@
 
         /* RSVP button — right side of nav, same shape as Menu */
         .nav-rsvp-btn {
-            justify-self: end;
             font-family: var(--font-heading);
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -704,6 +698,12 @@
                 padding: 6px;
             }
 
+        }
+
+        @media (max-width: 600px) {
+            .nav-rsvp-btn {
+                display: none;
+            }
         }
     </style>
 </head>

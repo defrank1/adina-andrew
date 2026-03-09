@@ -93,15 +93,20 @@ body.dark-mode::before {
     left: 0;
     right: 0;
     background-color: var(--color-soft-white);
-    padding: 0.75rem 2rem;
+    padding: 0.75rem 0;
     z-index: 1000;
     border-bottom: var(--border-hairline);
 }
 
 .nav-content {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
+    flex-wrap: nowrap;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .site-title {
