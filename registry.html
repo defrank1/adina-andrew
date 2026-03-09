@@ -191,9 +191,9 @@
             background-position: 100% 0%;
         }
 
-        /* Menu toggle — hidden on desktop */
+        /* Menu toggle — always visible */
         .menu-toggle {
-            display: none;
+            display: block;
         }
 
         /* ===========================
@@ -356,7 +356,7 @@
         }
 
         .registry-page {
-            padding-top: 140px;
+            padding-top: 110px;
             flex: 1;
         }
 
@@ -472,6 +472,122 @@
         }
 
         /* ===========================
+           Nav Dropdown — Universal
+           =========================== */
+        .nav-links {
+            display: none;
+            position: absolute;
+            top: calc(100% + 16px);
+            right: 16px;
+            background-color: var(--color-soft-white);
+            border: 1px solid rgba(26, 58, 46, 0.12);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            min-width: 200px;
+            transform-origin: top right;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .nav-links.open {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .nav-links::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url('images/textures/grain.png');
+            background-size: 800px auto;
+            background-repeat: repeat;
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: 12px;
+        }
+
+        .nav-links a {
+            position: relative;
+            z-index: 1;
+            color: var(--color-dark-green);
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            text-shadow: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.6;
+        }
+
+        body.dark-mode .nav-links {
+            background-color: var(--color-dark-green);
+            border-color: rgba(241, 237, 234, 0.15);
+        }
+
+        body.dark-mode .nav-links::before {
+            background-image: url('images/textures/grain-dark.png');
+        }
+
+        body.dark-mode .nav-links a {
+            color: var(--color-soft-white);
+        }
+
+        /* Menu toggle button — universal */
+        .menu-toggle {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--color-dark-green);
+            background-color: transparent;
+            padding: 0.4rem 1rem;
+            border-radius: 25px;
+            border: 2px solid var(--color-dark-green);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: none;
+        }
+
+        .menu-toggle:hover {
+            opacity: 0.7;
+        }
+
+        body.dark-mode .menu-toggle {
+            color: var(--color-soft-white);
+            border-color: var(--color-soft-white);
+        }
+
+        /* Content fade when menu is open — universal */
+        .registry-page {
+            transition: opacity 0.3s ease;
+        }
+
+        .registry-page.menu-open {
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .site-footer.menu-open {
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        /* ===========================
            Responsive
            =========================== */
         @media (max-width: 768px) {
@@ -524,114 +640,15 @@
                 padding: 1.5rem 0 1.5rem;
             }
 
-            /* Mobile nav: row layout */
-            .nav-content {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-
             /* Smaller monogram on mobile */
             .nav-monogram {
-                height: 72px;
-                width: 52px;
-            }
-
-            /* Hide nav links by default on mobile */
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: calc(100% + 16px);
-                right: 16px;
-                background-color: var(--color-soft-white);
-                border: 1px solid rgba(26, 58, 46, 0.12);
-                border-radius: 12px;
-                padding: 1.5rem 2rem;
-                flex-direction: column;
-                align-items: center;
-                gap: 1.2rem;
-                min-width: 180px;
-                transform-origin: top right;
-                transform: scale(0);
-                opacity: 0;
-                transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
-                z-index: 100;
-                overflow: hidden;
-            }
-
-            /* When menu is open */
-            .nav-links.open {
-                display: flex;
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            /* Grain texture inside menu card */
-            .nav-links::before {
-                content: '';
-                position: absolute;
-                inset: 0;
-                background-image: url('images/textures/grain.png');
-                background-size: 800px auto;
-                background-repeat: repeat;
-                opacity: 1;
-                pointer-events: none;
-                z-index: 0;
-                border-radius: 12px;
-            }
-
-            body.dark-mode .nav-links::before {
-                background-image: url('images/textures/grain-dark.png');
-            }
-
-            .nav-links a {
-                color: var(--color-dark-green);
-                font-size: 0.85rem;
-                text-shadow: none;
-                position: relative;
-                z-index: 1;
-            }
-
-            /* Show the Menu button on mobile */
-            .menu-toggle {
-                display: block;
-                font-family: var(--font-heading);
-                font-size: 0.7rem;
-                text-transform: uppercase;
-                letter-spacing: 0.1em;
-                color: var(--color-dark-green);
-                background-color: transparent;
-                padding: 0.4rem 1rem;
-                border-radius: 25px;
-                border: 2px solid var(--color-dark-green);
-                cursor: pointer;
-                transition: all 0.3s ease;
-                text-shadow: none;
-            }
-
-            .menu-toggle:hover {
-                opacity: 0.7;
-            }
-
-            /* Dark mode adjustments */
-            body.dark-mode .menu-toggle {
-                color: var(--color-soft-white);
-                border-color: var(--color-soft-white);
-            }
-
-            body.dark-mode .nav-links {
-                background-color: var(--color-dark-green);
-                border-color: rgba(241, 237, 234, 0.15);
-            }
-
-            body.dark-mode .nav-links a {
-                color: var(--color-soft-white);
-                text-shadow: none;
+                height: 56px;
+                width: 40px;
             }
 
             /* Reduce page top padding since mobile nav is shorter */
             .registry-page {
-                padding-top: 100px;
+                padding-top: 90px;
             }
 
             .registry-section {
@@ -655,21 +672,6 @@
                 padding: 6px;
             }
 
-            .registry-page {
-                transition: opacity 0.3s ease;
-            }
-
-            .registry-page.menu-open {
-                opacity: 0.4;
-                transition: opacity 0.3s ease;
-                pointer-events: none;
-            }
-
-            footer.menu-open {
-                opacity: 0.4;
-                transition: opacity 0.3s ease;
-                pointer-events: none;
-            }
         }
     </style>
 </head>
@@ -695,7 +697,7 @@
         <!-- Navigation -->
         <nav class="main-nav">
             <div class="nav-content">
-                <a href="/savethedate" class="site-title"><img src="images/Monogram/monogram-green.png" alt="Adina & Andrew" class="nav-monogram" id="nav-monogram" data-light="images/Monogram/monogram-green.png" data-dark="images/Monogram/monogram-white.png" width="69" height="96"></a>
+                <a href="/" class="site-title"><img src="images/Monogram/monogram-green.png" alt="Adina & Andrew - Home" class="nav-monogram" id="nav-monogram" data-light="images/Monogram/monogram-green.png" data-dark="images/Monogram/monogram-white.png" width="52" height="72"></a>
                 <ul class="nav-links" id="nav-links">
                     <li><a href="/savethedate">Save the Date</a></li>
                     <li><a href="/registry">Registry</a></li>
@@ -843,7 +845,7 @@
                 const isOpen = navLinks.classList.contains('open');
 
                 const registryPage = document.querySelector('.registry-page');
-                const footerEl = document.querySelector('footer');
+                const footerEl = document.querySelector('.site-footer');
 
                 if (isOpen) {
                     navLinks.style.transform = 'scale(0)';
@@ -872,7 +874,7 @@
                     menuToggle.textContent = 'Menu';
                     menuToggle.setAttribute('aria-expanded', 'false');
                     const registryPage = document.querySelector('.registry-page');
-                    const footerEl = document.querySelector('footer');
+                    const footerEl = document.querySelector('.site-footer');
                     if (registryPage) registryPage.classList.remove('menu-open');
                     if (footerEl) footerEl.classList.remove('menu-open');
                 });
@@ -891,7 +893,7 @@
                         menuToggle.textContent = 'Menu';
                         menuToggle.setAttribute('aria-expanded', 'false');
                         const registryPage = document.querySelector('.registry-page');
-                        const footerEl = document.querySelector('footer');
+                        const footerEl = document.querySelector('.site-footer');
                         if (registryPage) registryPage.classList.remove('menu-open');
                         if (footerEl) footerEl.classList.remove('menu-open');
                     }

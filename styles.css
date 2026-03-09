@@ -93,16 +93,16 @@ body.dark-mode::before {
     left: 0;
     right: 0;
     background-color: var(--color-soft-white);
-    padding: 0.8rem 2rem;
+    padding: 0.75rem 2rem;
     z-index: 1000;
     border-bottom: var(--border-hairline);
 }
 
 .nav-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    gap: 0.4rem;
 }
 
 .site-title {
@@ -115,8 +115,8 @@ body.dark-mode::before {
 }
 
 .nav-monogram {
-    height: 96px;
-    width: 69px;
+    height: 72px;
+    width: 52px;
     display: block;
     object-fit: contain;
 }
@@ -139,9 +139,7 @@ body.dark-mode .main-nav::before {
 
 .nav-links {
     list-style: none;
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
+    display: none;
 }
 
 .nav-links a {
