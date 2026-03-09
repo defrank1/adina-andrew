@@ -246,6 +246,7 @@ body.dark-mode .main-nav {
 .intro {
     padding: 4rem 0;
     text-align: center;
+    position: relative;
 }
 
 .intro p {
@@ -420,6 +421,7 @@ body.dark-mode .main-nav {
 /* RSVP Section */
 .rsvp-section {
     padding: 4rem 0;
+    position: relative;
 }
 
 .rsvp-prompt {
@@ -446,6 +448,16 @@ body::before {
 
 body.dark-mode::before {
     background-image: url('images/textures/grain-dark.png');
+}
+
+/* Stacking context — content above grain (z-index: 0) */
+#protected-content {
+    position: relative;
+    z-index: 1;
+}
+
+#password-overlay {
+    z-index: 2;
 }
 
 /* Footer */
@@ -614,6 +626,7 @@ body.theme-transitioning *::after {
 .registry-section {
     padding: 3rem 0;
     text-align: center;
+    position: relative;
 }
 
 .registry-links {
@@ -634,6 +647,8 @@ body.theme-transitioning *::after {
 .save-the-date-content {
     padding: 6rem 0 5rem;
     text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 .std-announcement {
