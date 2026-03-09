@@ -227,8 +227,8 @@
             z-index: 1;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-            padding: 1.2rem 2rem 1rem;
+            align-items: center;
+            padding: 1.5rem 2rem;
         }
 
         .footer-info {
@@ -239,11 +239,6 @@
             color: var(--color-dark-green);
             opacity: 0.4;
             margin: 0;
-            align-self: flex-end;
-            padding-bottom: 4px;
-        }
-
-        .footer-nowrap {
             white-space: nowrap;
         }
 
@@ -677,6 +672,24 @@
             .menu-toggle {
                 order: 1;
             }
+
+            .footer-info {
+                white-space: normal;
+                text-align: center;
+                line-height: 1.8;
+            }
+
+            .footer-separator {
+                display: none;
+            }
+
+            .footer-line {
+                display: block;
+            }
+
+            .footer-content {
+                padding: 1.2rem 1.5rem;
+            }
         }
     </style>
 </head>
@@ -736,7 +749,13 @@
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-content">
-                <p class="footer-info">Adina &amp; Andrew · <span class="footer-nowrap">October 17, 2026</span> · Washington, DC</p>
+                <p class="footer-info">
+                    <span class="footer-line">Adina &amp; Andrew</span>
+                    <span class="footer-separator"> · </span>
+                    <span class="footer-line">October 17, 2026</span>
+                    <span class="footer-separator"> · </span>
+                    <span class="footer-line">Washington, DC</span>
+                </p>
                 <div class="dark-mode-toggle">
                     <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
                         <img
