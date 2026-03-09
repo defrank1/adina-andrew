@@ -251,28 +251,10 @@
             text-align: center;
         }
 
-        /* Filled CTA button variant */
+        /* CTA button — size only; outlined style and hover from global .std-hotel-link */
         .registry-cta .std-hotel-link {
             font-size: 0.8rem;
             padding: 0.7rem 2rem;
-            background-color: var(--color-dark-green);
-            color: var(--color-soft-white);
-            border-color: var(--color-dark-green);
-            background-size: 300% 100%;
-            background-position: 0% 0%;
-        }
-
-        .registry-cta .std-hotel-link:hover {
-            background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-            background-size: 300% 100%;
-            background-position: 100% 0%;
-            color: var(--color-soft-white);
-            animation: flashGradient 0.5s ease forwards;
-        }
-
-        .registry-cta .std-hotel-link:active {
-            transform: translateY(0);
-            box-shadow: none;
         }
 
         body.dark-mode .registry-title,
@@ -281,8 +263,7 @@
         }
 
         body.dark-mode .registry-cta .std-hotel-link {
-            background-color: var(--color-soft-white);
-            color: var(--color-dark-green);
+            color: var(--color-soft-white);
             border-color: var(--color-soft-white);
         }
 
@@ -292,11 +273,6 @@
             background-position: 100% 0%;
             color: var(--color-dark-green);
             animation: flashGradientDark 0.5s ease forwards;
-        }
-
-        body.dark-mode .registry-cta .std-hotel-link:active {
-            transform: translateY(0);
-            box-shadow: none;
         }
 
         /* ===========================
