@@ -6,127 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Adina and Andrew's wedding registry.">
     <title>Adina & Andrew - Registry</title>
-    <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* ===========================
-           Page Layout
-           =========================== */
-
-        #protected-content.unlocked {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        .registry-page {
-            padding-top: 120px;
-            flex: 1;
-        }
-
-        .registry-page .content-wrapper {
-            max-width: 700px;
-        }
-
-        /* Content fades when menu is open */
-        .registry-page.menu-open,
-        .site-footer.menu-open {
-            opacity: 0.4;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        /* ===========================
-           Registry Section
-           =========================== */
-
-        .registry-section {
-            padding: 1.5rem 0 2rem;
-        }
-
-        .registry-title {
-            font-family: var(--font-title);
-            font-size: clamp(4rem, 8vw, 5.5rem);
-            font-weight: 400;
-            color: var(--color-dark-green);
-            margin-bottom: 1.5rem;
-            line-height: 1;
-            text-align: center;
-        }
-
-        .registry-illustration {
-            display: block;
-            margin: 0 auto 1.2rem;
-            width: auto;
-            max-width: 200px;
-            max-height: 250px;
-            height: auto;
-            object-fit: contain;
-            opacity: 0.9;
-            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
-        }
-
-        body.dark-mode .registry-illustration {
-            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
-        }
-
-        .registry-intro {
-            font-family: var(--font-body);
-            font-style: normal;
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: var(--color-dark-green);
-            max-width: 600px;
-            margin: 0 auto 1.5rem;
-            opacity: 0.85;
-            text-align: center;
-        }
-
-        .registry-cta {
-            text-align: center;
-        }
-
-        body.dark-mode .registry-title,
-        body.dark-mode .registry-intro {
-            color: var(--color-soft-white);
-        }
-
-        /* ===========================
-           Responsive
-           =========================== */
-
-        @media (max-width: 768px) {
-            .registry-title {
-                font-size: 3.8rem;
-                margin-bottom: 1rem;
-            }
-
-            .registry-illustration {
-                max-width: 180px;
-                max-height: 220px;
-                margin-bottom: 1.5rem;
-            }
-
-            .registry-intro {
-                font-size: 1rem;
-                line-height: 1.65;
-                max-width: none;
-                margin-bottom: 1.5rem;
-            }
-
-            .registry-section {
-                padding: 1.5rem 0 1rem;
-            }
-
-            .registry-page {
-                padding-top: 100px;
-            }
-        }
-    </style>
 </head>
 
-<body>
+<body class="page-registry">
     <!-- Password Protection Overlay -->
     <div id="password-overlay">
         <div class="password-container">
@@ -144,25 +29,7 @@
     <!-- Protected Content -->
     <div id="protected-content">
 
-        <!-- Navigation -->
-        <nav class="main-nav">
-            <div class="nav-content">
-                <a href="/" class="site-title">
-                    <img src="images/Monogram/monogram-green.png" alt="Adina & Andrew — Home"
-                        class="nav-monogram" id="nav-monogram"
-                        data-light="images/Monogram/monogram-green.png"
-                        data-dark="images/Monogram/monogram-white.png"
-                        width="52" height="72">
-                </a>
-                <button class="menu-toggle" id="menu-toggle"
-                    aria-label="Toggle navigation menu" aria-expanded="false">Menu</button>
-                <ul class="nav-links" id="nav-links">
-                    <li><a href="/savethedate">Save the Date</a></li>
-                    <li><a href="/registry">Registry</a></li>
-                    <li><a href="/rsvp">RSVP</a></li>
-                </ul>
-            </div>
-        </nav>
+        <div id="nav-placeholder"></div>
 
         <main class="registry-page">
             <section class="registry-section">
@@ -184,37 +51,17 @@
             </section>
         </main>
 
-        <!-- Footer -->
-        <footer class="site-footer">
-            <div class="footer-content">
-                <p class="footer-info">
-                    <span class="footer-line">Adina &amp; Andrew</span>
-                    <span class="footer-separator"> · </span>
-                    <span class="footer-line">October 17, 2026</span>
-                    <span class="footer-separator"> · </span>
-                    <span class="footer-line">Washington, DC</span>
-                </p>
-                <div class="dark-mode-toggle">
-                    <button id="dark-mode-btn" class="platform-light-toggle" aria-label="Toggle light and dark mode">
-                        <img
-                            src="images/illustrations/dark-mode-button.png"
-                            alt="Toggle dark mode"
-                            class="toggle-icon"
-                            id="toggle-icon"
-                            data-light="images/illustrations/dark-mode-button.png"
-                            data-dark="images/illustrations/light-mode-button.png"
-                            width="48"
-                            height="48"
-                        >
-                        <span class="toggle-label" id="toggle-label">Dark Mode</span>
-                    </button>
-                </div>
-            </div>
-        </footer>
+        <div id="footer-placeholder"></div>
 
     </div>
 
     <script>
+        // Apply dark mode immediately to prevent flash
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+        }
+
         // ===========================
         // Password Protection
         // ===========================
@@ -257,112 +104,8 @@
         passwordInput.addEventListener('input', function () {
             passwordError.classList.remove('show');
         });
-
-        // ===========================
-        // Dark Mode Toggle
-        // ===========================
-        const darkModeBtn = document.getElementById('dark-mode-btn');
-        const illustration = document.getElementById('registry-illustration');
-        const navMonogram = document.getElementById('nav-monogram');
-        const toggleIcon = document.getElementById('toggle-icon');
-        const toggleLabel = document.getElementById('toggle-label');
-
-        function updateImages(isDark) {
-            illustration.src = isDark ? illustration.dataset.dark : illustration.dataset.light;
-            navMonogram.src = isDark ? navMonogram.dataset.dark : navMonogram.dataset.light;
-            if (toggleIcon) {
-                toggleIcon.src = isDark ? toggleIcon.dataset.dark : toggleIcon.dataset.light;
-            }
-        }
-
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-            document.documentElement.classList.add('dark-mode');
-            updateImages(true);
-            if (toggleLabel) { toggleLabel.textContent = 'Light Mode'; }
-        }
-
-        darkModeBtn.addEventListener('click', function () {
-            document.body.classList.add('theme-transitioning');
-            document.body.classList.toggle('dark-mode');
-            document.documentElement.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-            updateImages(isDark);
-            if (toggleLabel) { toggleLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode'; }
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    document.body.classList.remove('theme-transitioning');
-                });
-            });
-        });
-
-        // ===========================
-        // Menu Toggle
-        // ===========================
-        const menuToggle = document.getElementById('menu-toggle');
-        const navLinks = document.getElementById('nav-links');
-
-        if (menuToggle && navLinks) {
-            menuToggle.addEventListener('click', function () {
-                const isOpen = navLinks.classList.contains('open');
-                const registryPage = document.querySelector('.registry-page');
-                const footerEl = document.querySelector('.site-footer');
-
-                if (isOpen) {
-                    navLinks.style.transform = 'scale(0)';
-                    navLinks.style.opacity = '0';
-                    setTimeout(() => {
-                        navLinks.classList.remove('open');
-                        navLinks.style.transform = '';
-                        navLinks.style.opacity = '';
-                    }, 300);
-                    menuToggle.textContent = 'Menu';
-                    menuToggle.setAttribute('aria-expanded', 'false');
-                    if (registryPage) registryPage.classList.remove('menu-open');
-                    if (footerEl) footerEl.classList.remove('menu-open');
-                } else {
-                    navLinks.classList.add('open');
-                    menuToggle.textContent = 'Close';
-                    menuToggle.setAttribute('aria-expanded', 'true');
-                    if (registryPage) registryPage.classList.add('menu-open');
-                    if (footerEl) footerEl.classList.add('menu-open');
-                }
-            });
-
-            navLinks.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    navLinks.classList.remove('open');
-                    menuToggle.textContent = 'Menu';
-                    menuToggle.setAttribute('aria-expanded', 'false');
-                    const registryPage = document.querySelector('.registry-page');
-                    const footerEl = document.querySelector('.site-footer');
-                    if (registryPage) registryPage.classList.remove('menu-open');
-                    if (footerEl) footerEl.classList.remove('menu-open');
-                });
-            });
-
-            document.addEventListener('click', function (e) {
-                if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-                    if (navLinks.classList.contains('open')) {
-                        navLinks.style.transform = 'scale(0)';
-                        navLinks.style.opacity = '0';
-                        setTimeout(() => {
-                            navLinks.classList.remove('open');
-                            navLinks.style.transform = '';
-                            navLinks.style.opacity = '';
-                        }, 300);
-                        menuToggle.textContent = 'Menu';
-                        menuToggle.setAttribute('aria-expanded', 'false');
-                        const registryPage = document.querySelector('.registry-page');
-                        const footerEl = document.querySelector('.site-footer');
-                        if (registryPage) registryPage.classList.remove('menu-open');
-                        if (footerEl) footerEl.classList.remove('menu-open');
-                    }
-                }
-            });
-        }
     </script>
+    <script src="includes/site-init.js"></script>
 </body>
 
 </html>

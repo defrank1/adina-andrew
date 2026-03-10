@@ -9,86 +9,9 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
     <link rel="stylesheet" href="styles.css">
-    <style>
-        /* ===========================
-           Page Layout
-           =========================== */
-
-        #protected-content.unlocked {
-            display: block;
-        }
-
-        /* ===========================
-           Save the Date Content
-           =========================== */
-
-        .announcement-icon {
-            display: block;
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        .announcement-icon img {
-            width: 250px;
-            height: auto;
-            opacity: 0.9;
-        }
-
-        /* Line break control */
-        .mobile-break {
-            display: none;
-        }
-
-        .desktop-break {
-            display: inline;
-        }
-
-        /* Embossed effect on images */
-        .std-names-image {
-            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
-        }
-
-        .dupont-icon {
-            filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
-        }
-
-        /* ===========================
-           Dark Mode — Content
-           =========================== */
-
-        body.dark-mode .std-travel {
-            border-top-color: rgba(241, 237, 234, 0.2);
-        }
-
-        body.dark-mode .std-names-image {
-            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
-        }
-
-        body.dark-mode .dupont-icon {
-            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
-        }
-
-        /* ===========================
-           Responsive
-           =========================== */
-
-        @media (max-width: 768px) {
-            .mobile-break {
-                display: inline;
-            }
-
-            .desktop-break {
-                display: none;
-            }
-
-            .announcement-icon img {
-                width: 175px;
-            }
-        }
-    </style>
 </head>
 
-<body>
+<body class="page-savethedate">
     <!-- Password Protection Overlay -->
     <div id="password-overlay">
         <div class="password-container">
@@ -133,7 +56,7 @@
                             is the InterContinental Washington, DC - The Wharf. Please book using the link below by
                             September 16, 2026. The group code is AAW.</p>
                         <a href="https://www.ihg.com/intercontinental/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qIta=99801505&icdv=99801505&qSlH=WASHC&qCiD=16&qCiMy=092026&qCoD=18&qCoMy=092026&qGrpCd=AAW&setPMCookies=true&qSHBrC=IC&qDest=801%20Wharf%20Street%20SW,%20Washington,%20DC,%20US&showApp=true&adjustMonth=false&srb_u=1&qRmFltr="
-                            class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
+                            class="btn-normal" target="_blank" rel="noopener noreferrer">Visit Website</a>
                     </div>
 
                     <div class="std-hotel">
@@ -142,7 +65,7 @@
                             Washington DC The Wharf, which is a very short walk (2-3 minutes) from the wedding venue.
                             Please book using the link below by September 16, 2026. The group code is 908.</p>
                         <a href="https://www.hilton.com/en/book/reservation/rooms/?ctyhocn=DCACUPY&arrivalDate=2026-10-16&departureDate=2026-10-18&groupCode=908&room1NumAdults=1&displayCurrency=USD&aarpRate="
-                            class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
+                            class="btn-normal" target="_blank" rel="noopener noreferrer">Visit Website</a>
                     </div>
 
                     <div class="std-hotel">
@@ -151,7 +74,7 @@
                             Washington, DC National Mall, which is a 15-20 minute walk from the wedding venue. Please
                             book using the link below by September 18, 2026. The group code is NDF.</p>
                         <a href="https://www.marriott.com/event-reservations/reservation-link.mi?id=1763049644521&key=GRP&app=resvlink&_branch_match_id=1312088118907015526&_branch_referrer=H4sIAAAAAAAAA8soKSkottLXTywo0MtNLCrKzC8p0UvOz9UvSi3OyczLtgdK2ALZZSCOWmaKraG5mbGBiaWZiYmpkaFadmqlrXtQgFpdUWpaKlB3Xnp8UlF%2BeXFqka1zRlF%2BbioA%2B91nT2AAAAA%3D"
-                            class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
+                            class="btn-normal" target="_blank" rel="noopener noreferrer">Visit Website</a>
                     </div>
 
                     <div class="std-hotel">
@@ -160,7 +83,7 @@
                             Capitol, which is a 12-15 minute walk from the wedding venue. Please note that we
                             do not have a room block reserved at this hotel.</p>
                         <a href="https://www.marriott.com/en-us/hotels/waszc-citizenm-washington-capitol/overview/"
-                            class="std-hotel-link" target="_blank" rel="noopener noreferrer">Visit Website</a>
+                            class="btn-normal" target="_blank" rel="noopener noreferrer">Visit Website</a>
                     </div>
                 </div>
             </div>

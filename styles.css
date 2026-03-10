@@ -79,6 +79,11 @@ body.dark-mode {
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
+/* Prevent Sentient from ever rendering italic */
+em, i, .registry-intro {
+    font-style: normal;
+}
+
 /* Disable transitions during theme switch to prevent flash */
 body.theme-transitioning,
 body.theme-transitioning *,
@@ -246,9 +251,21 @@ body.dark-mode .password-submit:hover {
     display: block;
 }
 
-/* Protected content hidden by default; .unlocked display is page-specific */
+/* Protected content hidden by default */
 #protected-content {
     display: none;
+}
+
+/* Default unlocked: flex column (nav + footer layout) */
+#protected-content.unlocked {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Save the Date: simple block (no nav/footer) */
+body.page-savethedate #protected-content.unlocked {
+    display: block;
 }
 
 /* ===========================
@@ -388,6 +405,14 @@ body.dark-mode .nav-links {
 
 body.dark-mode .nav-links a {
     color: var(--color-soft-white);
+}
+
+/* Content fades when menu is open */
+main.menu-open,
+.site-footer.menu-open {
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
 /* ===========================
@@ -571,46 +596,9 @@ body.dark-mode .btn-priority:hover {
     animation: flashGradientDark 0.5s ease forwards;
 }
 
-/* Standard hotel link — alias for .btn-normal (used on savethedate hotel buttons) */
-.std-hotel-link {
-    display: inline-block;
-    font-family: var(--font-heading);
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-dark-green);
-    background-color: transparent;
-    background-size: 300% 100%;
-    background-position: 0% 0%;
-    padding: 0.5rem 1.2rem;
-    border-radius: 25px;
-    text-decoration: none;
-    border: 2px solid var(--color-dark-green);
-    text-shadow: none;
-    cursor: pointer;
-    transition: all 0.5s ease;
-}
-
-.std-hotel-link:hover {
-    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
-    background-size: 300% 100%;
-    background-position: 100% 0%;
-    color: var(--color-soft-white);
-    animation: flashGradient 0.5s ease forwards;
-}
-
-body.dark-mode .std-hotel-link {
-    color: var(--color-soft-white);
-    border-color: var(--color-soft-white);
-    background-color: transparent;
-}
-
-body.dark-mode .std-hotel-link:hover {
-    background: linear-gradient(90deg, var(--color-soft-white) 0%, #d4cfc8 50%, var(--color-soft-white) 100%);
-    background-size: 300% 100%;
-    background-position: 100% 0%;
-    color: var(--color-dark-green);
-    animation: flashGradientDark 0.5s ease forwards;
+.btn-normal:active,
+.btn-priority:active {
+    transform: translateY(0);
 }
 
 /* ===========================
@@ -621,266 +609,6 @@ body.dark-mode .std-hotel-link:hover {
     max-width: 680px;
     margin: 0 auto;
     padding: 0 2rem;
-}
-
-/* Introduction Section */
-.intro {
-    padding: 4rem 0;
-    text-align: center;
-}
-
-.intro p {
-    font-size: 1rem;
-    line-height: 1.7;
-}
-
-/* Page Header (for subpages) */
-.page-header {
-    padding: 6rem 2rem 2rem;
-    margin-top: 80px;
-    text-align: center;
-}
-
-.page-header .section-heading {
-    margin-bottom: 0;
-}
-
-/* Our Story Section */
-.our-story {
-    padding: 4rem 0;
-    text-align: center;
-}
-
-.section-heading {
-    font-family: var(--font-title);
-    font-size: 2.5rem;
-    text-align: center;
-    margin-bottom: 2rem;
-    font-weight: 400;
-}
-
-.story-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-.story-images {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-.image-placeholder {
-    aspect-ratio: 4/5;
-    background-color: rgba(26, 58, 46, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgba(26, 58, 46, 0.1);
-}
-
-.image-placeholder p {
-    font-family: var(--font-heading);
-    color: rgba(26, 58, 46, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.9rem;
-}
-
-.story-text {
-    text-align: center;
-}
-
-.story-text p {
-    font-size: 1rem;
-    line-height: 1.7;
-}
-
-/* Section Divider */
-.section-divider {
-    text-align: center;
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-    letter-spacing: 0.8rem;
-    color: var(--color-dark-green);
-    padding: 2rem 0;
-}
-
-/* The Weekend Section */
-.the-weekend {
-    padding: 4rem 0;
-}
-
-.event {
-    margin-bottom: 2.5rem;
-    text-align: center;
-}
-
-.event:last-child {
-    margin-bottom: 0;
-}
-
-.event-day {
-    font-family: var(--font-title);
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-    font-weight: 400;
-}
-
-.event-name {
-    font-family: var(--font-heading);
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.4rem;
-}
-
-.event-time {
-    font-family: var(--font-heading);
-    font-size: 0.9rem;
-    margin-bottom: 0.8rem;
-}
-
-.event-location {
-    font-size: 0.95rem;
-    line-height: 1.6;
-}
-
-/* Where to Stay & Things to Do */
-.where-to-stay,
-.things-to-do {
-    padding: 4rem 0;
-    text-align: center;
-}
-
-.where-to-stay p,
-.things-to-do p {
-    margin-bottom: 1.5rem;
-    font-size: 1rem;
-    line-height: 1.7;
-}
-
-.where-to-stay .content-wrapper,
-.things-to-do .content-wrapper {
-    text-align: center;
-}
-
-/* ===========================
-   RSVP Section
-   =========================== */
-
-.rsvp-section {
-    padding: 4rem 0;
-}
-
-.rsvp-prompt {
-    text-align: center;
-    font-size: 1rem;
-    margin: 2rem 0 1.5rem;
-}
-
-.rsvp-section .content-wrapper {
-    text-align: center;
-}
-
-/* ===========================
-   Photo Gallery
-   =========================== */
-
-.photo-gallery {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.photos-section {
-    padding: 3rem 0;
-}
-
-/* ===========================
-   FAQ Section
-   =========================== */
-
-.faq-section {
-    padding: 3rem 0;
-}
-
-.faq-list {
-    max-width: 700px;
-    margin: 2rem auto 0;
-}
-
-.faq-item {
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.faq-item:last-child {
-    margin-bottom: 0;
-}
-
-.faq-question {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-}
-
-.faq-answer {
-    font-size: 1rem;
-    line-height: 1.7;
-}
-
-/* ===========================
-   Attractions Section
-   =========================== */
-
-.attractions-section {
-    padding: 3rem 0;
-    text-align: center;
-}
-
-.attractions-list {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.attraction-item {
-    text-align: center;
-}
-
-.attraction-name {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-}
-
-/* ===========================
-   Registry Section
-   =========================== */
-
-.registry-section {
-    padding: 3rem 0;
-    text-align: center;
-}
-
-.registry-links {
-    margin-top: 2rem;
-}
-
-.registry-placeholder {
-    font-style: italic;
-    opacity: 0.7;
 }
 
 /* Hotel List */
@@ -930,6 +658,7 @@ body.dark-mode .std-hotel-link:hover {
     height: auto;
     margin: 1.5rem auto;
     display: block;
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
 }
 
 .std-details {
@@ -984,191 +713,124 @@ body.dark-mode .std-hotel-link:hover {
     margin-bottom: 0.6rem;
 }
 
-/* ===========================
-   Hero Section (unused but retained)
-   =========================== */
+.dupont-icon {
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+}
 
-.hero {
-    min-height: 70vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+body.dark-mode .std-travel {
+    border-top-color: rgba(241, 237, 234, 0.2);
+}
+
+body.dark-mode .std-names-image {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+}
+
+body.dark-mode .dupont-icon {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+}
+
+/* Announcement icon (Save the Date) */
+.announcement-icon {
+    display: block;
     text-align: center;
-    padding: 4rem 2rem 3rem;
-    margin-top: 80px;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    position: relative;
+    margin-top: 2rem;
 }
 
-.hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(250, 249, 246, 0.7);
-    z-index: 0;
+.announcement-icon img {
+    width: 250px;
+    height: auto;
+    opacity: 0.9;
 }
 
-.hero > * {
-    position: relative;
-    z-index: 1;
+/* Line break control (Save the Date) */
+.mobile-break {
+    display: none;
 }
 
-.hero-title {
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    font-weight: 400;
-    margin-bottom: 1.5rem;
-}
-
-.couple-names {
-    font-family: var(--font-title);
-    font-size: 4rem;
-    font-weight: 400;
-    margin-bottom: 1rem;
-    line-height: 1.1;
-}
-
-.event-date {
-    font-family: var(--font-heading);
-    font-size: 0.95rem;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
+.desktop-break {
+    display: inline;
 }
 
 /* ===========================
-   Marquee Animation
+   Registry Page
    =========================== */
 
-.marquee-container {
-    overflow: hidden;
-    background-color: var(--color-dark-green);
+body.page-registry .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
+body.page-registry .registry-page .content-wrapper {
+    max-width: 700px;
+}
+
+body.page-registry .registry-section {
+    padding: 1.5rem 0 2rem;
+}
+
+.registry-title {
+    font-family: var(--font-title);
+    font-size: clamp(4rem, 8vw, 5.5rem);
+    font-weight: 400;
+    color: var(--color-dark-green);
+    margin-bottom: 1.5rem;
+    line-height: 1;
+    text-align: center;
+}
+
+.registry-illustration {
+    display: block;
+    margin: 0 auto 1.2rem;
+    width: auto;
+    max-width: 200px;
+    max-height: 250px;
+    height: auto;
+    object-fit: contain;
+    opacity: 0.9;
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+}
+
+body.dark-mode .registry-illustration {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+}
+
+.registry-intro {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-dark-green);
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+    opacity: 0.85;
+    text-align: center;
+}
+
+.registry-cta {
+    text-align: center;
+}
+
+body.dark-mode .registry-title,
+body.dark-mode .registry-intro {
     color: var(--color-soft-white);
-    padding: 1rem 0;
-    margin: 0;
-}
-
-.marquee-container.marquee-large {
-    padding: 1.5rem 0;
-}
-
-.marquee {
-    display: flex;
-    white-space: nowrap;
-    animation: scroll 20s linear infinite;
-}
-
-.marquee span {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    padding-right: 2rem;
-}
-
-.marquee-large .marquee span {
-    font-size: 2rem;
-    letter-spacing: 0.25em;
-}
-
-@keyframes scroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
 }
 
 /* ===========================
-   Responsive — 900px Breakpoint
+   Responsive — Mobile (900px)
    =========================== */
 
 @media (max-width: 900px) {
-    /* Nav — smaller monogram */
+    /* Body */
+    body {
+        font-size: 16px;
+    }
+
+    /* Navigation */
     .nav-monogram {
-        height: 40px;
+        height: 56px;
     }
 
-    /* Footer — stack vertically and center */
-    .footer-content {
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        padding: 1.2rem 1.5rem;
-    }
-
-    /* Footer text — wrap and center */
-    .footer-info {
-        white-space: normal;
-        text-align: center;
-        line-height: 1.8;
-    }
-
-    .footer-separator {
-        display: none;
-    }
-
-    .footer-line {
-        display: block;
-    }
-}
-
-/* ===========================
-   Responsive — 768px Breakpoint
-   =========================== */
-
-@media (max-width: 768px) {
-    .section-heading {
-        font-size: 2rem;
-    }
-
-    .story-images {
-        grid-template-columns: 1fr;
-    }
-
-    .photo-gallery {
-        grid-template-columns: 1fr;
-    }
-
-    .marquee span {
-        font-size: 0.95rem;
-    }
-
-    .marquee-large .marquee span {
-        font-size: 1.5rem;
-    }
-
-    .event-day {
-        font-size: 1.8rem;
-    }
-
-    .content-wrapper {
-        padding: 0 1.5rem;
-    }
-
-    .intro,
-    .our-story,
-    .the-weekend,
-    .where-to-stay,
-    .things-to-do,
-    .rsvp-section,
-    .photos-section,
-    .faq-section,
-    .attractions-section,
-    .registry-section {
-        padding: 2rem 0;
-    }
-
-    .section-divider {
-        padding: 1.5rem 0;
-    }
-
-    .attractions-list {
-        gap: 1.5rem;
-    }
-
-    /* Password overlay — mobile */
+    /* Password overlay */
     .password-container h2 {
         font-size: 3.5rem;
     }
@@ -1181,34 +843,13 @@ body.dark-mode .std-hotel-link:hover {
     .password-input {
         font-size: 16px;
     }
-}
 
-/* ===========================
-   Responsive — 480px Breakpoint
-   =========================== */
-
-@media (max-width: 480px) {
-    body {
-        font-size: 16px;
+    /* Content wrapper */
+    .content-wrapper {
+        padding: 0 1.5rem;
     }
 
-    .couple-names {
-        font-size: 2rem;
-    }
-
-    .section-heading {
-        font-size: 1.8rem;
-    }
-
-    .marquee-large .marquee span {
-        font-size: 1.2rem;
-    }
-
-    .faq-question,
-    .attraction-name {
-        font-size: 1rem;
-    }
-
+    /* Save the Date page */
     .std-names {
         font-size: 2.5rem;
     }
@@ -1236,5 +877,66 @@ body.dark-mode .std-hotel-link:hover {
 
     .std-hotel-description {
         font-size: 0.95rem;
+    }
+
+    .mobile-break {
+        display: inline;
+    }
+
+    .desktop-break {
+        display: none;
+    }
+
+    .announcement-icon img {
+        width: 175px;
+    }
+
+    /* Registry page */
+    body.page-registry .registry-page {
+        padding-top: 100px;
+    }
+
+    body.page-registry .registry-title {
+        font-size: 3.8rem;
+        margin-bottom: 1rem;
+    }
+
+    body.page-registry .registry-illustration {
+        max-width: 180px;
+        max-height: 220px;
+        margin-bottom: 1.5rem;
+    }
+
+    body.page-registry .registry-intro {
+        font-size: 1rem;
+        line-height: 1.65;
+        max-width: none;
+        margin-bottom: 1.5rem;
+    }
+
+    body.page-registry .registry-section {
+        padding: 1.5rem 0 1rem;
+    }
+
+    /* Footer */
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.2rem 1.5rem;
+    }
+
+    .footer-info {
+        white-space: normal;
+        text-align: center;
+        line-height: 1.8;
+    }
+
+    .footer-separator {
+        display: none;
+    }
+
+    .footer-line {
+        display: block;
     }
 }
