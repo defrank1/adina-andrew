@@ -90,9 +90,19 @@ CSS custom properties: `--color-dark-green`, `--color-soft-white`, `--color-acce
 - Save the Date password: `october17`
 - Session storage remembers unlock state within a session
 
+### Surface Layering
+
+The site uses three tonal surfaces to create physical depth:
+
+- **Nav:** Slightly deeper than body — `--color-nav-bg` (light) / `--color-nav-bg-dark` (dark) — with grain texture and soft box-shadow
+- **Body:** Primary surface — `--color-soft-white` (light) / `--color-dark-green` (dark) — with grain texture
+- **Footer:** Slightly deeper than body — `--color-footer-bg` (light) / `--color-footer-bg-dark` (dark) — with grain texture, no shadow
+
+All three surfaces use the same grain texture image (light or dark variant). The tonal shifts are subtle — the goal is "different paper stock," not "different color."
+
 ### Navigation
 
-- **Style:** Fixed transparent nav bar with hairline `border-bottom`
+- **Style:** Fixed nav bar with tinted background, grain texture, hairline `border-bottom`, and soft box-shadow — `--color-nav-bg` (light) / `--color-nav-bg-dark` (dark)
 - **Desktop (above 900px):** Monogram (left) · Menu button (right)
 - **Mobile (below 900px):** Monogram (left) · Menu button (right) — same as desktop, no reordering
 - **Monogram:** Large, 72px tall (desktop), 56px tall (mobile) — links to homepage (`/`)
@@ -132,7 +142,7 @@ Two button styles exist:
 
 ### Footer
 
-- **Style:** No border, no background — transparent, floating text
+- **Style:** No border. Subtle tinted background with grain texture — slightly deeper than body color — `--color-footer-bg` (light) / `--color-footer-bg-dark` (dark), no shadow
 - **Content:** Info text ("Adina & Andrew · October 17, 2026 · Washington, DC") · Dark/light toggle
 - Info text: PP Watch, very small (`0.55rem`), low opacity (`0.4` light / `0.35` dark)
 - Toggle: hand-drawn icon + label ("Dark Mode" / "Light Mode")

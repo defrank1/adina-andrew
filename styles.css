@@ -39,6 +39,7 @@
 :root {
     /* Colors */
     --color-dark-green: #1a3a2e;
+    --color-dark-bg: #122a20;
     --color-soft-white: #F1EDEA;
     --color-accent: #2d5a4a;
 
@@ -50,6 +51,7 @@
     /* Borders */
     --border-hairline: 1px solid rgba(26, 58, 46, 0.1);
     --border-hairline-dark: 1px solid rgba(241, 237, 234, 0.12);
+
 }
 
 /* ===========================
@@ -59,9 +61,15 @@
 body {
     font-family: var(--font-body);
     background-color: var(--color-soft-white);
-    background-image: url('images/textures/grain.png');
-    background-size: 400px 400px;
-    background-repeat: repeat;
+    background-image:
+        linear-gradient(rgba(241, 237, 234, 0.75), rgba(241, 237, 234, 0.75)),
+        url('images/textures/paper-grain-light.png'),
+        url('images/textures/noise-grain-light.png'),
+        url('images/textures/paper-grain-light-two.png'),
+        url('images/textures/noise-grain-light-two.png');
+    background-size: 100% 100%, 400px 400px, 400px 400px, 400px 400px, 400px 400px;
+    background-repeat: no-repeat, repeat, repeat, repeat, repeat;
+    background-blend-mode: normal, soft-light, soft-light, soft-light, soft-light;
     color: var(--color-dark-green);
     line-height: 1.7;
     font-size: 18px;
@@ -73,14 +81,22 @@ body {
 }
 
 body.dark-mode {
-    background-color: var(--color-dark-green);
-    background-image: url('images/textures/grain-dark.png');
+    background-color: var(--color-dark-bg);
+    background-image:
+        linear-gradient(rgba(18, 42, 32, 0.75), rgba(18, 42, 32, 0.75)),
+        url('images/textures/paper-grain-dark.png'),
+        url('images/textures/noise-grain-dark.png');
+    background-size: 100% 100%, 400px 400px, 400px 400px;
+    background-repeat: no-repeat, repeat, repeat;
+    background-blend-mode: normal, soft-light, soft-light;
     color: var(--color-soft-white);
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 /* Prevent Sentient from ever rendering italic */
-em, i, .registry-intro {
+em,
+i,
+.registry-intro {
     font-style: normal;
 }
 
@@ -126,17 +142,31 @@ body.locked {
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background-image: url('images/textures/grain.png');
-    background-size: 400px 400px;
-    background-repeat: repeat;
+    background-color: var(--color-soft-white);
+    background-image:
+        linear-gradient(rgba(241, 237, 234, 0.75), rgba(241, 237, 234, 0.75)),
+        url('images/textures/paper-grain-light.png'),
+        url('images/textures/noise-grain-light.png'),
+        url('images/textures/paper-grain-light-two.png'),
+        url('images/textures/noise-grain-light-two.png');
+    background-size: 100% 100%, 400px 400px, 400px 400px, 400px 400px, 400px 400px;
+    background-repeat: no-repeat, repeat, repeat, repeat, repeat;
+    background-blend-mode: normal, soft-light, soft-light, soft-light, soft-light;
 }
 
 body.dark-mode #password-overlay::before {
-    background-image: url('images/textures/grain-dark.png');
+    background-color: var(--color-dark-bg);
+    background-image:
+        linear-gradient(rgba(18, 42, 32, 0.75), rgba(18, 42, 32, 0.75)),
+        url('images/textures/paper-grain-dark.png'),
+        url('images/textures/noise-grain-dark.png');
+    background-size: 100% 100%, 400px 400px, 400px 400px;
+    background-repeat: no-repeat, repeat, repeat;
+    background-blend-mode: normal, soft-light, soft-light;
 }
 
 body.dark-mode #password-overlay {
-    background-color: var(--color-dark-green);
+    background-color: var(--color-dark-bg);
 }
 
 .password-container {
@@ -174,7 +204,7 @@ body.dark-mode .password-container p {
     align-items: stretch;
     max-width: 600px;
     margin: 0 auto;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .password-input {
@@ -184,7 +214,7 @@ body.dark-mode .password-container p {
     font-family: var(--font-body);
     font-size: 0.7rem;
     border: 2px solid var(--color-dark-green);
-    background: linear-gradient(135deg, var(--color-dark-green) 0%, #2d5a4a 100%);
+    background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -213,7 +243,7 @@ body.dark-mode .password-input {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-soft-white);
-    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-accent) 50%, var(--color-dark-green) 100%);
     background-size: 300% 100%;
     background-position: 0% 0%;
     border: 2px solid var(--color-dark-green);
@@ -241,10 +271,13 @@ body.dark-mode .password-submit:hover {
 }
 
 .password-error {
-    color: #c41e3a;
+    color: inherit;
     font-size: 0.9rem;
     margin-top: 0.5rem;
     display: none;
+    width: 100%;
+    flex-basis: 100%;
+    text-align: center;
 }
 
 .password-error.show {
@@ -269,33 +302,38 @@ body.page-savethedate #protected-content.unlocked {
 }
 
 /* ===========================
-   Navigation — Simple Corner Layout
+   Navigation — Floating Marquise (Desktop) / Corner Layout (Mobile)
    =========================== */
 
 .main-nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
-    background: transparent;
-    border-bottom: var(--border-hairline);
-    padding: 0.75rem 0;
+    padding: 0;
 }
 
-body.dark-mode .main-nav {
-    border-bottom: var(--border-hairline-dark);
-}
-
-.nav-content {
+.nav-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 2rem;
+    justify-content: center;
+    gap: 2rem;
     position: relative;
+    width: 680px;
+    height: 56px;
+}
+
+/* Full diamond SVG — positioned behind nav content */
+.nav-diamond {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+    z-index: -1;
 }
 
 /* Monogram link */
@@ -307,13 +345,50 @@ body.dark-mode .main-nav {
 }
 
 .nav-monogram {
-    height: 72px;
+    height: 36px;
     width: auto;
     display: block;
     object-fit: contain;
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
 }
 
-/* Menu toggle — outlined pill button */
+body.dark-mode .nav-monogram {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+}
+
+/* Desktop inline nav links */
+.nav-link-inline {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-dark-green);
+    text-decoration: none;
+    text-shadow: none;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.nav-link-inline:hover {
+    opacity: 0.6;
+}
+
+body.dark-mode .nav-link-inline {
+    color: var(--color-soft-white);
+}
+
+/* Hide menu button on desktop — inline links are visible */
+@media (min-width: 901px) {
+    .menu-toggle {
+        display: none !important;
+    }
+
+    .nav-links {
+        display: none !important;
+    }
+}
+
+/* Menu toggle — filled pill button */
 .menu-toggle {
     display: block;
     font-family: var(--font-heading);
@@ -321,10 +396,8 @@ body.dark-mode .main-nav {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--color-dark-green);
-    background: transparent;
-    background-size: 300% 100%;
-    background-position: 0% 0%;
-    border: 2px solid var(--color-dark-green);
+    background-color: #E5E0DC;
+    border: none;
     border-radius: 25px;
     padding: 0.5rem 1.2rem;
     cursor: pointer;
@@ -334,7 +407,7 @@ body.dark-mode .main-nav {
 }
 
 .menu-toggle:hover {
-    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-accent) 50%, var(--color-dark-green) 100%);
     background-size: 300% 100%;
     background-position: 100% 0%;
     color: var(--color-soft-white);
@@ -343,8 +416,8 @@ body.dark-mode .main-nav {
 
 body.dark-mode .menu-toggle {
     color: var(--color-soft-white);
-    border-color: var(--color-soft-white);
-    background-color: transparent;
+    background-color: #0e2319;
+    border: none;
 }
 
 body.dark-mode .menu-toggle:hover {
@@ -360,8 +433,8 @@ body.dark-mode .menu-toggle:hover {
     display: none;
     position: absolute;
     top: calc(100% + 12px);
-    left: 0;
-    background-color: rgba(241, 237, 234, 0.95);
+    right: 0;
+    background-color: rgba(229, 224, 220, 0.95);
     border: 1px solid rgba(26, 58, 46, 0.12);
     border-radius: 12px;
     padding: 1.5rem 2rem;
@@ -369,7 +442,7 @@ body.dark-mode .menu-toggle:hover {
     align-items: center;
     gap: 1.2rem;
     min-width: 200px;
-    transform-origin: top left;
+    transform-origin: top right;
     transform: scale(0);
     opacity: 0;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
@@ -399,7 +472,7 @@ body.dark-mode .menu-toggle:hover {
 }
 
 body.dark-mode .nav-links {
-    background-color: rgba(26, 58, 46, 0.95);
+    background-color: rgba(14, 35, 25, 0.95);
     border-color: rgba(241, 237, 234, 0.15);
 }
 
@@ -505,13 +578,23 @@ body.dark-mode .toggle-label {
 
 /* Gradient keyframes */
 @keyframes flashGradient {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 0%; }
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 100% 0%;
+    }
 }
 
 @keyframes flashGradientDark {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 0%; }
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 100% 0%;
+    }
 }
 
 /* Normal button — outlined, transparent bg, fills on hover */
@@ -535,7 +618,7 @@ body.dark-mode .toggle-label {
 }
 
 .btn-normal:hover {
-    background: linear-gradient(90deg, var(--color-dark-green) 0%, #2d5a4a 50%, var(--color-dark-green) 100%);
+    background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-accent) 50%, var(--color-dark-green) 100%);
     background-size: 300% 100%;
     background-position: 100% 0%;
     color: var(--color-soft-white);
@@ -820,14 +903,47 @@ body.dark-mode .registry-intro {
    =========================== */
 
 @media (max-width: 900px) {
+
     /* Body */
     body {
         font-size: 16px;
     }
 
-    /* Navigation */
+    /* Mobile nav — revert to corner layout */
+    .main-nav {
+        top: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        padding: 0.75rem 0;
+    }
+
+    .nav-bar {
+        width: auto;
+        height: auto;
+        padding: 0 2rem;
+        justify-content: space-between;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .nav-diamond {
+        display: none;
+    }
+
+    /* Hide desktop inline links on mobile */
+    .nav-link-inline {
+        display: none;
+    }
+
+    /* Show mobile menu button */
+    .menu-toggle {
+        display: block;
+    }
+
+    /* Restore monogram size on mobile */
     .nav-monogram {
-        height: 56px;
+        height: 47px;
     }
 
     /* Password overlay */
