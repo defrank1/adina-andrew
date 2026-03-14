@@ -39,17 +39,13 @@ function initTheme() {
     if (!darkModeBtn) return;
 
     darkModeBtn.addEventListener('click', function () {
-        document.body.classList.add('theme-transitioning');
-        document.body.classList.toggle('dark-mode');
         document.documentElement.classList.toggle('dark-mode');
+        document.body.classList.toggle('dark-mode');
         const isDarkNow = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkNow ? 'enabled' : 'disabled');
         updateImages(isDarkNow);
         const label = document.getElementById('toggle-label');
         if (label) label.textContent = isDarkNow ? 'Light Mode' : 'Dark Mode';
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-            document.body.classList.remove('theme-transitioning');
-        }));
     });
 }
 
