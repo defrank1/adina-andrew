@@ -125,7 +125,7 @@ body.dark-mode {
     background-repeat: no-repeat, repeat, repeat;
     background-blend-mode: normal, soft-light, soft-light;
     color: var(--color-soft-white);
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 2px rgba(241, 237, 234, 0.1), 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 /* Prevent Sentient from ever rendering italic */
@@ -370,11 +370,11 @@ body.page-savethedate #protected-content.unlocked {
     height: auto;
     pointer-events: none;
     z-index: 1;
-    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22));
 }
 
 body.dark-mode .nav-diamond {
-    filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3));
 }
 
 /* Monogram link */
