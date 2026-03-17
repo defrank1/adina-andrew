@@ -376,7 +376,7 @@ body.page-savethedate #protected-content.unlocked {
     width: 100%;
     height: auto;
     pointer-events: none;
-    z-index: 1;
+    z-index: 0;
     filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22));
 }
 
@@ -484,15 +484,17 @@ main.menu-open,
 .site-footer {
     margin-top: auto;
     background: transparent;
+    overflow: visible;
 }
 
 .footer-content {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding: 0.5rem 1.5rem;
+    padding: 0.5rem 1.5rem 2rem;
     max-width: 900px;
     margin: 0 auto;
+    overflow: visible;
 }
 
 .footer-info {
@@ -922,6 +924,211 @@ body.dark-mode .registry-intro {
 }
 
 /* ===========================
+   FAQ Page
+   =========================== */
+
+body.page-faq .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
+.faq-item {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.faq-item:last-child {
+    margin-bottom: 1.5rem;
+}
+
+.faq-question {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+}
+
+.faq-answer {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    opacity: 0.85;
+    margin-bottom: 0.5rem;
+}
+
+.faq-answer:last-child {
+    margin-bottom: 0;
+}
+
+/* ===========================
+   Schedule Page
+   =========================== */
+
+body.page-schedule .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
+.schedule-day {
+    max-width: 600px;
+    margin: 0 auto 0.5rem;
+    text-align: center;
+}
+
+.schedule-date {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    margin-top: 2rem;
+}
+
+.schedule-day:first-child .schedule-date {
+    margin-top: 0;
+}
+
+.schedule-event {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.schedule-event-name {
+    font-family: var(--font-title);
+    font-size: 2.2rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.schedule-event-detail {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    margin-bottom: 0.4rem;
+}
+
+.schedule-event-description {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    opacity: 0.85;
+    margin-bottom: 0.5rem;
+}
+
+.schedule-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(26, 58, 46, 0.3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s ease;
+}
+
+.schedule-link:hover {
+    text-decoration-color: var(--color-accent);
+}
+
+body.dark-mode .schedule-link {
+    text-decoration-color: rgba(241, 237, 234, 0.3);
+}
+
+body.dark-mode .schedule-link:hover {
+    text-decoration-color: rgba(241, 237, 234, 0.7);
+}
+
+/* ===========================
+   Travel Page
+   =========================== */
+
+body.page-travel .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
+.travel-section-title {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    text-align: center;
+    margin: 2.5rem auto 1.5rem;
+    max-width: 600px;
+}
+
+.travel-hotel {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    text-align: center;
+}
+
+.travel-hotel-name {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+}
+
+.travel-hotel-description {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    opacity: 0.85;
+}
+
+.travel-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(26, 58, 46, 0.3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s ease;
+}
+
+.travel-link:hover {
+    text-decoration-color: var(--color-accent);
+}
+
+body.dark-mode .travel-link {
+    text-decoration-color: rgba(241, 237, 234, 0.3);
+}
+
+body.dark-mode .travel-link:hover {
+    text-decoration-color: rgba(241, 237, 234, 0.7);
+}
+
+.travel-directions {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.travel-direction-item {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    opacity: 0.85;
+    margin-bottom: 1.5rem;
+}
+
+.travel-direction-item strong {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 0.3rem;
+    opacity: 1;
+}
+
+/* ===========================
    Responsive — Mobile (900px)
    =========================== */
 
@@ -963,10 +1170,10 @@ body.dark-mode .registry-intro {
     }
 
     .site-title {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        margin: 0.75rem auto 0;
+        position: absolute;
+        top: -3rem;
+        left: 50%;
+        transform: translateX(-50%);
         z-index: 2;
     }
 
@@ -1053,7 +1260,7 @@ body.dark-mode .registry-intro {
     /* Registry page */
     body.page-registry .registry-page {
         flex: none;
-        padding-top: 90px;
+        padding-top: 125px;
     }
 
     body.page-registry .registry-title {
@@ -1084,6 +1291,30 @@ body.dark-mode .registry-intro {
 
     body.page-registry .site-footer {
         margin-top: 2.4rem;
+    }
+
+    /* FAQ, Schedule, Travel pages */
+    body.page-faq .registry-page,
+    body.page-schedule .registry-page,
+    body.page-travel .registry-page {
+        flex: none;
+        padding-top: 90px;
+    }
+
+    body.page-faq #protected-content.unlocked,
+    body.page-schedule #protected-content.unlocked,
+    body.page-travel #protected-content.unlocked {
+        min-height: auto;
+    }
+
+    body.page-faq .site-footer,
+    body.page-schedule .site-footer,
+    body.page-travel .site-footer {
+        margin-top: 2.4rem;
+    }
+
+    .schedule-event-name {
+        font-size: 1.8rem;
     }
 
     /* Footer */

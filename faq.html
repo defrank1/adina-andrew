@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Adina and Andrew's wedding registry.">
-    <title>Adina & Andrew - Registry</title>
+    <meta name="description" content="Frequently asked questions about Adina and Andrew's wedding.">
+    <title>Adina & Andrew - Questions & Answers</title>
     <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
     <link rel="stylesheet" href="styles.css">
@@ -13,11 +13,11 @@
     <link rel="preload" as="image" href="images/textures/combined-dark.png">
 </head>
 
-<body class="page-registry">
+<body class="page-faq">
     <!-- Password Protection Overlay -->
     <div id="password-overlay">
         <div class="password-container">
-            <h2>Registry</h2>
+            <h2>Questions & Answers</h2>
             <p>Please enter the password:</p>
             <form id="password-form">
                 <input type="password" id="password-input" class="password-input" placeholder="Enter password"
@@ -37,18 +37,44 @@
         <main class="registry-page">
             <section class="registry-section">
                 <div class="content-wrapper">
-                    <h1 class="registry-title">Registry</h1>
+                    <h1 class="registry-title">Questions & Answers</h1>
                     <img
                         src="vectors/rowhouse.svg"
                         alt="A D.C. rowhouse illustration"
                         class="registry-illustration"
-                        id="registry-illustration"
+                        id="faq-illustration"
                         data-light="vectors/rowhouse.svg"
                         data-dark="vectors/rowhouse-dark.svg"
                     >
-                    <p class="registry-intro">We can't wait to celebrate with you! Your presence at the wedding is the best gift. If you'd like to give something more, we've put together a list of items we'll use and love for years to come. Please find the link to our registry below.</p>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">What is a Black Tie Preferred dress code?</h3>
+                        <p class="faq-answer">For gentlemen: If you own a tuxedo, this is your moment to wear it. For those without, a dark suit, white shirt, black shoes, and a dark tie will work as well. If you'd like any sartorial tips, Andrew would love to hear from you!</p>
+                        <p class="faq-answer">For ladies: Full-length gowns as well as formal cocktail dresses are welcome.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Can I bring my children?</h3>
+                        <p class="faq-answer">Unless we have told you otherwise, we won't be able to accommodate children at the wedding. Please let us know if you have any questions.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Will the wedding be outdoors?</h3>
+                        <p class="faq-answer">No, however there will be balconies accessible during the cocktail hour and reception.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">Are plus ones allowed?</h3>
+                        <p class="faq-answer">Check your invitation. Only guests whose names are on the invitation are invited.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h3 class="faq-question">How do I RSVP?</h3>
+                        <p class="faq-answer">Just click the link below! Once you see the confirmation screen, you know you've completed the RSVP.</p>
+                    </div>
+
                     <div class="registry-cta">
-                        <a href="https://www.zola.com/registry/adinaandandrew2026" class="btn-priority" target="_blank" rel="noopener noreferrer">Visit Our Registry</a>
+                        <a href="/rsvp" class="btn-priority">RSVP Now</a>
                     </div>
                 </div>
             </section>
@@ -69,7 +95,7 @@
         // Password Protection
         // ===========================
         if (location.hash.includes('figmacapture=')) {
-            sessionStorage.setItem('registryUnlocked', 'true');
+            sessionStorage.setItem('faqUnlocked', 'true');
         }
         const correctPassword = 'beautifulsuperstar';
         const passwordOverlay = document.getElementById('password-overlay');
@@ -78,14 +104,14 @@
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
 
-        if (sessionStorage.getItem('registryUnlocked') === 'true') {
+        if (sessionStorage.getItem('faqUnlocked') === 'true') {
             unlockContent();
         }
 
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('registryUnlocked', 'true');
+                sessionStorage.setItem('faqUnlocked', 'true');
                 unlockContent();
             } else {
                 passwordError.classList.add('show');
@@ -100,7 +126,7 @@
             document.body.classList.remove('locked');
         }
 
-        if (sessionStorage.getItem('registryUnlocked') !== 'true') {
+        if (sessionStorage.getItem('faqUnlocked') !== 'true') {
             document.body.classList.add('locked');
         }
 

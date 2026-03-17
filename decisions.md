@@ -325,6 +325,105 @@ Monogram hover: `transform: scale(0.96)` with adjusted `drop-shadow` filter — 
 
 ---
 
+## Baked Texture Tiles
+
+### Decision: Pre-composited PNGs (not runtime blend modes)
+
+The original approach used 4 PNG texture layers (light) / 2 PNG layers (dark) stacked on `body` with `background-blend-mode: soft-light` and a `linear-gradient` overlay controlling opacity. This worked on desktop Chrome but failed on mobile:
+
+1. **Mobile Chrome** rendered the grain much heavier than desktop, producing a grey/muddy appearance instead of warm white
+2. **Desktop Safari** showed a slightly different composite than desktop Chrome due to P3 color management
+3. **High-DPI screens** (3x mobile) made the 400px texture tiles coarser since each CSS pixel = 3 physical pixels
+4. Attempted fix: high-DPI media query with larger tiles (800px) and higher overlay opacity (0.92) — improved but didn't match desktop exactly
+5. Attempted fix: reducing to 2 layers with 600px tiles — still didn't match
+
+**Root cause:** `background-blend-mode: soft-light` is computed by the GPU at runtime, and different browsers/devices composite differently. There's no CSS override that forces identical rendering.
+
+**Solution:** Composited the final texture in Figma (800×800 frame, `#F1EDEA` fill, 4 grain layers at soft-light, exported as PNG at 1x). CSS is now trivially simple: `background-image: url(...)` + `background-repeat: repeat` + `background-size: 200px 200px`. No blend modes, no runtime compositing. Every device renders the flat tile identically.
+
+Dark mode tile created the same way with `#122a20` base + 2 grain layers.
+
+Note: Figma's "Flatten" command destroys blend mode results — just export the frame directly as PNG (right-click → Export → PNG 1x).
+
+---
+
+## Dark Mode Toggle — Unicode Symbols with Breathing Aura
+
+### Decision: ✹ / ⏾ symbols with CSS aura (not SVG morph, not cursor shimmer)
+
+The toggle went through extensive iteration:
+
+1. **Hand-drawn PNG sun/moon + text label** — original approach. Felt inconsistent with the brutalist PP Watch type beside the illustration.
+2. **Geometric SVG morph** (SMIL animate, circle ↔ crescent) — technically sound, used `fill="currentColor"` for theme inheritance. But the toggle as a whole didn't feel refined enough.
+3. **Unicode symbols with foil shimmer** (cursor-tracking radial gradient) — ✹ sun and ⏾ moon rendered via `background-clip: text`. Hover effect tracked cursor position with `mousemove`. Felt too gimmicky/interactive — "like a laser pointer."
+4. **Unicode symbols with breathing aura (final)** — same symbols, but hover shimmer replaced with a static CSS-animated glow. A 100px radial gradient with 8px blur gently pulses on a 4s cycle (`@keyframes breathe`). The symbol feels like an actual light source radiating into the paper.
+
+**Symbol choice:** ✹ (U+2739, "Eight Pointed Rectilinear Star") for sun, ⏾ (U+23FE, "Power Sleep Symbol" — renders as crescent) for moon. ✹ renders at 42px, ⏾ at 28px — different sizes needed because the glyphs have very different visual weights at the same font-size.
+
+**Color:** Deep olive green `rgba(48, 78, 62, 0.75)` for sun (barely green, good contrast on cream), accent green `rgba(45, 90, 74, 0.5)` for moon (greener, visible on dark background). Both use `background-clip: text` + `-webkit-text-fill-color: transparent` for the tinted foil effect.
+
+**Centering fix:** ✹ and ⏾ have different glyph bounding boxes, causing positional shift when toggling. Fixed with a 48×48px flex container with `align-items: center; justify-content: center` on `.toggle-sym`.
+
+---
+
+## Nav Diamond z-index
+
+### Decision: z-index 0 (not 1)
+
+The nav diamond PNG contains an opaque texture fill inside the diamond shape (baked grain matching the page background). When both the diamond and the nav links/monogram shared `z-index: 1`, the diamond's opaque fill covered the text elements — they were invisible.
+
+Previously masked by `mix-blend-mode: multiply` which made near-white areas effectively transparent. But `multiply` was removed because the diamond PNG already has a transparent background outside the shape — `multiply` was actually darkening the transparent areas and creating artifacts.
+
+Fix: diamond at `z-index: 0`, all text/link elements at `z-index: 1`.
+
+---
+
+## Footer Simplification
+
+### Decision: Toggle only, no info text
+
+The "ADINA & ANDREW · OCTOBER 17, 2026 · WASHINGTON, DC" text was removed from the footer. It felt corporate and redundant — guests already know whose wedding it is. The footer now contains only the dark mode toggle, right-aligned.
+
+---
+
+## Mobile Registry Page Spacing
+
+### Decision: Disable flex stretch on short pages
+
+The registry page content is short enough to fit on one screen, but `#protected-content.unlocked` has `min-height: 100vh` + `flex-direction: column` and `.site-footer` has `margin-top: auto`. This pushes the footer to the absolute bottom of the viewport, creating a large dead zone between the "Visit Our Registry" button and the toggle.
+
+Fix (mobile only, registry-specific):
+- `body.page-registry .registry-page { flex: none }` — stops the main content from stretching
+- `body.page-registry #protected-content.unlocked { min-height: auto }` — lets content determine height
+- `body.page-registry .site-footer { margin-top: 2.4rem }` — explicit spacing instead of auto-push
+
+This doesn't affect other pages (travel, FAQ) which will have enough content to fill the viewport naturally.
+
+---
+
+## Content Pages — FAQ, Schedule, Travel
+
+### Decision: All pages follow the registry.html template pattern
+
+Three new content pages were created (`faq.html`, `schedule.html`, `travel.html`) using `registry.html` as the exact structural template: password overlay → nav placeholder → protected content with `.registry-page` main element → footer placeholder → dark mode flash script → site-init.js.
+
+**Shared classes across all pages:**
+- `.registry-page` for the main element (controls flex layout)
+- `.registry-title` for page headlines (PP Playground)
+- `.registry-illustration` for illustrations (rowhouse SVG placeholder)
+- `.registry-cta` + `.btn-priority` for CTA buttons
+- `.registry-section` + `.content-wrapper` for content containment
+
+**Page-specific body classes** (`page-faq`, `page-schedule`, `page-travel`) scope padding, flex, and footer overrides in styles.css. Each page has its own `sessionStorage` key for password state.
+
+**Schedule page** is titled "Invitation" (not "Schedule") — the schedule is the invitation content. The existing `rsvp.html` with Google Sheets integration remains untouched. Times for some events are marked with `<!-- TODO: Add times -->` comments.
+
+**Travel page** reuses hotel content from `savethedate.html` with new class names (`.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`). Adds transit directions section with Metro/car/bus instructions.
+
+**Link styles** (`.schedule-link`, `.travel-link`) use subtle underlines (`text-decoration-color` at 30% opacity) that darken to accent color on hover — same pattern, namespaced per page.
+
+---
+
 ## Rejected / Abandoned Ideas
 
 - **Squarespace** — Abandoned for lack of customization control
@@ -340,6 +439,12 @@ Monogram hover: `transform: scale(0.96)` with adjusted `drop-shadow` filter — 
 - **CSS clip-path diamond menu button** — Abandoned because clip-path clips pseudo-elements and inset shadows ignore it
 - **SVG path morph mobile menu (Flubber.js)** — Technically worked but SVG hairlines rendered fuzzy at small sizes
 - **CSS clip-path morph dropdown** — Abandoned in favor of eliminating the dropdown entirely
-- **Hand-drawn sun/moon toggle PNGs** — Replaced with geometric SVG morph
+- **Hand-drawn sun/moon toggle PNGs** — Replaced with geometric SVG morph, then Unicode symbols
+- **Geometric SVG morph toggle** (SMIL animate) — Replaced with Unicode symbols + breathing aura
+- **Cursor-tracking foil shimmer** on toggle — Replaced with static CSS breathing aura
+- **Runtime `background-blend-mode: soft-light`** for grain — Replaced with pre-composited PNG tiles due to cross-browser rendering differences
+- **High-DPI media query for textures** — Attempted 600px/800px tiles with higher overlay opacity; didn't solve the fundamental blend-mode inconsistency
+- **`mix-blend-mode: multiply` on nav diamond** — Removed; was darkening transparent areas. Diamond already has transparent background outside shape.
+- **Footer info text** ("Adina & Andrew · October 17, 2026 · Washington, DC") — Removed as redundant
 - **Gradient sweep button hover** — Replaced with letterpress/deboss system
 - **Raised/lifted button shadows** — Replaced with all-inset deboss model

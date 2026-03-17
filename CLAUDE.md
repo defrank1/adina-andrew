@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: March 16, 2026
+Last updated: March 17, 2026
 
 ---
 
@@ -25,6 +25,9 @@ Last updated: March 16, 2026
 - `index.html` — Homepage (currently minimal, needs redesign as a hub/landing page)
 - `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer** — `<body class="page-savethedate">`
 - `registry.html` — Registry with link to Zola (`adinaandandrew2026` — double "and" is correct) — `<body class="page-registry">`
+- `faq.html` — Questions & Answers (5 Q&A items + RSVP CTA) — `<body class="page-faq">`
+- `schedule.html` — Wedding weekend schedule (Fri/Sat/Sun events) — `<body class="page-schedule">`
+- `travel.html` — Hotels (4 blocks) + transit directions — `<body class="page-travel">`
 - `rsvp.html` — RSVP form (integrates with Google Sheets via rsvp-workflow/google-apps-script.js)
 
 ## Hotel Blocks
@@ -80,7 +83,7 @@ Old variables `--color-nav-bg`, `--color-nav-bg-dark`, `--color-footer-bg`, and 
 ### Dark Mode
 
 - Supported on all pages (except `savethedate.html`, which has a standalone toggle but no nav/footer)
-- Toggle via button with geometric SVG icon in the footer — a circle (sun) that morphs into a crescent (moon) using SMIL path animation. Icon uses `fill="currentColor"` and inherits text color via CSS (no image swap needed). Morph animation is 400ms, matching the color transition timing.
+- Toggle via Unicode symbol with breathing aura glow: `✹` (sun, 42px) in light mode, `⏾` (moon, 28px) in dark mode. Rendered via `background-clip: text` for tinted foil effect. CSS-animated aura (`@keyframes breathe`, 4s cycle). No label text, no SVG, no PNG swap. Located in footer, right-aligned.
 - Icon swaps: `data-light` / `data-dark` attributes on `<img>` tags
 - Images that change: monogram, illustrations, nav diamond PNG
 - Dark mode preference saved to `localStorage`
@@ -104,64 +107,18 @@ Old variables `--color-nav-bg`, `--color-nav-bg-dark`, `--color-footer-bg`, and 
 - Body text centered
 - CTA buttons centered
 
-### Grain Texture
+### Background Texture
 
-- Grain scrolls with page content (feels like paper) — applied directly on `body` via `background-image`
-- NOT a pseudo-element, NOT fixed, NOT a single image
+Background uses **pre-composited texture tiles** — flat PNGs with grain already baked in at the correct opacity and blend. No runtime blend modes.
 
-#### Implementation
+- **Light mode:** `images/textures/combined-light.png` — warm white `#F1EDEA` with four grain layers pre-composited at soft-light in Figma
+- **Dark mode:** `images/textures/combined-dark.png` — dark green `#122a20` with two grain layers pre-composited at soft-light in Figma
+- **Tile size:** `background-size: 200px 200px` with `background-repeat: repeat`
+- **No blend modes in CSS** — `background-blend-mode` is not used anywhere. The old multi-layer approach with `soft-light` caused cross-browser rendering differences (mobile Chrome vs desktop Safari vs desktop Chrome all composited differently, producing grey/muddy results on mobile).
+- **Password overlay** (`#password-overlay::before`) uses the same baked tiles
+- **Fallback color** matches tile base: `#F1EDEA` light, `#122a20` dark
 
-The grain is built from multiple opaque PNG layers composited in Figma using soft-light blend mode. CSS `background-blend-mode: soft-light` replicates this exactly. A `linear-gradient` overlay at `0.75` opacity sits on top of the texture stack to control intensity (texture shows through at ~25% strength). The `background-color` on each element provides the base tint.
-
-**Light mode — 4 layers** (listed bottom to top; CSS `background-image` lists them top to bottom):
-1. `paper-grain-light.png` (bottom)
-2. `noise-grain-light.png`
-3. `paper-grain-light-two.png`
-4. `noise-grain-light-two.png` (top)
-
-**Dark mode — 2 layers** (listed bottom to top):
-1. `paper-grain-dark.png` (bottom)
-2. `noise-grain-dark.png` (top)
-
-All texture files are located in `images/textures/`.
-
-#### CSS Pattern
-
-```css
-/* Light mode (on body) */
-background-color: var(--color-soft-white);
-background-image:
-    linear-gradient(rgba(241, 237, 234, 0.75), rgba(241, 237, 234, 0.75)),
-    url('images/textures/paper-grain-light.png'),
-    url('images/textures/noise-grain-light.png'),
-    url('images/textures/paper-grain-light-two.png'),
-    url('images/textures/noise-grain-light-two.png');
-background-size: 100% 100%, 400px 400px, 400px 400px, 400px 400px, 400px 400px;
-background-repeat: no-repeat, repeat, repeat, repeat, repeat;
-background-blend-mode: normal, soft-light, soft-light, soft-light, soft-light;
-
-/* Dark mode (on body.dark-mode) */
-background-color: var(--color-dark-bg);
-background-image:
-    linear-gradient(rgba(18, 42, 32, 0.75), rgba(18, 42, 32, 0.75)),
-    url('images/textures/paper-grain-dark.png'),
-    url('images/textures/noise-grain-dark.png');
-background-size: 100% 100%, 400px 400px, 400px 400px;
-background-repeat: no-repeat, repeat, repeat;
-background-blend-mode: normal, soft-light, soft-light;
-```
-
-#### Password Overlay
-
-The password overlay uses a solid `background-color` on `#password-overlay` and a `::before` pseudo-element with the same multi-layer grain stack to recreate the textured surface over the opaque overlay.
-
-#### Key Learnings
-
-- Figma cannot export transparent PNGs from noise layers that use non-Normal blend modes — it silently adds an opaque background
-- The solution was exporting each noise layer individually at Normal blend mode, then compositing in CSS
-- `background-blend-mode: soft-light` does the exact same math as Figma's soft-light blend
-- The `linear-gradient` overlay alpha (0.75) was tuned by hand in Chrome dev tools — changing from 0.3 to 0.75 was confirmed visually by Andrew
-- Old `grain.png` and `grain-dark.png` files are no longer used
+Old texture files (`paper-grain-light.png`, `noise-grain-light.png`, `paper-grain-light-two.png`, `noise-grain-light-two.png`, `paper-grain-dark.png`, `noise-grain-dark.png`) are still in the repo but **no longer referenced in CSS**. The `<link rel="preload">` tags in HTML files still reference them — these should be updated to preload the combined tiles instead.
 
 ### Password Protection
 
@@ -190,18 +147,19 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Monogram:** Smaller inside the nav bar (~36–40px), centered between the link groups
 - **Position:** `position: fixed`, centered horizontally, near the top of the viewport — stays visible on scroll
 - **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow). Light mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22))`. Dark mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3))`. Hand-tuned — do not revert to the original heavier values.
+- **z-index:** `0` — lower than links/monogram (z-index 1) so the opaque fill inside the diamond PNG doesn't cover text elements. No `mix-blend-mode`.
 - **Hover:** Color shifts to `var(--color-accent)` (`#2d5a4a`) + `text-shadow` shifts to impressed letterpress state (`--emboss-hover`). In dark mode, text dims to `rgba(241, 237, 234, 0.7)`. No opacity change.
+- **Active (tap):** Same color shift and emboss as hover, plus `translateY(0.5px)` press feedback. Provides touch response on mobile.
 - **Mobile menu:** Hidden on desktop (`display: none !important` in the `min-width: 901px` media query)
 
 #### Mobile (900px and below)
 
-- **Layout:** Same floating diamond as desktop, scaled down to 340px wide × 50px tall. All four links (TRAVEL, FAQ, REGISTRY, RSVP) visible inside the diamond — no hamburger menu, no dropdown.
-- **Monogram:** Positioned above the diamond via `position: absolute; top: -2.5rem` on `.site-title`, centered horizontally. 30px height. Not inside the diamond.
-- **Nav position:** `position: fixed; top: 3rem; left: 50%; transform: translateX(-50%)`
-- **Link font size:** 0.55rem (smaller than desktop 0.7rem to fit four words in 340px)
-- **Link groups:** `.nav-links-left` and `.nav-links-right` each use `gap: 1.2rem`
-- **Diamond frame:** Same PNG as desktop, scaled to fit 340px width
-- **No Menu button, no dropdown, no mobile-specific menu system** — this was a deliberate simplification after extensive iteration
+- **Layout:** Same floating diamond as desktop, scaled down to 340px wide × 50px tall. All four links visible inside — no hamburger menu, no dropdown.
+- **Nav position:** `position: fixed; top: 4rem; left: 50%; transform: translateX(-50%)`
+- **Monogram:** `position: absolute; top: -3rem` on `.site-title`, centered via `left: 50%; transform: translateX(-50%)`. 38px height. Sits above diamond, scrolls with it.
+- **Link font size:** 0.55rem
+- **Link groups:** `gap: 1.2rem`
+- **No Menu button, no dropdown** — deliberate simplification after extensive iteration
 
 #### Both Modes
 
@@ -255,13 +213,12 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 
 ### Footer
 
-- **Style:** Transparent background — no border, no shadow, no separate tint. Inherits body surface.
-- **Content:** Info text ("Adina & Andrew · October 17, 2026 · Washington, DC") · Dark/light mode toggle
-- Info text: PP Watch, very small (`0.55rem`), low opacity (`0.4` light / `0.35` dark)
-- Toggle: geometric SVG morph icon (circle ↔ crescent) + PP Watch label ("Dark Mode" / "Light Mode"). SVG uses `currentColor` fill — no PNG swap needed for the icon.
-- **Desktop (above 900px):** Info text left, toggle right (flex row, `space-between`)
-- **Mobile (below 900px):** Everything stacks vertically and centers — info text wraps to three lines (separators hidden), toggle below, all centered
-- **`savethedate.html` has NO footer** (but has a standalone dark mode toggle at page bottom)
+- **No info text** — the "ADINA & ANDREW · OCTOBER 17, 2026 · WASHINGTON, DC" line was removed. Footer contains only the dark mode toggle.
+- **Layout:** `.footer-content` uses `justify-content: flex-end` to push the toggle to the right side
+- **Padding:** `0.5rem 1.5rem 2rem` — the extra bottom padding prevents the toggle's breathing aura (100px with 8px blur) from being clipped
+- **Overflow:** `overflow: visible` on both `.site-footer` and `.footer-content` to allow the aura to extend beyond bounds
+- **Mobile:** `flex-direction: row; justify-content: flex-end; padding: 0.5rem 1.5rem`
+- **Mobile registry-specific:** `body.page-registry .site-footer { margin-top: 2.4rem }` replaces `margin-top: auto` to position footer naturally after content instead of at viewport bottom
 
 ### Text Emboss/Shadow Effect
 
@@ -316,7 +273,7 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 
 - `.site-footer` wrapper
 - Info text with separator spans (hidden on mobile)
-- Dark mode toggle button with inline SVG morph icon (circle ↔ crescent)
+- Dark mode toggle button with Unicode symbol (`✹` / `⏾`) and breathing aura
 
 ---
 
@@ -336,6 +293,9 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 ├── index.html              (homepage — currently redirects to save-the-date)
 ├── savethedate.html        (NO nav, NO footer)
 ├── registry.html
+├── faq.html                (Questions & Answers)
+├── schedule.html           (Wedding weekend schedule)
+├── travel.html             (Hotels + directions)
 ├── rsvp.html
 ├── includes/
 │   ├── nav.html            (shared nav markup — injected via fetch)
@@ -351,7 +311,10 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 │   ├── names/              (names-image.png, names-image-dark.png)
 │   ├── illustrations/      (Dupont.png, Dupont-dark.png, dark-mode-button.png, light-mode-button.png)
 │   ├── nav/                (nav-diamond-light.png, nav-diamond-dark.png — mobile nav PNGs exist but are unused)
-│   └── textures/           (6 active grain PNGs + old/ subfolder with previous versions)
+│   └── textures/
+│       ├── combined-light.png          (baked texture tile — light mode)
+│       ├── combined-dark.png           (baked texture tile — dark mode)
+│       └── old/                        (legacy individual grain PNGs — no longer referenced in CSS)
 ├── vectors/
 │   ├── rowhouse.svg / rowhouse-dark.svg
 │   ├── nav-diamond-light.svg / nav-diamond-dark.svg  (source SVGs — PNGs are used in production)
@@ -367,23 +330,26 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
     └── settings.local.json
 ```
 
-**Planned but not yet created:** `travel.html`, `faq.html`
+**All content pages now exist.** `travel.html`, `faq.html`, and `schedule.html` were created following the `registry.html` template pattern.
 
 **No longer exists:** `registry-admin.html` (deleted — registry is through Zola)
 
 ### Key CSS Architecture
 
-- **Grain:** Multi-layer `background-image` on `body` with `background-blend-mode: soft-light` — four light-mode layers, two dark-mode layers, plus a `linear-gradient` overlay at 0.75 alpha. Scrolls with page content. See Grain Texture section for full CSS pattern.
-- **Nav:** `.main-nav` is `position: fixed`. `.nav-bar` contains the diamond PNG (`.nav-diamond`) positioned behind nav content, plus link groups (`.nav-links-left`, `.nav-links-right`) and monogram. Diamond PNG has `filter: drop-shadow()` for depth. On mobile, same diamond at 340px width with all links visible — monogram positioned above via absolute positioning.
+- **Grain:** Pre-composited texture tiles (`combined-light.png` / `combined-dark.png`) on `body` via `background-image`, tiled at 200px. No `background-blend-mode`. Scrolls with page content.
+- **Nav:** `.main-nav` is `position: fixed`. `.nav-bar` contains link groups (`.nav-links-left`, `.nav-links-right`), monogram, and diamond PNG at `z-index: 0`. On mobile, same diamond at 340px width with monogram positioned above via absolute. No hamburger menu.
 - **Footer:** `.site-footer` has `background: transparent` — no separate surface, no hairline, no shadow.
 - **Dark mode:** `body.dark-mode` in `styles.css` handles all global dark styles. Page-specific dark overrides scoped with body class (e.g., `body.page-registry .registry-illustration`). Color transitions use `@property` for smooth crossfades; grain/image swaps are instant.
 - **No z-index stacking hacks needed** — grain is body background, never overlays content.
 - **`#protected-content`** is `display: none` by default; `.unlocked` defaults to `flex` column in styles.css; `body.page-savethedate` overrides to `display: block`.
-- **Page body classes** (`page-registry`, `page-savethedate`) scope page-specific styles in styles.css — no inline `<style>` blocks.
-- **Password overlay** recreates grain via `::before` pseudo-element with the same multi-layer background stack.
+- **Page body classes** (`page-registry`, `page-savethedate`, `page-faq`, `page-schedule`, `page-travel`) scope page-specific styles in styles.css — no inline `<style>` blocks.
+- **Password overlay** recreates grain via `::before` pseudo-element with the same baked texture tiles.
 - **Buttons:** Letterpress/deboss model using `--shadow-raised`/`--shadow-lifted`/`--shadow-pressed` CSS custom properties (all inset). Surface texture via `::before` with SVG `feTurbulence`. No outer shadows, no gradient sweep.
-- **Dark mode toggle:** Inline SVG with SMIL `<animate>` path morph between circle (sun) and crescent (moon). Uses `fill="currentColor"`. No PNG swap.
+- **Dark mode toggle:** Unicode symbol (`✹` / `⏾`) with `background-clip: text` foil effect and CSS breathing aura. No SVG, no PNG swap.
 - **Mobile nav:** Same diamond as desktop at 340px width. Monogram positioned above via absolute positioning. No hamburger menu or dropdown.
+- **No `background-blend-mode` anywhere** — all textures are pre-composited in Figma and exported as flat PNG tiles. Eliminates cross-browser rendering differences.
+- **Toggle aura:** Pure CSS animation via `@keyframes breathe` — no JavaScript for the glow effect
+- **Footer overflow:** `overflow: visible` on footer elements to prevent aura clipping
 - **DAUB UI reference:** `.claude/daub-reference.md` contains the DAUB design system skill file. Used as design reference only — shadow scale philosophy, per-element texture technique. Do NOT import daub.css/daub.js.
 
 

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Travel information for Adina and Andrew's wedding in Washington, DC.">
+    <title>Adina & Andrew - Travel</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preload" as="image" href="images/textures/combined-light.png">
+    <link rel="preload" as="image" href="images/textures/combined-dark.png">
+</head>
+
+<body class="page-travel">
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Travel</h2>
+            <p>Please enter the password:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
+
+        <main class="registry-page">
+            <section class="registry-section">
+                <div class="content-wrapper">
+                    <h1 class="registry-title">Travel</h1>
+                    <img
+                        src="vectors/rowhouse.svg"
+                        alt="A D.C. rowhouse illustration"
+                        class="registry-illustration"
+                        id="travel-illustration"
+                        data-light="vectors/rowhouse.svg"
+                        data-dark="vectors/rowhouse-dark.svg"
+                    >
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">InterContinental</h3>
+                        <p class="travel-hotel-description">We have reserved a hotel room block at the wedding venue, which is the InterContinental Washington, DC - The Wharf. Please book using the link below by September 16, 2026. The group code is AAW.</p>
+                        <a href="https://www.ihg.com/intercontinental/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qIta=99801505&icdv=99801505&qSlH=WASHC&qCiD=16&qCiMy=092026&qCoD=18&qCoMy=092026&qGrpCd=AAW&setPMCookies=true&qSHBrC=IC&qDest=801%20Wharf%20Street%20SW,%20Washington,%20DC,%20US&showApp=true&adjustMonth=false&srb_u=1&qRmFltr=" class="btn-normal" target="_blank" rel="noopener noreferrer">Book Now</a>
+                    </div>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">Canopy by Hilton</h3>
+                        <p class="travel-hotel-description">We have reserved a hotel room block at the Canopy by Hilton Washington DC The Wharf, which is a very short walk (2-3 minutes) from the wedding venue. Please book using the link below by September 16, 2026. The group code is 908.</p>
+                        <a href="https://www.hilton.com/en/book/reservation/rooms/?ctyhocn=DCACUPY&arrivalDate=2026-10-16&departureDate=2026-10-18&groupCode=908&room1NumAdults=1&displayCurrency=USD&aarpRate=" class="btn-normal" target="_blank" rel="noopener noreferrer">Book Now</a>
+                    </div>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">Residence Inn</h3>
+                        <p class="travel-hotel-description">We have reserved a hotel room block at the Residence Inn Washington, DC National Mall, which is a 15-20 minute walk from the wedding venue. Please book using the link below by September 18, 2026. The group code is NDF.</p>
+                        <a href="https://www.marriott.com/event-reservations/reservation-link.mi?id=1763049644521&key=GRP&app=resvlink&_branch_match_id=1312088118907015526&_branch_referrer=H4sIAAAAAAAAA8soKSkottLXTywo0MtNLCrKzC8p0UvOz9UvSi3OyczLtgdK2ALZZSCOWmaKraG5mbGBiaWZiYmpkaFadmqlrXtQgFpdUWpaKlB3Xnp8UlF%2BeXFqka1zRlF%2BbioA%2B91nT2AAAAA%3D" class="btn-normal" target="_blank" rel="noopener noreferrer">Book Now</a>
+                    </div>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">citizenM</h3>
+                        <p class="travel-hotel-description">Another hotel option near the venue is the citizenM Washington Capitol, which is a 12-15 minute walk from the wedding venue. Please note that we do not have a room block reserved at this hotel.</p>
+                        <a href="https://www.marriott.com/en-us/hotels/waszc-citizenm-washington-capitol/overview/" class="btn-normal" target="_blank" rel="noopener noreferrer">Visit Website</a>
+                    </div>
+
+                    <h2 class="travel-section-title">Getting There</h2>
+
+                    <div class="travel-directions">
+                        <p class="travel-direction-item"><strong>From Union Station:</strong> Take the Red Line west until Gallery Place. Transfer to the Green Line toward Branch Avenue. Exit one stop later at Waterfront, and walk west along M Street and Maine Avenue until you reach the hotel at 7th Street.</p>
+
+                        <p class="travel-direction-item"><strong>From National Airport:</strong> Take the Yellow Line north until L'Enfant Plaza. Transfer to the Green Line toward Branch Avenue. Exit one stop later at Waterfront, and walk west along M Street and Maine Avenue until you reach the hotel at 7th Street.</p>
+
+                        <p class="travel-direction-item"><strong>From Dulles International Airport:</strong> Take the Silver Line east to L'Enfant Plaza, transfer to the Green Line toward Branch Avenue. Exit one stop later at Waterfront, and walk west along M Street and Maine Avenue until you reach the hotel at 7th Street.</p>
+
+                        <p class="travel-direction-item"><strong>By car:</strong> Please find garage arrangements through your hotel, or at The Wharf through <a href="https://www.wharfdc.com/getting-here/car-parking/" class="travel-link" target="_blank" rel="noopener noreferrer">this link</a>.</p>
+
+                        <p class="travel-direction-item"><strong>Already in DC?</strong> Take the Metro to Waterfront, and walk west along M Street and Maine Avenue until you reach the hotel at 7th Street. Alternatively, take the D40 bus from anywhere along 14th Street directly to the hotel.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="footer-placeholder"></div>
+
+    </div>
+
+    <script>
+        // Apply dark mode immediately to prevent flash
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+        }
+
+        // ===========================
+        // Password Protection
+        // ===========================
+        if (location.hash.includes('figmacapture=')) {
+            sessionStorage.setItem('travelUnlocked', 'true');
+        }
+        const correctPassword = 'beautifulsuperstar';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        if (sessionStorage.getItem('travelUnlocked') === 'true') {
+            unlockContent();
+        }
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem('travelUnlocked', 'true');
+                unlockContent();
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        function unlockContent() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+        }
+
+        if (sessionStorage.getItem('travelUnlocked') !== 'true') {
+            document.body.classList.add('locked');
+        }
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
+        });
+    </script>
+    <script src="includes/site-init.js"></script>
+</body>
+
+</html>
