@@ -35,6 +35,14 @@ function initTheme() {
     const toggleLabel = document.getElementById('toggle-label');
     if (toggleLabel && isDark) toggleLabel.textContent = 'Light Mode';
 
+    // Set initial toggle shape (no animation on load)
+    if (isDark) {
+        var toggleShape = document.getElementById('toggle-shape');
+        if (toggleShape) {
+            toggleShape.setAttribute('d', 'M17.5 28C17.5 43.1878 28.5681 55.5 27.5 55.5C12.3122 55.5 0 43.1878 0 28C0 12.8122 12.3122 0.5 27.5 0.5C27.5 0.5 17.5 12.8122 17.5 28Z');
+        }
+    }
+
     const darkModeBtn = document.getElementById('dark-mode-btn');
     if (!darkModeBtn) return;
 
@@ -46,58 +54,27 @@ function initTheme() {
         updateImages(isDarkNow);
         const label = document.getElementById('toggle-label');
         if (label) label.textContent = isDarkNow ? 'Light Mode' : 'Dark Mode';
+
+        // Morph toggle icon
+        var toMoon = document.getElementById('to-moon');
+        var toSun = document.getElementById('to-sun');
+        if (toMoon && toSun) {
+            if (isDarkNow) {
+                toMoon.beginElement();
+            } else {
+                toSun.beginElement();
+            }
+        }
     });
 }
 
 // ===========================
-// Menu Toggle
+// Menu (placeholder — mobile uses inline links, no toggle needed)
 // ===========================
 
 function initMenu() {
-    const menuToggle = document.getElementById('menu-toggle');
-    const navLinks = document.getElementById('nav-links');
-
-    if (!menuToggle || !navLinks) return;
-
-    function closeMenu() {
-        navLinks.style.transform = 'scale(0)';
-        navLinks.style.opacity = '0';
-        setTimeout(() => {
-            navLinks.classList.remove('open');
-            navLinks.style.transform = '';
-            navLinks.style.opacity = '';
-        }, 300);
-        menuToggle.textContent = 'Menu';
-        menuToggle.setAttribute('aria-expanded', 'false');
-        document.querySelectorAll('main.menu-open, .site-footer.menu-open').forEach(el => {
-            el.classList.remove('menu-open');
-        });
-    }
-
-    menuToggle.addEventListener('click', function () {
-        if (navLinks.classList.contains('open')) {
-            closeMenu();
-        } else {
-            navLinks.classList.add('open');
-            menuToggle.textContent = 'Close';
-            menuToggle.setAttribute('aria-expanded', 'true');
-            document.querySelectorAll('main, .site-footer').forEach(el => {
-                el.classList.add('menu-open');
-            });
-        }
-    });
-
-    navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', closeMenu);
-    });
-
-    document.addEventListener('click', function (e) {
-        if (navLinks.classList.contains('open') &&
-            !navLinks.contains(e.target) &&
-            !menuToggle.contains(e.target)) {
-            closeMenu();
-        }
-    });
+    // Mobile nav now shows all links inside the diamond — no menu toggle required.
+    // This function is kept as a no-op so loadIncludes() doesn't error.
 }
 
 loadIncludes();

@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: March 14, 2026
+Last updated: March 16, 2026
 
 ---
 
@@ -67,7 +67,7 @@ Apply `-webkit-font-smoothing: antialiased` and `text-rendering: optimizeLegibil
 | Dark green | `--color-dark-green` | `#1a3a2e` | Primary green — light mode text, borders, buttons, UI elements |
 | Dark mode background | `--color-dark-bg` | `#122a20` | Dark mode body + password overlay background only |
 | Soft white / cream | `--color-soft-white` | `#F1EDEA` | Light mode body background |
-| Accent | `--color-accent` | `#2d5a4a` | Hover gradient midpoints (used via `var(--color-accent)` in gradient declarations) |
+| Accent | `--color-accent` | `#2d5a4a` | Nav link hover color shift + button system accent |
 | Nav light fill | — | `#EBE7E3` | Baked into nav diamond PNG (light mode) — between body and old nav tint |
 | Nav dark fill | — | `#0e2319` | Baked into nav diamond PNG (dark mode) — darker than body |
 
@@ -80,9 +80,9 @@ Old variables `--color-nav-bg`, `--color-nav-bg-dark`, `--color-footer-bg`, and 
 ### Dark Mode
 
 - Supported on all pages (except `savethedate.html`, which has a standalone toggle but no nav/footer)
-- Toggle via button with hand-drawn sun/moon icon (PNG swap) in the footer
+- Toggle via button with geometric SVG icon in the footer — a circle (sun) that morphs into a crescent (moon) using SMIL path animation. Icon uses `fill="currentColor"` and inherits text color via CSS (no image swap needed). Morph animation is 400ms, matching the color transition timing.
 - Icon swaps: `data-light` / `data-dark` attributes on `<img>` tags
-- Images that change: monogram, illustrations, toggle icon, nav diamond PNG
+- Images that change: monogram, illustrations, nav diamond PNG
 - Dark mode preference saved to `localStorage`
 - Dark mode body uses `--color-dark-bg` (`#122a20`), NOT `--color-dark-green`
 - Dark mode grain overlay gradient uses `rgba(18, 42, 32, 0.75)` (matching `#122a20`)
@@ -189,64 +189,76 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Links:** `.nav-link-inline` elements — TRAVEL and FAQ on the left of the monogram, REGISTRY and RSVP on the right
 - **Monogram:** Smaller inside the nav bar (~36–40px), centered between the link groups
 - **Position:** `position: fixed`, centered horizontally, near the top of the viewport — stays visible on scroll
-- **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow)
-- **Hover:** Currently `opacity: 0.6` on `.nav-link-inline:hover` — hover design is TBD and will be revisited
-- **Menu button:** Hidden on desktop (`display: none !important` in the `min-width: 901px` media query)
+- **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow). Light mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22))`. Dark mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3))`. Hand-tuned — do not revert to the original heavier values.
+- **Hover:** Color shifts to `var(--color-accent)` (`#2d5a4a`) + `text-shadow` shifts to impressed letterpress state (`--emboss-hover`). In dark mode, text dims to `rgba(241, 237, 234, 0.7)`. No opacity change.
+- **Mobile menu:** Hidden on desktop (`display: none !important` in the `min-width: 901px` media query)
 
 #### Mobile (900px and below)
 
-- **Layout:** Monogram top-left (47px tall) · filled Menu pill button top-right
-- **Diamond frame:** Hidden (`display: none`)
-- **Inline links:** Hidden
-- **Menu pill:** Solid filled background in the darker tint (`#E5E0DC` light / `#0e2319` dark) — PP Watch, uppercase
-- **Dropdown:** Opens on tap (see Menu Dropdown section)
+- **Layout:** Same floating diamond as desktop, scaled down to 340px wide × 50px tall. All four links (TRAVEL, FAQ, REGISTRY, RSVP) visible inside the diamond — no hamburger menu, no dropdown.
+- **Monogram:** Positioned above the diamond via `position: absolute; top: -2.5rem` on `.site-title`, centered horizontally. 30px height. Not inside the diamond.
+- **Nav position:** `position: fixed; top: 3rem; left: 50%; transform: translateX(-50%)`
+- **Link font size:** 0.55rem (smaller than desktop 0.7rem to fit four words in 340px)
+- **Link groups:** `.nav-links-left` and `.nav-links-right` each use `gap: 1.2rem`
+- **Diamond frame:** Same PNG as desktop, scaled to fit 340px width
+- **No Menu button, no dropdown, no mobile-specific menu system** — this was a deliberate simplification after extensive iteration
 
 #### Both Modes
 
 - **Dark mode:** Nav diamond PNG swaps via `data-light` / `data-dark` attributes (handled by `site-init.js`). Monogram swaps to white version. Link text color swaps to cream.
 - **`savethedate.html` has NO nav**
+- **Nav link hover:** Color shifts to accent green (light) or dimmed cream (dark) + text-shadow shifts from emboss-rest to emboss-hover. Same behavior on desktop and mobile. Monogram hover: `scale(0.96)` press effect.
 
 #### Implementation History
 
 The nav went through several iterations: transparent bar → SVG pill frame (abandoned) → clip-path polygon (failed — clips pseudo-elements) → 3-slice SVG with CSS hairline middle (worked but PNGs were better for grain) → **final: baked PNG diamond**. The PNG approach won because grain is raster, not vector — baking fill + grain + hairlines into one image avoids all the CSS clipping/blending complexity.
 
-### Menu Dropdown (Mobile Only)
+### Mobile Navigation History
 
-- Only appears on mobile (900px and below) — desktop has no Menu button
-- Grows from Menu button with scale animation
-- `transform-origin: top left`
-- Cubic-bezier easing: `(0.34, 1.56, 0.64, 1)` for slight overshoot
-- `border-radius: 12px` on the dropdown card
-- Semi-transparent background: light mode `rgba(229, 224, 220, 0.95)`, dark mode `rgba(14, 35, 25, 0.95)`
-- Page content and footer fade to `opacity: 0.4` when menu is open (via `main.menu-open` and `.site-footer.menu-open`)
-- Clicking outside or pressing a link closes the menu
-- Links: Save the Date, Registry, RSVP
-- This mobile dropdown design is temporary and will likely change
+The mobile nav went through extensive iteration:
+1. Filled pill "Menu" button with dropdown — functional but generic
+2. Diamond-shaped marquise PNG button with CSS panel crossfade — shape looked like a football at small size
+3. SVG path morph via Flubber.js (marquise → rounded rectangle) — technically worked but SVG hairlines were fuzzy at small sizes
+4. Text "MENU" trigger with double hairlines — considered but untested
+5. **Final: same diamond nav as desktop, scaled to 340px** — all links visible inside the diamond, monogram above. No menu button needed.
+
+The old `.mobile-menu`, `.mobile-menu-trigger`, `.mobile-menu-panel`, `.mobile-menu-links`, and `.mobile-menu-close-btn` elements and styles have been removed. The `.menu-toggle` and `.nav-links` (dropdown) elements are also gone.
 
 ### CTA Buttons
 
-Two button styles exist:
+Two button styles exist, both using a **letterpress/deboss interaction model** — buttons are impressed into the paper surface, never raised above it. No outer shadows. Interaction deepens the impression.
 
-**`.btn-priority`** — Filled by default (e.g., "Visit Our Registry")
+**`.btn-priority`** — Reverse-colored debossed button (e.g., "Visit Our Registry")
 - Pill shape: `border-radius: 25px`
 - Dark green fill + white text (light mode); cream fill + dark green text (dark mode)
-- Hover: gradient sweep reveals transparent background
+- Border: `2px solid rgba(0, 0, 0, 0.12)` — subtle, uniform
+- Surface texture: `::before` pseudo-element with SVG `feTurbulence` grain at 18% opacity, `mix-blend-mode: soft-light`
 - PP Watch font, uppercase, small size
 - `text-shadow: none`
+- Hover: inset shadow deepens, background darkens slightly
+- Active: maximum inset depth, darkest background, `translateY(0.5px)`
 
-**`.btn-normal`** — Outlined by default (e.g., "Visit Website" on save-the-date hotels)
-- Same pill shape and font
-- Transparent background, dark green border + text (light mode); cream border + text (dark mode)
-- Hover: gradient sweep fills with solid color
-- `text-shadow: none`
+**`.btn-normal`** — Background-colored debossed button (e.g., "Visit Website")
+- Same pill shape, font, and texture
+- Background matches page surface: `var(--color-soft-white)` light / `var(--color-dark-bg)` dark
+- Border: `2px solid rgba(26, 58, 46, 0.2)` light / `rgba(241, 237, 234, 0.12)` dark
+- Hover/active: same deepening behavior as priority buttons
 
+**Shadow scale (CSS custom properties in `:root`):**
+- `--shadow-raised`: subtle inset + dark top edge + light bottom edge — rest state
+- `--shadow-lifted`: deeper inset + stronger edges — hover state
+- `--shadow-pressed`: maximum inset depth — active state
+- Shadows use `rgba(0, 0, 0, ...)` (not green) so they're visible on dark surfaces
+- Dark mode overrides in `body.dark-mode` adjust opacities
+
+**Interaction model:** rest (subtle impression) → hover (deeper, darker) → active (deepest, darkest, 0.5px down). Button never lifts off page. No gradient sweep. No outer shadow.
 
 ### Footer
 
 - **Style:** Transparent background — no border, no shadow, no separate tint. Inherits body surface.
 - **Content:** Info text ("Adina & Andrew · October 17, 2026 · Washington, DC") · Dark/light mode toggle
 - Info text: PP Watch, very small (`0.55rem`), low opacity (`0.4` light / `0.35` dark)
-- Toggle: hand-drawn icon + label ("Dark Mode" / "Light Mode")
+- Toggle: geometric SVG morph icon (circle ↔ crescent) + PP Watch label ("Dark Mode" / "Light Mode"). SVG uses `currentColor` fill — no PNG swap needed for the icon.
 - **Desktop (above 900px):** Info text left, toggle right (flex row, `space-between`)
 - **Mobile (below 900px):** Everything stacks vertically and centers — info text wraps to three lines (separators hidden), toggle below, all centered
 - **`savethedate.html` has NO footer** (but has a standalone dark mode toggle at page bottom)
@@ -260,9 +272,11 @@ Two button styles exist:
 
 ### Button Hover Animation
 
-- Gradient sweep effect using `background-size: 300% 100%` and `background-position` shift
-- Light mode: `flashGradient` keyframes (sweeps green → accent → transparent)
-- Dark mode: `flashGradientDark` keyframes (sweeps cream → light cream → transparent)
+- **No gradient sweep.** The old `flashGradient` / `flashGradientDark` keyframes have been fully removed.
+- Buttons use a letterpress/deboss interaction: inset shadows deepen and background-color darkens on hover and active.
+- Button surface texture via `::before` pseudo-element using inline SVG `feTurbulence` filter with `mix-blend-mode: soft-light` at 18% opacity. Inspired by DAUB UI's per-element texture approach (see `.claude/daub-reference.md`).
+- Transitions: `0.2s ease` for shadow/transform, `400ms ease` for color/theme changes.
+- The `#2d5a4a` accent color is used for nav link hover color shift, NOT for button hover gradients.
 
 ### Illustration Sizing
 
@@ -294,16 +308,15 @@ Two button styles exist:
 - `.main-nav` wrapper (fixed position)
 - `.nav-bar` inner container with the diamond frame and content:
   - `.nav-diamond` — the PNG image with `data-light` and `data-dark` attributes for mode switching
-  - `.nav-link-inline` elements (TRAVEL, FAQ, REGISTRY, RSVP) — visible on desktop, hidden on mobile
-  - `.site-title` with `.nav-monogram` image — visible in both layouts
-  - `.menu-toggle` pill button — visible on mobile, hidden on desktop
-- `.nav-links` dropdown container (for mobile menu)
+  - `.nav-links-left` div wrapping TRAVEL and FAQ links
+  - `.site-title` with `.nav-monogram` image — visible in both layouts, positioned above diamond on mobile
+  - `.nav-links-right` div wrapping REGISTRY and RSVP links
 
 #### footer.html Contains
 
 - `.site-footer` wrapper
 - Info text with separator spans (hidden on mobile)
-- Dark mode toggle button with icon image (`data-light`/`data-dark`)
+- Dark mode toggle button with inline SVG morph icon (circle ↔ crescent)
 
 ---
 
@@ -337,13 +350,14 @@ Two button styles exist:
 │   ├── Monogram/           (monogram-green.png, monogram-white.png)
 │   ├── names/              (names-image.png, names-image-dark.png)
 │   ├── illustrations/      (Dupont.png, Dupont-dark.png, dark-mode-button.png, light-mode-button.png)
-│   ├── nav/                (nav-diamond-light.png, nav-diamond-dark.png)
+│   ├── nav/                (nav-diamond-light.png, nav-diamond-dark.png — mobile nav PNGs exist but are unused)
 │   └── textures/           (6 active grain PNGs + old/ subfolder with previous versions)
 ├── vectors/
 │   ├── rowhouse.svg / rowhouse-dark.svg
 │   ├── nav-diamond-light.svg / nav-diamond-dark.svg  (source SVGs — PNGs are used in production)
 │   ├── names-flat.svg
-│   └── nav shapes.af       (Affinity source file)
+│   ├── nav shapes.af       (Affinity source file)
+│   └── mobile-nav/         (source SVGs from Affinity — not used in production)
 ├── rsvp-workflow/
 │   ├── google-apps-script.js
 │   ├── guests.js
@@ -360,13 +374,17 @@ Two button styles exist:
 ### Key CSS Architecture
 
 - **Grain:** Multi-layer `background-image` on `body` with `background-blend-mode: soft-light` — four light-mode layers, two dark-mode layers, plus a `linear-gradient` overlay at 0.75 alpha. Scrolls with page content. See Grain Texture section for full CSS pattern.
-- **Nav:** `.main-nav` is `position: fixed`. `.nav-bar` contains the diamond PNG (`.nav-diamond`) positioned behind nav content, plus inline links and monogram. Diamond PNG has `filter: drop-shadow()` for depth. On mobile, diamond hides and layout reverts to monogram-left / Menu-pill-right.
+- **Nav:** `.main-nav` is `position: fixed`. `.nav-bar` contains the diamond PNG (`.nav-diamond`) positioned behind nav content, plus link groups (`.nav-links-left`, `.nav-links-right`) and monogram. Diamond PNG has `filter: drop-shadow()` for depth. On mobile, same diamond at 340px width with all links visible — monogram positioned above via absolute positioning.
 - **Footer:** `.site-footer` has `background: transparent` — no separate surface, no hairline, no shadow.
 - **Dark mode:** `body.dark-mode` in `styles.css` handles all global dark styles. Page-specific dark overrides scoped with body class (e.g., `body.page-registry .registry-illustration`). Color transitions use `@property` for smooth crossfades; grain/image swaps are instant.
 - **No z-index stacking hacks needed** — grain is body background, never overlays content.
 - **`#protected-content`** is `display: none` by default; `.unlocked` defaults to `flex` column in styles.css; `body.page-savethedate` overrides to `display: block`.
 - **Page body classes** (`page-registry`, `page-savethedate`) scope page-specific styles in styles.css — no inline `<style>` blocks.
 - **Password overlay** recreates grain via `::before` pseudo-element with the same multi-layer background stack.
+- **Buttons:** Letterpress/deboss model using `--shadow-raised`/`--shadow-lifted`/`--shadow-pressed` CSS custom properties (all inset). Surface texture via `::before` with SVG `feTurbulence`. No outer shadows, no gradient sweep.
+- **Dark mode toggle:** Inline SVG with SMIL `<animate>` path morph between circle (sun) and crescent (moon). Uses `fill="currentColor"`. No PNG swap.
+- **Mobile nav:** Same diamond as desktop at 340px width. Monogram positioned above via absolute positioning. No hamburger menu or dropdown.
+- **DAUB UI reference:** `.claude/daub-reference.md` contains the DAUB design system skill file. Used as design reference only — shadow scale philosophy, per-element texture technique. Do NOT import daub.css/daub.js.
 
 
 ---
@@ -379,3 +397,25 @@ Two button styles exist:
 - Flag technical tradeoffs clearly
 - Do not make changes to styles.css without considering impact on ALL pages that use it
 - Read existing file state before proposing changes — never assume
+
+---
+
+## Reference: DAUB UI Design System
+
+`.claude/daub-reference.md` contains the DAUB UI component library's skill file. This is used as a **design reference only** — do NOT import daub.css or daub.js. Do NOT add DAUB classes to any HTML.
+
+We draw from DAUB's approach to:
+- Layered shadow scale (`--shadow-raised`, `--shadow-lifted`, `--shadow-pressed`)
+- Surface materiality (warm-tinted shadows, not pure black)
+- Text emboss / letterpress via `text-shadow`
+- Three-state interaction model: raised → lifted → pressed
+- Transition timing (150-200ms ease for interactions, 400ms ease for color/theme changes)
+
+All implementations should use our own CSS custom properties and selectors, not DAUB's `db-` prefix classes.
+```
+
+**4. Verify Claude Code sees it**
+
+Open Claude Code (`cc`) and ask it something like:
+```
+What's in .claude/daub-reference.md? Summarize the shadow and surface approach.

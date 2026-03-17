@@ -1,259 +1,226 @@
 # Figma Design System Rules — Adina & Andrew Wedding Website
 
-> Generated for Claude Code × Figma integration.
+> Figma-to-code translation guide for Claude Code × Figma integration.
 > Stack: Vanilla HTML5 / CSS3 / JavaScript — no frameworks, no build tools.
+>
+> **This file is a companion to CLAUDE.md, not a replacement.** CLAUDE.md is the single source of truth for all design tokens, component specs, and layout rules. This file provides Figma-specific guidance for translating designs into code. When in doubt, defer to CLAUDE.md.
+
+Last updated: March 15, 2026
 
 ---
 
-## 1. Design Tokens
+## 1. Design Tokens — Figma → CSS Mapping
 
-All tokens are CSS custom properties defined in `:root` in `styles.css`.
+All tokens are CSS custom properties on `:root` in `styles.css`. Registered via `@property` for smooth dark mode transitions (~400ms ease).
 
 ### Colors
 
-| Token | Value | Usage |
-|---|---|---|
-| `--color-dark-green` | `#1a3a2e` | Primary brand color — text, borders, buttons, nav |
-| `--color-soft-white` | `#F1EDEA` | Background & alternate text (inverted in dark mode) |
-| `--color-accent` | `#2d5a4a` | Gradient endpoint for button/hover states |
-| Error red | `#c41e3a` | Form validation errors only |
+| Figma Token | CSS Variable | Hex | Notes |
+|---|---|---|---|
+| Dark green | `var(--color-dark-green)` | `#1a3a2e` | Text, borders, buttons, UI — both modes |
+| Dark background | `var(--color-dark-bg)` | `#122a20` | Dark mode body background ONLY — never for text/UI |
+| Soft white / cream | `var(--color-soft-white)` | `#F1EDEA` | Light mode body background, dark mode text |
+| Accent | `var(--color-accent)` | `#2d5a4a` | Gradient midpoints in button hover states |
+| Error red | (no variable) | `#c41e3a` | Form validation only |
 
-**Dark mode** swaps the two primaries: `--color-soft-white` becomes the background, `--color-dark-green` becomes the text color. Applied via `body.dark-mode` class.
+**Non-CSS colors (baked into PNG assets):**
+| Usage | Light | Dark |
+|---|---|---|
+| Nav diamond fill | `#EBE7E3` | `#0e2319` |
+
+These are exported from Figma as part of the nav diamond PNGs — not adjustable via CSS. Re-export from Figma if they need to change.
+
+**Figma implementation rule:** Always use `var()` references in code — never hardcode hex values. If a Figma design uses a color not in this table, flag it before implementing.
 
 ### Gradients
 
 Buttons use a 300%-wide horizontal gradient that animates on hover:
 ```css
-background: linear-gradient(90deg, #1a3a2e 0%, #2d5a4a 50%, #1a3a2e 100%);
+/* Light mode — .btn-priority default fill */
+background: linear-gradient(90deg, var(--color-dark-green) 0%, var(--color-accent) 50%, transparent 100%);
 background-size: 300% 100%;
-/* animates: background-position 0% → 100% over 0.5s */
 ```
+
+Dark mode uses `flashGradientDark` keyframes with cream/light-cream stops. See CLAUDE.md > Button Hover Animation for full spec.
 
 ### Opacity & Overlays
-- Hero overlay: `rgba(250, 249, 246, 0.7)` — light scrim
-- Modal backdrop: `rgba(26, 58, 46, 0.45)`
-- Secondary text / meta: `opacity: 0.7–0.8` on base color
-- Placeholder text: `opacity: 0.35`
-- Thin divider lines: `rgba(26, 58, 46, 0.15)` (light) / `rgba(241, 237, 234, 0.15)` (dark)
+
+| Context | Value |
+|---|---|
+| Password overlay grain | `linear-gradient` at `rgba(241, 237, 234, 0.75)` (light) / `rgba(18, 42, 32, 0.75)` (dark) |
+| Mobile menu dropdown | `rgba(229, 224, 220, 0.95)` (light) / `rgba(14, 35, 25, 0.95)` (dark) |
+| Footer info text | `opacity: 0.4` (light) / `0.35` (dark) |
+| Placeholder text | `opacity: 0.35` |
 
 ---
 
-## 2. Typography
+## 2. Typography — Figma Font → CSS Variable
 
-### Font Families
-
-| Variable | Family | Weight | Use case |
+| Figma Font Name | CSS Variable | Weight | Usage Rule |
 |---|---|---|---|
-| `--font-title` | PP Playground | 500 (Medium) | Decorative/display: couple names, section headings, page overlays |
-| `--font-heading` | PP Watch | 700 (Bold) | Nav links, labels, buttons, meta — always uppercase + letter-spacing |
-| `--font-body` | Sentient | 400 (Regular) | Body copy, descriptions, form inputs |
+| PP Playground Medium | `var(--font-title)` | 500 | Display text, couple names, page overlay titles |
+| PP Watch Bold | `var(--font-heading)` | 700 | Nav, labels, buttons — always `text-transform: uppercase` + `letter-spacing` |
+| Sentient Regular | `var(--font-body)` | 400 | Body copy, descriptions, form inputs — **never italic** (`font-style: normal` enforced) |
 
-Fallbacks: PP Playground → `Brush Script MT, cursive` / PP Watch → `Helvetica Neue, Arial, sans-serif` / Sentient → `Baskerville, Georgia, serif`
-
-### Type Scale
-
-| Role | Font | Size | Transform | Letter-spacing | Line-height |
-|---|---|---|---|---|---|
-| Password/page overlay title | PP Playground | 5.2rem | — | — | — |
-| Section title (display) | PP Playground | 3–4.5rem | — | — | — |
-| Couple names (hero) | PP Playground | 3.5–4rem | — | — | 1.1 |
-| Heading label | PP Watch | 0.85–1.5rem | uppercase | 0.15–0.25em | — |
-| Nav links | PP Watch | 0.9rem | uppercase | 0.1em | — |
-| Button text | PP Watch | 0.65–1rem | uppercase | 0.1–0.15em | — |
-| Item name chip | PP Watch | 0.8rem | uppercase | 0.12em | — |
-| Body / descriptions | Sentient | 1–1.1rem | — | — | 1.7 |
-| Small meta text | Sentient | 0.85–0.95rem | — | — | 1.6 |
-| Footer / copyright | PP Watch | 0.8rem | uppercase | 0.1em | — |
+**Figma-to-code rule:** If a Figma text layer uses PP Watch, it must have `text-transform: uppercase` and `letter-spacing: 0.1–0.25em` in CSS. If it uses Sentient, ensure `font-style: normal` is set.
 
 ### Text Effects
-- **Emboss (light mode):** `text-shadow: 0 2px 3px rgba(255,255,255,0.9), 0 -1px 1px rgba(26,58,46,0.1)`
-- **Emboss (dark mode):** `text-shadow: 0 1px 2px rgba(255,255,255,0.2), 0 2px 5px rgba(0,0,0,0.5)`
-- **Buttons & labels:** `text-shadow: none` (explicit override)
+
+See CLAUDE.md > Text Emboss/Shadow Effect for exact values. Key rule: buttons and nav links always set `text-shadow: none`.
 
 ---
 
-## 3. Spacing & Layout
+## 3. Component Patterns
 
-### Content Width Constraints
-| Container | Max-width |
-|---|---|
-| `.content-wrapper` | 800px |
-| `.nav-content` | 1200px |
-| `.specialty-grid` | 860px |
-| `.faq-list` | 700px |
-| `.attractions-list` | 700px |
-| `.std-announcement` / `.std-travel` | 700px |
-| `.claim-modal` | 400px |
-| `.password-container` | 400px |
+### Buttons — Two Variants Only
 
-### Section Padding
-- Standard section: `padding: 3rem 0`
-- Registry/specialty section: `padding: 4rem 0 3rem` / `3rem 0 4rem`
-- Page header (subpages with nav): `padding: 6rem 2rem 2rem`
-- Content wrapper horizontal: `padding: 0 2rem` (reduces to `0 1.5rem` on mobile)
-- Hero: `padding: 4rem 2rem 3rem`, `margin-top: 80px` (nav offset)
-- Footer: `padding: 0 0 60px 0`
+| Class | Default State | Hover |
+|---|---|---|
+| `.btn-priority` | Filled (dark green bg, white text) | Gradient sweep → transparent |
+| `.btn-normal` | Outlined (transparent bg, dark green border) | Gradient sweep → filled |
 
-### Grid Patterns
-- Specialty items: `grid-template-columns: repeat(2, 1fr)` → `1fr` on mobile
-- Story/photo gallery: `grid-template-columns: repeat(2, 1fr)` → `1fr` on mobile
-- Registry cards (logos): `flex-direction: column`, centered, `gap: 1.25rem`
+Both share: `border-radius: 25px`, `font-family: var(--font-heading)`, `text-transform: uppercase`, `letter-spacing: 0.1em`, `text-shadow: none`.
 
----
+**Figma rule:** Any button in a Figma design maps to one of these two classes. There are no other button variants. If a Figma button looks filled → `.btn-priority`. If outlined → `.btn-normal`.
 
-## 4. Component Patterns
+### Navigation
 
-### Buttons (Pill Shape)
-All interactive buttons share this base shape:
-```
-border-radius: 25px
-border: 2px solid currentColor
-font-family: PP Watch
-text-transform: uppercase
-letter-spacing: 0.1em
-text-shadow: none
-transition: all 0.5s ease
-```
+The nav is a **baked PNG diamond** — not an SVG, not a CSS shape.
 
-**Variants:**
-- **Primary filled** (`.password-submit`, `.claim-submit-btn`): dark-green fill, soft-white text
-- **Ghost/outline** (`.std-hotel-link`, `.item-link`, `.item-claim-btn`, `.dark-mode-btn`): transparent fill, dark-green border & text → inverts on hover
-- **Registry card** (`.registry-card`): logo container, 240×56px pill, gradient fill from default
+- **Desktop (>900px):** Floating marquise diamond PNG (`images/nav/nav-diamond-light.png` / `nav-diamond-dark.png`) with inline links (TRAVEL · FAQ · [monogram] · REGISTRY · RSVP) and `filter: drop-shadow()`.
+- **Mobile (≤900px):** Diamond hidden. Monogram top-left (47px), filled Menu pill top-right. Dropdown on tap.
 
-**Hover state** on all ghost buttons: gradient sweep left-to-right, text inverts, optional `translateY(-1px)` lift.
+**Figma rule:** If modifying the nav diamond's appearance (fill, grain, hairlines), changes must be made in Figma and re-exported as PNG. CSS only controls positioning, shadow, and link styling.
 
-**Disabled/pending state** (`.item-claim-btn.pending`): `opacity: 0.5`, `cursor: default`
+### Footer
 
-### Navigation (`.main-nav`)
-- Fixed, `top: 0`, `z-index: 1000`
-- `background-color: --color-soft-white` (inverts in dark mode)
-- `border-bottom: 1px solid rgba(26,58,46,0.1)`
-- Height implied by padding: `1.5rem 2rem`
-- Site title: PP Playground 1.8rem
-- Nav links: PP Watch 0.9rem, uppercase, `letter-spacing: 0.1em`
+Transparent background — inherits body surface. Contains info text + dark mode toggle. No border, no shadow, no separate tint.
+
+**Figma rule:** Do not design the footer as a separate surface/card. It sits directly on the body.
 
 ### Password Overlay
-- Full-screen fixed, `z-index: 9999`
-- Same background as page (`--color-soft-white` / `--color-dark-green`)
-- Film grain texture overlaid at `z-index: 1`
-- Title: PP Playground 5.2rem → 3.5rem on mobile
-- Form: horizontal flex (input + button) → stacks vertically on mobile
 
-### Marquee Banner
-- Full-width, `background-color: --color-dark-green`, `color: --color-soft-white`
-- PP Watch, uppercase, `letter-spacing: 0.2em`
-- Two sizes: standard (1.1rem) and large (2rem, `padding: 1.5rem 0`)
-- Infinite horizontal scroll animation (`translateX 0 → -50%`, 20s linear)
-
-### Section Divider
-- `font-family: PP Watch`, `letter-spacing: 0.8rem` — decorative text divider
-- Also used as `<hr>` with `border-top: 1px solid rgba(26,58,46,0.15)`
-
-### Specialty Item Card
-```
-.specialty-item
-  .item-image-wrap (4:3 aspect ratio, border 1px, overflow hidden)
-    img or .item-image-placeholder
-  .item-name (PP Watch, 0.8rem, uppercase)
-  .item-meta (Sentient, 0.9rem, opacity 0.7)
-  .item-actions
-    .item-link (ghost pill button → external link)
-    .item-claim-btn (ghost pill button → opens modal)
-```
-
-### Claim Modal
-- Fixed overlay backdrop: `rgba(26,58,46,0.45)`
-- Modal card: `border-radius: 4px` (not pill — intentionally square-ish), `border: 2px solid --color-dark-green`, `padding: 2.5rem 2rem`
-- Inputs: pill-shaped (`border-radius: 25px`), transparent bg
-- Two action buttons side-by-side: filled submit + ghost cancel
+Full-screen fixed overlay with the same grain texture as the body, recreated via `::before` pseudo-element. See CLAUDE.md > Password Overlay for implementation.
 
 ---
 
-## 5. Texture & Visual Effects
+## 4. Grain & Texture — Figma Export → CSS
 
-### Film Grain
-- Applied to `body::before` and `#password-overlay::before`
-- `background-image: url('images/textures/grain.png')`
-- Dark mode: `url('images/textures/grain-dark.png')` (inverted)
-- `z-index: -1` on body, `z-index: 1` on overlay (pointer-events: none on both)
+The grain system is the most technically nuanced part of this project. See CLAUDE.md > Grain Texture for the full CSS pattern and decisions.md for the export history.
 
-### Footer Texture
-- `background-image: url('images/textures/footer.png')` — repeating-x illustration at bottom
-- `background-position: center bottom 5px`, `background-size: auto 30%`
+### Key Rules for Figma Export
 
-### Embossed Images (Drop Shadow)
-- Names image & Dupont illustration use `filter: drop-shadow()` for embossed look
-- Light: `drop-shadow(0px 2px 2px rgba(255,255,255,1)) drop-shadow(0px -1px 1px rgba(0,0,0,0.15))`
-- Dark: `drop-shadow(0px 2px 2px rgba(0,0,0,0.5)) drop-shadow(0px -1px 1px rgba(255,255,255,0.1))`
+1. **Export each noise/paper layer individually at Normal blend mode** — Figma cannot export transparent PNGs from layers using non-Normal blend modes (it silently adds opaque backgrounds)
+2. **CSS handles the blending** — `background-blend-mode: soft-light` replicates Figma's Soft Light exactly
+3. **Tile size:** 400×400px for all texture PNGs
+4. **Overlay intensity:** Controlled by a `linear-gradient` at 0.75 alpha on top of the texture stack
 
----
+### Current Texture Files (in `images/textures/`)
 
-## 6. Dark Mode
+**Light mode (4 layers):** `paper-grain-light.png`, `noise-grain-light.png`, `paper-grain-light-two.png`, `noise-grain-light-two.png`
 
-Toggle via `body.dark-mode` class (persisted in `localStorage('darkMode')`).
+**Dark mode (2 layers):** `paper-grain-dark.png`, `noise-grain-dark.png`
 
-**Color inversions:**
-- Background: `--color-soft-white` → `--color-dark-green`
-- Text: `--color-dark-green` → `--color-soft-white`
-- Borders: dark-green → soft-white
-- Button gradients: swap color stops
-
-**Image swapping:**
-- Name lockup PNG: `names-image.png` → `names-image-dark.png`
-- Illustrations: `Dupont.png` → `Dupont-dark.png`
-- Registry logos: `data-light` / `data-dark` attributes swapped via JS
-- Grain texture: `grain.png` → `grain-dark.png`
-- Footer: `footer.png` → `footer-dark.png` + `filter: brightness(1.5)`
+**Figma rule:** If new textures are added, they must follow this same export-at-Normal-blend-mode pattern and be added to both the body and password overlay grain stacks.
 
 ---
 
-## 7. Responsive Breakpoints
+## 5. Dark Mode — What Needs Dual Variants
 
-| Breakpoint | Width | Key changes |
+### Image Swaps (instant, no transition)
+
+All handled via `data-light` / `data-dark` attributes on `<img>` tags, swapped by `site-init.js`:
+
+| Asset | Light | Dark |
 |---|---|---|
-| Large | `max-width: 1024px` | Nav gap reduces |
-| Tablet | `max-width: 768px` | Nav stacks, grids go 1-col, font sizes reduce, password form stacks |
-| Mobile | `max-width: 480px` | Body font 16px, display text further reduced, padding tightens |
+| Nav diamond | `nav-diamond-light.png` | `nav-diamond-dark.png` |
+| Monogram | `monogram-green.png` | `monogram-white.png` |
+| Names lockup | `names-image.png` | `names-image-dark.png` |
+| Illustrations | `Dupont.png` | `Dupont-dark.png` |
+| Dark mode toggle icon | `light-mode-button.png` | `dark-mode-button.png` |
+
+### Color Transitions (smooth, ~400ms via `@property`)
+
+CSS custom properties crossfade automatically. No JavaScript class toggling needed.
+
+**Figma rule:** Every new component must have `body.dark-mode .component` overrides in `styles.css`. Every new image that changes between modes needs `data-light` / `data-dark` attributes.
 
 ---
 
-## 8. Asset Conventions
+## 6. Layout & Responsive
 
-### Image Naming
-- Name lockups: `images/names/names-image.png` + `images/names/names-image-dark.png`
-- Illustrations: `images/illustrations/Dupont.png` + `images/illustrations/Dupont-dark.png`
-- Registry item photos: `images/registry/[item-name].jpg` or `.png`
-- Textures: `images/textures/grain.png`, `grain-dark.png`, `footer.png`, `footer-dark.png`
+### Single Breakpoint: 900px
 
-### SVG / Vector Logos
-- Stored in `vectors/`
-- Naming: `[brand]-dark.svg` (inverted/light version for use on dark backgrounds) + `[brand].svg` (light/standard)
-- Used via `data-light` / `data-dark` HTML attributes for JS-driven dark mode swap
+| Viewport | Layout |
+|---|---|
+| >900px | Desktop — diamond nav, side-by-side footer |
+| ≤900px | Mobile — monogram + Menu pill, stacked footer, reduced font sizes |
 
-### Source Files
-- `artboards/` — Affinity Designer `.afdesign` source files
+No other breakpoints in `styles.css`. (`rsvp-styles.css` has its own 768px — separate scope.)
+
+### Content Width
+
+| Container | Max-width |
+|---|---|
+| `.content-wrapper` | 680px (global) |
+| `.content-wrapper` (registry) | 700px (override) |
+
+### Surface Layering
+
+Two visual surfaces create physical depth:
+1. **Body** — primary surface with multi-layer grain
+2. **Nav diamond** — floating PNG with its own grain/fill baked in, offset by `drop-shadow`
+
+The footer is NOT a separate surface.
+
+**Figma rule:** New sections sit on the body surface. Do not introduce new elevated surfaces without explicit approval.
 
 ---
 
-## 9. CSS Methodology
+## 7. Asset Export Conventions
 
-- **No framework** — plain CSS in `styles.css` + page-level `<style>` blocks in each HTML file
-- **Global styles:** `styles.css` (shared components, typography, layout, breakpoints)
-- **Page-specific styles:** `<style>` tag within each HTML file (password overlay, page layout, dark mode overrides)
-- **Naming:** BEM-inspired: `.component-element` or `.component-element--modifier`
-- **Namespace prefixes:** `std-` (save the date page), `registry-`, `password-`
-- **Utility classes:** `.content-wrapper`, `.section-divider`, `.grid`, `.card`
-- **Media queries:** at the bottom of `styles.css`; also duplicated inline for page-specific rules
+### File Naming
+
+| Type | Pattern | Location |
+|---|---|---|
+| Illustrations | `Name.png` + `Name-dark.png` | `images/illustrations/` |
+| Monogram | `monogram-green.png` / `monogram-white.png` | `images/Monogram/` |
+| Names lockup | `names-image.png` / `names-image-dark.png` | `images/names/` |
+| Nav diamond | `nav-diamond-light.png` / `nav-diamond-dark.png` | `images/nav/` |
+| Textures | `paper-grain-*.png` / `noise-grain-*.png` | `images/textures/` |
+| SVG sources | `*.svg` | `vectors/` |
+| Affinity sources | `*.af` / `*.afdesign` | `vectors/` |
+
+### SVG Export Rules (for Rive or other vector use)
+
+- Outline all strokes before export
+- Use Presentation Attributes styling (not CSS `<style>` blocks)
+- Decimal precision: 2
+- Release unnecessary clipping masks
+- Use descriptive group/layer names (map to `id` attributes)
 
 ---
 
-## 10. Figma Implementation Notes
+## 8. CSS Methodology
 
-When implementing designs from Figma into this codebase:
+- **Global styles:** `styles.css` — shared components, typography, layout, breakpoints
+- **Page-specific styles:** Scoped with body class in `styles.css` (e.g., `body.page-registry .component`) — NOT inline `<style>` blocks
+- **RSVP styles:** Separate file `rsvp-styles.css`
+- **No build step** — edits go directly into `.html` or `.css` files; deployed via `git push origin main`
+- **Naming:** BEM-inspired — `.component-element` or `.component-element--modifier`
 
-1. **Colors** — always use `var(--color-dark-green)`, `var(--color-soft-white)`, `var(--color-accent)` — never hardcode hex values
-2. **Fonts** — use `var(--font-title)`, `var(--font-heading)`, `var(--font-body)` variables
-3. **Buttons** — all interactive elements must follow the pill-shaped ghost/filled pattern with the gradient hover animation
-4. **Dark mode** — every new component needs `body.dark-mode .component` overrides
-5. **No build step** — edits go directly into `.html` or `.css` files; deployed by `git push origin main`
-6. **Page styles** — add page-specific styles in the HTML `<style>` block, not in `styles.css`
+---
+
+## 9. Figma Implementation Checklist
+
+When implementing any design from Figma into this codebase:
+
+1. **Read CLAUDE.md first** — it contains all locked design decisions
+2. **Colors** — use `var()` custom properties, never hardcode hex
+3. **Fonts** — use `var(--font-title)`, `var(--font-heading)`, `var(--font-body)`
+4. **Buttons** — map to `.btn-normal` or `.btn-priority` — no other variants
+5. **Dark mode** — add `body.dark-mode` overrides; use `data-light`/`data-dark` for image swaps
+6. **Page styles** — scope with body class in `styles.css`, not inline `<style>` blocks
+7. **Grain** — body and password overlay already handle it; new surfaces should NOT add their own grain
+8. **Breakpoint** — single breakpoint at 900px; mobile adjustments go in the existing `@media (max-width: 900px)` block
+9. **Check all pages** — changes to `styles.css` affect every page; verify no regressions

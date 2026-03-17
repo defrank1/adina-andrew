@@ -1,0 +1,345 @@
+# decisions.md — Design & Technical Decision Log
+
+This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
+
+Last updated: March 14, 2026
+
+---
+
+## Platform & Hosting
+
+### Decision: Custom HTML/CSS/JS on GitHub Pages (not Squarespace)
+
+The project began with a plan to use Squarespace for ease of use, with Claude Code writing custom CSS overrides. That approach was abandoned early. Squarespace's templating system fought against the level of customization Andrew wanted — full control over layout, typography, animations, and interactivity. The site was rebuilt as a fully hand-coded static project hosted on GitHub Pages.
+
+**Tradeoff accepted:** More development effort, but complete design control. No platform-imposed constraints on navigation, animation (Rive), or custom registry logic.
+
+**Lesson learned:** GitHub Pages requires a public repo on free plans. Making the repo private kills the deployment, and making it public again does not auto-redeploy — an empty commit (`git commit --allow-empty`) is required to trigger a rebuild.
+
+---
+
+## Typography
+
+### Decision: PP Playground / PP Watch / Sentient (not Canora / Akzidenz-Grotesk / Mrs Eaves)
+
+The original font plan was Canora (titles), Akzidenz-Grotesk (headings), and Mrs Eaves (body). All three were replaced during the design development phase. The new stack is PP Playground Medium (titles), PP Watch Bold (headings/UI), and Sentient Regular (body).
+
+PP Playground provides the same calligraphic expressiveness as Canora but with more visual weight and personality. PP Watch replaced Akzidenz-Grotesk as the structural/UI font — it's bolder and reads better in uppercase at small sizes. Sentient replaced Mrs Eaves as the body face.
+
+**Locked rule:** Sentient is never rendered italic. All `font-style: normal` is enforced globally. The CLAUDE.md spec explicitly warns against reverting to the old font names, because Claude Code sessions that have older context sometimes try to reference them.
+
+---
+
+## Colors
+
+### Decision: Two-green system — `--color-dark-green` (#1a3a2e) and `--color-dark-bg` (#122a20)
+
+Initially there was one green used everywhere. During the dark mode implementation, `#1a3a2e` was found to be too dark for large background surfaces — it made the page feel oppressive rather than rich. A separate, even deeper green (`#122a20`) was introduced specifically for the dark mode body background.
+
+`--color-dark-green` remains the workhorse color for text, borders, buttons, and UI elements across both modes. `--color-dark-bg` is used only for the body surface in dark mode. This separation was intentional and is documented in CLAUDE.md to prevent consolidation.
+
+### Decision: Nav diamond fill colors are baked into PNGs, not CSS
+
+The nav diamond uses slightly different tints than the body (`#EBE7E3` light / `#0e2319` dark) to create a "different paper stock" layering effect. These colors are baked directly into the nav PNG exports from Figma rather than set via CSS custom properties, because the grain texture is also baked in. If these need to change, the PNGs must be re-exported.
+
+---
+
+## Dark Mode
+
+### Decision: `@property` transitions instead of `theme-transitioning` class
+
+An earlier implementation used a `theme-transitioning` CSS class toggled by JavaScript to suppress animation flash during mode switches. This was replaced with CSS `@property` declarations that register color custom properties with `<color>` syntax, enabling native CSS transitions on the properties themselves. The result is smoother crossfades (~400ms ease) without JavaScript coordination.
+
+Grain textures and image swaps (PNGs, SVGs) still happen instantly — only color values transition.
+
+### Decision: Dark mode class applied before first paint via inline script
+
+To prevent a flash of light mode on page load when dark mode is saved in `localStorage`, a small inline `<script>` in the `<head>` applies the `dark-mode` class to `<html>` and `<body>` before the browser paints. This is deliberate and should not be moved to an external file or deferred.
+
+---
+
+## Grain Texture
+
+### Decision: CSS `background-blend-mode: soft-light` with opaque PNGs (not transparent PNGs)
+
+This was the single most fought-over technical decision in the project. The original plan was to export transparent grain PNGs from Figma and layer them over CSS `background-color`. Multiple attempts were made:
+
+1. **Figma export with transparency** — Failed. Figma silently adds an opaque background when exporting layers that use non-Normal blend modes (Soft Light, Overlay, etc.). Even exporting individual layers, ungrouped, from empty frames produced opaque RGB files.
+2. **Desktop Figma app** — Same result.
+3. **Exporting from frames with no fill** — Same result.
+4. **Affinity Photo conversion** (brightness-to-alpha method) — Proposed but not executed because it would reinterpret the texture character.
+5. **Python conversion** — Built and tested; produced working transparency but the texture looked different from the Figma original.
+
+**What finally worked:** Exporting each noise layer individually at Normal blend mode from Figma (which preserves transparency correctly for Normal-blend layers), then compositing them in CSS using `background-blend-mode: soft-light`. The CSS performs the identical math that Figma's Soft Light blend does. A `linear-gradient` overlay at 0.75 alpha controls intensity — hand-tuned in Chrome DevTools by Andrew.
+
+**Structure:** Light mode uses four texture layers, dark mode uses two. All are opaque PNGs tiled at 400×400px. The `background-color` on each element provides the base tint, and `soft-light` blending lets it show through.
+
+**Key insight:** Grain that uses non-Normal blend modes in Figma *cannot* be exported as transparent PNGs. The blend result is inherently dependent on what's underneath. CSS `background-blend-mode` is the correct mechanism for this — it resolves the blend at render time against whatever `background-color` is set.
+
+### Decision: Grain scrolls with content (not fixed)
+
+The grain is applied directly on `body` as `background-image`, not as a `position: fixed` pseudo-element. This makes it feel like paper texture — it moves with the content as you scroll, rather than sitting stationary behind it. The fixed approach was never seriously considered; it was always meant to feel physically attached to the surface.
+
+### Decision: Password overlay recreates grain via `::before`
+
+Because the password overlay uses a solid `background-color` to block the body's grain, a `::before` pseudo-element on `#password-overlay` recreates the exact same multi-layer grain stack. This means the grain is implemented in two places (body and overlay), which is slightly fragile but functionally correct. A future consolidation could merge these, but it's low priority.
+
+---
+
+## Navigation
+
+### Decision: Baked PNG diamond (not SVG, not CSS clip-path, not 3-slice)
+
+The navigation went through more iterations than any other element. In chronological order:
+
+1. **Transparent bar with hairline border-bottom** — The first implementation. Functional but generic. Felt template-like.
+2. **Floating SVG pill frame** — Specified in an early CLAUDE.md version but never implemented. The idea was a pill-shaped SVG (`floating-header-green.svg`) with the Menu button sitting inside it.
+3. **Floating marquise shape via CSS `clip-path: polygon()`** — Built and deployed. The tapered diamond ends were approximated with polygon points. Problem: `clip-path` clips everything inside the element, including `::before` pseudo-elements. This made it impossible to add a visible hairline border — the pseudo-element was clipped to the same shape as the fill, making the stroke invisible.
+4. **Inline SVG with stroke-only path** — Proposed as the fix for the clip-path problem. The SVG would be just a `<path>` with a stroke and no fill, positioned behind the nav content. Body texture would show through the empty interior.
+5. **3-slice approach** — Left diamond SVG (fixed) + middle CSS hairlines (stretchy) + right diamond SVG (fixed). This solved the responsive scaling problem (the whole SVG was shrinking proportionally instead of collapsing the middle). SVGs were programmatically split from the full diamond. The middle section was just `border-top` + `border-bottom`. This worked but introduced visible seam issues at the junction between SVG endpoints and CSS hairlines.
+6. **Full-width single SVG** — Attempted at a fixed 680px width. Didn't scale well responsively.
+7. **Semi-transparent SVG fill** — Andrew pushed for grain to show through the nav interior. The solution: set the SVG fill to the tinted color at 60-70% opacity so the body's grain bleeds through underneath.
+8. **Baked PNG diamond** — The final, locked approach. The diamond shape, fill, grain texture, and hairlines are all composited together in Figma and exported as a single PNG. Two versions: `nav-diamond-light.png` and `nav-diamond-dark.png`. The PNG sits behind the nav content (positioned absolutely), and `filter: drop-shadow()` follows the diamond shape for depth. Dark mode swaps the PNG via `data-light`/`data-dark` attributes.
+
+**Why PNG won:** Grain is raster, not vector. Baking fill + grain + hairlines into one image sidesteps all the CSS clipping, blending, and compositing complexity. The nav diamond is a self-contained visual asset — changing its appearance means re-exporting from Figma, not debugging CSS.
+
+**Tradeoff accepted:** The nav fill colors are not CSS-adjustable. If the tint needs to change, the PNGs must be re-exported.
+
+### Decision: Desktop shows inline links, mobile shows Menu pill
+
+Desktop (above 900px): TRAVEL · FAQ · [monogram] · REGISTRY · RSVP displayed inside the diamond frame. The Menu button is hidden via `display: none !important`.
+
+Mobile (900px and below): Diamond frame hidden. Monogram top-left (47px), filled Menu pill top-right. Dropdown opens on tap with a scale animation and slight overshoot easing.
+
+The mobile Menu pill uses the darker tint (`#E5E0DC` light / `#0e2319` dark) — same as the nav diamond fill — so it reads as a related surface element even though the diamond is hidden.
+
+### Decision: Drop shadow is `filter: drop-shadow()`, not `box-shadow`
+
+`box-shadow` would cast a rectangular shadow around the nav container, not the diamond shape. `drop-shadow()` follows the alpha contour of the PNG, so the shadow hugs the marquise silhouette. Values were hand-tuned: light mode `0 4px 14px rgba(0, 0, 0, 0.22)`, dark mode `0 4px 14px rgba(0, 0, 0, 0.3)`.
+
+---
+
+## Layout & Responsive Design
+
+### Decision: Single breakpoint at 900px
+
+One structural breakpoint. Above 900px is desktop, below is mobile. This was a deliberate consolidation from an earlier codebase that had breakpoints at 900px, 768px, and 480px. The additional breakpoints contained mostly dead code from deleted page sections. Remaining font-size refinements for very small screens were evaluated and either folded into the 900px breakpoint or removed.
+
+The RSVP page (`rsvp-styles.css`) retains its own 768px breakpoint — separate file, separate scope, intentionally independent.
+
+### Decision: `content-wrapper` at 680px globally, 700px for registry
+
+The registry page needs slightly more horizontal breathing room for its content, so its `.content-wrapper` is overridden to 700px. This is an intentional exception, not drift.
+
+---
+
+## Illustrations
+
+### Decision: 200px desktop, ~175-180px mobile (not 250px)
+
+The original CLAUDE.md spec said ~250px for desktop illustrations. During the registry page design work, 200px was found to be the better proportion — 250px made the rowhouse illustration dominate the page rather than complement it. Andrew confirmed 200px as the locked size.
+
+### Decision: Light/dark variants via `data-light`/`data-dark` attributes
+
+All illustrations that change between modes use custom data attributes on `<img>` tags. The `site-init.js` script handles swapping `src` values on mode toggle. This pattern is consistent across the monogram, illustrations, toggle icon, and nav diamond PNG.
+
+---
+
+## Registry
+
+### Decision: Zola as the single registry hub (not separate Bloomingdale's + C&B links)
+
+The project started with separate links to Bloomingdale's and Crate & Barrel registries. A custom "specialty item" registry was also explored — a self-built system using Google Apps Script + Google Sheets where guests could click "I'm buying this" and Andrew could confirm purchases via an admin interface.
+
+The custom registry was built and functional (with pending/confirmed state management), but ultimately the approach was simplified: Zola serves as the single registry platform, consolidating all items from multiple retailers plus specialty one-offs into one guest-facing link (`zola.com/registry/adinaandandrew2026` — note the double "and," which is correct).
+
+The `registry-admin.html` page was deleted as part of this consolidation.
+
+### Decision: Registry page password is separate from other pages
+
+Registry uses `beautifulsuperstar`, save-the-date uses `october17`. Different passwords for different pages, stored via `sessionStorage` so they persist within a browser session but not across sessions.
+
+---
+
+## Surface Layering Philosophy
+
+### Decision: Two visible surfaces — nav diamond and body (not three)
+
+Inspired by Haley Park's portfolio site, the design uses physically layered surfaces to create depth. The nav diamond is a distinct "sheet of paper" sitting on top of the body, with its own slightly different tint and grain. A `drop-shadow` gives it physical weight.
+
+The footer was briefly considered as a third surface (slightly different tint from the body) but was intentionally simplified to `background: transparent` — it just inherits the body. The old `--color-footer-bg` variables were removed. Two surfaces creates enough depth without making the page feel busy.
+
+---
+
+## Shared Includes System
+
+### Decision: `fetch()`-based HTML injection for nav and footer
+
+Rather than copy-pasting the nav and footer HTML into every page, the markup lives in `includes/nav.html` and `includes/footer.html`. Pages have `<div id="nav-placeholder">` and `<div id="footer-placeholder">` as injection targets. The `includes/site-init.js` script fetches and injects both, then initializes dark mode, menu toggle, and image swapping.
+
+`savethedate.html` is exempt — it has no nav and no footer.
+
+This was implemented during a comprehensive audit that also stripped dead CSS, consolidated duplicate button classes, migrated inline page styles to styles.css, and deleted defunct files.
+
+---
+
+## Animated Intro (Rive)
+
+### Decision: Rive for the metro station animation (not CSS/JS, not Lottie, not GSAP)
+
+The intro concept: a hand-drawn DC Metro station scene → train arrives → doors open → envelope emerges → envelope opens to reveal the RSVP page, styled as a physical invitation.
+
+Rive was chosen because the sequence requires state machine logic (idle → train arrives → doors open → envelope emerges → transition) with timeline-based clips. CSS/JS animation could handle individual transitions but not the coordinated state management. Lottie was considered but Rive's state machine model is a better fit for interactive, sequenced animation.
+
+**Asset requirements:** Five separate SVGs exported from Illustrator — station background, train car body, envelope body, envelope flap (rotates separately), and invitation card. The friend who drew the illustrations separated these into individual layers.
+
+**SVG export rules for Rive:** Outline all strokes before export, use Presentation Attributes styling (not CSS `<style>` blocks), decimal precision 2, release unnecessary clipping masks, use descriptive group/layer names (these become `id` attributes that map to Rive objects).
+
+**Status:** Assets separated and export prep underway. Rive implementation not yet started.
+
+---
+
+## Monogram
+
+### Decision: Optical size variant needed for small sizes
+
+The monogram's thin hairline strokes disappear at small sizes (below ~80px). The recommended approach is an optical size variant — a separate file with manually thickened strokes, maintaining the same letterforms. This preserves a master file for large use and a `monogram-small` variant for nav and other small contexts. Stroke weight override via Illustrator (adding a small stroke on top of the fill) was considered but can look slightly off at close inspection.
+
+**Status:** Not yet created. The nav currently uses the standard monogram at 36px (desktop) / 47px (mobile), where hairline disappearance is noticeable but not critical.
+
+---
+
+## Button System
+
+### Decision: Two variants only — `.btn-normal` (background-colored debossed) and `.btn-priority` (reverse-colored debossed)
+
+The codebase at one point had `.btn-normal`, `.btn-priority`, and a save-the-date-specific `.std-hotel-link` that was functionally identical to `.btn-normal`. During the CSS audit, `.std-hotel-link` was identified as dead duplication and consolidated.
+
+Both buttons share the same deboss/letterpress interaction model, pill shape (`border-radius: 25px`), PP Watch uppercase styling, and SVG `feTurbulence` surface grain. They differ in color treatment: normal uses the page background color with contrasting text, priority uses the reverse (dark green fill in light mode, cream fill in dark mode).
+
+## Dark Mode Text Shadow
+
+### Decision: Separate emboss values for light and dark modes
+
+Light mode: `0 2px 3px rgba(255, 255, 255, 0.9), 0 -1px 1px rgba(26, 58, 46, 0.1)` — creates a subtle pressed-into-paper emboss.
+
+Dark mode: `0 1px 2px rgba(241, 237, 234, 0.1), 0 2px 5px rgba(0, 0, 0, 0.5)` — softer, with more shadow depth.
+
+Buttons and nav links explicitly set `text-shadow: none` to stay crisp.
+
+---
+
+## Development Workflow
+
+### Decision: This chat for design direction, Claude Code for implementation
+
+Andrew uses this project chat for design exploration, decisions, and generating detailed instruction files (.md prompts). Implementation happens in Claude Code via the `cc` alias in the terminal. Instructions are delivered as downloadable .md files with explicit DO NOT sections and verification checklists — this pattern emerged because Claude Code would sometimes drift from the intent when given vague prompts.
+
+### Decision: CLAUDE.md as the living spec
+
+CLAUDE.md is the single source of truth. Claude Code reads it before making any changes. It gets updated whenever decisions are locked. The file has been through multiple major rewrites as the design evolved — early versions referenced the floating SVG pill nav (never implemented), the old font stack, and other since-superseded decisions.
+
+### Decision: Clean rewrites over incremental patches
+
+After the site audit revealed significant CSS cruft from earlier iterations (dead selectors, duplicate rules, conflicting breakpoints), Andrew established a preference for clean consolidated rewrites rather than patching. When a section needs rework, the old code is stripped entirely and replaced, rather than layered on top.
+
+---
+
+## Dark Mode Toggle
+
+### Decision: Geometric SVG morph (not hand-drawn PNG)
+
+The original toggle used hand-drawn sun/moon illustrations (`dark-mode-button.png` / `light-mode-button.png`) that swapped via the `data-light`/`data-dark` image system. This was visually incongruous — the organic, illustrated icon clashed with the brutalist PP Watch uppercase text beside it.
+
+The replacement is a single SVG path that morphs between a full circle (representing the sun / light mode) and a crescent (representing the moon / dark mode) using SMIL `<animate>` elements. The icon uses `fill="currentColor"` so it inherits the page text color automatically — green in light mode, cream in dark mode — with no image swapping required. The morph duration is 400ms, matching the site's `@property` color transition timing.
+
+**Path A (geometric) was chosen over Path B (keep illustration, change font pairing).** The geometric approach maintains consistency with the PP Watch UI type and the overall clean/precise feel of the nav and button system. The hand-drawn illustrations (Dupont rowhouse, etc.) remain for content areas where they belong — the toggle is a UI control, not content illustration.
+
+**Technical approach:** SMIL animation with `begin="indefinite"` — JavaScript calls `.beginElement()` on the appropriate `<animate>` element when the toggle is clicked. The initial state is set via `setAttribute('d', ...)` without animation on page load if dark mode is already enabled. The old PNG swap approach remains intact for all other elements (monogram, nav diamond, illustrations) — only the toggle icon changed.
+
+**Why not CSS `clip-path` morph?** Browser support for animating `clip-path` is inconsistent. SMIL `<animate>` with `attributeName="d"` works reliably in all modern browsers and produces smooth interpolation between path shapes with the same number of control points.
+
+---
+
+## Button Interaction Model
+
+### Decision: Letterpress/deboss (not raised/lifted, not gradient sweep)
+
+The button system went through three iterations:
+
+1. **Gradient sweep** — Original approach using `background-size: 300%` and `background-position` animation on hover. Removed because it felt like a generic digital UI effect, incongruous with the physical paper language.
+
+2. **Raised/lifted/pressed with outer shadows** — Inspired by DAUB UI's shadow scale system. Buttons had outer `box-shadow` at rest and lifted via `translateY(-2px)` on hover. Technically sound but felt wrong — chunky 3D objects on a page where everything else reads as flat printed stationery.
+
+3. **Letterpress/deboss (final)** — All shadows are `inset`. Buttons are impressed into the paper surface. Hover deepens the impression (stronger inset + darker background). Active reaches maximum depth. Button never lifts off page.
+
+**Key technical details:**
+- Shadow variables use `rgba(0, 0, 0)` not green — dark shadows on dark green buttons were invisible.
+- Bevel effect (dark top edge + light bottom edge) via hard 0-blur inset shadows, not multi-color borders (which create miter seams on rounded corners).
+- Button surface texture uses SVG `feTurbulence` via `::before` with `mix-blend-mode: soft-light` at 18% opacity — the DAUB approach to per-element grain.
+- `translateY` on hover was removed entirely. Only active has `translateY(0.5px)`.
+
+**Design reference:** DAUB UI (daub.dev) informed the shadow scale and texture technique. The raised-button model was rejected in favor of deboss to match the wedding invitation aesthetic.
+
+---
+
+## Dark Mode Toggle
+
+### Decision: Geometric SVG morph (not hand-drawn PNG)
+
+The hand-drawn sun/moon illustrations clashed with the brutalist PP Watch type beside them. Replaced with a single SVG `<path>` that morphs between a full circle (sun) and crescent (moon) using SMIL `<animate>` elements. Uses `fill="currentColor"` — inherits green/cream automatically via CSS. Duration: 400ms matching color transitions.
+
+Path A (geometric) was chosen over Path B (keep illustration, change font pairing). The hand-drawn illustrations remain for content areas — the toggle is a UI control, not content.
+
+**Technical:** SMIL with `begin="indefinite"` triggered by JavaScript `.beginElement()`. Initial state set via `setAttribute('d', ...)` on page load (no animation). Old PNG swap system still used for all other elements.
+
+---
+
+## Mobile Navigation
+
+### Decision: Desktop diamond at 340px with inline links (not hamburger menu)
+
+The mobile nav went through extensive iteration before arriving at the simplest solution:
+
+1. **Filled pill "Menu" button** — Original approach. Worked but felt generic.
+2. **Diamond-shaped marquise PNG** with CSS crossfade panel — The marquise at mobile size looked like a football or lemon. Shape doesn't work below ~500px width.
+3. **SVG path morph via Flubber.js** — Marquise morphing to rounded rectangle. Technically worked but SVG hairlines rendered fuzzy at small sizes. The baked PNG approach that works for the desktop nav can't be used here because both shapes need to be in the same SVG for morphing.
+4. **Text "MENU" + double hairlines** trigger — Considered but bypassed.
+5. **Desktop diamond scaled to 340px (final)** — All four links (TRAVEL, FAQ, REGISTRY, RSVP) fit inside the diamond at 0.55rem. Monogram positioned above via `position: absolute; top: -2.5rem`. No menu button, no dropdown, no animation. Same element on desktop and mobile, just smaller.
+
+**Why this works:** The four link words are short enough to fit in 340px at small type. The diamond proportions hold at this width because the height also scales proportionally. The monogram is pulled above the diamond via absolute positioning so it doesn't compete for space inside the shape.
+
+**What was removed:** `.menu-toggle`, `.nav-links` dropdown, `.mobile-menu`, `.mobile-menu-trigger`, `.mobile-menu-panel`, `.mobile-menu-links`, `.mobile-menu-close-btn`, and all associated CSS and JavaScript. The Flubber.js CDN script tag was removed. The mobile nav PNG files (`mobile-nav-light.png`, `mobile-nav-dark.png`) are no longer referenced.
+
+---
+
+## Nav Link Hover
+
+### Decision: Accent color shift + letterpress emboss (not opacity)
+
+Original: `opacity: 0.6` on hover. Too subtle — barely perceptible, especially inside the diamond.
+
+New: Color shifts from `--color-dark-green` to `--color-accent` (`#2d5a4a`) and `text-shadow` shifts from `--emboss-rest` to `--emboss-hover`. In dark mode, text dims to `rgba(241, 237, 234, 0.7)`. The accent color is within the same green family — reads as tonal change, not a color change. Combined with the emboss shift, enough visual feedback without being dramatic.
+
+Monogram hover: `transform: scale(0.96)` with adjusted `drop-shadow` filter — a press effect distinct from the text links.
+
+---
+
+## Rejected / Abandoned Ideas
+
+- **Squarespace** — Abandoned for lack of customization control
+- **Custom self-hosted registry** with Google Apps Script + Sheets — Built and working, but consolidated to Zola for simplicity
+- **CSS `clip-path` for nav shape** — Clips pseudo-elements, making hairline borders impossible
+- **3-slice SVG nav** (left point + stretchy middle + right point) — Worked but had visible seam issues at SVG/CSS junctions
+- **Transparent grain PNGs from Figma** — Figma cannot export transparent PNGs from layers using non-Normal blend modes; it silently adds opaque backgrounds
+- **`theme-transitioning` JavaScript class for dark mode** — Replaced by CSS `@property` transitions
+- **Footer as a separate tinted surface** — Simplified to transparent/inherited
+- **Separate Bloomingdale's and Crate & Barrel registry links** — Consolidated to single Zola link
+- **registry-admin.html** — Deleted after moving to Zola
+- **Pill-shaped mobile menu button** — Replaced first with diamond marquise, then with inline links
+- **CSS clip-path diamond menu button** — Abandoned because clip-path clips pseudo-elements and inset shadows ignore it
+- **SVG path morph mobile menu (Flubber.js)** — Technically worked but SVG hairlines rendered fuzzy at small sizes
+- **CSS clip-path morph dropdown** — Abandoned in favor of eliminating the dropdown entirely
+- **Hand-drawn sun/moon toggle PNGs** — Replaced with geometric SVG morph
+- **Gradient sweep button hover** — Replaced with letterpress/deboss system
+- **Raised/lifted button shadows** — Replaced with all-inset deboss model
