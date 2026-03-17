@@ -36,6 +36,7 @@ function initTheme() {
     var sym = document.getElementById('toggle-sym');
     if (sym && isDark) {
         sym.textContent = '\u23FE';
+        sym.style.fontSize = '28px';
     }
 
     const darkModeBtn = document.getElementById('dark-mode-toggle');
@@ -49,7 +50,13 @@ function initTheme() {
         updateImages(isDarkNow);
         var sym = document.getElementById('toggle-sym');
         if (sym) {
-            sym.textContent = isDarkNow ? '\u23FE' : '\u2739';
+            if (isDarkNow) {
+                sym.textContent = '\u23FE';
+                sym.style.fontSize = '28px';
+            } else {
+                sym.textContent = '\u2739';
+                sym.style.fontSize = '42px';
+            }
         }
     });
 

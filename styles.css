@@ -378,7 +378,6 @@ body.page-savethedate #protected-content.unlocked {
     pointer-events: none;
     z-index: 1;
     filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22));
-    mix-blend-mode: multiply;
 }
 
 body.dark-mode .nav-diamond {
@@ -530,14 +529,21 @@ body.dark-mode .footer-info {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px;
+    padding: 0;
+    width: 48px;
+    height: 48px;
     -webkit-user-select: none;
     user-select: none;
 }
 
 .toggle-sym {
-    font-size: 28px;
+    font-size: 42px;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
     background: rgba(48, 78, 62, 0.75);
     -webkit-background-clip: text;
     background-clip: text;
@@ -547,6 +553,7 @@ body.dark-mode .footer-info {
 }
 
 body.dark-mode .toggle-sym {
+    font-size: 28px;
     background: rgba(45, 90, 74, 0.5);
     -webkit-background-clip: text;
     background-clip: text;
@@ -888,10 +895,10 @@ body.dark-mode .registry-intro {
         font-size: 16px;
     }
 
-    /* Mobile nav — monogram above diamond, links inside */
+    /* Mobile nav — monogram fixed above, diamond fixed below */
     .main-nav {
         position: fixed;
-        top: 3rem;
+        top: 4rem;
         left: 50%;
         transform: translateX(-50%);
         padding: 0;
@@ -918,17 +925,16 @@ body.dark-mode .registry-intro {
         display: none;
     }
 
-    /* Pull monogram out of the flex row, position above the diamond */
     .site-title {
-        position: absolute;
-        top: -2.5rem;
+        position: fixed;
+        top: 0.75rem;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 2;
+        z-index: 1001;
     }
 
     .nav-monogram {
-        height: 30px;
+        height: 38px;
     }
 
     .nav-link-inline {
