@@ -32,18 +32,13 @@ function initTheme() {
     const isDark = localStorage.getItem('darkMode') === 'enabled';
     if (isDark) updateImages(true);
 
-    const toggleLabel = document.getElementById('toggle-label');
-    if (toggleLabel && isDark) toggleLabel.textContent = 'Light Mode';
-
-    // Set initial toggle shape (no animation on load)
-    if (isDark) {
-        var toggleShape = document.getElementById('toggle-shape');
-        if (toggleShape) {
-            toggleShape.setAttribute('d', 'M17.5 28C17.5 43.1878 28.5681 55.5 27.5 55.5C12.3122 55.5 0 43.1878 0 28C0 12.8122 12.3122 0.5 27.5 0.5C27.5 0.5 17.5 12.8122 17.5 28Z');
-        }
+    // Set initial toggle symbol
+    var sym = document.getElementById('toggle-sym');
+    if (sym && isDark) {
+        sym.textContent = '\u23FE';
     }
 
-    const darkModeBtn = document.getElementById('dark-mode-btn');
+    const darkModeBtn = document.getElementById('dark-mode-toggle');
     if (!darkModeBtn) return;
 
     darkModeBtn.addEventListener('click', function () {
@@ -52,20 +47,41 @@ function initTheme() {
         const isDarkNow = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkNow ? 'enabled' : 'disabled');
         updateImages(isDarkNow);
-        const label = document.getElementById('toggle-label');
-        if (label) label.textContent = isDarkNow ? 'Light Mode' : 'Dark Mode';
-
-        // Morph toggle icon
-        var toMoon = document.getElementById('to-moon');
-        var toSun = document.getElementById('to-sun');
-        if (toMoon && toSun) {
-            if (isDarkNow) {
-                toMoon.beginElement();
-            } else {
-                toSun.beginElement();
-            }
+        var sym = document.getElementById('toggle-sym');
+        if (sym) {
+            sym.textContent = isDarkNow ? '\u23FE' : '\u2739';
         }
     });
+
+    // Cursor-tracking shimmer on toggle symbol
+    var toggleSym = document.getElementById('toggle-sym');
+    if (toggleSym) {
+        var baseLt = 'rgba(48,78,62,0.75)';
+        var baseDk = 'rgba(45,90,74,0.5)';
+
+        toggleSym.addEventListener('mousemove', function(e) {
+            var rect = toggleSym.getBoundingClientRect();
+            var x = ((e.clientX - rect.left) / rect.width) * 100;
+            var y = ((e.clientY - rect.top) / rect.height) * 100;
+            var isDark = document.body.classList.contains('dark-mode');
+            var bg = isDark ? baseDk : baseLt;
+            var hiA = isDark ? 'rgba(241,237,234,0.6)' : 'rgba(255,255,255,0.55)';
+            var hiB = isDark ? 'rgba(241,237,234,0.5)' : 'rgba(255,255,255,0.45)';
+            var grad = 'radial-gradient(ellipse 18px 8px at ' + x + '% ' + y + '%, ' + hiA + ' 0%, transparent 80%), radial-gradient(ellipse 8px 18px at ' + x + '% ' + y + '%, ' + hiB + ' 0%, transparent 80%), ' + bg;
+            toggleSym.style.background = grad;
+            toggleSym.style.webkitBackgroundClip = 'text';
+            toggleSym.style.backgroundClip = 'text';
+            toggleSym.style.webkitTextFillColor = 'transparent';
+        });
+
+        toggleSym.addEventListener('mouseleave', function() {
+            var isDark = document.body.classList.contains('dark-mode');
+            toggleSym.style.background = isDark ? baseDk : baseLt;
+            toggleSym.style.webkitBackgroundClip = 'text';
+            toggleSym.style.backgroundClip = 'text';
+            toggleSym.style.webkitTextFillColor = 'transparent';
+        });
+    }
 }
 
 // ===========================
