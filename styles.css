@@ -1075,3 +1075,23 @@ body.dark-mode .registry-intro {
         display: block;
     }
 }
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    body {
+        background-image:
+            linear-gradient(rgba(241, 237, 234, 0.85), rgba(241, 237, 234, 0.85)),
+            url('images/textures/paper-grain-light.png'),
+            url('images/textures/noise-grain-light.png'),
+            url('images/textures/paper-grain-light-two.png'),
+            url('images/textures/noise-grain-light-two.png');
+        background-size: 100% 100%, 600px 600px, 600px 600px, 600px 600px, 600px 600px;
+    }
+
+    body.dark-mode {
+        background-image:
+            linear-gradient(rgba(18, 42, 32, 0.85), rgba(18, 42, 32, 0.85)),
+            url('images/textures/paper-grain-dark.png'),
+            url('images/textures/noise-grain-dark.png');
+        background-size: 100% 100%, 600px 600px, 600px 600px;
+    }
+}
