@@ -582,9 +582,20 @@ body.dark-mode .toggle-aura {
 }
 
 @keyframes breathe {
-    0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
-    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-    100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
+    0% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    100% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
 }
 
 /* ===========================
@@ -1041,7 +1052,8 @@ body.dark-mode .registry-intro {
 
     /* Registry page */
     body.page-registry .registry-page {
-        padding-top: 80px;
+        flex: none;
+        padding-top: 90px;
     }
 
     body.page-registry .registry-title {
@@ -1064,6 +1076,14 @@ body.dark-mode .registry-intro {
 
     body.page-registry .registry-section {
         padding: 1.5rem 0 1rem;
+    }
+
+    body.page-registry #protected-content.unlocked {
+        min-height: auto;
+    }
+
+    body.page-registry .site-footer {
+        margin-top: 2.4rem;
     }
 
     /* Footer */
