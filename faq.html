@@ -92,7 +92,7 @@
         // Password Protection
         // ===========================
         if (location.hash.includes('figmacapture=')) {
-            sessionStorage.setItem('faqUnlocked', 'true');
+            sessionStorage.setItem('siteUnlocked', 'true');
         }
         const correctPassword = 'beautifulsuperstar';
         const passwordOverlay = document.getElementById('password-overlay');
@@ -101,14 +101,14 @@
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
 
-        if (sessionStorage.getItem('faqUnlocked') === 'true') {
+        if (sessionStorage.getItem('siteUnlocked') === 'true') {
             unlockContent();
         }
 
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('faqUnlocked', 'true');
+                sessionStorage.setItem('siteUnlocked', 'true');
                 unlockContent();
             } else {
                 passwordError.classList.add('show');
@@ -123,7 +123,7 @@
             document.body.classList.remove('locked');
         }
 
-        if (sessionStorage.getItem('faqUnlocked') !== 'true') {
+        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
             document.body.classList.add('locked');
         }
 
