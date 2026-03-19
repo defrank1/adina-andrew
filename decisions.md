@@ -500,6 +500,98 @@ The Dupont illustration was renamed from `Dupont.png` to `Dupont-light.png` for 
 
 ---
 
+## Homepage — Standalone Invitation Page with Embossed Diamond Nav
+
+### Decision: Standalone page with static embossed diamond nav
+
+`homepage.html` was created as the primary landing page for the wedding website. It follows the Save the Date pattern: standalone page with no floating nav and no shared footer. Dark mode toggle is a `btn-normal` text button at the bottom, same as Save the Date.
+
+The content flow from top to bottom: invitation intro text ("You are cordially invited...") → names image (same PNG as Save the Date) → date and city → static diamond nav → RSVP button → hairline divider → two event summary blocks (Ceremony and Reception, After Party) → Dupont illustration as closing element.
+
+**Static embossed diamond nav:** The floating marquise nav used on all other content pages is replaced on the homepage with a static diamond that sits in the content flow. The diamond uses the letterpress/emboss drop-shadow treatment (same as illustrations: white highlight below, dark shadow above) instead of the floating shadow used on the fixed nav. This makes it feel printed on the page rather than hovering above it. The monogram was removed from inside the diamond — only the four nav links remain (Travel, FAQ, Registry, RSVP), evenly spaced across the shape. Opacity set to 0.9 to match illustration treatment.
+
+**Why Option B (static diamond) over other approaches:**
+
+- Option A (no nav, no footer, just inline text links) was considered but the diamond provides visual structure and brand identity.
+- Option C (keep floating nav, remove inline links) was considered but the floating nav felt too heavy on a page intended to read as a formal invitation.
+- Option B (static diamond in content flow) won because it provides navigation while feeling like part of the printed invitation rather than website chrome.
+
+**Event summaries** below the hairline are condensed versions of the Schedule page content — just event name (PP Playground), date, venue, and dress code as PP Watch metadata lines. No body text descriptions except for the After Party. Only Ceremony and Reception and After Party appear on the homepage — Welcome Party is excluded.
+
+The homepage is currently at `/homepage` (file: `homepage.html`) while `index.html` continues to redirect to Save the Date. When the site goes live with the real homepage, the file will be renamed to `index.html`.
+
+---
+
+## Travel Page — PP Playground Section Titles and Hairline Dividers
+
+### Decision: PP Playground section titles (not PP Watch)
+
+The Travel page section titles ("Hotels" and "Transportation") were changed from PP Watch 0.85rem uppercase to PP Playground 2.8rem. This makes them feel like section openers rather than structural labels, matching how the Save the Date uses PP Playground for its "Travel" section title.
+
+Hairline dividers (`.section-divider`) were added before both section titles — between the flag illustration and "Hotels", and between the last hotel block and "Transportation". The divider uses `var(--border-hairline)` with dark mode support, spaced at `margin: 3rem auto 2.5rem` to match the Save the Date's rhythm.
+
+A mobile override reduces section title size to 2rem.
+
+---
+
+## Unified Password Session Storage
+
+### Decision: Shared `siteUnlocked` key (not per-page keys)
+
+All pages sharing the `beautifulsuperstar` password now use a single shared `sessionStorage` key: `siteUnlocked`. Entering the password on any page (FAQ, Travel, Schedule, Registry, Homepage) unlocks all of them for the rest of the browser session. Previously each page used its own key (`faqUnlocked`, `travelUnlocked`, etc.), requiring guests to re-enter the password on every page.
+
+Save the Date remains separate with its own key (`saveTheDateUnlocked`) since it uses a different password (`october17`).
+
+---
+
+## Monogram Link
+
+### Decision: Monogram links to `/homepage`
+
+The monogram in the shared nav (`includes/nav.html`) now links to `/homepage` instead of `/`. This will be changed back to `/` when the homepage moves to `index.html`.
+
+---
+
+## Button Labels — "Book Room"
+
+### Decision: "Book Room" for hotel booking buttons
+
+Hotel booking buttons on both the Travel page and Save the Date page were changed to "Book Room" (from "Book Now" and "Visit Website" respectively). citizenM buttons remain "Visit Website" since there's no room block to book.
+
+---
+
+## Meta Descriptions Standardized
+
+### Decision: Uniform meta description across all pages
+
+All pages now use the same meta description: "Adina and Andrew's wedding website."
+
+---
+
+## Schedule Page — Dress Code Formatting
+
+### Decision: Dress code labels as PP Watch metadata
+
+Short dress code labels (Black Tie Preferred, Semi-Formal) were moved from Sentient body text (`.schedule-event-description`) to PP Watch metadata lines (`.schedule-event-detail`). The "Dress Code:" prefix was removed — context makes it clear. Explanatory text (e.g., "Sport coats and trousers, or dresses, jumpsuits, and blouses") stays as a Sentient `.schedule-event-description` paragraph below the label. Breathing room (`margin-top: 2rem`) was added above the RSVP button at the bottom of the Schedule page.
+
+---
+
+## Consistent Illustration Vertical Rhythm
+
+### Decision: Fixed height for `.registry-illustration`
+
+`.registry-illustration` was changed from `max-height: 250px` to a fixed `height: 200px` (mobile: `height: 180px`) with `object-fit: contain`. This ensures the distance from title to first content block is consistent across all pages regardless of illustration proportions.
+
+---
+
+## FAQ Password Overlay — Title Centering
+
+### Decision: Nowrap title with widened container
+
+`white-space: nowrap` was added to `body.page-faq .password-container h2` to keep "Questions & Answers" on one line. The FAQ password container was widened to `max-width: 600px` to prevent the nowrap text from overflowing off-center.
+
+---
+
 ## Rejected / Abandoned Ideas
 
 - **Squarespace** — Abandoned for lack of customization control
@@ -528,3 +620,6 @@ The Dupont illustration was renamed from `Dupont.png` to `Dupont-light.png` for 
 - **Affinity Designer Inner Shadow for letterpress effect on illustrations** — Tested but only affects edges, doesn't add texture to flat fill areas
 - **Affinity Designer pixel layer noise overlay for illustration texture** — Explored but complex workflow; Figma noise plugins are simpler for this use case
 - **`.std-intro` and `.std-details` left-alignment** — Accidentally applied during content page left-alignment pass, then reverted. Save the Date must remain centered.
+- **Homepage with floating nav** (Option C) — Felt too heavy on a formal invitation page. Static embossed diamond chosen instead.
+- **Homepage with no diamond, just text links** (Option A) — Too minimal; diamond provides visual structure and brand identity.
+- **Monogram inside homepage static diamond** — Removed because with only four links the spacing was uneven; the diamond reads cleaner without it.

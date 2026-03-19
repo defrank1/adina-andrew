@@ -22,7 +22,8 @@ Last updated: March 19, 2026
 
 ## Pages
 
-- `index.html` — Homepage (currently minimal, needs redesign as a hub/landing page)
+- `index.html` — Currently redirects to Save the Date. Will be replaced by homepage.html when the site goes live.
+- `homepage.html` — Homepage / invitation landing page. Standalone (no floating nav, no shared footer). Static embossed diamond nav in content flow. `<body class="page-home">`
 - `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer** — `<body class="page-savethedate">`
 - `registry.html` — Registry with link to Zola (`adinaandandrew2026` — double "and" is correct) — `<body class="page-registry">`
 - `faq.html` — Questions & Answers (5 Q&A items, inline RSVP link) — `<body class="page-faq">`
@@ -41,7 +42,7 @@ Last updated: March 19, 2026
 
 ## Meta
 
-- Meta description on all pages: "Adina and Andrew are getting married!"
+- Meta description on all pages: "Adina and Andrew's wedding website."
 
 ---
 
@@ -126,6 +127,8 @@ Old texture files (`paper-grain-light.png`, `noise-grain-light.png`, `paper-grai
 - Registry password: `beautifulsuperstar`
 - Save the Date password: `october17`
 - Session storage remembers unlock state within a session
+- All pages using `beautifulsuperstar` share a single session storage key: `siteUnlocked`. Entering the password on any page unlocks all of them for that browser session.
+- Save the Date remains separate with key `saveTheDateUnlocked` and password `october17`.
 
 ### Surface Layering
 
@@ -166,6 +169,14 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Dark mode:** Nav diamond PNG swaps via `data-light` / `data-dark` attributes (handled by `site-init.js`). Monogram swaps to white version. Link text color swaps to cream.
 - **`savethedate.html` has NO nav**
 - **Nav link hover:** Color shifts to accent green (light) or dimmed cream (dark) + text-shadow shifts from emboss-rest to emboss-hover. Same behavior on desktop and mobile. Monogram hover: `scale(0.96)` press effect.
+
+#### Homepage (Static Diamond)
+
+- **No floating nav.** The homepage uses a static diamond PNG in the content flow, not the fixed-position `.main-nav`.
+- **Embossed, not floating:** Uses the illustration drop-shadow treatment (`drop-shadow(0px 2px 2px rgba(255,255,255,1)) drop-shadow(0px -1px 1px rgba(0,0,0,0.15))`) instead of the floating shadow. Opacity 0.9.
+- **No monogram** inside the diamond — only the four nav links (Travel, FAQ, Registry, RSVP), evenly spaced.
+- **Wrapped in `.home-nav`** — a flex container that centers the diamond in the content flow.
+- **Dark mode toggle:** Standalone `btn-normal` text button at bottom, same pattern as Save the Date.
 
 #### Implementation History
 
@@ -293,7 +304,8 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 ├── .gitignore
 ├── styles.css              (global styles — shared across all pages)
 ├── rsvp-styles.css         (RSVP-specific styles)
-├── index.html              (homepage — currently redirects to save-the-date)
+├── index.html              (currently redirects to save-the-date)
+├── homepage.html           (homepage / invitation landing page — standalone)
 ├── savethedate.html        (NO nav, NO footer)
 ├── registry.html
 ├── faq.html                (Questions & Answers)
@@ -355,6 +367,11 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - **Footer overflow:** `overflow: visible` on footer elements to prevent aura clipping
 - **DAUB UI reference:** `.claude/daub-reference.md` contains the DAUB design system skill file. Used as design reference only — shadow scale philosophy, per-element texture technique. Do NOT import daub.css/daub.js.
 - **Content page body text** is left-aligned within centered containers. Hotel blocks, FAQ items, and schedule events share consistent sizing derived from the Save the Date `.std-hotel` pattern (1.1rem name, 0.1em letter-spacing, 0.75rem name margin, 1rem body text, 0.6rem body margin, 2.5rem block margin). The Travel page uses a D.C. flag illustration (`flag-light.png`/`flag-dark.png`) instead of the rowhouse, with "Hotels" and "Transportation" section subheads. The Schedule page event hierarchy is: Event Name (PP Playground, 2.8rem) → Date → Address → Description → Dress Code. The FAQ page uses an inline RSVP link instead of a CTA button.
+- **Travel page section titles** ("Hotels", "Transportation") use PP Playground at 2.8rem (mobile: 2rem), left-aligned. Hairline dividers (`.section-divider`) separate the illustration from Hotels, and Hotels from Transportation.
+- **Button labels** on Travel and Save the Date hotel blocks: "Book Room" for hotels with room blocks, "Visit Website" for citizenM.
+- **Schedule page dress code:** short labels as `.schedule-event-detail` (PP Watch), explanatory text as `.schedule-event-description` (Sentient). No "Dress Code:" prefix.
+- **`.registry-illustration`** uses fixed `height: 200px` (mobile: 180px) with `object-fit: contain` for consistent vertical rhythm across pages.
+- **FAQ password overlay** uses `white-space: nowrap` with widened container (`max-width: 600px`) to keep title on one line.
 
 
 ---

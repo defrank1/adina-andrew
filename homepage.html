@@ -88,11 +88,7 @@
             </section>
         </main>
 
-        <footer>
-            <div style="text-align: center; padding: 1.5rem 0;">
-                <button id="dark-mode-btn" class="btn-normal">Dark Mode</button>
-            </div>
-        </footer>
+        <div id="footer-placeholder"></div>
 
     </div>
 
@@ -146,29 +142,6 @@
             passwordError.classList.remove('show');
         });
 
-        // ===========================
-        // Dark Mode Toggle
-        // ===========================
-        const darkModeBtn = document.getElementById('dark-mode-btn');
-        if (darkModeBtn) {
-            const isDarkOnLoad = localStorage.getItem('darkMode') === 'enabled';
-            if (isDarkOnLoad) {
-                darkModeBtn.textContent = 'Light Mode';
-            }
-            darkModeBtn.addEventListener('click', function () {
-                document.documentElement.classList.toggle('dark-mode');
-                document.body.classList.toggle('dark-mode');
-                const isDark = document.body.classList.contains('dark-mode');
-                localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-                darkModeBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-                // site-init.js handles data-light/data-dark swaps via updateImages
-                // but it only runs on the shared footer toggle (#dark-mode-toggle)
-                // so we need to manually trigger the image swap here
-                document.querySelectorAll('[data-light][data-dark]').forEach(img => {
-                    img.src = isDark ? img.dataset.dark : img.dataset.light;
-                });
-            });
-        }
     </script>
     <script src="includes/site-init.js"></script>
 </body>
