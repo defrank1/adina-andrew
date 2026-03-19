@@ -38,10 +38,11 @@
                     <img src="images/names/names-image.png" alt="Adina Nelson & Andrew DeFrank" class="std-names-image"
                         id="names-image">
                     <p class="std-details"><strong>October 17, 2026</strong><br>Washington, D.C.<br><br>
-                        InterContinental at The Wharf<br>801 Wharf Street SW<br><br><em>Formal invitation to follow.</em></p>
+                        InterContinental at The Wharf<br>801 Wharf Street SW<br><br><em>Formal invitation to
+                            follow.</em></p>
 
                     <div class="announcement-icon">
-                        <img src="images/illustrations/Dupont.png" alt="" class="dupont-icon" id="dupont-icon">
+                        <img src="images/illustrations/Dupont-light.png" alt="" class="dupont-icon" id="dupont-icon">
                     </div>
                 </div>
 
@@ -153,7 +154,7 @@
 
         function updateImages(isDarkMode) {
             if (namesImage) namesImage.src = isDarkMode ? 'images/names/names-image-dark.png' : 'images/names/names-image.png';
-            if (dupontIcon) dupontIcon.src = isDarkMode ? 'images/illustrations/Dupont-dark.png' : 'images/illustrations/Dupont.png';
+            if (dupontIcon) dupontIcon.src = isDarkMode ? 'images/illustrations/Dupont-dark.png' : 'images/illustrations/Dupont-light.png';
         }
 
         const isDarkOnLoad = localStorage.getItem('darkMode') === 'enabled';
