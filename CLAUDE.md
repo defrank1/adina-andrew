@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: March 17, 2026
+Last updated: March 19, 2026
 
 ---
 
@@ -25,9 +25,9 @@ Last updated: March 17, 2026
 - `index.html` — Homepage (currently minimal, needs redesign as a hub/landing page)
 - `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer** — `<body class="page-savethedate">`
 - `registry.html` — Registry with link to Zola (`adinaandandrew2026` — double "and" is correct) — `<body class="page-registry">`
-- `faq.html` — Questions & Answers (5 Q&A items + RSVP CTA) — `<body class="page-faq">`
-- `schedule.html` — Wedding weekend schedule (Fri/Sat/Sun events) — `<body class="page-schedule">`
-- `travel.html` — Hotels (4 blocks) + transit directions — `<body class="page-travel">`
+- `faq.html` — Questions & Answers (5 Q&A items, inline RSVP link) — `<body class="page-faq">`
+- `schedule.html` — Wedding weekend invitation (Fri/Sat/Sun events, event names lead each block) — `<body class="page-schedule">`
+- `travel.html` — Hotels (4 blocks) + transportation directions, D.C. flag illustration — `<body class="page-travel">`
 - `rsvp.html` — RSVP form (integrates with Google Sheets via rsvp-workflow/google-apps-script.js)
 
 ## Hotel Blocks
@@ -104,7 +104,7 @@ Old variables `--color-nav-bg`, `--color-nav-bg-dark`, `--color-footer-bg`, and 
 - Centered, vertically stacked content
 - `content-wrapper` constrains content width (~680px globally; registry page overrides to 700px)
 - Illustrations centered, not floated
-- Body text centered
+- Body text left-aligned on content pages (FAQ, Travel, Schedule, Registry). Save the Date remains fully centered — it's a formal invitation card.
 - CTA buttons centered
 
 ### Background Texture
@@ -243,6 +243,9 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - `object-fit: contain`
 - Light/dark variants via `data-light` / `data-dark` attributes
 - Drop-shadow filter: light mode uses white/dark-green shadows, dark mode uses black/white shadows
+- Export from Affinity Designer at 600px wide (3x retina at 200px display size)
+- Light and dark variants must have identical canvas bounds to prevent swap size jumps
+- Texture/grain should be baked into illustration assets before export, not applied via CSS
 
 ### Responsive Breakpoint
 
@@ -309,7 +312,7 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 │   ├── favicon.png
 │   ├── Monogram/           (monogram-green.png, monogram-white.png)
 │   ├── names/              (names-image.png, names-image-dark.png)
-│   ├── illustrations/      (Dupont.png, Dupont-dark.png, dark-mode-button.png, light-mode-button.png)
+│   ├── illustrations/      (Dupont-light.png, Dupont-dark.png, flag-light.png, flag-dark.png)
 │   ├── nav/                (nav-diamond-light.png, nav-diamond-dark.png — mobile nav PNGs exist but are unused)
 │   └── textures/
 │       ├── combined-light.png          (baked texture tile — light mode)
@@ -351,6 +354,7 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - **Toggle aura:** Pure CSS animation via `@keyframes breathe` — no JavaScript for the glow effect
 - **Footer overflow:** `overflow: visible` on footer elements to prevent aura clipping
 - **DAUB UI reference:** `.claude/daub-reference.md` contains the DAUB design system skill file. Used as design reference only — shadow scale philosophy, per-element texture technique. Do NOT import daub.css/daub.js.
+- **Content page body text** is left-aligned within centered containers. Hotel blocks, FAQ items, and schedule events share consistent sizing derived from the Save the Date `.std-hotel` pattern (1.1rem name, 0.1em letter-spacing, 0.75rem name margin, 1rem body text, 0.6rem body margin, 2.5rem block margin). The Travel page uses a D.C. flag illustration (`flag-light.png`/`flag-dark.png`) instead of the rowhouse, with "Hotels" and "Transportation" section subheads. The Schedule page event hierarchy is: Event Name (PP Playground, 2.8rem) → Date → Address → Description → Dress Code. The FAQ page uses an inline RSVP link instead of a CTA button.
 
 
 ---

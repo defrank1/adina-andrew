@@ -725,6 +725,77 @@ body.dark-mode .btn-priority:active {
 }
 
 /* ===========================
+   Homepage
+   =========================== */
+
+body.page-home #protected-content.unlocked {
+    display: block;
+}
+
+body.page-home .save-the-date-content {
+    padding: 6rem 0 5rem;
+}
+
+.home-nav {
+    display: flex;
+    justify-content: center;
+    margin: 2rem auto 2.5rem;
+}
+
+.home-nav .nav-bar {
+    position: relative;
+}
+
+.home-nav .site-title:hover {
+    transform: scale(0.96);
+}
+
+body.page-home .std-names-image {
+    margin: 2.5rem auto;
+}
+
+body.page-home .registry-cta {
+    margin-bottom: 2rem;
+}
+
+.home-details .announcement-icon {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+}
+
+.home-details {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-top: 3rem;
+    border-top: var(--border-hairline);
+    text-align: center;
+}
+
+body.dark-mode .home-details {
+    border-top-color: rgba(241, 237, 234, 0.2);
+}
+
+.home-event {
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.home-event .schedule-event-name {
+    text-align: center;
+}
+
+.home-event .schedule-event-detail {
+    text-align: center;
+}
+
+.home-event .schedule-event-description {
+    text-align: center;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ===========================
    Save the Date Page
    =========================== */
 
@@ -891,8 +962,8 @@ body.page-registry .registry-section {
     margin: 0 auto 1.2rem;
     width: auto;
     max-width: 200px;
-    max-height: 250px;
-    height: auto;
+    max-height: none;
+    height: 200px;
     object-fit: contain;
     opacity: 0.9;
     filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
@@ -912,7 +983,6 @@ body.dark-mode .registry-illustration {
     max-width: 600px;
     margin: 0 auto 1.5rem;
     opacity: 0.85;
-    text-align: center;
 }
 
 .registry-cta {
@@ -927,6 +997,14 @@ body.dark-mode .registry-intro {
 /* ===========================
    FAQ Page
    =========================== */
+
+body.page-faq .password-container {
+    max-width: 600px;
+}
+
+body.page-faq .password-container h2 {
+    white-space: nowrap;
+}
 
 body.page-faq .registry-page {
     padding-top: 120px;
@@ -974,6 +1052,10 @@ body.page-schedule .registry-page {
     flex: 1;
 }
 
+body.page-schedule .registry-cta {
+    margin-top: 2rem;
+}
+
 .schedule-day {
     max-width: 600px;
     margin: 0 auto 0.5rem;
@@ -996,12 +1078,12 @@ body.page-schedule .registry-page {
 .schedule-event {
     max-width: 600px;
     margin: 0 auto 2rem;
-    text-align: center;
+    text-align: left;
 }
 
 .schedule-event-name {
     font-family: var(--font-title);
-    font-size: 2.2rem;
+    font-size: 2.8rem;
     font-weight: 400;
     margin-bottom: 0.5rem;
     line-height: 1.2;
@@ -1055,14 +1137,24 @@ body.page-travel .registry-page {
 }
 
 .travel-section-title {
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-    text-align: center;
+    font-family: var(--font-title);
+    font-size: 2.8rem;
+    font-weight: 400;
+    text-align: left;
     margin: 2.5rem auto 1.5rem;
     max-width: 600px;
+    line-height: 1.2;
+}
+
+.section-divider {
+    border: none;
+    border-top: var(--border-hairline);
+    max-width: 600px;
+    margin: 1rem auto 2.5rem;
+}
+
+body.dark-mode .section-divider {
+    border-top-color: rgba(241, 237, 234, 0.2);
 }
 
 .travel-hotel {
@@ -1276,7 +1368,8 @@ body.dark-mode .travel-link:hover {
 
     body.page-registry .registry-illustration {
         max-width: 180px;
-        max-height: 220px;
+        height: 180px;
+        max-height: none;
         margin-bottom: 1.5rem;
     }
 
@@ -1321,6 +1414,37 @@ body.dark-mode .travel-link:hover {
 
     .schedule-event-name {
         font-size: 1.8rem;
+    }
+
+    /* Homepage */
+    body.page-home .save-the-date-content {
+        padding-top: 4rem;
+    }
+
+    .home-nav .nav-bar {
+        width: 340px;
+        height: 50px;
+    }
+
+    .home-nav .nav-link-inline {
+        font-size: 0.55rem;
+    }
+
+    .home-nav .nav-links-left,
+    .home-nav .nav-links-right {
+        gap: 1.2rem;
+    }
+
+    .home-nav .site-title {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+    }
+
+    /* Travel section titles */
+    .travel-section-title {
+        font-size: 2rem;
     }
 
     /* Footer */

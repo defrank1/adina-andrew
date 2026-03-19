@@ -9,6 +9,9 @@ wedding-website/
 ├── index.html                   # Homepage (currently redirects to save-the-date)
 ├── savethedate.html             # Save the Date — NO nav, NO footer
 ├── registry.html                # Registry page
+├── faq.html                     # Questions & Answers
+├── schedule.html                # Wedding weekend schedule (Invitation)
+├── travel.html                  # Hotels + transportation directions
 ├── rsvp.html                    # RSVP form
 ├── styles.css                   # Global styles (all pages)
 ├── rsvp-styles.css              # RSVP-specific styles
@@ -35,10 +38,10 @@ wedding-website/
 │   │   ├── names-image.png
 │   │   └── names-image-dark.png
 │   ├── illustrations/
-│   │   ├── Dupont.png
+│   │   ├── Dupont-light.png
 │   │   ├── Dupont-dark.png
-│   │   ├── dark-mode-button.png
-│   │   └── light-mode-button.png
+│   │   ├── flag-light.png
+│   │   └── flag-dark.png
 │   ├── nav/
 │   │   ├── nav-diamond-light.png
 │   │   ├── nav-diamond-dark.png
@@ -47,19 +50,21 @@ wedding-website/
 │   │   ├── mobile-nav-light-old.png
 │   │   └── mobile-nav-dark-old.png
 │   └── textures/
-│       ├── paper-grain-light.png
-│       ├── noise-grain-light.png
-│       ├── paper-grain-light-two.png
-│       ├── noise-grain-light-two.png
-│       ├── paper-grain-dark.png
-│       ├── noise-grain-dark.png
-│       └── old/                 # Previous texture versions
+│       ├── combined-light.png       # Baked texture tile — light mode (in use)
+│       ├── combined-dark.png        # Baked texture tile — dark mode (in use)
+│       ├── paper-grain-light.png    # Legacy — no longer referenced in CSS
+│       ├── noise-grain-light.png    # Legacy
+│       ├── paper-grain-light-two.png # Legacy
+│       ├── noise-grain-light-two.png # Legacy
+│       ├── paper-grain-dark.png     # Legacy
+│       ├── noise-grain-dark.png     # Legacy
+│       └── old/                     # Previous texture versions
 │
 ├── vectors/
 │   ├── rowhouse.svg
 │   ├── rowhouse-dark.svg
 │   ├── names-flat.svg
-│   ├── nav shapes.af            # Affinity Designer source
+│   ├── nav shapes.af               # Affinity Designer source
 │   ├── credentials.json
 │   └── mobile-nav/
 │       ├── mobile-nav-light.svg
@@ -68,11 +73,11 @@ wedding-website/
 │       └── mobile-nav-open-dark.svg
 │
 ├── rsvp-workflow/
-│   ├── google-apps-script.js    # Google Sheets integration
-│   ├── guests.js                # Guest list data
-│   └── rsvp-script.js           # RSVP form client-side logic
+│   ├── google-apps-script.js        # Google Sheets integration
+│   ├── guests.js                    # Guest list data
+│   └── rsvp-script.js              # RSVP form client-side logic
 │
 └── .claude/
     ├── settings.local.json
-    ├── daub-reference.md        # DAUB UI design system reference
+    ├── daub-reference.md            # DAUB UI design system reference
     └── figma-design-system-rules.md

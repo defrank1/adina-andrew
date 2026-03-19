@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: March 14, 2026
+Last updated: March 19, 2026
 
 ---
 
@@ -424,6 +424,82 @@ Three new content pages were created (`faq.html`, `schedule.html`, `travel.html`
 
 ---
 
+## Content Page Styling Pass — Left-Alignment and Consistent Sizing
+
+### Decision: Body text left-aligned on content pages (not centered)
+
+Body text on the content pages (FAQ, Travel, Schedule, Registry) was changed from `text-align: center` to `text-align: left`. This applies to paragraph-level body text only — page titles (PP Playground), section headings (PP Watch), illustrations, and CTA buttons remain centered. The Save the Date page remains fully centered — it's a formal invitation card with a different design intent.
+
+This matches the precedent set by the Save the Date's travel section, where `.std-hotel` and `.std-travel-intro` were already left-aligned. Body text reads more naturally as left-aligned paragraphs than as centered blocks.
+
+Affected selectors: `.faq-answer`, `.travel-hotel-description`, `.travel-direction-item`, `.schedule-event-description`, `.registry-intro`. Container-level alignment changed to left on `.travel-hotel`, `.faq-item`, `.schedule-event`.
+
+`.std-intro` and `.std-details` were accidentally changed to left-aligned during the pass and then reverted — the Save the Date page must stay centered.
+
+### Decision: Consistent block sizing across content pages
+
+Hotel blocks on the Travel page, FAQ items, and schedule events were resized to match the Save the Date's `.std-hotel` proportions — the established "block pattern" is: 1.1rem name, 0.1em letter-spacing, 0.75rem name margin-bottom, 1rem body text, 0.6rem body margin-bottom, 2.5rem block margin-bottom.
+
+---
+
+## Travel Page — D.C. Flag Illustration and Section Organization
+
+### Decision: D.C. flag illustration (not rowhouse)
+
+The Travel page illustration was swapped from the rowhouse SVG to a hand-drawn D.C. flag PNG (`flag-light.png` / `flag-dark.png`). The flag is exported from Affinity Designer at 600px wide (3x retina coverage at 200px display size) with transparent background.
+
+### Decision: Hotels and Transportation section subheads
+
+A "Hotels" subhead (`<h2 class="travel-section-title">`) was added above the hotel blocks. "Getting There" was renamed to "Transportation". These section titles use the existing `.travel-section-title` class (PP Watch, centered, 0.85rem uppercase).
+
+---
+
+## Schedule Page Restructure
+
+### Decision: Event name leads each block (not date)
+
+The schedule page event blocks were restructured. The original hierarchy was: Date heading → Event Name → Address → Body → Dress Code, with dates in their own separate `.schedule-day` wrappers above each event.
+
+The new hierarchy is: Event Name → Date (inline as `.schedule-event-detail`) → Address → Body → Dress Code. Event names (PP Playground) now lead each block, with the date as a supporting detail line below. This reads more naturally — the event identity comes first, then the when/where.
+
+Other schedule changes: Dress code switched from PP Watch (`.schedule-event-detail`) to Sentient (`.schedule-event-description`) for readability. After Party date/time combined into one line with a middle dot separator. Farewell Brunch now has a date line. Event name size increased from 2.2rem to 2.8rem (desktop).
+
+---
+
+## FAQ Page — RSVP Button Removed, Inline Link Added
+
+### Decision: Inline RSVP link (not CTA button)
+
+The FAQ page's bottom "RSVP Now" button (`.btn-priority`) was removed. The RSVP question answer now contains an inline link using the `.schedule-link` class instead. Various Q&A copy was tightened.
+
+---
+
+## Illustration Grain Overlay — Tested and Rejected
+
+### Decision: No CSS grain overlay on illustrations
+
+A CSS grain overlay was tested on the Travel page flag illustration. The approach: wrap the `<img>` in a `.illustration-wrapper` div, apply SVG `feTurbulence` noise via `::after` with `mix-blend-mode: soft-light` (same technique as button grain). The problem: `::after` covers the full rectangular bounds of the wrapper, so the noise pattern is visible as a rectangle against the transparent PNG areas. This approach doesn't work for irregular-shaped transparent illustrations.
+
+Texture on illustrations should be baked into the asset at the design tool level (Affinity Designer / Figma) before export, not applied via CSS.
+
+---
+
+## Illustration Export from Affinity Designer
+
+### Decision: 600px wide export for 3x retina coverage
+
+PNG illustrations are exported from Affinity Designer at 600px wide (height scales proportionally with Lock Aspect Ratio). This provides clean 3x retina coverage at the 200px CSS display size. Resample: Bilinear. Matte: transparent. Light and dark variants must have identical artboard/canvas bounds to prevent size jumps on the `data-light`/`data-dark` swap.
+
+---
+
+## Save the Date — Dupont Illustration Renamed
+
+### Decision: `Dupont-light.png` naming convention
+
+The Dupont illustration was renamed from `Dupont.png` to `Dupont-light.png` for consistency with the `data-light`/`data-dark` naming convention used across all other illustrations. Both the HTML `src` and the JavaScript `updateImages()` function in `savethedate.html` were updated. The dark variant remains `Dupont-dark.png`.
+
+---
+
 ## Rejected / Abandoned Ideas
 
 - **Squarespace** — Abandoned for lack of customization control
@@ -448,3 +524,7 @@ Three new content pages were created (`faq.html`, `schedule.html`, `travel.html`
 - **Footer info text** ("Adina & Andrew · October 17, 2026 · Washington, DC") — Removed as redundant
 - **Gradient sweep button hover** — Replaced with letterpress/deboss system
 - **Raised/lifted button shadows** — Replaced with all-inset deboss model
+- **CSS grain overlay on illustrations** (`.illustration-wrapper::after` with SVG feTurbulence) — Rejected because the rectangular pseudo-element is visible against transparent PNG areas. Texture should be baked into assets at the design tool level.
+- **Affinity Designer Inner Shadow for letterpress effect on illustrations** — Tested but only affects edges, doesn't add texture to flat fill areas
+- **Affinity Designer pixel layer noise overlay for illustration texture** — Explored but complex workflow; Figma noise plugins are simpler for this use case
+- **`.std-intro` and `.std-details` left-alignment** — Accidentally applied during content page left-alignment pass, then reverted. Save the Date must remain centered.
