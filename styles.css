@@ -1150,7 +1150,7 @@ body.page-travel .registry-page {
     border: none;
     border-top: var(--border-hairline);
     max-width: 600px;
-    margin: 1rem auto 2.5rem;
+    margin: 3rem auto 2.5rem;
 }
 
 body.dark-mode .section-divider {
