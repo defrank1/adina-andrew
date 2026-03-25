@@ -361,9 +361,9 @@ body.page-savethedate #protected-content.unlocked {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
+    gap: 1.8rem;
     position: relative;
-    width: 550px;
+    width: 750px;
     height: 56px;
 }
 
@@ -460,13 +460,47 @@ body.dark-mode .nav-link-inline:hover {
     text-shadow: var(--emboss-hover);
 }
 
+/* RSVP nav link — breathing aura */
+.nav-rsvp {
+    position: relative;
+}
+
+.nav-rsvp::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70px;
+    height: 40px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+    animation: breathe 4s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(45, 90, 74, 0.12) 0%, rgba(45, 90, 74, 0.05) 40%, transparent 70%);
+    filter: blur(6px);
+}
+
+body.dark-mode .nav-rsvp::after {
+    background: radial-gradient(circle, rgba(241, 237, 234, 0.1) 0%, rgba(241, 237, 234, 0.04) 40%, transparent 70%);
+}
+
 /* Nav link groups */
 .nav-links-left,
 .nav-links-right {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.8rem;
     z-index: 1;
+}
+
+/* Mobile menu — hidden on desktop */
+.mobile-menu-btn {
+    display: none;
+}
+
+.mobile-menu-panel {
+    display: none;
 }
 
 /* Content fades when menu is open */
@@ -745,12 +779,12 @@ body.page-home .save-the-date-content {
 .home-nav .nav-bar {
     position: relative;
     justify-content: center;
-    gap: 2.5rem;
+    gap: 1.8rem;
 }
 
 .home-nav .nav-links-left,
 .home-nav .nav-links-right {
-    gap: 2.5rem;
+    gap: 1.8rem;
 }
 
 .home-nav .nav-diamond {
@@ -1127,6 +1161,147 @@ body.dark-mode .schedule-link:hover {
 }
 
 /* ===========================
+   Our Story Page
+   =========================== */
+
+body.page-our-story .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
+body.page-dc-guide .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
+.story-timeline {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 0.5rem;
+}
+
+.story-moment {
+    margin-bottom: 3.5rem;
+}
+
+.story-moment:last-child {
+    margin-bottom: 1.5rem;
+}
+
+.story-year {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-dark-green);
+    text-align: center;
+    margin-bottom: 1.2rem;
+    opacity: 0.5;
+    text-shadow: none;
+}
+
+body.dark-mode .story-year {
+    color: var(--color-soft-white);
+}
+
+.story-photo-single {
+    display: block;
+    margin: 0 auto;
+    max-width: 380px;
+}
+
+.story-photo-pair {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.story-photo-pair .story-photo-frame {
+    flex: 1;
+    max-width: 243px;
+}
+
+.story-photo-frame {
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.story-photo-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+.story-photo-single .story-photo-frame img.photo-portrait {
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+}
+
+.story-photo-single .story-photo-frame img.photo-landscape {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.story-photo-pair .story-photo-frame img {
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+}
+
+.story-caption {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: 1rem;
+    line-height: 1.7;
+    text-align: left;
+    color: var(--color-dark-green);
+    max-width: 480px;
+    margin: 1rem auto 0;
+    opacity: 0.85;
+}
+
+body.dark-mode .story-caption {
+    color: var(--color-soft-white);
+}
+
+.story-caption-label {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    display: block;
+    margin-bottom: 0.3rem;
+    opacity: 0.6;
+    text-shadow: none;
+}
+
+.story-divider {
+    border: none;
+    border-top: var(--border-hairline);
+    max-width: 200px;
+    margin: 3rem auto;
+}
+
+body.dark-mode .story-divider {
+    border-top-color: rgba(241, 237, 234, 0.2);
+}
+
+.story-closing {
+    text-align: center;
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    color: var(--color-dark-green);
+    margin-top: 1rem;
+    line-height: 1.4;
+}
+
+body.dark-mode .story-closing {
+    color: var(--color-soft-white);
+}
+
+/* ===========================
    Travel Page
    =========================== */
 
@@ -1236,61 +1411,143 @@ body.dark-mode .travel-link:hover {
         font-size: 16px;
     }
 
-    .main-nav {
-        position: fixed;
-        top: 4rem;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 0;
-        z-index: 1000;
-    }
-
+    /* Mobile nav — menu button replaces inline links */
     .nav-bar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1.2rem;
-        position: relative;
-        width: 340px;
-        height: 50px;
-        flex-wrap: nowrap;
-        flex-direction: row;
-        padding: 0;
-    }
-
-    .nav-diamond {
-        display: block;
-    }
-
-    .nav-bar::before {
         display: none;
     }
 
-    .site-title {
+    .mobile-menu-btn {
+        display: inline-block;
+        font-family: var(--font-heading);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-dark-green);
+        background-color: var(--color-soft-white);
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        border: 2px solid rgba(26, 58, 46, 0.2);
+        text-shadow: none;
+        cursor: pointer;
+        box-shadow: var(--shadow-raised);
+        position: relative;
+        overflow: hidden;
+        transition: box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 400ms ease, border-color 400ms ease;
+    }
+
+    .mobile-menu-btn::before {
+        content: '';
         position: absolute;
-        top: -3rem;
+        inset: 0;
+        border-radius: inherit;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        mix-blend-mode: soft-light;
+        opacity: 0.18;
+        pointer-events: none;
+    }
+
+    .mobile-menu-btn:active {
+        box-shadow: var(--shadow-pressed);
+        transform: translateY(0.5px);
+    }
+
+    body.dark-mode .mobile-menu-btn {
+        color: var(--color-soft-white);
+        background-color: var(--color-dark-bg);
+        border: 2px solid rgba(241, 237, 234, 0.12);
+    }
+
+    /* Mobile menu panel */
+    .mobile-menu-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        right: 0;
+        background-color: var(--color-soft-white);
+        border: 2px solid rgba(26, 58, 46, 0.15);
+        border-radius: 12px;
+        padding: 0.75rem 0;
+        min-width: 160px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        z-index: 1001;
+        transition: background-color 400ms ease, border-color 400ms ease;
+    }
+
+    .mobile-menu-panel::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        mix-blend-mode: soft-light;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+
+    .mobile-menu-panel.open {
+        display: block;
+    }
+
+    body.dark-mode .mobile-menu-panel {
+        background-color: var(--color-dark-bg);
+        border-color: rgba(241, 237, 234, 0.1);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .mobile-menu-link {
+        display: block;
+        font-family: var(--font-heading);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-dark-green);
+        text-decoration: none;
+        padding: 0.6rem 1.5rem;
+        text-shadow: none;
+        transition: color 400ms ease;
+    }
+
+    .mobile-menu-link:active {
+        opacity: 0.6;
+    }
+
+    body.dark-mode .mobile-menu-link {
+        color: var(--color-soft-white);
+    }
+
+    .mobile-rsvp {
+        margin-top: 0.3rem;
+        padding-top: 0.9rem;
+        border-top: var(--border-hairline);
+    }
+
+    body.dark-mode .mobile-rsvp {
+        border-top-color: rgba(241, 237, 234, 0.12);
+    }
+
+    /* Monogram — show above menu button on mobile */
+    .main-nav .site-title {
+        position: absolute;
+        top: -0.5rem;
         left: 50%;
         transform: translateX(-50%);
         z-index: 2;
-    }
-
-    .nav-monogram {
-        height: 38px;
-    }
-
-    .nav-link-inline {
-        display: inline;
-        font-size: 0.55rem;
-    }
-
-    .nav-links-left,
-    .nav-links-right {
-        gap: 1.2rem;
         display: flex;
     }
 
-    .mobile-menu {
-        display: none !important;
+    .main-nav .nav-monogram {
+        height: 38px;
+    }
+
+    /* Main nav positioning on mobile */
+    .main-nav {
+        position: fixed;
+        top: 4rem;
+        right: 1.5rem;
+        left: auto;
+        transform: none;
+        padding: 0;
+        z-index: 1000;
     }
 
     /* Password overlay */
@@ -1391,23 +1648,29 @@ body.dark-mode .travel-link:hover {
         margin-top: 2.4rem;
     }
 
-    /* FAQ, Schedule, Travel pages */
+    /* FAQ, Schedule, Travel, Our Story pages */
     body.page-faq .registry-page,
     body.page-schedule .registry-page,
-    body.page-travel .registry-page {
+    body.page-travel .registry-page,
+    body.page-our-story .registry-page,
+    body.page-dc-guide .registry-page {
         flex: none;
         padding-top: 90px;
     }
 
     body.page-faq #protected-content.unlocked,
     body.page-schedule #protected-content.unlocked,
-    body.page-travel #protected-content.unlocked {
+    body.page-travel #protected-content.unlocked,
+    body.page-our-story #protected-content.unlocked,
+    body.page-dc-guide #protected-content.unlocked {
         min-height: auto;
     }
 
     body.page-faq .site-footer,
     body.page-schedule .site-footer,
-    body.page-travel .site-footer {
+    body.page-travel .site-footer,
+    body.page-our-story .site-footer,
+    body.page-dc-guide .site-footer {
         margin-top: 2.4rem;
     }
 
@@ -1420,23 +1683,58 @@ body.dark-mode .travel-link:hover {
         padding-top: 4rem;
     }
 
+    /* Homepage nav — mobile */
     .home-nav .nav-bar {
-        width: 340px;
-        height: 50px;
+        display: flex;
+        flex-direction: column;
+        width: auto;
+        height: auto;
+        gap: 0.5rem;
+        padding: 0;
     }
 
-    .home-nav .nav-link-inline {
-        font-size: 0.55rem;
+    .home-nav .nav-diamond {
+        display: none;
     }
 
     .home-nav .nav-links-left,
     .home-nav .nav-links-right {
         gap: 1.2rem;
+        justify-content: center;
+    }
+
+    .home-nav .nav-link-inline {
+        font-size: 0.6rem;
     }
 
     /* Travel section titles */
     .travel-section-title {
         font-size: 2.3rem;
+    }
+
+    /* Our Story mobile */
+    .story-photo-pair {
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        max-width: 320px;
+    }
+
+    .story-photo-pair .story-photo-frame {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .story-photo-single {
+        max-width: 320px;
+    }
+
+    .story-caption {
+        font-size: 0.95rem;
+    }
+
+    .story-closing {
+        font-size: 1.5rem;
     }
 
     /* Footer */

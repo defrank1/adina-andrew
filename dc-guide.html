@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adina and Andrew's wedding website.">
+    <title>Adina & Andrew - DC Guide</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preload" as="image" href="images/textures/combined-light.png">
+    <link rel="preload" as="image" href="images/textures/combined-dark.png">
+</head>
+
+<body class="page-dc-guide">
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>DC Guide</h2>
+            <p>Please enter the password:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
+
+        <main class="registry-page">
+            <section class="registry-section">
+                <div class="content-wrapper">
+                    <h1 class="registry-title">DC Guide</h1>
+                    <img src="images/illustrations/Dupont-light.png" alt="A Dupont Circle illustration"
+                        class="registry-illustration" id="dc-guide-illustration"
+                        data-light="images/illustrations/Dupont-light.png"
+                        data-dark="images/illustrations/Dupont-dark.png">
+
+                    <p class="page-intro">A few of our favorite places in the city we call home.</p>
+
+                    <hr class="section-divider">
+
+                    <h2 class="travel-section-title">Food</h2>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">Lorem Ipsum Kitchen</h3>
+                        <p class="travel-hotel-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. A short walk from
+                            the venue along the waterfront.</p>
+                    </div>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">Dolor Sit Café</h3>
+                        <p class="travel-hotel-description">Ut enim ad minim veniam, quis nostrud exercitation
+                            ullamco laboris nisi ut aliquip ex ea commodo consequat. One of our go-to brunch
+                            spots on Capitol Hill.</p>
+                    </div>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">Amet Bistro</h3>
+                        <p class="travel-hotel-description">Duis aute irure dolor in reprehenderit in voluptate
+                            velit esse cillum dolore eu fugiat nulla pariatur. Great for a pre-dinner cocktail
+                            and small plates.</p>
+                    </div>
+
+                    <div class="travel-hotel">
+                        <h3 class="travel-hotel-name">Consectetur Wine Bar</h3>
+                        <p class="travel-hotel-description">Excepteur sint occaecat cupidatat non proident, sunt
+                            in culpa qui officia deserunt mollit anim id est laborum. Ask for the back patio if
+                            the weather is nice.</p>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <h2 class="travel-section-title">Activities</h2>
+
+                    <div class="travel-directions">
+                        <p class="travel-direction-item"><strong>The National Mall</strong> Lorem ipsum dolor sit
+                            amet, consectetur adipiscing elit. The monuments are best visited early in the morning
+                            or at sunset — the Lincoln Memorial at golden hour is worth the walk.</p>
+
+                        <p class="travel-direction-item"><strong>Georgetown Waterfront</strong> Sed do eiusmod
+                            tempor incididunt ut labore et dolore magna aliqua. Walk along the canal, grab
+                            coffee, and browse the shops on M Street.</p>
+
+                        <p class="travel-direction-item"><strong>Dupont Circle</strong> Ut enim ad minim veniam,
+                            quis nostrud exercitation ullamco laboris. Our neighborhood — great bookstores,
+                            Sunday farmers market, and people-watching from the fountain.</p>
+
+                        <p class="travel-direction-item"><strong>Eastern Market</strong> Duis aute irure dolor in
+                            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                            Weekend flea market and fresh produce on Capitol Hill.</p>
+
+                        <p class="travel-direction-item"><strong>The Wharf</strong> Excepteur sint occaecat
+                            cupidatat non proident, sunt in culpa qui officia deserunt mollit. Right where the
+                            wedding is — explore the waterfront restaurants, the pier, and the sunset views
+                            before the big day.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="footer-placeholder"></div>
+
+    </div>
+
+    <script>
+        // Apply dark mode immediately to prevent flash
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+        }
+
+        // ===========================
+        // Password Protection
+        // ===========================
+        if (location.hash.includes('figmacapture=')) {
+            sessionStorage.setItem('siteUnlocked', 'true');
+        }
+        const correctPassword = 'beautifulsuperstar';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+            unlockContent();
+        }
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem('siteUnlocked', 'true');
+                unlockContent();
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        function unlockContent() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+        }
+
+        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
+            document.body.classList.add('locked');
+        }
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
+        });
+    </script>
+    <script src="includes/site-init.js"></script>
+</body>
+
+</html>

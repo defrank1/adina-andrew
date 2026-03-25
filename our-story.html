@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adina and Andrew's wedding website.">
+    <title>Adina & Andrew - Our Story</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preload" as="image" href="images/textures/combined-light.png">
+    <link rel="preload" as="image" href="images/textures/combined-dark.png">
+</head>
+
+<body class="page-our-story">
+    <!-- Password Protection Overlay -->
+    <div id="password-overlay">
+        <div class="password-container">
+            <h2>Our Story</h2>
+            <p>Please enter the password:</p>
+            <form id="password-form">
+                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
+                    autocomplete="off">
+                <button type="submit" class="password-submit">Enter</button>
+                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
+
+        <main class="registry-page">
+            <section class="registry-section">
+                <div class="content-wrapper">
+                    <h1 class="registry-title">Our Story</h1>
+                    <img src="vectors/rowhouse.svg" alt="A D.C. rowhouse illustration"
+                        class="registry-illustration" id="story-illustration"
+                        data-light="vectors/rowhouse.svg" data-dark="vectors/rowhouse-dark.svg">
+
+                    <p class="page-intro">How a group chat turned into a life together.</p>
+
+                    <div class="story-timeline">
+
+                        <!-- Cherry Blossoms -->
+                        <div class="story-moment">
+                            <div class="story-photo-single">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-blossoms.jpg"
+                                        alt="Adina and Andrew under the cherry blossoms"
+                                        class="photo-portrait">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">Cherry blossom season</span>
+                                Our first spring in DC together. Caption placeholder — Andrew and Adina will fill this in with the real story.
+                            </div>
+                        </div>
+
+                        <!-- Halloween + Copenhagen -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-pair">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-bike-halloween.jpg"
+                                        alt="Capital Bikeshare and Citi Bike Halloween costume">
+                                </div>
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-copenhagen.jpg"
+                                        alt="Adina and Andrew at a café in Copenhagen">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">The fun stuff</span>
+                                A couples costume that only makes sense in the Northeast, and a sunny afternoon somewhere in Copenhagen. Placeholder for the real caption.
+                            </div>
+                        </div>
+
+                        <!-- Cruise + Surfing -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-pair">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-cruise.jpg"
+                                        alt="Adina and Andrew on a cruise"
+                                        style="aspect-ratio: 4/3;">
+                                </div>
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-surfing.jpg"
+                                        alt="Adina and Andrew in wetsuits after surfing">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">Adventures</span>
+                                From sea level to... also sea level. Placeholder caption.
+                            </div>
+                        </div>
+
+                        <!-- Cape Cod -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-single">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-cape-cod.jpg"
+                                        alt="Adina and Andrew dressed up on the beach at Cape Cod"
+                                        class="photo-portrait">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">Cape Cod</span>
+                                Placeholder caption about this evening on the beach.
+                            </div>
+                        </div>
+
+                        <!-- Marseille -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-single">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-marseille.jpg"
+                                        alt="Adina and Andrew overlooking Marseille"
+                                        class="photo-portrait">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">Marseille</span>
+                                Placeholder caption about the trip to the south of France.
+                            </div>
+                        </div>
+
+                        <!-- Barristers — Black tie at the Metro -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-single">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-barristers.jpg"
+                                        alt="Adina and Andrew in black tie at Gallery Place Metro station"
+                                        class="photo-portrait">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">Gallery Place</span>
+                                Black tie on the Metro. Placeholder caption — this photo is very DC.
+                            </div>
+                        </div>
+
+                        <!-- Family -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-single" style="max-width: 480px;">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-adf-familyjpg.jpg"
+                                        alt="Andrew's family"
+                                        class="photo-landscape">
+                                </div>
+                            </div>
+                            <div class="story-caption">
+                                <span class="story-caption-label">Family</span>
+                                Placeholder caption about family and what they mean to you both.
+                            </div>
+                        </div>
+
+                        <!-- Ring reveal -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-single" style="max-width: 320px;">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-after-party.jpg"
+                                        alt="Adina showing off the engagement ring"
+                                        class="photo-portrait">
+                                </div>
+                            </div>
+                            <div class="story-caption" style="text-align: center;">
+                                <span class="story-caption-label">She said yes</span>
+                                Placeholder caption about the engagement.
+                            </div>
+                        </div>
+
+                        <!-- Engagement portrait — the closer -->
+                        <hr class="story-divider">
+                        <div class="story-moment">
+                            <div class="story-photo-single" style="max-width: 420px;">
+                                <div class="story-photo-frame">
+                                    <img src="images/our-story/web-engagement.jpg"
+                                        alt="Adina and Andrew engagement portrait"
+                                        class="photo-portrait">
+                                </div>
+                            </div>
+                            <p class="story-closing">See you in October.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div id="footer-placeholder"></div>
+
+    </div>
+
+    <script>
+        // Apply dark mode immediately to prevent flash
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+        }
+
+        // ===========================
+        // Password Protection
+        // ===========================
+        if (location.hash.includes('figmacapture=')) {
+            sessionStorage.setItem('siteUnlocked', 'true');
+        }
+        const correctPassword = 'beautifulsuperstar';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
+        const passwordForm = document.getElementById('password-form');
+        const passwordInput = document.getElementById('password-input');
+        const passwordError = document.getElementById('password-error');
+
+        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+            unlockContent();
+        }
+
+        passwordForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (passwordInput.value === correctPassword) {
+                sessionStorage.setItem('siteUnlocked', 'true');
+                unlockContent();
+            } else {
+                passwordError.classList.add('show');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        function unlockContent() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+        }
+
+        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
+            document.body.classList.add('locked');
+        }
+
+        passwordInput.addEventListener('input', function () {
+            passwordError.classList.remove('show');
+        });
+    </script>
+    <script src="includes/site-init.js"></script>
+</body>
+
+</html>

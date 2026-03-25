@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: March 19, 2026
+Last updated: March 25, 2026
 
 ---
 
@@ -26,9 +26,11 @@ Last updated: March 19, 2026
 - `homepage.html` — Homepage / invitation landing page. Standalone (no floating nav, no shared footer). Static embossed diamond nav in content flow. `<body class="page-home">`
 - `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer** — `<body class="page-savethedate">`
 - `registry.html` — Registry with link to Zola (`adinaandandrew2026` — double "and" is correct) — `<body class="page-registry">`
-- `faq.html` — Questions & Answers (5 Q&A items, inline RSVP link) — `<body class="page-faq">`
+- `faq.html` — Questions & Answers (7 Q&A items, inline RSVP link) — `<body class="page-faq">`
 - `schedule.html` — Wedding weekend invitation (Fri/Sat/Sun events, event names lead each block) — `<body class="page-schedule">`
 - `travel.html` — Hotels (4 blocks) + transportation directions, D.C. flag illustration — `<body class="page-travel">`
+- `our-story.html` — Photo timeline page with captions — `<body class="page-our-story">`
+- `dc-guide.html` — DC recommendations (Food + Activities sections), follows Travel page template — `<body class="page-dc-guide">`
 - `rsvp.html` — RSVP form (integrates with Google Sheets via rsvp-workflow/google-apps-script.js)
 
 ## Hotel Blocks
@@ -72,8 +74,8 @@ Apply `-webkit-font-smoothing: antialiased` and `text-rendering: optimizeLegibil
 | Dark mode background | `--color-dark-bg` | `#122a20` | Dark mode body + password overlay background only |
 | Soft white / cream | `--color-soft-white` | `#F1EDEA` | Light mode body background |
 | Accent | `--color-accent` | `#2d5a4a` | Nav link hover color shift + button system accent |
-| Nav light fill | — | `#EBE7E3` | Baked into nav diamond PNG (light mode) — between body and old nav tint |
-| Nav dark fill | — | `#0e2319` | Baked into nav diamond PNG (dark mode) — darker than body |
+| Nav light fill | — | `#F1EDEA` | Baked into wide nav diamond PNG (light mode) — matches body color; drop-shadow alone provides separation |
+| Nav dark fill | — | `#0e2319` | Baked into wide nav diamond PNG (dark mode) — darker than body for contrast since shadows are less visible on dark surfaces |
 
 **Important:** `--color-dark-green` and `--color-dark-bg` are intentionally separate. `--color-dark-green` is the workhorse color for text and UI across both modes. `--color-dark-bg` is used only for the dark mode body surface — it was too dark for text/buttons but reads better as a background.
 
@@ -105,7 +107,7 @@ Old variables `--color-nav-bg`, `--color-nav-bg-dark`, `--color-footer-bg`, and 
 - Centered, vertically stacked content
 - `content-wrapper` constrains content width (~680px globally; registry page overrides to 700px)
 - Illustrations centered, not floated
-- Body text left-aligned on content pages (FAQ, Travel, Schedule, Registry). Save the Date remains fully centered — it's a formal invitation card.
+- Body text left-aligned on content pages (FAQ, Travel, Schedule, Registry, Our Story, DC Guide). Save the Date remains fully centered — it's a formal invitation card.
 - CTA buttons centered
 
 ### Background Texture
@@ -134,7 +136,7 @@ Old texture files (`paper-grain-light.png`, `noise-grain-light.png`, `paper-grai
 
 The site uses two visual surfaces to create physical depth:
 
-- **Nav diamond:** A floating marquise-shaped PNG with fill, grain texture, and hairlines baked together — sits on top of the body as a distinct surface with a subtle `drop-shadow` filter. The fill color is slightly different from the body (`#EBE7E3` light / `#0e2319` dark) to create the "different paper stock" effect.
+- **Nav diamond:** A floating marquise-shaped PNG with fill, grain texture, and hairlines baked together — sits on top of the body as a distinct surface with a subtle `drop-shadow` filter. Light mode fill matches the body color (`#F1EDEA`) — the drop-shadow alone provides separation. Dark mode fill is darker than the body (`#0e2319` vs `#122a20`) for contrast since shadows are less visible on dark surfaces. This asymmetry is intentional.
 - **Body:** Primary surface — `var(--color-soft-white)` (light) / `var(--color-dark-bg)` (dark) — with multi-layer grain texture via CSS backgrounds.
 
 The footer has **no separate surface** — it inherits the body background (transparent). This was a deliberate simplification. The old `--color-footer-bg` / `--color-footer-bg-dark` variables have been removed.
@@ -144,25 +146,29 @@ The footer has **no separate surface** — it inherits the body background (tran
 #### Desktop (above 900px)
 
 - **Shape:** Floating marquise diamond frame — inspired by the facets of Andrew's engagement ring
-- **Implementation:** Single PNG image (`images/nav/nav-diamond-light.png` / `nav-diamond-dark.png`) containing fill + grain texture + hairlines baked together. Composited in Figma using a diamond mask over the grain texture layers, exported as PNG with transparent background outside the shape.
-- **Content inside the diamond:** TRAVEL · FAQ · [monogram] · REGISTRY · RSVP — all in PP Watch uppercase, arranged as a centered flex row
-- **Links:** `.nav-link-inline` elements — TRAVEL and FAQ on the left of the monogram, REGISTRY and RSVP on the right
+- **Implementation:** Single wider PNG image (`images/nav/wide-nav-light.png` / `wide-nav-dark.png`) containing fill + grain texture + hairlines baked together. Composited in Figma using a diamond mask over the grain texture layers, exported as PNG with transparent background outside the shape. Old PNGs (`nav-diamond-light.png`, `nav-diamond-dark.png`) remain in repo but are no longer referenced.
+- **Content inside the diamond:** TRAVEL · FAQ · DC GUIDE · [monogram] · OUR STORY · REGISTRY · RSVP — all in PP Watch uppercase, arranged as a centered flex row. Six links total, three per side.
+- **Link order:** "Guest stuff" left of monogram (Travel, FAQ, DC Guide), "us stuff + RSVP" right (Our Story, Registry, RSVP)
+- **Links:** `.nav-link-inline` elements in `.nav-links-left` (3 links) and `.nav-links-right` (3 links)
+- **RSVP emphasis:** RSVP link has additional `.nav-rsvp` class with a breathing aura (`::after` pseudo-element using `@keyframes breathe`). Light mode: accent green radial gradient. Dark mode: cream radial gradient. Subtle pulsing glow to draw attention to the primary action.
 - **Monogram:** Smaller inside the nav bar (~36–40px), centered between the link groups
 - **Position:** `position: fixed`, centered horizontally, near the top of the viewport — stays visible on scroll
+- **`.nav-bar` width:** 750px (expanded from 550px to accommodate 6 links). Gap: 1.8rem.
 - **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow). Light mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22))`. Dark mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3))`. Hand-tuned — do not revert to the original heavier values.
 - **z-index:** `0` — lower than links/monogram (z-index 1) so the opaque fill inside the diamond PNG doesn't cover text elements. No `mix-blend-mode`.
 - **Hover:** Color shifts to `var(--color-accent)` (`#2d5a4a`) + `text-shadow` shifts to impressed letterpress state (`--emboss-hover`). In dark mode, text dims to `rgba(241, 237, 234, 0.7)`. No opacity change.
 - **Active (tap):** Same color shift and emboss as hover, plus `translateY(0.5px)` press feedback. Provides touch response on mobile.
-- **Mobile menu:** Hidden on desktop (`display: none !important` in the `min-width: 901px` media query)
+- **Mobile menu elements:** Hidden on desktop (`.mobile-menu-btn` and `.mobile-menu-panel` are `display: none`)
 
 #### Mobile (900px and below)
 
-- **Layout:** Same floating diamond as desktop, scaled down to 340px wide × 50px tall. All four links visible inside — no hamburger menu, no dropdown.
-- **Nav position:** `position: fixed; top: 4rem; left: 50%; transform: translateX(-50%)`
-- **Monogram:** `position: absolute; top: -3rem` on `.site-title`, centered via `left: 50%; transform: translateX(-50%)`. 38px height. Sits above diamond, scrolls with it.
-- **Link font size:** 0.55rem
-- **Link groups:** `gap: 1.2rem`
-- **No Menu button, no dropdown** — deliberate simplification after extensive iteration
+- **Layout:** Menu pill button with dropdown panel. The inline diamond and links are hidden (`display: none` on `.nav-bar`).
+- **Menu button:** `.mobile-menu-btn` — a `btn-normal`-styled pill with PP Watch uppercase, grain texture via `::before`, letterpress shadow. Positioned top-right (`position: fixed; top: 4rem; right: 1.5rem`).
+- **Dropdown panel:** `.mobile-menu-panel` — rounded rectangle with grain texture, appears below the button on tap. Contains all 6 links as `.mobile-menu-link` elements. Opens/closes via `.open` class toggled by JavaScript in `site-init.js`.
+- **RSVP separator:** `.mobile-rsvp` class adds a hairline above RSVP in the dropdown, visually separating it as the primary action.
+- **Close behavior:** Panel closes on outside click or link click (handled by `initMenu()` in `site-init.js`).
+- **Monogram:** 38px height, positioned near the menu button via absolute positioning.
+- **Dark mode:** Button and panel both switch colors — cream text on dark green background, adjusted border and shadow opacities.
 
 #### Both Modes
 
@@ -174,8 +180,9 @@ The footer has **no separate surface** — it inherits the body background (tran
 
 - **No floating nav.** The homepage uses a static diamond PNG in the content flow, not the fixed-position `.main-nav`.
 - **Embossed, not floating:** Uses the illustration drop-shadow treatment (`drop-shadow(0px 2px 2px rgba(255,255,255,1)) drop-shadow(0px -1px 1px rgba(0,0,0,0.15))`) instead of the floating shadow. Opacity 0.9.
-- **No monogram** inside the diamond — only the four nav links (Travel, FAQ, Registry, RSVP), evenly spaced.
-- **Wrapped in `.home-nav`** — a flex container that centers the diamond in the content flow.
+- **No monogram** inside the diamond — only the six nav links (Travel, FAQ, DC Guide, Our Story, Registry, RSVP), three per side.
+- **Wrapped in `.home-nav`** — a flex container that centers the diamond in the content flow. Gap: 1.8rem.
+- **Mobile:** Diamond hidden, links reflow into two stacked centered rows. No menu button on homepage.
 - **Dark mode toggle:** Uses the shared footer (injected via `site-init.js`), same Unicode symbol toggle as all other nav pages.
 - **Event blocks** below the hairline are left-aligned (`text-align: left`) within a 600px `max-width` container, matching the Schedule page. The invitation section above the hairline stays centered. Dupont illustration at the bottom stays centered.
 
@@ -190,15 +197,16 @@ The mobile nav went through extensive iteration:
 2. Diamond-shaped marquise PNG button with CSS panel crossfade — shape looked like a football at small size
 3. SVG path morph via Flubber.js (marquise → rounded rectangle) — technically worked but SVG hairlines were fuzzy at small sizes
 4. Text "MENU" trigger with double hairlines — considered but untested
-5. **Final: same diamond nav as desktop, scaled to 340px** — all links visible inside the diamond, monogram above. No menu button needed.
+5. Same diamond nav as desktop, scaled to 340px — all 4 links visible inside. Worked when there were only 4 links.
+6. **Final: Menu pill button with dropdown panel** — returned to the menu button approach when nav expanded from 4 to 6 links. Six links don't fit in a 340px diamond. The pill button uses `btn-normal` styling (grain, letterpress shadow) positioned top-right. Dropdown panel contains all 6 links with RSVP separated by a hairline.
 
-The old `.mobile-menu`, `.mobile-menu-trigger`, `.mobile-menu-panel`, `.mobile-menu-links`, and `.mobile-menu-close-btn` elements and styles have been removed. The `.menu-toggle` and `.nav-links` (dropdown) elements are also gone.
+Old iteration 5's mobile rules (340px diamond, 0.55rem links, monogram above diamond) have been replaced by the menu button system.
 
 ### CTA Buttons
 
 Two button styles exist, both using a **letterpress/deboss interaction model** — buttons are impressed into the paper surface, never raised above it. No outer shadows. Interaction deepens the impression.
 
-**`.btn-priority`** — Reverse-colored debossed button (e.g., "Visit Our Registry")
+**`.btn-priority`** — Reverse-colored debossed button (e.g., homepage RSVP button)
 - Pill shape: `border-radius: 25px`
 - Dark green fill + white text (light mode); cream fill + dark green text (dark mode)
 - Border: `2px solid rgba(0, 0, 0, 0.12)` — subtle, uniform
@@ -208,7 +216,7 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - Hover: inset shadow deepens, background darkens slightly
 - Active: maximum inset depth, darkest background, `translateY(0.5px)`
 
-**`.btn-normal`** — Background-colored debossed button (e.g., "Visit Website")
+**`.btn-normal`** — Background-colored debossed button (e.g., "Visit Our Registry", "Visit Website", "Book Room")
 - Same pill shape, font, and texture
 - Background matches page surface: `var(--color-soft-white)` light / `var(--color-dark-bg)` dark
 - Border: `2px solid rgba(26, 58, 46, 0.2)` light / `rgba(241, 237, 234, 0.12)` dark
@@ -279,10 +287,12 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 
 - `.main-nav` wrapper (fixed position)
 - `.nav-bar` inner container with the diamond frame and content:
-  - `.nav-diamond` — the PNG image with `data-light` and `data-dark` attributes for mode switching
-  - `.nav-links-left` div wrapping TRAVEL and FAQ links
-  - `.site-title` with `.nav-monogram` image — visible in both layouts, positioned above diamond on mobile
-  - `.nav-links-right` div wrapping REGISTRY and RSVP links
+  - `.nav-diamond` — the wide PNG image with `data-light` and `data-dark` attributes for mode switching
+  - `.nav-links-left` div wrapping Travel, FAQ, DC Guide links
+  - `.site-title` with `.nav-monogram` image
+  - `.nav-links-right` div wrapping Our Story, Registry, RSVP links (RSVP has `.nav-rsvp` class)
+- `.mobile-menu-btn` — pill-shaped menu button (hidden on desktop, visible on mobile)
+- `.mobile-menu-panel` — dropdown with all 6 links as `.mobile-menu-link` elements (RSVP has `.mobile-rsvp` class)
 
 #### footer.html Contains
 
@@ -312,6 +322,8 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 ├── faq.html                (Questions & Answers)
 ├── schedule.html           (Wedding weekend schedule)
 ├── travel.html             (Hotels + directions)
+├── our-story.html          (Photo timeline — page-our-story)
+├── dc-guide.html           (DC recommendations — page-dc-guide)
 ├── rsvp.html
 ├── includes/
 │   ├── nav.html            (shared nav markup — injected via fetch)
@@ -326,7 +338,8 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 │   ├── Monogram/           (monogram-green.png, monogram-white.png)
 │   ├── names/              (names-image.png, names-image-dark.png)
 │   ├── illustrations/      (Dupont-light.png, Dupont-dark.png, flag-light.png, flag-dark.png)
-│   ├── nav/                (nav-diamond-light.png, nav-diamond-dark.png — mobile nav PNGs exist but are unused)
+│   ├── nav/                (wide-nav-light.png, wide-nav-dark.png — active; nav-diamond-light.png, nav-diamond-dark.png — legacy, no longer referenced)
+│   ├── our-story/          (web-optimized photos: web-blossoms.jpg, web-engagement.jpg, web-copenhagen.jpg, etc. Originals also in folder but not referenced in HTML)
 │   └── textures/
 │       ├── combined-light.png          (baked texture tile — light mode)
 │       ├── combined-dark.png           (baked texture tile — dark mode)
@@ -353,22 +366,25 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 ### Key CSS Architecture
 
 - **Grain:** Pre-composited texture tiles (`combined-light.png` / `combined-dark.png`) on `body` via `background-image`, tiled at 200px. No `background-blend-mode`. Scrolls with page content.
-- **Nav:** `.main-nav` is `position: fixed`. `.nav-bar` contains link groups (`.nav-links-left`, `.nav-links-right`), monogram, and diamond PNG at `z-index: 0`. On mobile, same diamond at 340px width with monogram positioned above via absolute. No hamburger menu.
+- **Nav:** `.main-nav` is `position: fixed`. `.nav-bar` (750px wide) contains link groups (`.nav-links-left`, `.nav-links-right`), monogram, and wide diamond PNG at `z-index: 0`. On mobile, `.nav-bar` is hidden; `.mobile-menu-btn` pill and `.mobile-menu-panel` dropdown replace inline links.
 - **Footer:** `.site-footer` has `background: transparent` — no separate surface, no hairline, no shadow.
 - **Dark mode:** `body.dark-mode` in `styles.css` handles all global dark styles. Page-specific dark overrides scoped with body class (e.g., `body.page-registry .registry-illustration`). Color transitions use `@property` for smooth crossfades; grain/image swaps are instant.
 - **No z-index stacking hacks needed** — grain is body background, never overlays content.
 - **`#protected-content`** is `display: none` by default; `.unlocked` defaults to `flex` column in styles.css; `body.page-savethedate` overrides to `display: block`.
-- **Page body classes** (`page-registry`, `page-savethedate`, `page-faq`, `page-schedule`, `page-travel`) scope page-specific styles in styles.css — no inline `<style>` blocks.
+- **Page body classes** (`page-registry`, `page-savethedate`, `page-faq`, `page-schedule`, `page-travel`, `page-our-story`, `page-dc-guide`, `page-home`) scope page-specific styles in styles.css — no inline `<style>` blocks.
 - **Password overlay** recreates grain via `::before` pseudo-element with the same baked texture tiles.
 - **Buttons:** Letterpress/deboss model using `--shadow-raised`/`--shadow-lifted`/`--shadow-pressed` CSS custom properties (all inset). Surface texture via `::before` with SVG `feTurbulence`. No outer shadows, no gradient sweep.
 - **Dark mode toggle:** Unicode symbol (`✹` / `⏾`) with `background-clip: text` foil effect and CSS breathing aura. No SVG, no PNG swap.
-- **Mobile nav:** Same diamond as desktop at 340px width. Monogram positioned above via absolute positioning. No hamburger menu or dropdown.
+- **Mobile nav:** Menu pill button (`.mobile-menu-btn`) top-right with dropdown panel (`.mobile-menu-panel`). Inline diamond and links hidden. Toggle logic in `initMenu()` in `site-init.js`.
 - **No `background-blend-mode` anywhere** — all textures are pre-composited in Figma and exported as flat PNG tiles. Eliminates cross-browser rendering differences.
 - **Toggle aura:** Pure CSS animation via `@keyframes breathe` — no JavaScript for the glow effect
 - **Footer overflow:** `overflow: visible` on footer elements to prevent aura clipping
 - **DAUB UI reference:** `.claude/daub-reference.md` contains the DAUB design system skill file. Used as design reference only — shadow scale philosophy, per-element texture technique. Do NOT import daub.css/daub.js.
 - **Content page body text** is left-aligned within centered containers. Hotel blocks, FAQ items, and schedule events share consistent sizing derived from the Save the Date `.std-hotel` pattern (1.1rem name, 0.1em letter-spacing, 0.75rem name margin, 1rem body text, 0.6rem body margin, 2.5rem block margin). The Travel page uses a D.C. flag illustration (`flag-light.png`/`flag-dark.png`) instead of the rowhouse, with "Hotels" and "Transportation" section subheads. The Schedule page event hierarchy is: Event Name (PP Playground, 2.8rem) → Date → Address → Description → Dress Code. The FAQ page uses an inline RSVP link instead of a CTA button.
-- **Travel page section titles** ("Hotels", "Transportation") use PP Playground at 2.8rem (mobile: 2rem), left-aligned. Hairline dividers (`.section-divider`) separate the illustration from Hotels, and Hotels from Transportation.
+- **Page intro text** (`.page-intro`) appears below illustrations on content pages. Sentient Regular, 1.05rem, 0.85 opacity, left-aligned. Renamed from `.registry-intro` — the mobile override is unscoped so it applies across all pages.
+- **Travel page section titles** ("Hotels", "Transportation") use PP Playground at 3.2rem (mobile: 2.3rem), left-aligned. Hairline divider (`.section-divider`) separates Hotels from Transportation. No hairline between page intro and Hotels.
+- **Our Story page** uses `.story-timeline` container (600px max-width) with `.story-moment` blocks. Photos use `.story-photo-single` (380px max, mobile: 320px) or `.story-photo-pair` (flex row, mobile: stacked column). Captions in `.story-caption` with `.story-caption-label` subheads. `.story-divider` hairlines between moments. `.story-closing` as final text. Web-optimized JPGs prefixed `web-` in `images/our-story/`.
+- **DC Guide page** reuses Travel page classes: `.travel-section-title`, `.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`, `.section-divider`, `.travel-directions`, `.travel-direction-item`. Two sections: Food and Activities. Uses Dupont illustration.
 - **Button labels** on Travel and Save the Date hotel blocks: "Book Room" for hotels with room blocks, "Visit Website" for citizenM.
 - **Schedule page dress code:** short labels as `.schedule-event-detail` (PP Watch), explanatory text as `.schedule-event-description` (Sentient). No "Dress Code:" prefix.
 - **`.registry-illustration`** uses fixed `height: 200px` (mobile: 180px) with `object-fit: contain` for consistent vertical rhythm across pages.

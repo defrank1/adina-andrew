@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: March 19, 2026
+Last updated: March 25, 2026
 
 ---
 
@@ -40,7 +40,7 @@ Initially there was one green used everywhere. During the dark mode implementati
 
 ### Decision: Nav diamond fill colors are baked into PNGs, not CSS
 
-The nav diamond uses slightly different tints than the body (`#EBE7E3` light / `#0e2319` dark) to create a "different paper stock" layering effect. These colors are baked directly into the nav PNG exports from Figma rather than set via CSS custom properties, because the grain texture is also baked in. If these need to change, the PNGs must be re-exported.
+The wider nav diamond (`wide-nav-light.png` / `wide-nav-dark.png`) uses baked fill colors. Light mode fill now matches the body color (`#F1EDEA`) — the drop-shadow alone provides separation, creating a cleaner look. Dark mode fill remains darker than the body (`#0e2319` vs `#122a20`) because shadows are less visible on dark surfaces, so the tint contrast is needed. This asymmetry is intentional — different visual mechanisms achieve the same "floating surface" effect in each mode. If these need to change, the PNGs must be re-exported from Figma.
 
 ---
 
@@ -99,19 +99,17 @@ The navigation went through more iterations than any other element. In chronolog
 5. **3-slice approach** — Left diamond SVG (fixed) + middle CSS hairlines (stretchy) + right diamond SVG (fixed). This solved the responsive scaling problem (the whole SVG was shrinking proportionally instead of collapsing the middle). SVGs were programmatically split from the full diamond. The middle section was just `border-top` + `border-bottom`. This worked but introduced visible seam issues at the junction between SVG endpoints and CSS hairlines.
 6. **Full-width single SVG** — Attempted at a fixed 680px width. Didn't scale well responsively.
 7. **Semi-transparent SVG fill** — Andrew pushed for grain to show through the nav interior. The solution: set the SVG fill to the tinted color at 60-70% opacity so the body's grain bleeds through underneath.
-8. **Baked PNG diamond** — The final, locked approach. The diamond shape, fill, grain texture, and hairlines are all composited together in Figma and exported as a single PNG. Two versions: `nav-diamond-light.png` and `nav-diamond-dark.png`. The PNG sits behind the nav content (positioned absolutely), and `filter: drop-shadow()` follows the diamond shape for depth. Dark mode swaps the PNG via `data-light`/`data-dark` attributes.
+8. **Baked PNG diamond** — The final, locked approach. The diamond shape, fill, grain texture, and hairlines are all composited together in Figma and exported as a single PNG. Current versions: `wide-nav-light.png` and `wide-nav-dark.png` (wider to accommodate 6 links). Old 4-link PNGs (`nav-diamond-light.png`, `nav-diamond-dark.png`) remain in repo but are no longer referenced. The PNG sits behind the nav content (positioned absolutely), and `filter: drop-shadow()` follows the diamond shape for depth. Dark mode swaps the PNG via `data-light`/`data-dark` attributes.
 
 **Why PNG won:** Grain is raster, not vector. Baking fill + grain + hairlines into one image sidesteps all the CSS clipping, blending, and compositing complexity. The nav diamond is a self-contained visual asset — changing its appearance means re-exporting from Figma, not debugging CSS.
 
 **Tradeoff accepted:** The nav fill colors are not CSS-adjustable. If the tint needs to change, the PNGs must be re-exported.
 
-### Decision: Desktop shows inline links, mobile shows Menu pill
+### Decision: Desktop shows 6 inline links, mobile shows Menu pill with dropdown
 
-Desktop (above 900px): TRAVEL · FAQ · [monogram] · REGISTRY · RSVP displayed inside the diamond frame. The Menu button is hidden via `display: none !important`.
+Desktop (above 900px): TRAVEL · FAQ · DC GUIDE · [monogram] · OUR STORY · REGISTRY · RSVP displayed inside a wider diamond frame (750px `.nav-bar`). Link groups use 1.8rem gap. RSVP has a breathing aura (`.nav-rsvp::after`).
 
-Mobile (900px and below): Diamond frame hidden. Monogram top-left (47px), filled Menu pill top-right. Dropdown opens on tap with a scale animation and slight overshoot easing.
-
-The mobile Menu pill uses the darker tint (`#E5E0DC` light / `#0e2319` dark) — same as the nav diamond fill — so it reads as a related surface element even though the diamond is hidden.
+Mobile (900px and below): `.nav-bar` hidden entirely. `.mobile-menu-btn` pill positioned top-right. Dropdown panel (`.mobile-menu-panel`) opens on tap with all 6 links. RSVP separated by a hairline (`.mobile-rsvp`). Panel closes on outside click or link click. Toggle logic in `initMenu()` in `site-init.js`.
 
 ### Decision: Drop shadow is `filter: drop-shadow()`, not `box-shadow`
 
@@ -297,19 +295,20 @@ Path A (geometric) was chosen over Path B (keep illustration, change font pairin
 
 ## Mobile Navigation
 
-### Decision: Desktop diamond at 340px with inline links (not hamburger menu)
+### Decision: Menu pill button with dropdown (supersedes 340px inline diamond)
 
-The mobile nav went through extensive iteration before arriving at the simplest solution:
+The mobile nav went through extensive iteration:
 
 1. **Filled pill "Menu" button** — Original approach. Worked but felt generic.
 2. **Diamond-shaped marquise PNG** with CSS crossfade panel — The marquise at mobile size looked like a football or lemon. Shape doesn't work below ~500px width.
-3. **SVG path morph via Flubber.js** — Marquise morphing to rounded rectangle. Technically worked but SVG hairlines rendered fuzzy at small sizes. The baked PNG approach that works for the desktop nav can't be used here because both shapes need to be in the same SVG for morphing.
+3. **SVG path morph via Flubber.js** — Marquise morphing to rounded rectangle. Technically worked but SVG hairlines rendered fuzzy at small sizes.
 4. **Text "MENU" + double hairlines** trigger — Considered but bypassed.
-5. **Desktop diamond scaled to 340px (final)** — All four links (TRAVEL, FAQ, REGISTRY, RSVP) fit inside the diamond at 0.55rem. Monogram positioned above via `position: absolute; top: -2.5rem`. No menu button, no dropdown, no animation. Same element on desktop and mobile, just smaller.
+5. **Desktop diamond scaled to 340px** — All four links fit inside the diamond at 0.55rem. Worked well when the nav had only 4 links.
+6. **Menu pill button with dropdown (final)** — When the nav expanded from 4 to 6 links (adding Our Story and DC Guide), six links no longer fit in a 340px diamond. Returned to the menu button approach with a `btn-normal`-styled pill (`.mobile-menu-btn`) positioned top-right. Dropdown panel (`.mobile-menu-panel`) lists all 6 links with RSVP separated by a hairline. Panel closes on outside click or link click.
 
-**Why this works:** The four link words are short enough to fit in 340px at small type. The diamond proportions hold at this width because the height also scales proportionally. The monogram is pulled above the diamond via absolute positioning so it doesn't compete for space inside the shape.
+**Why iteration 5 was superseded:** The 340px diamond worked perfectly for 4 short link words but couldn't accommodate 6 (especially "Our Story" and "DC Guide" which are longer). Rather than shrinking type further or truncating labels, the menu button provides a cleaner mobile experience.
 
-**What was removed:** `.menu-toggle`, `.nav-links` dropdown, `.mobile-menu`, `.mobile-menu-trigger`, `.mobile-menu-panel`, `.mobile-menu-links`, `.mobile-menu-close-btn`, and all associated CSS and JavaScript. The Flubber.js CDN script tag was removed. The mobile nav PNG files (`mobile-nav-light.png`, `mobile-nav-dark.png`) are no longer referenced.
+**What was removed from iteration 5:** The mobile `.nav-bar` rules (340px width, 0.55rem links, monogram absolute positioning above diamond) were replaced by `display: none`. New `.mobile-menu-btn` and `.mobile-menu-panel` elements and styles were added.
 
 ---
 
@@ -414,7 +413,7 @@ Three new content pages were created (`faq.html`, `schedule.html`, `travel.html`
 - `.registry-cta` + `.btn-priority` for CTA buttons
 - `.registry-section` + `.content-wrapper` for content containment
 
-**Page-specific body classes** (`page-faq`, `page-schedule`, `page-travel`) scope padding, flex, and footer overrides in styles.css. Each page has its own `sessionStorage` key for password state.
+**Page-specific body classes** (`page-faq`, `page-schedule`, `page-travel`, `page-our-story`, `page-dc-guide`) scope padding, flex, and footer overrides in styles.css. All pages sharing `beautifulsuperstar` use the shared `siteUnlocked` session storage key.
 
 **Schedule page** is titled "Invitation" (not "Schedule") — the schedule is the invitation content. The existing `rsvp.html` with Google Sheets integration remains untouched. Times for some events are marked with `<!-- TODO: Add times -->` comments.
 
@@ -594,6 +593,76 @@ Short dress code labels (Black Tie Preferred, Semi-Formal) were moved from Senti
 
 ---
 
+## Nav Expansion — 4 Links to 6
+
+### Decision: 6-link nav with wider diamond and reordered groupings
+
+The nav expanded from 4 links (Travel, FAQ, Registry, RSVP) to 6 (Travel, FAQ, DC Guide, Our Story, Registry, RSVP) to accommodate two new pages. The wider diamond PNG (`wide-nav-light.png` / `wide-nav-dark.png`) was exported from Figma. `.nav-bar` width increased from 550px to 750px, gaps tightened from 2rem to 1.8rem.
+
+**Link grouping:** "Guest stuff" (Travel, FAQ, DC Guide) sits left of the monogram; "us stuff + RSVP" (Our Story, Registry, RSVP) sits right. This groups practical travel/logistics info on one side and personal/action items on the other.
+
+**RSVP breathing aura:** The RSVP link (`.nav-rsvp`) has a `::after` pseudo-element with a radial gradient glow animated via the existing `@keyframes breathe` (4s cycle). Light mode uses accent green, dark mode uses cream. Subtle enough to not scream but enough to draw the eye to the primary action.
+
+**Homepage static diamond** also updated to 6 links with wider PNG and 1.8rem gaps. On mobile, the homepage diamond hides and links reflow into stacked centered rows (no menu button on homepage — it already has a dedicated RSVP button below the nav).
+
+---
+
+## Page Intro Text — `.page-intro`
+
+### Decision: Rename `.registry-intro` to `.page-intro` and add to all content pages
+
+The `.registry-intro` class was renamed to `.page-intro` to reflect its use across all content pages, not just the registry. The mobile override was de-scoped from `body.page-registry .registry-intro` to just `.page-intro` so it applies universally.
+
+Intro paragraphs added below illustrations on Travel, FAQ, and Schedule pages. All text is placeholder — Andrew will workshop final copy.
+
+---
+
+## Our Story Page
+
+### Decision: Photo timeline with captions
+
+`our-story.html` was created as a photo timeline page. Uses `.story-timeline` (600px max-width) containing `.story-moment` blocks with photos (`.story-photo-single` for one image, `.story-photo-pair` for two side-by-side), captions (`.story-caption` with `.story-caption-label`), and hairline dividers (`.story-divider`). Closes with `.story-closing` text.
+
+Photos are web-optimized JPGs (prefixed `web-`) stored in `images/our-story/`. Originals (from camera) are also in the folder but not referenced in HTML. Uses the rowhouse illustration. All caption text is placeholder.
+
+On mobile, photo pairs stack vertically and singles narrow to 320px max-width. All styles are in `styles.css` — no inline `<style>` block.
+
+---
+
+## DC Guide Page
+
+### Decision: Follows Travel page template exactly
+
+`dc-guide.html` was created using the Travel page as an exact structural template. It reuses all Travel page classes: `.travel-section-title`, `.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`, `.section-divider`, `.travel-directions`, `.travel-direction-item`. No new CSS classes needed.
+
+Two sections: "Food" (4 placeholder restaurant blocks) and "Activities" (5 placeholder items). Uses the Dupont illustration. All copy is lorem ipsum placeholder.
+
+---
+
+## Travel Section Title Sizing
+
+### Decision: Increase from 2.8rem to 3.2rem
+
+`.travel-section-title` ("Hotels", "Transportation", and DC Guide sections) increased from 2.8rem to 3.2rem desktop, 2rem to 2.3rem mobile. The previous size felt too close to body text weight — the new size reads as a stronger section anchor while remaining clearly subordinate to the page title (`.registry-title` at `clamp(4rem, 8vw, 5.5rem)`).
+
+---
+
+## FAQ Additions
+
+### Decision: Two new Q&A items added
+
+"When should I RSVP by?" (September 1, 2026 — placeholder date) and "How do I get to the venue?" (brief answer encouraging Metro, links to Travel page) were added before the existing "How do I RSVP?" item, which remains last. FAQ now has 7 items total.
+
+---
+
+## Registry Button Change
+
+### Decision: Registry CTA changed from `btn-priority` to `btn-normal`
+
+The "Visit Our Registry" button on the registry page was changed from `.btn-priority` (reverse-colored) to `.btn-normal` (background-colored). The priority button style is being reserved for the most important action (RSVP).
+
+---
+
 ## Rejected / Abandoned Ideas
 
 - **Squarespace** — Abandoned for lack of customization control
@@ -605,7 +674,8 @@ Short dress code labels (Black Tie Preferred, Semi-Formal) were moved from Senti
 - **Footer as a separate tinted surface** — Simplified to transparent/inherited
 - **Separate Bloomingdale's and Crate & Barrel registry links** — Consolidated to single Zola link
 - **registry-admin.html** — Deleted after moving to Zola
-- **Pill-shaped mobile menu button** — Replaced first with diamond marquise, then with inline links
+- **Inline links in 340px mobile diamond** — Worked for 4 links but couldn't accommodate 6; replaced with menu pill button + dropdown
+- **Original pill-shaped mobile menu button** (iteration 1) — Felt generic; later returned to a refined version when 6 links required it
 - **CSS clip-path diamond menu button** — Abandoned because clip-path clips pseudo-elements and inset shadows ignore it
 - **SVG path morph mobile menu (Flubber.js)** — Technically worked but SVG hairlines rendered fuzzy at small sizes
 - **CSS clip-path morph dropdown** — Abandoned in favor of eliminating the dropdown entirely

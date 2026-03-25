@@ -62,12 +62,35 @@ function initTheme() {
 }
 
 // ===========================
-// Menu (placeholder — mobile uses inline links, no toggle needed)
+// Mobile Menu
 // ===========================
 
 function initMenu() {
-    // Mobile nav now shows all links inside the diamond — no menu toggle required.
-    // This function is kept as a no-op so loadIncludes() doesn't error.
+    const btn = document.getElementById('mobile-menu-btn');
+    const panel = document.getElementById('mobile-menu-panel');
+    if (!btn || !panel) return;
+
+    btn.addEventListener('click', function () {
+        const isOpen = panel.classList.contains('open');
+        panel.classList.toggle('open');
+        btn.setAttribute('aria-expanded', !isOpen);
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!btn.contains(e.target) && !panel.contains(e.target)) {
+            panel.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    // Close menu when a link is clicked
+    panel.querySelectorAll('.mobile-menu-link').forEach(function (link) {
+        link.addEventListener('click', function () {
+            panel.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+        });
+    });
 }
 
 loadIncludes();
