@@ -176,7 +176,8 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Embossed, not floating:** Uses the illustration drop-shadow treatment (`drop-shadow(0px 2px 2px rgba(255,255,255,1)) drop-shadow(0px -1px 1px rgba(0,0,0,0.15))`) instead of the floating shadow. Opacity 0.9.
 - **No monogram** inside the diamond — only the four nav links (Travel, FAQ, Registry, RSVP), evenly spaced.
 - **Wrapped in `.home-nav`** — a flex container that centers the diamond in the content flow.
-- **Dark mode toggle:** Standalone `btn-normal` text button at bottom, same pattern as Save the Date.
+- **Dark mode toggle:** Uses the shared footer (injected via `site-init.js`), same Unicode symbol toggle as all other nav pages.
+- **Event blocks** below the hairline are left-aligned (`text-align: left`) within a 600px `max-width` container, matching the Schedule page. The invitation section above the hairline stays centered. Dupont illustration at the bottom stays centered.
 
 #### Implementation History
 

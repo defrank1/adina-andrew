@@ -135,7 +135,7 @@ body.dark-mode {
 /* Prevent Sentient from ever rendering italic */
 em,
 i,
-.registry-intro {
+.page-intro {
     font-style: normal;
 }
 
@@ -972,7 +972,7 @@ body.dark-mode .registry-illustration {
     filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
 }
 
-.registry-intro {
+.page-intro {
     font-family: var(--font-body);
     font-style: normal;
     font-size: 1.05rem;
@@ -989,7 +989,7 @@ body.dark-mode .registry-illustration {
 }
 
 body.dark-mode .registry-title,
-body.dark-mode .registry-intro {
+body.dark-mode .page-intro {
     color: var(--color-soft-white);
 }
 
@@ -1137,7 +1137,7 @@ body.page-travel .registry-page {
 
 .travel-section-title {
     font-family: var(--font-title);
-    font-size: 2.8rem;
+    font-size: 3.2rem;
     font-weight: 400;
     text-align: left;
     margin: 2.5rem auto 1.5rem;
@@ -1372,7 +1372,7 @@ body.dark-mode .travel-link:hover {
         margin-bottom: 1.5rem;
     }
 
-    body.page-registry .registry-intro {
+    .page-intro {
         font-size: 1rem;
         line-height: 1.65;
         max-width: none;
@@ -1436,7 +1436,7 @@ body.dark-mode .travel-link:hover {
 
     /* Travel section titles */
     .travel-section-title {
-        font-size: 2rem;
+        font-size: 2.3rem;
     }
 
     /* Footer */

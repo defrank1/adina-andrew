@@ -504,7 +504,7 @@ The Dupont illustration was renamed from `Dupont.png` to `Dupont-light.png` for 
 
 ### Decision: Standalone page with static embossed diamond nav
 
-`homepage.html` was created as the primary landing page for the wedding website. It follows the Save the Date pattern: standalone page with no floating nav and no shared footer. Dark mode toggle is a `btn-normal` text button at the bottom, same as Save the Date.
+`homepage.html` was created as the primary landing page for the wedding website. It uses no floating nav but does use the shared footer (with the Unicode symbol dark mode toggle). The standalone `btn-normal` text toggle was initially used but replaced with the shared footer for consistency.
 
 The content flow from top to bottom: invitation intro text ("You are cordially invited...") → names image (same PNG as Save the Date) → date and city → static diamond nav → RSVP button → hairline divider → two event summary blocks (Ceremony and Reception, After Party) → Dupont illustration as closing element.
 
@@ -516,7 +516,9 @@ The content flow from top to bottom: invitation intro text ("You are cordially i
 - Option C (keep floating nav, remove inline links) was considered but the floating nav felt too heavy on a page intended to read as a formal invitation.
 - Option B (static diamond in content flow) won because it provides navigation while feeling like part of the printed invitation rather than website chrome.
 
-**Event summaries** below the hairline are condensed versions of the Schedule page content — just event name (PP Playground), date, venue, and dress code as PP Watch metadata lines. No body text descriptions except for the After Party. Only Ceremony and Reception and After Party appear on the homepage — Welcome Party is excluded.
+**Event summaries** below the hairline are left-aligned within a 600px container, matching the Schedule/Invitation page layout — not centered. The top section (invitation text, names, diamond nav, RSVP button) remains centered. This creates a clear shift: formal centered invitation above the hairline, practical left-aligned information below it. The Dupont illustration at the bottom stays centered as a closing element.
+
+Event blocks are condensed versions of the Schedule page content — just event name (PP Playground), date, venue, and dress code as PP Watch metadata lines. No body text descriptions except for the After Party. Only Ceremony and Reception and After Party appear on the homepage — Welcome Party is excluded.
 
 The homepage is currently at `/homepage` (file: `homepage.html`) while `index.html` continues to redirect to Save the Date. When the site goes live with the real homepage, the file will be renamed to `index.html`.
 
