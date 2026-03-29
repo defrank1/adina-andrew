@@ -82,7 +82,7 @@
 
     /* Physical depth — shadow scale */
     --shadow-raised: inset 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(0, 0, 0, 0.12);
-    --shadow-lifted: inset 0 2.5px 6px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 -1px 0 rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(0, 0, 0, 0.2);
+    --shadow-lifted: inset 0 1.6px 4.2px rgba(0, 0, 0, 0.20), inset 0 0 0 1px rgba(0, 0, 0, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(0, 0, 0, 0.14);
     --shadow-pressed: inset 0 3px 7px rgba(0, 0, 0, 0.32), inset 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(0, 0, 0, 0.2);
 
     /* Nav text — letterpress states */
@@ -126,7 +126,7 @@ body.dark-mode {
     color: var(--color-soft-white);
     text-shadow: 0 1px 2px rgba(241, 237, 234, 0.1), 0 2px 5px rgba(0, 0, 0, 0.5);
     --shadow-raised: inset 0 1px 2px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
-    --shadow-lifted: inset 0 2.5px 5.5px rgba(0, 0, 0, 0.26), inset 0 0 0 1px rgba(0, 0, 0, 0.13);
+    --shadow-lifted: inset 0 1.6px 3.2px rgba(0, 0, 0, 0.17), inset 0 0 0 1px rgba(0, 0, 0, 0.08);
     --shadow-pressed: inset 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(0, 0, 0, 0.15);
     --emboss-rest: 0 1px 0 rgba(241, 237, 234, 0.08), 0 -0.5px 0 rgba(0, 0, 0, 0.2);
     --emboss-hover: 0 -1px 1px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(241, 237, 234, 0.06);
@@ -675,7 +675,7 @@ body.dark-mode .toggle-aura {
 
 .btn-normal:hover {
     box-shadow: var(--shadow-lifted);
-    background-color: #e3deda;
+    background-color: #ece8e4;
 }
 
 .btn-normal:active {
@@ -691,7 +691,7 @@ body.dark-mode .btn-normal {
 }
 
 body.dark-mode .btn-normal:hover {
-    background-color: #0b1e15;
+    background-color: #10261c;
 }
 
 body.dark-mode .btn-normal:active {
@@ -734,7 +734,7 @@ body.dark-mode .btn-normal:active {
 
 .btn-priority:hover {
     box-shadow: var(--shadow-lifted);
-    background-color: #122920;
+    background-color: #17352a;
 }
 
 .btn-priority:active {
@@ -750,7 +750,7 @@ body.dark-mode .btn-priority {
 }
 
 body.dark-mode .btn-priority:hover {
-    background-color: #e2ddd8;
+    background-color: #ece7e3;
 }
 
 body.dark-mode .btn-priority:active {
