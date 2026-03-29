@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: March 25, 2026
+Last updated: March 29, 2026
 
 ---
 
@@ -314,13 +314,15 @@ The mobile nav went through extensive iteration:
 
 ## Nav Link Hover
 
-### Decision: Accent color shift + letterpress emboss (not opacity)
+### Decision: Accent color shift + letterpress emboss + draw-in underline (not opacity)
 
 Original: `opacity: 0.6` on hover. Too subtle — barely perceptible, especially inside the diamond.
 
-New: Color shifts from `--color-dark-green` to `--color-accent` (`#2d5a4a`) and `text-shadow` shifts from `--emboss-rest` to `--emboss-hover`. In dark mode, text dims to `rgba(241, 237, 234, 0.7)`. The accent color is within the same green family — reads as tonal change, not a color change. Combined with the emboss shift, enough visual feedback without being dramatic.
+Current: Color shifts from `--color-dark-green` to `--color-accent` (`#2d5a4a`), `text-shadow` shifts from `--emboss-rest` to `--emboss-hover`, and a 1px underline draws in from center (`width: 0` → `100%`, `0.25s ease`). In dark mode, text dims to `rgba(241, 237, 234, 0.7)` and underline uses the same dimmed cream. The draw-in underline does NOT apply to `.nav-rsvp` (which has its own static double underline emphasis).
 
-Monogram hover: `transform: scale(0.96)` with adjusted `drop-shadow` filter — a press effect distinct from the text links.
+Monogram hover: `transform: scale(0.96) rotate(-3deg)` with reduced `drop-shadow` intensity — a press-and-tilt effect. Active: `scale(0.93)`. The rotation adds personality without being distracting.
+
+The same draw-in underline applies to `.mobile-menu-link` elements in the dropdown panel (excluding `.mobile-rsvp`).
 
 ---
 
@@ -348,20 +350,21 @@ Note: Figma's "Flatten" command destroys blend mode results — just export the 
 
 ## Dark Mode Toggle — Unicode Symbols with Breathing Aura
 
-### Decision: ✹ / ⏾ symbols with CSS aura (not SVG morph, not cursor shimmer)
+### Decision: ☀ / ⏾ symbols with CSS aura (not SVG morph, not cursor shimmer)
 
 The toggle went through extensive iteration:
 
 1. **Hand-drawn PNG sun/moon + text label** — original approach. Felt inconsistent with the brutalist PP Watch type beside the illustration.
 2. **Geometric SVG morph** (SMIL animate, circle ↔ crescent) — technically sound, used `fill="currentColor"` for theme inheritance. But the toggle as a whole didn't feel refined enough.
 3. **Unicode symbols with foil shimmer** (cursor-tracking radial gradient) — ✹ sun and ⏾ moon rendered via `background-clip: text`. Hover effect tracked cursor position with `mousemove`. Felt too gimmicky/interactive — "like a laser pointer."
-4. **Unicode symbols with breathing aura (final)** — same symbols, but hover shimmer replaced with a static CSS-animated glow. A 100px radial gradient with 8px blur gently pulses on a 4s cycle (`@keyframes breathe`). The symbol feels like an actual light source radiating into the paper.
+4. **Unicode symbols with breathing aura** — ✹ symbol, but hover shimmer replaced with a static CSS-animated glow. Felt good but ✹ read as abstract — didn't immediately say "sun."
+5. **☀ symbol with breathing aura (final)** — ✹ replaced with ☀ (U+2600, "Black Sun with Rays"). More recognizable as a sun. Renders at 36px (down from ✹'s 42px — ☀ has more visual weight at smaller size). Moon symbol ⏾ unchanged at 28px.
 
-**Symbol choice:** ✹ (U+2739, "Eight Pointed Rectilinear Star") for sun, ⏾ (U+23FE, "Power Sleep Symbol" — renders as crescent) for moon. ✹ renders at 42px, ⏾ at 28px — different sizes needed because the glyphs have very different visual weights at the same font-size.
+**Symbol choice:** ☀ (U+2600, "Black Sun with Rays") for sun, ⏾ (U+23FE, "Power Sleep Symbol" — renders as crescent) for moon. ☀ renders at 36px, ⏾ at 28px — different sizes needed because the glyphs have very different visual weights at the same font-size.
 
 **Color:** Deep olive green `rgba(48, 78, 62, 0.75)` for sun (barely green, good contrast on cream), accent green `rgba(45, 90, 74, 0.5)` for moon (greener, visible on dark background). Both use `background-clip: text` + `-webkit-text-fill-color: transparent` for the tinted foil effect.
 
-**Centering fix:** ✹ and ⏾ have different glyph bounding boxes, causing positional shift when toggling. Fixed with a 48×48px flex container with `align-items: center; justify-content: center` on `.toggle-sym`.
+**Centering fix:** ☀ and ⏾ have different glyph bounding boxes, causing positional shift when toggling. Fixed with a 48×48px flex container with `align-items: center; justify-content: center` on `.toggle-sym`.
 
 ---
 
@@ -601,7 +604,7 @@ The nav expanded from 4 links (Travel, FAQ, Registry, RSVP) to 6 (Travel, FAQ, D
 
 **Link grouping:** "Guest stuff" (Travel, FAQ, DC Guide) sits left of the monogram; "us stuff + RSVP" (Our Story, Registry, RSVP) sits right. This groups practical travel/logistics info on one side and personal/action items on the other.
 
-**RSVP breathing aura:** The RSVP link (`.nav-rsvp`) has a `::after` pseudo-element with a radial gradient glow animated via the existing `@keyframes breathe` (4s cycle). Light mode uses accent green, dark mode uses cream. Subtle enough to not scream but enough to draw the eye to the primary action.
+**RSVP emphasis:** The RSVP link (`.nav-rsvp`) has a `::after` pseudo-element with a static double hairline underline (two 1px lines separated by ~2px gap). Color matches link text at 0.4 opacity. Originally a breathing aura (radial gradient with `@keyframes breathe`) — replaced because the animated glow competed with the toggle aura and felt too busy. The static double underline is quieter but still distinguishes RSVP from other links. Same treatment on `.mobile-rsvp` in the dropdown.
 
 **Homepage static diamond** also updated to 6 links with wider PNG and 1.8rem gaps. On mobile, the homepage diamond hides and links reflow into stacked centered rows (no menu button on homepage — it already has a dedicated RSVP button below the nav).
 
@@ -663,6 +666,30 @@ The "Visit Our Registry" button on the registry page was changed from `.btn-prio
 
 ---
 
+## DC Guide — Hairline Consistency
+
+### Decision: No divider between page intro and first section
+
+The DC Guide page had a `<hr class="section-divider">` between the `.page-intro` text and the "Food" section title. The Travel page does NOT have a divider before its first section ("Hotels") — the divider only separates Hotels from Transportation. Removed the extra divider from DC Guide to match the Travel page pattern. Divider between "Food" and "Activities" remains.
+
+---
+
+## Mobile Menu — Backdrop Fade
+
+### Decision: Wire up existing `.menu-open` CSS
+
+The CSS for `main.menu-open` / `.site-footer.menu-open` (opacity 0.4, pointer-events none) already existed in `styles.css` but the JavaScript in `initMenu()` never added the class. Fixed by adding `setBackdropFade()` calls to all three close paths (button toggle, outside click, link click) in `site-init.js`. This dims the page content when the mobile menu is open, focusing attention on the dropdown.
+
+---
+
+## Mobile Content Spacing
+
+### Decision: Increase top padding from 90px to 120px on content pages
+
+On mobile, the menu button sits at `top: 4rem` (~64px) and is ~36px tall, so its bottom edge is at ~100px. Content pages (FAQ, Schedule, Travel, Our Story, DC Guide) had `padding-top: 90px`, causing titles to overlap the button zone. Increased to 120px. Registry already at 125px — unchanged. Homepage has no menu button — unchanged (scoped via body class exclusion).
+
+---
+
 ## Rejected / Abandoned Ideas
 
 - **Squarespace** — Abandoned for lack of customization control
@@ -695,3 +722,5 @@ The "Visit Our Registry" button on the registry page was changed from `.btn-prio
 - **Homepage with floating nav** (Option C) — Felt too heavy on a formal invitation page. Static embossed diamond chosen instead.
 - **Homepage with no diamond, just text links** (Option A) — Too minimal; diamond provides visual structure and brand identity.
 - **Monogram inside homepage static diamond** — Removed because with only four links the spacing was uneven; the diamond reads cleaner without it.
+- **RSVP breathing aura** (`.nav-rsvp::after` radial gradient + `@keyframes breathe`) — Replaced with static double hairline underline. The animated glow competed with the toggle aura and felt too busy.
+- **✹ (U+2739) toggle glyph** — Replaced with ☀ (U+2600). ✹ read as abstract; ☀ is immediately recognizable as a sun.

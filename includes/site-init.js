@@ -54,8 +54,8 @@ function initTheme() {
                 sym.childNodes[0].textContent = '\u23FE';
                 sym.style.fontSize = '28px';
             } else {
-                sym.childNodes[0].textContent = '\u2739';
-                sym.style.fontSize = '42px';
+                sym.childNodes[0].textContent = '\u2600';
+                sym.style.fontSize = '36px';
             }
         }
     });
@@ -70,10 +70,19 @@ function initMenu() {
     const panel = document.getElementById('mobile-menu-panel');
     if (!btn || !panel) return;
 
+    const mainEl = document.querySelector('main');
+    const footerEl = document.querySelector('.site-footer');
+
+    function setBackdropFade(open) {
+        if (mainEl) mainEl.classList.toggle('menu-open', open);
+        if (footerEl) footerEl.classList.toggle('menu-open', open);
+    }
+
     btn.addEventListener('click', function () {
         const isOpen = panel.classList.contains('open');
         panel.classList.toggle('open');
         btn.setAttribute('aria-expanded', !isOpen);
+        setBackdropFade(!isOpen);
     });
 
     // Close menu when clicking outside
@@ -81,6 +90,7 @@ function initMenu() {
         if (!btn.contains(e.target) && !panel.contains(e.target)) {
             panel.classList.remove('open');
             btn.setAttribute('aria-expanded', 'false');
+            setBackdropFade(false);
         }
     });
 
@@ -89,6 +99,7 @@ function initMenu() {
         link.addEventListener('click', function () {
             panel.classList.remove('open');
             btn.setAttribute('aria-expanded', 'false');
+            setBackdropFade(false);
         });
     });
 }

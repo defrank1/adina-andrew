@@ -395,16 +395,19 @@ body.dark-mode .nav-diamond {
 }
 
 .site-title:hover {
-    transform: scale(0.96);
+    transform: scale(0.96) rotate(-3deg);
+}
+
+.site-title:active {
+    transform: scale(0.93) rotate(-3deg);
 }
 
 .site-title:hover .nav-monogram {
-    filter: drop-shadow(0px 1px 1px rgba(255, 255, 255, 0.6)) drop-shadow(0px -1px 2px rgba(0, 0, 0, 0.2));
-    transition: filter 0.2s ease;
+    filter: drop-shadow(0px 1px 1px rgba(255, 255, 255, 0.4)) drop-shadow(0px -0.5px 1px rgba(0, 0, 0, 0.12));
 }
 
 body.dark-mode .site-title:hover .nav-monogram {
-    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.4)) drop-shadow(0px -1px 2px rgba(255, 255, 255, 0.15));
+    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.3)) drop-shadow(0px -0.5px 1px rgba(255, 255, 255, 0.08));
 }
 
 .nav-monogram {
@@ -413,6 +416,7 @@ body.dark-mode .site-title:hover .nav-monogram {
     display: block;
     object-fit: contain;
     filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+    transition: filter 0.2s ease;
 }
 
 body.dark-mode .nav-monogram {
@@ -460,7 +464,7 @@ body.dark-mode .nav-link-inline:hover {
     text-shadow: var(--emboss-hover);
 }
 
-/* RSVP nav link — breathing aura */
+/* RSVP nav link — double hairline underline */
 .nav-rsvp {
     position: relative;
 }
@@ -468,21 +472,41 @@ body.dark-mode .nav-link-inline:hover {
 .nav-rsvp::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70px;
-    height: 40px;
-    border-radius: 50%;
+    left: 0;
+    bottom: -4px;
+    width: 100%;
+    height: 5px;
+    border-top: 1px solid var(--color-dark-green);
+    border-bottom: 1px solid var(--color-dark-green);
+    opacity: 0.4;
     pointer-events: none;
-    z-index: -1;
-    animation: breathe 4s ease-in-out infinite;
-    background: radial-gradient(circle, rgba(45, 90, 74, 0.12) 0%, rgba(45, 90, 74, 0.05) 40%, transparent 70%);
-    filter: blur(6px);
 }
 
 body.dark-mode .nav-rsvp::after {
-    background: radial-gradient(circle, rgba(241, 237, 234, 0.1) 0%, rgba(241, 237, 234, 0.04) 40%, transparent 70%);
+    border-top-color: var(--color-soft-white);
+    border-bottom-color: var(--color-soft-white);
+}
+
+/* Nav link hover — draw-in underline from center */
+.nav-link-inline:not(.nav-rsvp)::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 1px;
+    background-color: var(--color-accent);
+    transition: width 0.25s ease;
+    pointer-events: none;
+}
+
+.nav-link-inline:not(.nav-rsvp):hover::after {
+    width: 100%;
+}
+
+body.dark-mode .nav-link-inline:not(.nav-rsvp)::after {
+    background-color: rgba(241, 237, 234, 0.7);
 }
 
 /* Nav link groups */
@@ -573,7 +597,7 @@ body.dark-mode .footer-info {
 }
 
 .toggle-sym {
-    font-size: 42px;
+    font-size: 36px;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -1505,6 +1529,28 @@ body.dark-mode .travel-link:hover {
         padding: 0.6rem 1.5rem;
         text-shadow: none;
         transition: color 400ms ease;
+        position: relative;
+    }
+
+    .mobile-menu-link:not(.mobile-rsvp)::after {
+        content: '';
+        position: absolute;
+        bottom: 0.3rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 1px;
+        background-color: var(--color-accent);
+        transition: width 0.25s ease;
+        pointer-events: none;
+    }
+
+    .mobile-menu-link:not(.mobile-rsvp):hover::after {
+        width: calc(100% - 3rem);
+    }
+
+    body.dark-mode .mobile-menu-link:not(.mobile-rsvp)::after {
+        background-color: rgba(241, 237, 234, 0.7);
     }
 
     .mobile-menu-link:active {
@@ -1519,6 +1565,25 @@ body.dark-mode .travel-link:hover {
         margin-top: 0.3rem;
         padding-top: 0.9rem;
         border-top: var(--border-hairline);
+        position: relative;
+    }
+
+    .mobile-rsvp::after {
+        content: '';
+        position: absolute;
+        left: 1.5rem;
+        right: 1.5rem;
+        bottom: 0.2rem;
+        height: 5px;
+        border-top: 1px solid var(--color-dark-green);
+        border-bottom: 1px solid var(--color-dark-green);
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    body.dark-mode .mobile-rsvp::after {
+        border-top-color: var(--color-soft-white);
+        border-bottom-color: var(--color-soft-white);
     }
 
     body.dark-mode .mobile-rsvp {
@@ -1648,14 +1713,14 @@ body.dark-mode .travel-link:hover {
         margin-top: 2.4rem;
     }
 
-    /* FAQ, Schedule, Travel, Our Story pages */
+    /* FAQ, Schedule, Travel, Our Story pages — enough clearance below mobile menu button */
     body.page-faq .registry-page,
     body.page-schedule .registry-page,
     body.page-travel .registry-page,
     body.page-our-story .registry-page,
     body.page-dc-guide .registry-page {
         flex: none;
-        padding-top: 90px;
+        padding-top: 120px;
     }
 
     body.page-faq #protected-content.unlocked,
