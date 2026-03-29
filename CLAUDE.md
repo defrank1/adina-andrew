@@ -162,13 +162,13 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Content inside the diamond:** TRAVEL · FAQ · DC GUIDE · [monogram] · OUR STORY · REGISTRY · RSVP — all in PP Watch uppercase, arranged as a centered flex row. Six links total, three per side.
 - **Link order:** "Guest stuff" left of monogram (Travel, FAQ, DC Guide), "us stuff + RSVP" right (Our Story, Registry, RSVP)
 - **Links:** `.nav-link-inline` elements in `.nav-links-left` (3 links) and `.nav-links-right` (3 links)
-- **RSVP emphasis:** RSVP link has additional `.nav-rsvp` class with a static double hairline underline (`::after` pseudo-element with `border-top` + `border-bottom` on a 5px strip). Color matches link text (`var(--color-dark-green)` light / `var(--color-soft-white)` dark) at 0.4 opacity. No animation, no aura. The underlines do not appear on hover — the hover underline draw-in is for non-RSVP links only.
+- **RSVP emphasis:** RSVP link has additional `.nav-rsvp` class with a per-letter breathing text-shadow glow. Three layered `text-shadow` values at different blur radii (6px/14px/28px) create a soft halo around each letterform. Light mode: accent green `rgba(45, 90, 74, ...)`. Dark mode: cream `rgba(241, 237, 234, ...)`. Glow intensity pulses via `@keyframes rsvp-glow` / `rsvp-glow-dark` (4s cycle, matching toggle aura timing). On hover, glow intensifies (animation pauses, static brighter shadow). Text color/position unchanged — only the glow breathes.
 - **Monogram:** Smaller inside the nav bar (~36–40px), centered between the link groups
 - **Position:** `position: fixed`, centered horizontally, near the top of the viewport — stays visible on scroll
 - **`.nav-bar` width:** 750px (expanded from 550px to accommodate 6 links). Gap: 1.8rem.
 - **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow). Light mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22))`. Dark mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3))`. Hand-tuned — do not revert to the original heavier values.
 - **z-index:** `0` — lower than links/monogram (z-index 1) so the opaque fill inside the diamond PNG doesn't cover text elements. No `mix-blend-mode`.
-- **Hover:** Color shifts to `var(--color-accent)` (`#2d5a4a`) + `text-shadow` shifts to impressed letterpress state (`--emboss-hover`). In dark mode, text dims to `rgba(241, 237, 234, 0.7)`. No opacity change. A 1px underline draws in from center via `::after` (`width: 0` → `100%`, `0.25s ease`). The draw-in underline does NOT apply to `.nav-rsvp` (which has its own static double underline).
+- **Hover (non-RSVP links):** Press-in / letterpress deepening effect. Color shifts to `var(--color-accent)` + `text-shadow` deepens (darker top shadow, dimmer bottom highlight — simulates letter sinking into the page) + `translateY(0.5px)`. In dark mode, text dims to `rgba(241, 237, 234, 0.7)` with deepened dark shadows. No underline, no `::after`. RSVP link excluded via `:not(.nav-rsvp)` — it has its own glow hover treatment.
 - **Active (tap):** Same color shift and emboss as hover, plus `translateY(0.5px)` press feedback. Provides touch response on mobile.
 - **Mobile menu elements:** Hidden on desktop (`.mobile-menu-btn` and `.mobile-menu-panel` are `display: none`)
 
@@ -177,7 +177,7 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Layout:** Menu pill button with dropdown panel. The inline diamond and links are hidden (`display: none` on `.nav-bar`).
 - **Menu button:** `.mobile-menu-btn` — a `btn-normal`-styled pill with PP Watch uppercase, grain texture via `::before`, letterpress shadow. Positioned top-right (`position: fixed; top: 4rem; right: 1.5rem`).
 - **Dropdown panel:** `.mobile-menu-panel` — rounded rectangle with grain texture, appears below the button on tap. Contains all 6 links as `.mobile-menu-link` elements. Opens/closes via `.open` class toggled by JavaScript in `site-init.js`.
-- **RSVP separator:** `.mobile-rsvp` class adds a hairline above RSVP in the dropdown, visually separating it as the primary action. A double hairline underline (`::after`) below the RSVP text matches the desktop `.nav-rsvp` emphasis.
+- **RSVP separator:** `.mobile-rsvp` class adds a hairline above RSVP in the dropdown, visually separating it as the primary action. Same breathing text-shadow glow as desktop `.nav-rsvp`.
 - **Close behavior:** Panel closes on outside click or link click (handled by `initMenu()` in `site-init.js`). When open, `<main>` and `.site-footer` receive `.menu-open` class (fades content to 0.4 opacity, disables pointer events). All close paths (button toggle, outside click, link click) remove `.menu-open`.
 - **Monogram:** 38px height, positioned near the menu button via absolute positioning.
 - **Dark mode:** Button and panel both switch colors — cream text on dark green background, adjusted border and shadow opacities.
@@ -186,7 +186,7 @@ The footer has **no separate surface** — it inherits the body background (tran
 
 - **Dark mode:** Nav diamond PNG swaps via `data-light` / `data-dark` attributes (handled by `site-init.js`). Monogram swaps to white version. Link text color swaps to cream.
 - **`savethedate.html` has NO nav**
-- **Nav link hover:** Color shifts to accent green (light) or dimmed cream (dark) + text-shadow shifts from emboss-rest to emboss-hover + underline draws in from center. Same behavior on desktop and mobile. Monogram hover: `scale(0.96) rotate(-3deg)` press-and-tilt effect with reduced drop-shadow. Active: `scale(0.93)`.
+- **Nav link hover:** Press-in effect — color shifts to accent green (light) or dimmed cream (dark) + text-shadow deepens (heavier top shadow, dimmer bottom highlight) + `translateY(0.5px)`. Same behavior on desktop and mobile. RSVP hover intensifies its glow instead. Monogram hover: `scale(0.96) translateY(0.5px)` press-in with tightened drop-shadow. Active: `scale(0.93)`. No rotate.
 
 #### Homepage (Static Diamond)
 

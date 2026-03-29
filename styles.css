@@ -395,19 +395,19 @@ body.dark-mode .nav-diamond {
 }
 
 .site-title:hover {
-    transform: scale(0.96) rotate(-3deg);
+    transform: scale(0.96) translateY(0.5px);
 }
 
 .site-title:active {
-    transform: scale(0.93) rotate(-3deg);
+    transform: scale(0.93) translateY(0.5px);
 }
 
 .site-title:hover .nav-monogram {
-    filter: drop-shadow(0px 1px 1px rgba(255, 255, 255, 0.4)) drop-shadow(0px -0.5px 1px rgba(0, 0, 0, 0.12));
+    filter: drop-shadow(0px 1px 1px rgba(255, 255, 255, 0.3)) drop-shadow(0px -1px 2px rgba(0, 0, 0, 0.2));
 }
 
 body.dark-mode .site-title:hover .nav-monogram {
-    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.3)) drop-shadow(0px -0.5px 1px rgba(255, 255, 255, 0.08));
+    filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.4)) drop-shadow(0px -1px 2px rgba(255, 255, 255, 0.06));
 }
 
 .nav-monogram {
@@ -432,26 +432,22 @@ body.dark-mode .nav-monogram {
     color: var(--color-dark-green);
     text-decoration: none;
     text-shadow: var(--emboss-rest);
-    transition: text-shadow 0.2s ease, color 400ms ease;
+    transition: text-shadow 0.2s ease, color 400ms ease, transform 0.2s ease;
     white-space: nowrap;
     position: relative;
     z-index: 1;
 }
 
-.nav-link-inline:hover {
+/* Press-in hover — deepened emboss (non-RSVP links) */
+.nav-link-inline:not(.nav-rsvp):hover {
     color: var(--color-accent);
-    text-shadow: var(--emboss-hover);
-}
-
-.nav-link-inline:active {
-    color: var(--color-accent);
-    text-shadow: var(--emboss-hover);
+    text-shadow: 0 -1px 2px rgba(26, 58, 46, 0.2), 0 2px 3px rgba(255, 255, 255, 0.3);
     transform: translateY(0.5px);
 }
 
-body.dark-mode .nav-link-inline:active {
-    color: rgba(241, 237, 234, 0.7);
-    text-shadow: var(--emboss-hover);
+.nav-link-inline:not(.nav-rsvp):active {
+    color: var(--color-accent);
+    text-shadow: 0 -1px 3px rgba(26, 58, 46, 0.3), 0 2px 2px rgba(255, 255, 255, 0.2);
     transform: translateY(0.5px);
 }
 
@@ -459,54 +455,59 @@ body.dark-mode .nav-link-inline {
     color: var(--color-soft-white);
 }
 
-body.dark-mode .nav-link-inline:hover {
+body.dark-mode .nav-link-inline:not(.nav-rsvp):hover {
     color: rgba(241, 237, 234, 0.7);
-    text-shadow: var(--emboss-hover);
+    text-shadow: 0 -1px 2px rgba(0, 0, 0, 0.5), 0 2px 2px rgba(241, 237, 234, 0.05);
+    transform: translateY(0.5px);
 }
 
-/* RSVP nav link — double hairline underline */
+body.dark-mode .nav-link-inline:not(.nav-rsvp):active {
+    color: rgba(241, 237, 234, 0.7);
+    text-shadow: 0 -1px 3px rgba(0, 0, 0, 0.6), 0 2px 1px rgba(241, 237, 234, 0.03);
+    transform: translateY(0.5px);
+}
+
+/* RSVP nav link — per-letter breathing glow */
 .nav-rsvp {
     position: relative;
+    animation: rsvp-glow 4s ease-in-out infinite;
 }
 
-.nav-rsvp::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 100%;
-    height: 5px;
-    border-top: 1px solid var(--color-dark-green);
-    border-bottom: 1px solid var(--color-dark-green);
-    opacity: 0.4;
-    pointer-events: none;
+@keyframes rsvp-glow {
+    0%, 100% {
+        text-shadow: 0 0 6px rgba(45, 90, 74, 0.2), 0 0 14px rgba(45, 90, 74, 0.1), 0 0 28px rgba(45, 90, 74, 0.05);
+    }
+    50% {
+        text-shadow: 0 0 8px rgba(45, 90, 74, 0.35), 0 0 18px rgba(45, 90, 74, 0.2), 0 0 36px rgba(45, 90, 74, 0.1);
+    }
 }
 
-body.dark-mode .nav-rsvp::after {
-    border-top-color: var(--color-soft-white);
-    border-bottom-color: var(--color-soft-white);
+body.dark-mode .nav-rsvp {
+    animation-name: rsvp-glow-dark;
 }
 
-/* Nav link hover — draw-in underline from center */
-.nav-link-inline:not(.nav-rsvp)::after {
-    content: '';
-    position: absolute;
-    bottom: -3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 1px;
-    background-color: var(--color-accent);
-    transition: width 0.25s ease;
-    pointer-events: none;
+@keyframes rsvp-glow-dark {
+    0%, 100% {
+        text-shadow: 0 0 6px rgba(241, 237, 234, 0.15), 0 0 14px rgba(241, 237, 234, 0.08), 0 0 28px rgba(241, 237, 234, 0.04);
+    }
+    50% {
+        text-shadow: 0 0 8px rgba(241, 237, 234, 0.3), 0 0 18px rgba(241, 237, 234, 0.15), 0 0 36px rgba(241, 237, 234, 0.08);
+    }
 }
 
-.nav-link-inline:not(.nav-rsvp):hover::after {
-    width: 100%;
+/* RSVP hover — glow intensifies */
+.nav-rsvp:hover {
+    text-shadow: 0 0 10px rgba(45, 90, 74, 0.45), 0 0 22px rgba(45, 90, 74, 0.3), 0 0 44px rgba(45, 90, 74, 0.15);
+    animation: none;
 }
 
-body.dark-mode .nav-link-inline:not(.nav-rsvp)::after {
-    background-color: rgba(241, 237, 234, 0.7);
+body.dark-mode .nav-rsvp:hover {
+    text-shadow: 0 0 10px rgba(241, 237, 234, 0.4), 0 0 22px rgba(241, 237, 234, 0.25), 0 0 44px rgba(241, 237, 234, 0.12);
+    animation: none;
+}
+
+.nav-rsvp:active {
+    transform: translateY(0.5px);
 }
 
 /* Nav link groups */
@@ -1528,29 +1529,21 @@ body.dark-mode .travel-link:hover {
         text-decoration: none;
         padding: 0.6rem 1.5rem;
         text-shadow: none;
-        transition: color 400ms ease;
+        transition: color 400ms ease, text-shadow 0.2s ease, transform 0.2s ease;
         position: relative;
     }
 
-    .mobile-menu-link:not(.mobile-rsvp)::after {
-        content: '';
-        position: absolute;
-        bottom: 0.3rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 1px;
-        background-color: var(--color-accent);
-        transition: width 0.25s ease;
-        pointer-events: none;
+    /* Press-in hover for mobile links (non-RSVP) */
+    .mobile-menu-link:not(.mobile-rsvp):hover {
+        color: var(--color-accent);
+        text-shadow: 0 -1px 2px rgba(26, 58, 46, 0.2), 0 2px 3px rgba(255, 255, 255, 0.3);
+        transform: translateY(0.5px);
     }
 
-    .mobile-menu-link:not(.mobile-rsvp):hover::after {
-        width: calc(100% - 3rem);
-    }
-
-    body.dark-mode .mobile-menu-link:not(.mobile-rsvp)::after {
-        background-color: rgba(241, 237, 234, 0.7);
+    body.dark-mode .mobile-menu-link:not(.mobile-rsvp):hover {
+        color: rgba(241, 237, 234, 0.7);
+        text-shadow: 0 -1px 2px rgba(0, 0, 0, 0.5), 0 2px 2px rgba(241, 237, 234, 0.05);
+        transform: translateY(0.5px);
     }
 
     .mobile-menu-link:active {
@@ -1561,33 +1554,27 @@ body.dark-mode .travel-link:hover {
         color: var(--color-soft-white);
     }
 
+    /* RSVP — breathing glow in mobile menu */
     .mobile-rsvp {
         margin-top: 0.3rem;
         padding-top: 0.9rem;
         border-top: var(--border-hairline);
-        position: relative;
-    }
-
-    .mobile-rsvp::after {
-        content: '';
-        position: absolute;
-        left: 1.5rem;
-        right: 1.5rem;
-        bottom: 0.2rem;
-        height: 5px;
-        border-top: 1px solid var(--color-dark-green);
-        border-bottom: 1px solid var(--color-dark-green);
-        opacity: 0.4;
-        pointer-events: none;
-    }
-
-    body.dark-mode .mobile-rsvp::after {
-        border-top-color: var(--color-soft-white);
-        border-bottom-color: var(--color-soft-white);
+        animation: rsvp-glow 4s ease-in-out infinite;
     }
 
     body.dark-mode .mobile-rsvp {
         border-top-color: rgba(241, 237, 234, 0.12);
+        animation-name: rsvp-glow-dark;
+    }
+
+    .mobile-rsvp:hover {
+        text-shadow: 0 0 10px rgba(45, 90, 74, 0.45), 0 0 22px rgba(45, 90, 74, 0.3), 0 0 44px rgba(45, 90, 74, 0.15);
+        animation: none;
+    }
+
+    body.dark-mode .mobile-rsvp:hover {
+        text-shadow: 0 0 10px rgba(241, 237, 234, 0.4), 0 0 22px rgba(241, 237, 234, 0.25), 0 0 44px rgba(241, 237, 234, 0.12);
+        animation: none;
     }
 
     /* Monogram — show above menu button on mobile */
