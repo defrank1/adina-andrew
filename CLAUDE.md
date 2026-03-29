@@ -168,7 +168,7 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **`.nav-bar` width:** 750px (expanded from 550px to accommodate 6 links). Gap: 1.8rem.
 - **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow). Light mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22))`. Dark mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3))`. Hand-tuned — do not revert to the original heavier values.
 - **z-index:** `0` — lower than links/monogram (z-index 1) so the opaque fill inside the diamond PNG doesn't cover text elements. No `mix-blend-mode`.
-- **Hover (non-RSVP links):** Press-in / letterpress deepening effect. Color shifts to `var(--color-accent)` + `text-shadow` deepens (darker top shadow, dimmer bottom highlight — simulates letter sinking into the page) + `translateY(0.5px)`. In dark mode, text dims to `rgba(241, 237, 234, 0.7)` with deepened dark shadows. No underline, no `::after`. RSVP link excluded via `:not(.nav-rsvp)` — it has its own glow hover treatment.
+- **Hover (non-RSVP links):** Ink freshening effect. Links rest at `opacity: 0.78` (slightly faded ink) and sharpen to `opacity: 1` on hover. Color shifts to `var(--color-accent)` (light) / full `var(--color-soft-white)` (dark). `text-shadow` shifts to `--emboss-hover`. No movement on hover — `translateY(0.5px)` on `:active` only. No `::after`, no underline. Transition: `opacity 0.2s ease`. RSVP excluded via `:not(.nav-rsvp)` — stays at full opacity with its own glow.
 - **Active (tap):** Same color shift and emboss as hover, plus `translateY(0.5px)` press feedback. Provides touch response on mobile.
 - **Mobile menu elements:** Hidden on desktop (`.mobile-menu-btn` and `.mobile-menu-panel` are `display: none`)
 
@@ -186,7 +186,7 @@ The footer has **no separate surface** — it inherits the body background (tran
 
 - **Dark mode:** Nav diamond PNG swaps via `data-light` / `data-dark` attributes (handled by `site-init.js`). Monogram swaps to white version. Link text color swaps to cream.
 - **`savethedate.html` has NO nav**
-- **Nav link hover:** Press-in effect — color shifts to accent green (light) or dimmed cream (dark) + text-shadow deepens (heavier top shadow, dimmer bottom highlight) + `translateY(0.5px)`. Same behavior on desktop and mobile. RSVP hover intensifies its glow instead. Monogram hover: `scale(0.96) translateY(0.5px)` press-in with tightened drop-shadow. Active: `scale(0.93)`. No rotate.
+- **Nav link hover:** Ink freshening — links rest at `opacity: 0.78`, sharpen to `1.0` on hover with accent color shift. Same on desktop and mobile. RSVP excluded (has glow). Monogram rests at `opacity: 0.85`, freshens to `1.0` on hover with `scale(0.96)`. Active: `scale(0.93)`. No rotate, no translateY on hover.
 
 #### Homepage (Static Diamond)
 
