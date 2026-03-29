@@ -412,7 +412,7 @@ body.dark-mode .nav-diamond {
 }
 
 .site-title:hover .nav-monogram {
-    filter: drop-shadow(0 0 8px rgba(45, 90, 74, 0.2));
+    filter: drop-shadow(0 0 12px rgba(45, 90, 74, 0.35));
 }
 
 body.dark-mode .nav-monogram {
@@ -420,7 +420,7 @@ body.dark-mode .nav-monogram {
 }
 
 body.dark-mode .site-title:hover .nav-monogram {
-    filter: drop-shadow(0 0 8px rgba(241, 237, 234, 0.15));
+    filter: drop-shadow(0 0 12px rgba(241, 237, 234, 0.3));
 }
 
 /* Desktop inline nav links */
@@ -431,7 +431,7 @@ body.dark-mode .site-title:hover .nav-monogram {
     letter-spacing: 0.1em;
     color: var(--color-dark-green);
     text-decoration: none;
-    text-shadow: 0 0 8px rgba(45, 90, 74, 0.12), 0 0 18px rgba(45, 90, 74, 0.06);
+    text-shadow: 0 0 10px rgba(45, 90, 74, 0.3), 0 0 24px rgba(45, 90, 74, 0.15), 0 0 40px rgba(45, 90, 74, 0.08);
     transition: text-shadow 0.25s ease, color 0.2s ease;
     white-space: nowrap;
     position: relative;
@@ -440,28 +440,28 @@ body.dark-mode .site-title:hover .nav-monogram {
 
 .nav-link-inline:hover {
     color: var(--color-accent);
-    text-shadow: 0 0 6px rgba(45, 90, 74, 0.3), 0 0 16px rgba(45, 90, 74, 0.18), 0 0 30px rgba(45, 90, 74, 0.08);
+    text-shadow: 0 0 8px rgba(45, 90, 74, 0.5), 0 0 20px rgba(45, 90, 74, 0.35), 0 0 40px rgba(45, 90, 74, 0.18);
 }
 
 .nav-link-inline:active {
     color: var(--color-accent);
-    text-shadow: 0 0 6px rgba(45, 90, 74, 0.3), 0 0 16px rgba(45, 90, 74, 0.18), 0 0 30px rgba(45, 90, 74, 0.08);
+    text-shadow: 0 0 8px rgba(45, 90, 74, 0.5), 0 0 20px rgba(45, 90, 74, 0.35), 0 0 40px rgba(45, 90, 74, 0.18);
     transform: translateY(0.5px);
 }
 
 body.dark-mode .nav-link-inline {
     color: var(--color-soft-white);
-    text-shadow: 0 0 8px rgba(241, 237, 234, 0.1), 0 0 18px rgba(241, 237, 234, 0.05);
+    text-shadow: 0 0 10px rgba(241, 237, 234, 0.25), 0 0 24px rgba(241, 237, 234, 0.12), 0 0 40px rgba(241, 237, 234, 0.06);
 }
 
 body.dark-mode .nav-link-inline:hover {
     color: var(--color-soft-white);
-    text-shadow: 0 0 6px rgba(241, 237, 234, 0.25), 0 0 16px rgba(241, 237, 234, 0.15), 0 0 30px rgba(241, 237, 234, 0.06);
+    text-shadow: 0 0 8px rgba(241, 237, 234, 0.45), 0 0 20px rgba(241, 237, 234, 0.3), 0 0 40px rgba(241, 237, 234, 0.15);
 }
 
 body.dark-mode .nav-link-inline:active {
     color: var(--color-soft-white);
-    text-shadow: 0 0 6px rgba(241, 237, 234, 0.25), 0 0 16px rgba(241, 237, 234, 0.15), 0 0 30px rgba(241, 237, 234, 0.06);
+    text-shadow: 0 0 8px rgba(241, 237, 234, 0.45), 0 0 20px rgba(241, 237, 234, 0.3), 0 0 40px rgba(241, 237, 234, 0.15);
     transform: translateY(0.5px);
 }
 
@@ -473,10 +473,10 @@ body.dark-mode .nav-link-inline:active {
 
 @keyframes rsvp-glow {
     0%, 100% {
-        text-shadow: 0 0 6px rgba(45, 90, 74, 0.25), 0 0 14px rgba(45, 90, 74, 0.15), 0 0 28px rgba(45, 90, 74, 0.08);
+        text-shadow: 0 0 8px rgba(45, 90, 74, 0.4), 0 0 20px rgba(45, 90, 74, 0.25), 0 0 36px rgba(45, 90, 74, 0.12);
     }
     50% {
-        text-shadow: 0 0 8px rgba(45, 90, 74, 0.35), 0 0 18px rgba(45, 90, 74, 0.22), 0 0 34px rgba(45, 90, 74, 0.12);
+        text-shadow: 0 0 8px rgba(45, 90, 74, 0.55), 0 0 22px rgba(45, 90, 74, 0.35), 0 0 42px rgba(45, 90, 74, 0.18);
     }
 }
 
@@ -486,21 +486,21 @@ body.dark-mode .nav-rsvp {
 
 @keyframes rsvp-glow-dark {
     0%, 100% {
-        text-shadow: 0 0 6px rgba(241, 237, 234, 0.2), 0 0 14px rgba(241, 237, 234, 0.12), 0 0 28px rgba(241, 237, 234, 0.06);
+        text-shadow: 0 0 8px rgba(241, 237, 234, 0.35), 0 0 20px rgba(241, 237, 234, 0.2), 0 0 36px rgba(241, 237, 234, 0.1);
     }
     50% {
-        text-shadow: 0 0 8px rgba(241, 237, 234, 0.3), 0 0 18px rgba(241, 237, 234, 0.18), 0 0 34px rgba(241, 237, 234, 0.1);
+        text-shadow: 0 0 8px rgba(241, 237, 234, 0.5), 0 0 22px rgba(241, 237, 234, 0.3), 0 0 42px rgba(241, 237, 234, 0.15);
     }
 }
 
 /* RSVP hover — glow intensifies beyond breathing peak */
 .nav-rsvp:hover {
-    text-shadow: 0 0 6px rgba(45, 90, 74, 0.4), 0 0 16px rgba(45, 90, 74, 0.25), 0 0 32px rgba(45, 90, 74, 0.12);
+    text-shadow: 0 0 8px rgba(45, 90, 74, 0.65), 0 0 22px rgba(45, 90, 74, 0.45), 0 0 44px rgba(45, 90, 74, 0.22);
     animation: none;
 }
 
 body.dark-mode .nav-rsvp:hover {
-    text-shadow: 0 0 6px rgba(241, 237, 234, 0.35), 0 0 16px rgba(241, 237, 234, 0.2), 0 0 32px rgba(241, 237, 234, 0.1);
+    text-shadow: 0 0 8px rgba(241, 237, 234, 0.6), 0 0 22px rgba(241, 237, 234, 0.4), 0 0 44px rgba(241, 237, 234, 0.2);
     animation: none;
 }
 
@@ -1526,14 +1526,14 @@ body.dark-mode .travel-link:hover {
         color: var(--color-dark-green);
         text-decoration: none;
         padding: 0.6rem 1.5rem;
-        text-shadow: 0 0 8px rgba(45, 90, 74, 0.12), 0 0 18px rgba(45, 90, 74, 0.06);
+        text-shadow: 0 0 10px rgba(45, 90, 74, 0.3), 0 0 24px rgba(45, 90, 74, 0.15), 0 0 40px rgba(45, 90, 74, 0.08);
         transition: text-shadow 0.25s ease, color 0.2s ease;
         position: relative;
     }
 
     .mobile-menu-link:hover {
         color: var(--color-accent);
-        text-shadow: 0 0 6px rgba(45, 90, 74, 0.3), 0 0 16px rgba(45, 90, 74, 0.18), 0 0 30px rgba(45, 90, 74, 0.08);
+        text-shadow: 0 0 8px rgba(45, 90, 74, 0.5), 0 0 20px rgba(45, 90, 74, 0.35), 0 0 40px rgba(45, 90, 74, 0.18);
     }
 
     .mobile-menu-link:active {
@@ -1542,12 +1542,12 @@ body.dark-mode .travel-link:hover {
 
     body.dark-mode .mobile-menu-link {
         color: var(--color-soft-white);
-        text-shadow: 0 0 8px rgba(241, 237, 234, 0.1), 0 0 18px rgba(241, 237, 234, 0.05);
+        text-shadow: 0 0 10px rgba(241, 237, 234, 0.25), 0 0 24px rgba(241, 237, 234, 0.12), 0 0 40px rgba(241, 237, 234, 0.06);
     }
 
     body.dark-mode .mobile-menu-link:hover {
         color: var(--color-soft-white);
-        text-shadow: 0 0 6px rgba(241, 237, 234, 0.25), 0 0 16px rgba(241, 237, 234, 0.15), 0 0 30px rgba(241, 237, 234, 0.06);
+        text-shadow: 0 0 8px rgba(241, 237, 234, 0.45), 0 0 20px rgba(241, 237, 234, 0.3), 0 0 40px rgba(241, 237, 234, 0.15);
     }
 
     /* RSVP — breathing glow in mobile menu */
@@ -1564,12 +1564,12 @@ body.dark-mode .travel-link:hover {
     }
 
     .mobile-rsvp:hover {
-        text-shadow: 0 0 6px rgba(45, 90, 74, 0.4), 0 0 16px rgba(45, 90, 74, 0.25), 0 0 32px rgba(45, 90, 74, 0.12);
+        text-shadow: 0 0 8px rgba(45, 90, 74, 0.65), 0 0 22px rgba(45, 90, 74, 0.45), 0 0 44px rgba(45, 90, 74, 0.22);
         animation: none;
     }
 
     body.dark-mode .mobile-rsvp:hover {
-        text-shadow: 0 0 6px rgba(241, 237, 234, 0.35), 0 0 16px rgba(241, 237, 234, 0.2), 0 0 32px rgba(241, 237, 234, 0.1);
+        text-shadow: 0 0 8px rgba(241, 237, 234, 0.6), 0 0 22px rgba(241, 237, 234, 0.4), 0 0 44px rgba(241, 237, 234, 0.2);
         animation: none;
     }
 
