@@ -28,64 +28,30 @@
         </div>
     </div>
 
+    <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
+    <div id="nav-placeholder"></div>
+
     <!-- Protected Content -->
     <div id="protected-content">
 
-        <main>
-            <section class="save-the-date-content">
-                <div class="content-wrapper">
-                    <div class="std-announcement">
-                        <p class="std-intro">You are cordially invited to the<br>wedding ceremony and celebration of</p>
+        <main class="registry-page">
+            <section class="registry-section">
+                <div class="content-wrapper homepage-hero">
 
-                        <img src="images/names/names-image.png" alt="Adina Nelson & Andrew DeFrank"
-                            class="std-names-image" id="names-image"
-                            data-light="images/names/names-image.png"
-                            data-dark="images/names/names-image-dark.png">
+                    <img src="images/names/names-image.png" alt="Adina Nelson & Andrew DeFrank"
+                        class="std-names-image" id="names-image"
+                        data-light="images/names/names-image.png"
+                        data-dark="images/names/names-image-dark.png">
 
-                        <p class="std-details"><strong>October 17, 2026</strong><br>Washington, D.C.</p>
+                    <p class="homepage-date">October 17, 2026</p>
+                    <p class="homepage-location">Washington, D.C.</p>
 
-                        <div class="home-nav">
-                            <div class="nav-bar">
-                                <div class="nav-links-left">
-                                    <a href="/travel" class="nav-link-inline">Travel</a>
-                                    <a href="/faq" class="nav-link-inline">FAQ</a>
-                                    <a href="/dc-guide" class="nav-link-inline">DC Guide</a>
-                                </div>
-                                <div class="nav-links-right">
-                                    <a href="/our-story" class="nav-link-inline">Our Story</a>
-                                    <a href="/registry" class="nav-link-inline">Registry</a>
-                                    <a href="/rsvp" class="nav-link-inline nav-rsvp">RSVP</a>
-                                </div>
-                                <img src="/images/nav/wide-nav-light.png" alt="" class="nav-diamond" id="home-nav-diamond" data-light="/images/nav/wide-nav-light.png" data-dark="/images/nav/wide-nav-dark.png">
-                            </div>
-                        </div>
-
-                        <div class="registry-cta">
-                            <a href="/rsvp" class="btn-priority">RSVP</a>
-                        </div>
+                    <div class="homepage-illustration">
+                        <img src="images/illustrations/Dupont-light.png" alt="" class="dupont-icon" id="dupont-icon"
+                            data-light="images/illustrations/Dupont-light.png"
+                            data-dark="images/illustrations/Dupont-dark.png">
                     </div>
 
-                    <div class="home-details">
-                        <div class="home-event">
-                            <h3 class="schedule-event-name">Ceremony and Reception</h3>
-                            <p class="schedule-event-detail">Saturday, October 17th</p>
-                            <p class="schedule-event-detail">InterContinental Washington, DC — The Wharf<br>801 Wharf Street SW</p>
-                            <p class="schedule-event-detail">Black Tie Preferred</p>
-                        </div>
-
-                        <div class="home-event">
-                            <h3 class="schedule-event-name">After Party</h3>
-                            <p class="schedule-event-detail">Saturday, October 17th · 11:00 PM — 1:00 AM</p>
-                            <p class="schedule-event-detail">Kirwan's on the Wharf<br>749 Wharf Street SW, Second Floor</p>
-                            <p class="schedule-event-description">Meet us upstairs for drinks, late-night food, and the best company — our friends and family.</p>
-                        </div>
-
-                        <div class="announcement-icon">
-                            <img src="images/illustrations/Dupont-light.png" alt="" class="dupont-icon" id="dupont-icon"
-                                data-light="images/illustrations/Dupont-light.png"
-                                data-dark="images/illustrations/Dupont-dark.png">
-                        </div>
-                    </div>
                 </div>
             </section>
         </main>

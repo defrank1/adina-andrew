@@ -724,3 +724,8 @@ On mobile, the menu button sits at `top: 4rem` (~64px) and is ~36px tall, so its
 - **Monogram inside homepage static diamond** — Removed because with only four links the spacing was uneven; the diamond reads cleaner without it.
 - **RSVP breathing aura** (`.nav-rsvp::after` radial gradient + `@keyframes breathe`) — Replaced with static double hairline underline. The animated glow competed with the toggle aura and felt too busy.
 - **✹ (U+2739) toggle glyph** — Replaced with ☀ (U+2600). ✹ read as abstract; ☀ is immediately recognizable as a sun.
+
+### Homepage → Landing Page Layout (Approach 1)
+**Date:** March 29, 2026
+**Decision:** Moved the shared floating nav to the top of the homepage (consistent with all inner pages). Removed invitation preamble text ("You are cordially invited..."), ceremony/reception details, after party details, and Dupont fountain illustration. Homepage is now a clean landing page: nav → names → date → RSVP button. The names image serves as hero content rather than an invitation header.
+**Rationale:** The homepage needed to function as a landing page, not a semi-invitation. The nav should be consistently positioned across all pages. Event details belong on the Schedule page. The ceremonial feel comes from the typography and design, not from invitation language.
