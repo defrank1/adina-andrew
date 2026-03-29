@@ -1400,7 +1400,7 @@ body.dark-mode .travel-link:hover {
         background-color: var(--color-soft-white);
         padding: 0.5rem 1.5rem;
         border-radius: 25px;
-        border: 2px solid rgba(26, 58, 46, 0.2);
+        border: 1px solid rgba(26, 58, 46, 0.15);
         text-shadow: none;
         cursor: pointer;
         box-shadow: var(--shadow-raised);
@@ -1427,8 +1427,8 @@ body.dark-mode .travel-link:hover {
 
     body.dark-mode .mobile-menu-btn {
         color: var(--color-soft-white);
-        background-color: var(--color-dark-bg);
-        border: 2px solid rgba(241, 237, 234, 0.12);
+        background-color: var(--color-dark-green);
+        border: 1px solid rgba(241, 237, 234, 0.1);
     }
 
     /* Mobile menu panel */
@@ -1463,7 +1463,7 @@ body.dark-mode .travel-link:hover {
     }
 
     body.dark-mode .mobile-menu-panel {
-        background-color: var(--color-dark-bg);
+        background-color: var(--color-dark-green);
         border-color: rgba(241, 237, 234, 0.1);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
@@ -1514,12 +1514,14 @@ body.dark-mode .travel-link:hover {
 
     /* Monogram — show above menu button on mobile */
     .main-nav .site-title {
-        position: absolute;
-        top: -0.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 2;
+        position: fixed;
+        top: 1.5rem;
+        left: 1.5rem;
+        right: auto;
+        transform: none;
+        z-index: 1001;
         display: flex;
+        align-items: center;
     }
 
     .main-nav .nav-monogram {
@@ -1529,7 +1531,7 @@ body.dark-mode .travel-link:hover {
     /* Main nav positioning on mobile */
     .main-nav {
         position: fixed;
-        top: 4rem;
+        top: 1.5rem;
         right: 1.5rem;
         left: auto;
         transform: none;
