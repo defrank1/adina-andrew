@@ -980,18 +980,6 @@ body.dark-mode .registry-illustration {
     filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
 }
 
-.page-closing-illustration {
-    margin-top: 3rem;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.page-closing-illustration .registry-illustration {
-    max-height: 160px;
-    height: auto;
-    opacity: 0.7;
-}
-
 .page-intro {
     font-family: var(--font-body);
     font-style: normal;
@@ -1621,10 +1609,6 @@ body.dark-mode .travel-link:hover {
         height: 180px;
         max-height: none;
         margin-bottom: 1.5rem;
-    }
-
-    .page-closing-illustration .registry-illustration {
-        max-height: 130px;
     }
 
     .page-intro {
