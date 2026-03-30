@@ -980,6 +980,18 @@ body.dark-mode .registry-illustration {
     filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
 }
 
+.page-closing-illustration {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.page-closing-illustration .registry-illustration {
+    max-height: 160px;
+    height: auto;
+    opacity: 0.7;
+}
+
 .page-intro {
     font-family: var(--font-body);
     font-style: normal;
@@ -1470,6 +1482,7 @@ body.dark-mode .travel-link:hover {
 
     .mobile-menu-link {
         display: block;
+        text-align: center;
         font-family: var(--font-heading);
         font-size: 0.7rem;
         text-transform: uppercase;
@@ -1501,31 +1514,23 @@ body.dark-mode .travel-link:hover {
         text-shadow: 0 0 8px rgba(241, 237, 234, 0.34), 0 0 20px rgba(241, 237, 234, 0.225), 0 0 40px rgba(241, 237, 234, 0.11);
     }
 
-    /* RSVP — separator in mobile menu */
+    /* RSVP in mobile menu */
     .mobile-rsvp {
-        margin-top: 0.3rem;
-        padding-top: 0.9rem;
-        border-top: var(--border-hairline);
+        margin-top: 0;
+        padding-top: 0.6rem;
+        border-top: none;
     }
 
-    body.dark-mode .mobile-rsvp {
-        border-top-color: rgba(241, 237, 234, 0.12);
-    }
-
-    /* Monogram — show above menu button on mobile */
-    .main-nav .site-title {
-        position: fixed;
-        top: 1.5rem;
-        left: 1.5rem;
-        right: auto;
-        transform: none;
-        z-index: 1001;
+    /* Monogram inside mobile dropdown */
+    .mobile-monogram-link {
         display: flex;
-        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1.5rem 0.6rem;
     }
 
-    .main-nav .nav-monogram {
-        height: 38px;
+    .mobile-monogram-link .nav-monogram {
+        height: 28px;
+        width: auto;
     }
 
     /* Main nav positioning on mobile */
@@ -1616,6 +1621,10 @@ body.dark-mode .travel-link:hover {
         height: 180px;
         max-height: none;
         margin-bottom: 1.5rem;
+    }
+
+    .page-closing-illustration .registry-illustration {
+        max-height: 130px;
     }
 
     .page-intro {
