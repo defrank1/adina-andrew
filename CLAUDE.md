@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: March 29, 2026
+Last updated: April 4, 2026
 
 ---
 
@@ -23,27 +23,28 @@ Last updated: March 29, 2026
 ## Pages
 
 - `index.html` — Currently redirects to Save the Date. Will be replaced by homepage.html when the site goes live.
-- `homepage.html` — Homepage / invitation landing page. Standalone (no floating nav, no shared footer). Static embossed diamond nav in content flow. `<body class="page-home">`
+- `homepage.html` — Homepage / clean landing page. Uses shared floating nav (via `#nav-placeholder`, same as inner pages). Content: names image as hero, date in PP Watch uppercase, "Washington, D.C." location, Dupont fountain illustration as closing decorative element. No page title `<h1>`, no invitation preamble, no event details, no standalone RSVP button. Entire page fits in one viewport without scrolling via `flex: 1` chain on `.homepage-hero`. `<body class="page-home">`
 - `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer** — `<body class="page-savethedate">`
 - `registry.html` — Registry with link to Zola (`adinaandandrew2026` — double "and" is correct) — `<body class="page-registry">`
 - `faq.html` — Questions & Answers (7 Q&A items, inline RSVP link) — `<body class="page-faq">`
 - `schedule.html` — Wedding weekend invitation (Fri/Sat/Sun events, event names lead each block) — `<body class="page-schedule">`
-- `travel.html` — Hotels (4 blocks) + transportation directions, D.C. flag illustration — `<body class="page-travel">`
+- `travel.html` — Hotels (4 blocks) + transportation directions, cherry blossom illustration — `<body class="page-travel">`
 - `our-story.html` — Photo timeline page with captions — `<body class="page-our-story">`
 - `dc-guide.html` — DC recommendations (Food + Activities sections), follows Travel page template — `<body class="page-dc-guide">`
 - `rsvp.html` — RSVP form (integrates with Google Sheets via rsvp-workflow/google-apps-script.js)
 
-### Planned Illustration Assignments (pending new assets)
+### Illustration Assignments
 
 | Page | Illustration | Status |
 |------|-------------|--------|
-| Travel | Cherry Blossom | New asset, pending |
-| FAQ | Joan of Arc | New asset, pending |
-| DC Guide | Flag (moved from Travel) | Swap when cherry blossom is ready |
-| Our Story | None (remove rowhouse) | When ready |
+| Travel | Cherry Blossom (`blossom-light.png` / `blossom-dark.png`) | Done |
+| FAQ | Joan of Arc (`joan-test-light.png` / `joan-test-dark.png`) | Done |
+| DC Guide | D.C. Flag (`flag-light.png` / `flag-dark.png`) | Done |
 | Registry | Rowhouse | Stays |
-| RSVP | None / Rive animation | Stays |
+| Our Story | None (removed) | Done |
+| RSVP | None / Rive animation | — |
 | Schedule | TBD | — |
+| Homepage | Dupont fountain (closing decorative element, not page illustration) | Done |
 
 ## Hotel Blocks
 
@@ -162,13 +163,13 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Content inside the diamond:** TRAVEL · FAQ · DC GUIDE · [monogram] · OUR STORY · REGISTRY · RSVP — all in PP Watch uppercase, arranged as a centered flex row. Six links total, three per side.
 - **Link order:** "Guest stuff" left of monogram (Travel, FAQ, DC Guide), "us stuff + RSVP" right (Our Story, Registry, RSVP)
 - **Links:** `.nav-link-inline` elements in `.nav-links-left` (3 links) and `.nav-links-right` (3 links)
-- **RSVP emphasis:** RSVP link (`.nav-rsvp`) has a stronger breathing glow than sibling links — three layered `text-shadow` values at 6px/14px/28px blur. Pulses via `@keyframes rsvp-glow` / `rsvp-glow-dark` (4s cycle). On hover, glow intensifies beyond breathing peak (animation pauses). Part of the unified nav glow system — all links glow subtly, RSVP glows brightest.
+- **RSVP emphasis:** RSVP link (`.nav-rsvp`) is the sole exception to "no glow at rest" — it has a breathing glow via `@keyframes rsvp-glow` / `rsvp-glow-dark` (4s cycle, three-layer `text-shadow` at 6px/14px/28px blur). On hover, glow intensifies beyond the breathing peak (animation pauses). All other links have no glow at rest.
 - **Monogram:** Smaller inside the nav bar (~36–40px), centered between the link groups
 - **Position:** `position: fixed`, centered horizontally, near the top of the viewport — stays visible on scroll
 - **`.nav-bar` width:** 750px (expanded from 550px to accommodate 6 links). Gap: 1.8rem.
 - **Drop shadow:** `filter: drop-shadow()` on `.nav-diamond` — follows the diamond shape (not a rectangular box-shadow). Light mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.22))`. Dark mode: `drop-shadow(0 4px 14px rgba(0, 0, 0, 0.3))`. Hand-tuned — do not revert to the original heavier values.
 - **z-index:** `0` — lower than links/monogram (z-index 1) so the opaque fill inside the diamond PNG doesn't cover text elements. No `mix-blend-mode`.
-- **Hover:** All links use a unified glow system. At rest, every nav link has a subtle `text-shadow` glow (8px/18px blur, low opacity). On hover, glow intensifies (6px/16px/30px blur, higher opacity) + color shifts to `var(--color-accent)`. No movement on hover — `translateY(0.5px)` on `:active` only. No `::after`, no underline, no opacity changes. Light mode glow: accent green `rgba(45, 90, 74, ...)`. Dark mode glow: cream `rgba(241, 237, 234, ...)`. Transition: `text-shadow 0.25s ease, color 0.2s ease`.
+- **Hover:** No glow at rest — links have `text-shadow: none` in their default state. On hover, a glow appears (text-shadow at ~75% intensity) + color shifts to `var(--color-accent)`. Light mode glow: accent green `rgba(45, 90, 74, ...)`. Dark mode glow: cream `rgba(241, 237, 234, ...)`. Transition: `text-shadow 0.25s ease, color 0.2s ease`. No `translateY` on hover — only on `:active` (`translateY(0.5px)`).
 - **Active (tap):** Same color shift and emboss as hover, plus `translateY(0.5px)` press feedback. Provides touch response on mobile.
 - **Mobile menu elements:** Hidden on desktop (`.mobile-menu-btn` and `.mobile-menu-panel` are `display: none`)
 
@@ -177,26 +178,26 @@ The footer has **no separate surface** — it inherits the body background (tran
 - **Layout:** Menu pill button with dropdown panel. The inline diamond and links are hidden (`display: none` on `.nav-bar`).
 - **Menu button:** `.mobile-menu-btn` — a `btn-normal`-styled pill with PP Watch uppercase, grain texture via `::before`, letterpress shadow. Positioned top-right (`position: fixed; top: 4rem; right: 1.5rem`).
 - **Dropdown panel:** `.mobile-menu-panel` — rounded rectangle with grain texture, appears below the button on tap. Contains all 6 links as `.mobile-menu-link` elements. Opens/closes via `.open` class toggled by JavaScript in `site-init.js`.
-- **RSVP separator:** `.mobile-rsvp` class adds a hairline above RSVP in the dropdown, visually separating it as the primary action. Same breathing glow and hover intensification as desktop `.nav-rsvp`. All mobile links share the same subtle glow at rest.
+- **RSVP separator:** `.mobile-rsvp` class adds a hairline above RSVP in the dropdown, visually separating it as the primary action. Same breathing glow and hover intensification as desktop `.nav-rsvp`.
 - **Close behavior:** Panel closes on outside click or link click (handled by `initMenu()` in `site-init.js`). When open, `<main>` and `.site-footer` receive `.menu-open` class (fades content to 0.4 opacity, disables pointer events). All close paths (button toggle, outside click, link click) remove `.menu-open`.
-- **Monogram:** 38px height, positioned near the menu button via absolute positioning.
+- **Monogram:** Duplicated in the HTML — once inside `.nav-bar` for desktop, once inside `.mobile-menu-panel` as the first centered item (above the six page links). Each is `display: none` on its non-active breakpoint. The monogram inside the mobile dropdown links to `/homepage`.
 - **Dark mode:** Button and panel both switch colors — cream text on dark green background, adjusted border and shadow opacities.
 
 #### Both Modes
 
 - **Dark mode:** Nav diamond PNG swaps via `data-light` / `data-dark` attributes (handled by `site-init.js`). Monogram swaps to white version. Link text color swaps to cream.
 - **`savethedate.html` has NO nav**
-- **Nav link hover:** Unified glow system — all links have a subtle `text-shadow` glow at rest, intensifying on hover with accent color shift. RSVP glows brighter and breathes. Monogram hover: `scale(0.96)` + `drop-shadow` glow matching link glow color. Active: `scale(0.93)`. No rotate, no translateY on hover.
+- **Nav link hover:** No glow at rest — glow appears only on hover with accent color shift. RSVP is the sole exception (breathing glow at rest). Monogram hover: `scale(0.96)` + `drop-shadow` glow matching link glow color. Active: `scale(0.93)`. No rotate, no translateY on hover.
 
-#### Homepage (Static Diamond)
+#### Homepage
 
-- **No floating nav.** The homepage uses a static diamond PNG in the content flow, not the fixed-position `.main-nav`.
-- **Embossed, not floating:** Uses the illustration drop-shadow treatment (`drop-shadow(0px 2px 2px rgba(255,255,255,1)) drop-shadow(0px -1px 1px rgba(0,0,0,0.15))`) instead of the floating shadow. Opacity 0.9.
-- **No monogram** inside the diamond — only the six nav links (Travel, FAQ, DC Guide, Our Story, Registry, RSVP), three per side.
-- **Wrapped in `.home-nav`** — a flex container that centers the diamond in the content flow. Gap: 1.8rem.
-- **Mobile:** Diamond hidden, links reflow into two stacked centered rows. No menu button on homepage.
-- **Dark mode toggle:** Uses the shared footer (injected via `site-init.js`), same Unicode symbol toggle as all other nav pages.
-- **Event blocks** below the hairline are left-aligned (`text-align: left`) within a 600px `max-width` container, matching the Schedule page. The invitation section above the hairline stays centered. Dupont illustration at the bottom stays centered.
+- **Uses the shared floating nav** — same `#nav-placeholder` injection as all inner pages. No special homepage-only nav.
+- **No page title** — the names image is the hero content. Unlike inner pages which have `<h1 class="registry-title">`, the homepage has no text heading.
+- **Content fits one viewport** — `.homepage-hero` uses `flex: 1` with `display: flex; flex-direction: column; justify-content: center; align-items: center` to vertically center names + date + location within the available space. The Dupont fountain illustration sits below as a closing flourish.
+- **Date typography** — `.homepage-date` uses PP Watch uppercase (`font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 0.12em`).
+- **No RSVP button** — RSVP is accessible only via the nav link. The standalone button was removed to keep the page as a title card.
+- **Mobile:** Same shared nav (pill Menu button + dropdown). Content still fits one viewport.
+- **Dark mode:** Handled by the shared nav/footer system. Names image and Dupont illustration swap via `data-light`/`data-dark`.
 
 #### Implementation History
 
@@ -269,13 +270,13 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 
 ### Illustration Sizing
 
-- Desktop: ~200px max-width
-- Mobile: ~175–180px max-width
+- Desktop: ~120px height (reduced from 200px to 60% size)
+- Mobile: ~120px height (same as desktop — the mobile-specific 180px override was removed for consistency)
 - Centered, `display: block`, `margin: 0 auto`
 - `object-fit: contain`
 - Light/dark variants via `data-light` / `data-dark` attributes
 - Drop-shadow filter: light mode uses white/dark-green shadows, dark mode uses black/white shadows
-- Export from Affinity Designer at 600px wide (3x retina at 200px display size)
+- Export from Affinity Designer at 600px wide (3x retina at ~200px max display size)
 - Light and dark variants must have identical canvas bounds to prevent swap size jumps
 - Texture/grain should be baked into illustration assets before export, not applied via CSS
 
@@ -397,10 +398,10 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - **Page intro text** (`.page-intro`) appears below illustrations on content pages. Sentient Regular, 1.05rem, 0.85 opacity, left-aligned. Renamed from `.registry-intro` — the mobile override is unscoped so it applies across all pages.
 - **Travel page section titles** ("Hotels", "Transportation") use PP Playground at 3.2rem (mobile: 2.3rem), left-aligned. Hairline divider (`.section-divider`) separates Hotels from Transportation. No hairline between page intro and Hotels.
 - **Our Story page** uses `.story-timeline` container (600px max-width) with `.story-moment` blocks. Photos use `.story-photo-single` (380px max, mobile: 320px) or `.story-photo-pair` (flex row, mobile: stacked column). Captions in `.story-caption` with `.story-caption-label` subheads. `.story-divider` hairlines between moments. `.story-closing` as final text. Web-optimized JPGs prefixed `web-` in `images/our-story/`.
-- **DC Guide page** reuses Travel page classes: `.travel-section-title`, `.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`, `.section-divider`, `.travel-directions`, `.travel-direction-item`. Two sections: Food and Activities. Uses Dupont illustration. No hairline between page intro and first section (matching Travel page pattern) — divider only between Food and Activities.
+- **DC Guide page** reuses Travel page classes: `.travel-section-title`, `.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`, `.section-divider`, `.travel-directions`, `.travel-direction-item`. Two sections: Food and Activities. Uses D.C. flag illustration. No hairline between page intro and first section (matching Travel page pattern) — divider only between Food and Activities.
 - **Button labels** on Travel and Save the Date hotel blocks: "Book Room" for hotels with room blocks, "Visit Website" for citizenM.
 - **Schedule page dress code:** short labels as `.schedule-event-detail` (PP Watch), explanatory text as `.schedule-event-description` (Sentient). No "Dress Code:" prefix.
-- **`.registry-illustration`** uses fixed `height: 200px` (mobile: 180px) with `object-fit: contain` for consistent vertical rhythm across pages.
+- **`.registry-illustration`** uses fixed `height: 120px` with `object-fit: contain` for consistent vertical rhythm across pages. The mobile-specific 180px override has been removed — 120px applies at all breakpoints.
 - **FAQ password overlay** uses `white-space: nowrap` with widened container (`max-width: 600px`) to keep title on one line.
 
 

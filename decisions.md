@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: March 29, 2026
+Last updated: April 4, 2026
 
 ---
 
@@ -729,3 +729,54 @@ On mobile, the menu button sits at `top: 4rem` (~64px) and is ~36px tall, so its
 **Date:** March 29, 2026
 **Decision:** Moved the shared floating nav to the top of the homepage (consistent with all inner pages). Removed invitation preamble text ("You are cordially invited..."), ceremony/reception details, after party details, and Dupont fountain illustration. Homepage is now a clean landing page: nav → names → date → RSVP button. The names image serves as hero content rather than an invitation header.
 **Rationale:** The homepage needed to function as a landing page, not a semi-invitation. The nav should be consistently positioned across all pages. Event details belong on the Schedule page. The ceremonial feel comes from the typography and design, not from invitation language.
+
+---
+
+## Homepage Redesigned to Clean Landing Page
+
+### Decision: Strip homepage to title card with shared nav (Approach 1)
+
+**Date:** March 30, 2026
+
+The homepage was converted from a "semi-invitation" layout (with preamble text, ceremony/reception details, after party details, static embossed diamond nav, and RSVP button) to a clean landing page. Changes:
+
+- Shared floating nav moved to the top (via `#nav-placeholder`, consistent with all inner pages)
+- Removed "You are cordially invited..." preamble
+- Removed ceremony and after party event blocks
+- Removed the static embossed diamond nav (`.home-nav`) — homepage now uses the same fixed nav as inner pages
+- Removed standalone RSVP button (RSVP accessible via nav link only)
+- Added Dupont fountain illustration as closing decorative element
+- Date changed to PP Watch uppercase with letter-spacing
+- All content fits in one viewport via `flex: 1` chain on `.homepage-hero`
+
+**Rationale:** The homepage needed to function as a landing page, not a semi-invitation. The nav should be consistently positioned across all pages. Event details belong on the Schedule page. The ceremonial feel comes from the typography and design, not from invitation language.
+
+---
+
+## Nav Link Hover — No Glow at Rest
+
+### Decision: Glow on hover only, RSVP breathing glow as sole exception
+
+**Date:** March 29, 2026
+
+Nav links no longer have any `text-shadow` glow at rest. Glow appears only on hover at ~75% intensity with accent color shift. The earlier "unified glow system" (where all links glowed subtly at rest) was removed — it made the nav feel busy and reduced the contrast between resting and hovered states.
+
+RSVP retains its breathing glow (`@keyframes rsvp-glow`, 4s cycle) as the sole exception. This gives it persistent visual emphasis without requiring all other links to glow too.
+
+---
+
+## Illustration Size Reduction
+
+### Decision: 120px height across all breakpoints (60% of original 200px)
+
+**Date:** March 30, 2026
+
+Page illustrations were reduced from `height: 200px` to `height: 120px` on `.registry-illustration`. The mobile-specific override at 180px was removed — 120px applies universally. Registry had an extra `padding: 1.5rem 0 2rem` on `.registry-section` that no other page had — this was removed for consistency.
+
+---
+
+## .htaccess Removed
+
+### Decision: Delete .htaccess
+
+`.htaccess` is an Apache server configuration file. GitHub Pages does not run Apache — it uses its own CDN infrastructure. The file had no effect and was removed.
