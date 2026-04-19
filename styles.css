@@ -1291,6 +1291,16 @@ body.page-travel .registry-page {
     line-height: 1.2;
 }
 
+.dc-day-label {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-color);
+    margin: 1.4rem 0 0.4rem 0;
+}
+
 .section-divider {
     border: none;
     border-top: var(--border-hairline);
