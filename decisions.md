@@ -622,13 +622,64 @@ Intro paragraphs added below illustrations on Travel, FAQ, and Schedule pages. A
 
 ## Our Story Page
 
-### Decision: Photo timeline with captions
+### Decision: Photo timeline with captions (superseded — see "Our Story Rebuild")
 
-`our-story.html` was created as a photo timeline page. Uses `.story-timeline` (600px max-width) containing `.story-moment` blocks with photos (`.story-photo-single` for one image, `.story-photo-pair` for two side-by-side), captions (`.story-caption` with `.story-caption-label`), and hairline dividers (`.story-divider`). Closes with `.story-closing` text.
+`our-story.html` was originally created as a photo timeline page. Uses `.story-timeline` (600px max-width) containing `.story-moment` blocks with photos (`.story-photo-single` for one image, `.story-photo-pair` for two side-by-side), captions (`.story-caption` with `.story-caption-label`), and hairline dividers (`.story-divider`). Closes with `.story-closing` text.
 
 Photos are web-optimized JPGs (prefixed `web-`) stored in `images/our-story/`. Originals (from camera) are also in the folder but not referenced in HTML. Uses the rowhouse illustration. All caption text is placeholder.
 
 On mobile, photo pairs stack vertically and singles narrow to 320px max-width. All styles are in `styles.css` — no inline `<style>` block.
+
+### Decision: Our Story Rebuild — narrative prose with carousels (April 26, 2026)
+
+The page was rebuilt from a chronological grid of nine labeled photo moments (label → photo → caption → divider) into seven narrative sections of continuous prose, punctuated by photo groups. Reasons:
+
+- **The labeled-moments structure read like a slideshow caption sheet**, not a story. Each `.story-caption-label` and brief caption felt redundant when the photos themselves carried the moment.
+- **Real prose lets the relationship speak first.** The new structure puts paragraphs of narrative ahead of the visuals — the photos illustrate the writing, not the other way around.
+- **Some moments don't need photos** (e.g., the meeting paragraph, the long-hard-conversation paragraph). The grid layout couldn't support that — every moment needed its photo. Prose-first does.
+- **Multi-photo moments belong in carousels, not pairs of frames.** First Dates, Long Distance, Together, and The Proposal each span 3–5 photos that read as a sequence. A flat grid of 4 thumbnails dilutes the moment; a swipeable sequence preserves it.
+
+**New conventions:**
+- `.story-prose` — narrative paragraph blocks. Sentient body type, max-width 480px (matches `.story-caption`), centered, opacity 0.85, dark mode override. Multiple `<p>` children allowed.
+- `.story-prose-placeholder` — inline span flagging unfinished copy. Dotted underline + 0.55 opacity + light letter-spacing. Italic was rejected because of the site-wide no-italic rule for Sentient — dotted underline carries the "draft" signal without breaking that rule.
+- `.story-caption-label` is now used as a section *footer* below photo groups (where captions used to sit) rather than a label inside `.story-caption`.
+- `.story-carousel` family — see below.
+
+The page's `.page-intro` line ("How a group chat turned into a life together.") was removed. The narrative structure makes a separate intro paragraph redundant.
+
+### Decision: Carousel architecture — scroll-snap + arrows + dots (April 26, 2026)
+
+The four photo carousels (First Dates, Long Distance, Together, The Proposal) use native `scroll-snap-type: x mandatory` on a flex track, with absolutely-positioned arrow buttons and click-to-scroll dot indicators below. No external libraries.
+
+**Why scroll-snap and not transform-based slides:**
+- Native scroll-snap supports touch swipe, mouse wheel scrub, and trackpad gestures for free
+- Browser handles the smooth scroll animation
+- Keyboard navigation just needs to call `track.scrollTo()` — no manual transform math
+- Works without JS (the scroll itself does); JS only enhances with arrows and dot sync
+
+**Class family** (all under `.story-carousel`):
+- `.story-carousel` — relative container, max-width 480px
+- `.story-carousel-track` — `overflow-x: auto`, scroll-snap, hidden scrollbar, `tabindex="0"` for keyboard
+- `.story-carousel-slide` — `flex: 0 0 100%`, scroll-snap-align center
+- `.story-carousel-arrow` (with `-prev` / `-next` modifiers) — small circular buttons mirroring `.btn-normal`'s debossed aesthetic: same `feTurbulence` `::before` grain, same `--shadow-raised`/`--shadow-lifted`/`--shadow-pressed` token transitions, same dark mode treatment. PP Watch chevron glyph (`‹` / `›`).
+- `.story-carousel-arrow.disabled` — at first/last slide, `opacity: 0.35`, `aria-disabled="true"`, click handler skips
+- `.story-carousel-dots` / `.story-carousel-dot` (with `.active` modifier) — 6×6px circles, 8px gap, click jumps to that slide
+
+**Attribute pattern:** `data-carousel` on the container, `data-carousel-dots` on the dots placeholder. JS queries these and builds dots dynamically, so adding more carousels in the future requires only the HTML — no JS changes.
+
+**Desktop arrow position:** `left: -50px` / `right: -50px` (outside the photo). **Mobile (≤900px):** arrows move inside the photo edges (`left: 8px` / `right: 8px`) with a semi-transparent backdrop (`rgba(241, 237, 234, 0.85)` light, `rgba(18, 42, 32, 0.85)` dark) plus `backdrop-filter: blur(2px)` for legibility on light photos.
+
+**Photos retain natural aspect ratios** — the spec explicitly didn't want forced uniform aspect. Arrows recenter to the current photo's height via `position: absolute; top: 50%` against the carousel container, so per-slide height differences are handled.
+
+### Decision: Carousel JS in new file `includes/carousel.js` (April 26, 2026)
+
+Carousel logic lives in a new file, not appended to `site-init.js`. Reasons:
+- `site-init.js` is currently single-purpose (nav include, theme toggle, mobile menu) and runs on every page
+- Carousels only exist on `our-story.html`
+- Bundling carousel JS into `site-init.js` would ship ~80 unused lines to every other page
+- A separate file keeps each script's intent clear
+
+`includes/carousel.js` is loaded via `<script src="includes/carousel.js">` after the existing `<script src="includes/site-init.js">` tag, only on `our-story.html`. Vanilla JS, function-scoped, matches the existing `site-init.js` style. Throttles scroll listener with `requestAnimationFrame` for the active-dot sync.
 
 ---
 
