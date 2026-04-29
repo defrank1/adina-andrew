@@ -695,6 +695,10 @@ Replaced the single section-level `.story-caption-label` per Our Story section w
 
 Two sections: "Food" (4 placeholder restaurant blocks) and "Activities" (5 placeholder items). Uses the Dupont illustration. All copy is lorem ipsum placeholder.
 
+### Decision: Restructure neighborhood sections from time-based to type-based (April 29, 2026)
+
+Each neighborhood section was reorganized from `Friday Night` / `The Weekend` prose paragraphs into `Where to Eat` / `What to Do` indented item lists. The existing `.dc-day-label` class is reused for the new sub-headings. A new `.dc-list` pattern (no marker, 2rem indent, 0.7rem rhythm between items) is the first list pattern on the site — list color inherits from the body so dark mode flips automatically. Final guest copy from Adina replaces all prior placeholder/draft notes.
+
 ---
 
 ## Travel Section Title Sizing
