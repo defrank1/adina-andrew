@@ -16,6 +16,11 @@ function initCarousel(carousel) {
 
     if (!track || slides.length === 0) return;
 
+    // Find the per-photo caption element within the same .story-moment, if present
+    const moment = carousel.closest('.story-moment');
+    const captionEl = moment ? moment.querySelector('[data-photo-caption]') : null;
+    const fadeMs = 180;
+
     // Build dots
     const dots = slides.map(function (_, i) {
         const dot = document.createElement('button');
@@ -30,6 +35,22 @@ function initCarousel(carousel) {
 
     let currentIndex = 0;
     let scrollRaf = null;
+
+    // Initialize caption to slide 0's text immediately (no fade)
+    if (captionEl) {
+        captionEl.textContent = slides[0].getAttribute('data-caption') || '';
+    }
+
+    function updateCaption(index) {
+        if (!captionEl) return;
+        const text = slides[index].getAttribute('data-caption') || '';
+        if (captionEl.textContent === text) return;
+        captionEl.classList.add('is-fading');
+        setTimeout(function () {
+            captionEl.textContent = text;
+            captionEl.classList.remove('is-fading');
+        }, fadeMs);
+    }
 
     function scrollToSlide(index) {
         const clamped = Math.max(0, Math.min(slides.length - 1, index));
@@ -59,6 +80,7 @@ function initCarousel(carousel) {
             dots.forEach(function (dot, i) {
                 dot.classList.toggle('active', i === currentIndex);
             });
+            updateCaption(currentIndex);
         }
         updateArrowState();
     }

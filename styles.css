@@ -1248,6 +1248,29 @@ body.dark-mode .story-caption {
     text-shadow: none;
 }
 
+/* Per-photo caption — Our Story */
+.story-photo-caption {
+    font-family: var(--font-body);
+    font-style: normal;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--color-dark-green);
+    max-width: 480px;
+    margin: 1rem auto 0;
+    opacity: 0.85;
+    transition: opacity 180ms ease;
+    min-height: 1.5em;
+}
+
+body.dark-mode .story-photo-caption {
+    color: var(--color-soft-white);
+}
+
+.story-photo-caption.is-fading {
+    opacity: 0;
+}
+
 .story-divider {
     border: none;
     border-top: var(--border-hairline);

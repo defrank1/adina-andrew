@@ -73,15 +73,15 @@
                                     <span aria-hidden="true">&lsaquo;</span>
                                 </button>
                                 <div class="story-carousel-track" tabindex="0">
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="One of the first times we went out with friends, to the annual kite festival">
                                         <img src="images/our-story/web-kite-festival.jpg"
                                             alt="Adina and Andrew at the kite festival" loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="Our first concert! Haim, just across the street from the wedding venue.">
                                         <img src="images/our-story/web-concert.jpg" alt="Adina and Andrew at a concert"
                                             loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="Celebrating Adina's 26th birthday on the Takoda rooftop">
                                         <img src="images/our-story/web-takoda.jpg" alt="Adina and Andrew at Takoda"
                                             loading="lazy">
                                     </div>
@@ -92,7 +92,7 @@
                                 </button>
                                 <div class="story-carousel-dots" data-carousel-dots aria-hidden="true"></div>
                             </div>
-                            <span class="story-caption-label">First Dates</span>
+                            <p class="story-photo-caption" data-photo-caption></p>
                         </div>
 
                         <!-- Section 3: Family -->
@@ -101,17 +101,29 @@
                             <div class="story-prose">
                                 <p>We met each other's families.</p>
                             </div>
-                            <div class="story-photo-pair">
-                                <div class="story-photo-frame">
-                                    <img src="images/our-story/web-family-andrew.jpg" alt="Adina with Andrew's family"
-                                        loading="lazy">
+                            <!-- TODO: replace web-family-adina.jpg + caption when Adina sends new photo -->
+                            <div class="story-carousel" data-carousel>
+                                <button class="story-carousel-arrow story-carousel-arrow-prev"
+                                    aria-label="Previous photo" type="button">
+                                    <span aria-hidden="true">&lsaquo;</span>
+                                </button>
+                                <div class="story-carousel-track" tabindex="0">
+                                    <div class="story-carousel-slide" data-caption="Celebrating Andrew's grandma on her 108th birthday">
+                                        <img src="images/our-story/web-family-andrew.jpg" alt="Adina with Andrew's family"
+                                            loading="lazy">
+                                    </div>
+                                    <div class="story-carousel-slide" data-caption="At Adina's brother's graduation">
+                                        <img src="images/our-story/web-family-adina.jpg"
+                                            alt="Andrew at Adina's brother's graduation" loading="lazy">
+                                    </div>
                                 </div>
-                                <div class="story-photo-frame">
-                                    <img src="images/our-story/web-family-adina.jpg"
-                                        alt="Andrew at Adina's brother's graduation" loading="lazy">
-                                </div>
+                                <button class="story-carousel-arrow story-carousel-arrow-next" aria-label="Next photo"
+                                    type="button">
+                                    <span aria-hidden="true">&rsaquo;</span>
+                                </button>
+                                <div class="story-carousel-dots" data-carousel-dots aria-hidden="true"></div>
                             </div>
-                            <span class="story-caption-label">Family</span>
+                            <p class="story-photo-caption" data-photo-caption></p>
                         </div>
 
                         <!-- Section 4: Malcolm X Park -->
@@ -128,7 +140,7 @@
                                         alt="Adina and Andrew in Malcolm X Park" class="photo-portrait" loading="lazy">
                                 </div>
                             </div>
-                            <span class="story-caption-label">Malcolm X Park</span>
+                            <p class="story-photo-caption">At Andrew's goodbye party before moving to New York, in Malcolm X Park</p>
                         </div>
 
                         <!-- Section 5: Long Distance -->
@@ -147,23 +159,23 @@
                                     <span aria-hidden="true">&lsaquo;</span>
                                 </button>
                                 <div class="story-carousel-track" tabindex="0">
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="Overlooking Marseille from the Notre-Dame de la Garde">
                                         <img src="images/our-story/web-europe.jpg" alt="Adina and Andrew in Europe"
                                             loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="Our long-distance inspired DC/NYC bikeshare Halloween costumes">
                                         <img src="images/our-story/web-bike-halloween.jpg"
                                             alt="Capital Bikeshare and Citi Bike Halloween costume" loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="In the Blue Ridge Mountains">
                                         <img src="images/our-story/web-shenandoah.jpg"
                                             alt="Adina and Andrew in Shenandoah" loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="At Emily and Trevor's wedding in Cape Cod">
                                         <img src="images/our-story/web-beach-wedding.jpg"
                                             alt="Adina and Andrew at a beach wedding" loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="At the Georgetown Law Barrister's Ball, also at the Anthem!">
                                         <img src="images/our-story/web-barristers.jpg"
                                             alt="Adina and Andrew at Barrister's Ball" loading="lazy">
                                     </div>
@@ -174,15 +186,14 @@
                                 </button>
                                 <div class="story-carousel-dots" data-carousel-dots aria-hidden="true"></div>
                             </div>
-                            <span class="story-caption-label">Long Distance</span>
+                            <p class="story-photo-caption" data-photo-caption></p>
                         </div>
 
                         <!-- Section 6: Together -->
                         <hr class="story-divider">
                         <div class="story-moment">
                             <div class="story-prose">
-                                <p>Since we moved in together in 2024, our love has only grown… <span
-                                        class="story-prose-placeholder">[PLACEHOLDER — to be written]</span></p>
+                                <p>Since we moved in together in 2024, we've loved building a life together in DC, and are so lucky to have visited so many amazing places together.</p>
                             </div>
                             <div class="story-carousel" data-carousel>
                                 <button class="story-carousel-arrow story-carousel-arrow-prev"
@@ -190,19 +201,19 @@
                                     <span aria-hidden="true">&lsaquo;</span>
                                 </button>
                                 <div class="story-carousel-track" tabindex="0">
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="Thrilled to be somewhere in the rocky North Sea">
                                         <img src="images/our-story/web-cruise.jpg" alt="Adina and Andrew on a cruise"
                                             loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="At a brewery in Nørrebro, Copenhagen">
                                         <img src="images/our-story/web-copenhagen.jpg"
                                             alt="Adina and Andrew at a café in Copenhagen" loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="Pre-surf lesson in Carlsbad, California">
                                         <img src="images/our-story/web-wetsuits.jpg"
                                             alt="Adina and Andrew in wetsuits after surfing" loading="lazy">
                                     </div>
-                                    <div class="story-carousel-slide">
+                                    <div class="story-carousel-slide" data-caption="After the Georgetown Law graduation gala">
                                         <img src="images/our-story/web-gallery-place.jpg"
                                             alt="Adina and Andrew in black tie at Gallery Place Metro station"
                                             loading="lazy">
@@ -214,7 +225,7 @@
                                 </button>
                                 <div class="story-carousel-dots" data-carousel-dots aria-hidden="true"></div>
                             </div>
-                            <span class="story-caption-label">Together</span>
+                            <p class="story-photo-caption" data-photo-caption></p>
                         </div>
 
                         <!-- Section 7: The Proposal -->

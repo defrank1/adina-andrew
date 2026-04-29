@@ -681,6 +681,10 @@ Carousel logic lives in a new file, not appended to `site-init.js`. Reasons:
 
 `includes/carousel.js` is loaded via `<script src="includes/carousel.js">` after the existing `<script src="includes/site-init.js">` tag, only on `our-story.html`. Vanilla JS, function-scoped, matches the existing `site-init.js` style. Throttles scroll listener with `requestAnimationFrame` for the active-dot sync.
 
+### Decision: Per-photo captions on Our Story (April 29, 2026)
+
+Replaced the single section-level `.story-caption-label` per Our Story section with per-photo captions that swap (180ms crossfade) as the active carousel slide changes. Each `.story-carousel-slide` carries a `data-caption` attribute; a `<p class="story-photo-caption" data-photo-caption>` after the carousel is populated by `includes/carousel.js`. Sections 4 (Malcolm X Park, single photo) uses a static caption with the same `.story-photo-caption` class — no `data-photo-caption` attribute. Section 7 (The Proposal) intentionally retains the old `.story-caption-label` pattern for now. The Family section converted from `.story-photo-pair` to a 2-slide carousel; the Together section's placeholder prose was replaced with final copy. The existing `.story-caption-label` rules remain in styles.css since Section 7 still uses them.
+
 ---
 
 ## DC Guide Page
