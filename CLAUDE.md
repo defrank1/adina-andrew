@@ -270,8 +270,8 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 
 ### Illustration Sizing
 
-- Desktop: ~120px height (reduced from 200px to 60% size)
-- Mobile: ~120px height (same as desktop — the mobile-specific 180px override was removed for consistency)
+- Desktop: 200px height
+- Mobile (≤900px): 150px height
 - Centered, `display: block`, `margin: 0 auto`
 - `object-fit: contain`
 - Light/dark variants via `data-light` / `data-dark` attributes
@@ -404,7 +404,7 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - **DC Guide page** reuses Travel page classes: `.travel-section-title`, `.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`, `.section-divider`, `.travel-directions`, `.travel-direction-item`. Two sections: Food and Activities. Uses D.C. flag illustration. No hairline between page intro and first section (matching Travel page pattern) — divider only between Food and Activities.
 - **Button labels** on Travel and Save the Date hotel blocks: "Book Room" for hotels with room blocks, "Visit Website" for citizenM.
 - **Schedule page dress code:** short labels as `.schedule-event-detail` (PP Watch), explanatory text as `.schedule-event-description` (Sentient). No "Dress Code:" prefix.
-- **`.registry-illustration`** uses fixed `height: 120px` with `object-fit: contain` for consistent vertical rhythm across pages. The mobile-specific 180px override has been removed — 120px applies at all breakpoints.
+- **`.registry-illustration`** uses fixed `height: 200px` (desktop) / `height: 150px` (≤900px) with `object-fit: contain` for consistent vertical rhythm across pages.
 - **FAQ password overlay** uses `white-space: nowrap` with widened container (`max-width: 600px`) to keep title on one line.
 
 

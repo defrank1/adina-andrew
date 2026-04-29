@@ -832,6 +832,10 @@ RSVP retains its breathing glow (`@keyframes rsvp-glow`, 4s cycle) as the sole e
 
 Page illustrations were reduced from `height: 200px` to `height: 120px` on `.registry-illustration`. The mobile-specific override at 180px was removed — 120px applies universally. Registry had an extra `padding: 1.5rem 0 2rem` on `.registry-section` that no other page had — this was removed for consistency.
 
+### Decision: Resize illustrations to 200px desktop / 150px mobile (April 29, 2026)
+
+`.registry-illustration` resized from 120px (universal) to **200px desktop / 150px mobile (≤900px)**. This supersedes the March 30 decision above. The desktop size returns near the original pre-reduction value but the mobile override is now smaller (150px) than desktop, instead of matching it. CLAUDE.md illustration-sizing notes were updated to match.
+
 ---
 
 ## .htaccess Removed
