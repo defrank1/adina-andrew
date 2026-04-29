@@ -35,6 +35,7 @@ function initCarousel(carousel) {
 
     let currentIndex = 0;
     let scrollRaf = null;
+    let captionFadeTimeout = null;
 
     // Initialize caption to slide 0's text immediately (no fade)
     if (captionEl) {
@@ -45,10 +46,14 @@ function initCarousel(carousel) {
         if (!captionEl) return;
         const text = slides[index].getAttribute('data-caption') || '';
         if (captionEl.textContent === text) return;
+        if (captionFadeTimeout !== null) {
+            clearTimeout(captionFadeTimeout);
+        }
         captionEl.classList.add('is-fading');
-        setTimeout(function () {
+        captionFadeTimeout = setTimeout(function () {
             captionEl.textContent = text;
             captionEl.classList.remove('is-fading');
+            captionFadeTimeout = null;
         }, fadeMs);
     }
 

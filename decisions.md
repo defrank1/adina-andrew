@@ -838,6 +838,21 @@ Page illustrations were reduced from `height: 200px` to `height: 120px` on `.reg
 
 ---
 
+## Style Consistency Pass — Our Story + DC Guide
+
+### Decision: Six small consistency fixes (April 29, 2026)
+
+Tightened cross-page consistency now that Our Story and DC Guide are both populated:
+
+- **Photo captions:** Two over-long Our Story captions shortened (kite festival slide; bike Halloween slide) so they fit a single line on desktop.
+- **Mobile caption height:** Added `@media (max-width: 900px) { .story-photo-caption { min-height: 3em; } }` to reserve 2 lines and prevent layout shift between short and long captions on narrow viewports. Desktop keeps the base `min-height: 1.5em`.
+- **Carousel fade race fix:** `updateCaption` in `includes/carousel.js` now stores its `setTimeout` handle and `clearTimeout`s any pending fade before starting a new one. Prevents stale captions from sticking when arrows are rapid-clicked. Each `initCarousel` invocation has its own closure-scoped `captionFadeTimeout`, so multiple carousels on the same page don't share state.
+- **`.dc-day-label` cleanup:** Replaced `color: var(--text-color)` with `color: inherit`. `--text-color` is undefined site-wide; the rule worked only because `var()` with no fallback already inherits. Cosmetic source-only change, no visual diff.
+- **`.section-divider` symmetry:** `margin: 3rem auto 2.5rem` → `margin: 3rem auto`. Equal vertical space above and below the hairline.
+- **`.story-closing` size:** `font-size: 1.8rem` → `2.4rem` to better balance against the page title above.
+
+---
+
 ## .htaccess Removed
 
 ### Decision: Delete .htaccess

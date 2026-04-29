@@ -1285,7 +1285,7 @@ body.dark-mode .story-divider {
 .story-closing {
     text-align: center;
     font-family: var(--font-title);
-    font-size: 1.8rem;
+    font-size: 2.4rem;
     color: var(--color-dark-green);
     margin-top: 1rem;
     line-height: 1.4;
@@ -1543,7 +1543,7 @@ body.page-travel .registry-page {
     font-size: 0.82rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--text-color);
+    color: inherit;
     margin: 1.4rem 0 0.4rem 0;
 }
 
@@ -1570,7 +1570,7 @@ body.page-travel .registry-page {
     border: none;
     border-top: var(--border-hairline);
     max-width: 600px;
-    margin: 3rem auto 2.5rem;
+    margin: 3rem auto;
 }
 
 body.dark-mode .section-divider {
@@ -1886,6 +1886,10 @@ body.dark-mode .travel-link:hover {
     .registry-illustration {
         max-width: 150px;
         height: 150px;
+    }
+
+    .story-photo-caption {
+        min-height: 3em;
     }
 
 
