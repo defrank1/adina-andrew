@@ -1320,17 +1320,6 @@ body.dark-mode .story-prose {
     color: var(--color-soft-white);
 }
 
-.story-prose-placeholder {
-    opacity: 0.55;
-    text-decoration: underline dotted rgba(26, 58, 46, 0.4);
-    text-underline-offset: 3px;
-    letter-spacing: 0.02em;
-}
-
-body.dark-mode .story-prose-placeholder {
-    text-decoration-color: rgba(241, 237, 234, 0.4);
-}
-
 /* Carousel */
 .story-carousel {
     position: relative;
@@ -1547,23 +1536,12 @@ body.page-travel .registry-page {
     margin: 1.4rem 0 0.4rem 0;
 }
 
-/* Indented item list — DC Guide */
-.dc-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+/* Body prose under section labels — DC Guide */
+.dc-prose {
     font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.7;
-}
-
-.dc-list li {
-    padding-left: 2rem;
     margin: 0;
-}
-
-.dc-list li + li {
-    margin-top: 0.7rem;
 }
 
 .section-divider {

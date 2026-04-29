@@ -853,6 +853,14 @@ Tightened cross-page consistency now that Our Story and DC Guide are both popula
 
 ---
 
+## DC Guide — Lists to Prose
+
+### Decision: Convert `.dc-list` blocks to `.dc-prose` paragraphs (April 29, 2026)
+
+Every "Where to Eat" / "What to Do" `<ul class="dc-list">` on the DC Guide became a single `<p class="dc-prose">` — bullet text preserved verbatim, items joined by spaces. Reads as a recommendation from a friend rather than a checklist. Trimmed "actually" from the National Mall What-to-Do prose and a trailing space in the page intro. Removed the now-unused `.dc-list` rules from `styles.css`, plus the `.story-prose-placeholder` rules left over from the Together-section placeholder span.
+
+---
+
 ## .htaccess Removed
 
 ### Decision: Delete .htaccess
