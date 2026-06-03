@@ -1114,7 +1114,7 @@ body.page-schedule .registry-cta {
 .schedule-link {
     color: inherit;
     text-decoration: underline;
-    text-decoration-color: rgba(26, 58, 46, 0.3);
+    text-decoration-color: rgba(26, 58, 46, 0.55);
     text-underline-offset: 3px;
     transition: text-decoration-color 0.2s ease;
 }
@@ -1124,7 +1124,7 @@ body.page-schedule .registry-cta {
 }
 
 body.dark-mode .schedule-link {
-    text-decoration-color: rgba(241, 237, 234, 0.3);
+    text-decoration-color: rgba(241, 237, 234, 0.55);
 }
 
 body.dark-mode .schedule-link:hover {
@@ -1582,7 +1582,7 @@ body.dark-mode .section-divider {
 .travel-link {
     color: inherit;
     text-decoration: underline;
-    text-decoration-color: rgba(26, 58, 46, 0.3);
+    text-decoration-color: rgba(26, 58, 46, 0.55);
     text-underline-offset: 3px;
     transition: text-decoration-color 0.2s ease;
 }
@@ -1592,7 +1592,7 @@ body.dark-mode .section-divider {
 }
 
 body.dark-mode .travel-link {
-    text-decoration-color: rgba(241, 237, 234, 0.3);
+    text-decoration-color: rgba(241, 237, 234, 0.55);
 }
 
 body.dark-mode .travel-link:hover {
@@ -1767,7 +1767,7 @@ body.dark-mode .travel-link:hover {
     }
 
     .mobile-monogram-link .nav-monogram {
-        height: 28px;
+        height: 48px;
         width: auto;
     }
 
