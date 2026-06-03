@@ -203,7 +203,7 @@ Rive was chosen because the sequence requires state machine logic (idle → trai
 
 The monogram's thin hairline strokes disappear at small sizes (below ~80px). The recommended approach is an optical size variant — a separate file with manually thickened strokes, maintaining the same letterforms. This preserves a master file for large use and a `monogram-small` variant for nav and other small contexts. Stroke weight override via Illustrator (adding a small stroke on top of the fill) was considered but can look slightly off at close inspection.
 
-**Status:** Not yet created. The nav currently uses the standard monogram at 36px (desktop) / 47px (mobile), where hairline disappearance is noticeable but not critical.
+**Status:** Not yet created. The nav currently uses the standard monogram at 36px (desktop) / 48px (mobile), where hairline disappearance is noticeable but not critical.
 
 ---
 
@@ -422,7 +422,7 @@ Three new content pages were created (`faq.html`, `schedule.html`, `travel.html`
 
 **Travel page** reuses hotel content from `savethedate.html` with new class names (`.travel-hotel`, `.travel-hotel-name`, `.travel-hotel-description`). Adds transit directions section with Metro/car/bus instructions.
 
-**Link styles** (`.schedule-link`, `.travel-link`) use subtle underlines (`text-decoration-color` at 30% opacity) that darken to accent color on hover — same pattern, namespaced per page.
+**Link styles** (`.schedule-link`, `.travel-link`) use subtle underlines (`text-decoration-color` at 55% opacity) that darken to accent color on hover — same pattern, namespaced per page.
 
 ---
 
