@@ -52,7 +52,7 @@ Last updated: April 26, 2026
 |-------|----------------|------------|---------|
 | InterContinental (venue) | — | `AAW` | Sep 16, 2026 |
 | Canopy by Hilton | 2-3 min | `908` | Sep 16, 2026 |
-| Residence Inn | 15-20 min | `NDF` | Sep 18, 2026 |
+| Residence Inn by Marriott | 15-20 min | `NDF` | Sep 18, 2026 |
 | citizenM | 12-15 min | No room block | — |
 
 ## Meta
