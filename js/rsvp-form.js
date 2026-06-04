@@ -34,8 +34,8 @@
             venue: 'Sonoma Restaurant & Wine Bar',
             address: '223 Pennsylvania Avenue SE',
             mapUrl: 'https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC',
-            dress: 'Semi-Formal',
-            dressNote: 'Sport coats and trousers, or dresses, jumpsuits, and blouses',
+            dress: 'Semi-Formal (sport coats and trousers, or dresses, jumpsuits, and blouses)',
+            dressNote: '',
             description: "Please join us to kick off the weekend! We're hosting a welcome party at a wine bar on Capitol Hill. There will be drinks and light bites, but please make dinner plans beforehand."
         },
         saturday: {

@@ -240,6 +240,8 @@
 
 /* Per-person blocks (name heading + event choices + meal) */
 .person-name {
+    font-size: 2.5rem;
+    line-height: 1.1;
     text-align: left;
     margin-top: 0.5rem;
     margin-bottom: 1.5rem;
@@ -255,11 +257,16 @@ body.dark-mode .person-block + .person-block {
     border-top-color: rgba(241, 237, 234, 0.15);
 }
 
-/* Schedule-style event details inside the form (scaled down for the denser,
-   repeated form context vs. the standalone schedule page) */
+/* Event names render in PP Watch (uppercase) for readability inside the form.
+   Logistics lines (.schedule-event-detail) are also PP Watch but smaller and
+   lighter, so the event name reads as the header and the details as supporting. */
 body.page-rsvp-internal .schedule-event-name {
-    font-size: 1.9rem;
-    margin-bottom: 0.6rem;
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+    margin-bottom: 0.7rem;
 }
 
 .event-group .radio-group {
@@ -395,7 +402,11 @@ body.dark-mode .invitation-details {
         padding: 1rem;
     }
 
+    .person-name {
+        font-size: 2rem;
+    }
+
     body.page-rsvp-internal .schedule-event-name {
-        font-size: 1.6rem;
+        font-size: 1.05rem;
     }
 }
