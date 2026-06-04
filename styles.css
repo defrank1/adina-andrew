@@ -733,6 +733,17 @@ body.dark-mode .btn-priority:active {
     padding: 0 2rem;
 }
 
+/* Small uppercase label heading (PP Watch) — shared by FAQ questions,
+   Travel hotel/transit labels, and DC Guide day labels */
+.label-heading {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.75rem;
+}
+
 /* Hotel List */
 .hotel-list {
     margin-top: 2rem;
@@ -1023,15 +1034,6 @@ body.page-faq .registry-page {
 
 .faq-item:last-child {
     margin-bottom: 1.5rem;
-}
-
-.faq-question {
-    font-family: var(--font-heading);
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 0.75rem;
-    font-weight: 700;
 }
 
 .faq-answer {
@@ -1526,14 +1528,9 @@ body.page-travel .registry-page {
     line-height: 1.2;
 }
 
-.dc-day-label {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: inherit;
-    margin: 1.4rem 0 0.4rem 0;
+/* DC Guide labels sit inline between prose blocks — more space above, tighter below */
+body.page-dc-guide .label-heading {
+    margin: 1.4rem 0 0.4rem;
 }
 
 /* Body prose under section labels — DC Guide */
@@ -1559,15 +1556,6 @@ body.dark-mode .section-divider {
     max-width: 600px;
     margin: 0 auto 2.5rem;
     text-align: left;
-}
-
-.travel-hotel-name {
-    font-family: var(--font-heading);
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    margin-bottom: 0.75rem;
-    font-weight: 700;
 }
 
 .travel-hotel-description {
