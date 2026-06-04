@@ -22,9 +22,9 @@ Last updated: June 4, 2026
 
 ## Pages
 
-- `index.html` — Currently redirects to Save the Date. Will be replaced by homepage.html when the site goes live.
-- `homepage.html` — Homepage / clean landing page. Uses shared floating nav (via `#nav-placeholder`, same as inner pages). Content: names image as hero, date in PP Watch uppercase, "Washington, D.C." location, Dupont fountain illustration as closing decorative element. No page title `<h1>`, no invitation preamble, no event details, no standalone RSVP button. Entire page fits in one viewport without scrolling via `flex: 1` chain on `.homepage-hero`. `<body class="page-home">`
-- `savethedate.html` — Save the Date with travel/hotel info — **NO nav, NO footer** — `<body class="page-savethedate">`
+- `index.html` — **The homepage, served at the site root (`/`).** Clean landing page using the shared floating nav (via `#nav-placeholder`, same as inner pages). Content: names image as hero, date in PP Watch uppercase, "Washington, D.C." location, Dupont fountain illustration as closing decorative element. No page title `<h1>`, no invitation preamble, no event details, no standalone RSVP button. Entire page fits in one viewport without scrolling via `flex: 1` chain on `.homepage-hero`. `<body class="page-home">`
+- `homepage.html` — **Retired.** The homepage now lives at the root (`index.html`); this file is a redirect stub to `/` so old `/homepage` links don't 404. The nav monogram links to `/`, not `/homepage`.
+- `savethedate.html` — **Retired.** Replaced by the homepage at the root; this file is a redirect stub to `/`. (Was the Save the Date with travel/hotel info, `<body class="page-savethedate">` — that markup is gone, but the `.page-savethedate` styles remain in `styles.css`, currently unused.)
 - `registry.html` — Registry with link to Zola (`adinaandandrew2026` — double "and" is correct) — `<body class="page-registry">`
 - `faq.html` — Questions & Answers (7 Q&A items, inline RSVP link) — `<body class="page-faq">`
 - `schedule.html` — Wedding weekend invitation (Fri/Sat/Sun events, event names lead each block) — `<body class="page-schedule">`
@@ -140,10 +140,10 @@ Old texture files (`paper-grain-light.png`, `noise-grain-light.png`, `paper-grai
 
 The site uses two passwords:
 
-- **Real password:** `october17` — The guest-facing password. Used on `savethedate.html` and `index.html` (which currently redirects to Save the Date). Session key: `saveTheDateUnlocked`. This is the password guests will use once the site goes live.
-- **Secret password:** `beautifulsuperstar` — The development/preview password for pages still being built out. Used on all other pages: `homepage.html`, `travel.html`, `faq.html`, `schedule.html`, `registry.html`, `our-story.html`, `dc-guide.html`, `rsvp.html`. Session key: `siteUnlocked`. Entering the secret password on any of these pages unlocks all of them for that browser session.
+- **Guest password:** `october17` — The main guest-facing password. Used on the homepage (`index.html`) and every content page: `travel.html`, `faq.html`, `schedule.html`, `registry.html`, `our-story.html`, `dc-guide.html`. Session key: `siteUnlocked`. Entering it on any of these pages unlocks all of them for that browser session.
+- **RSVP password:** `beautifulsuperstar` — Gates `rsvp.html` only, while the RSVP form is still being built out. Session key: `rsvpUnlocked`. Kept separate so the RSVP page stays locked even after the rest of the site is unlocked.
 
-Each page has its own password overlay. Session storage remembers unlock state within a session. The real password and secret password use separate session storage keys, so unlocking one group does not unlock the other.
+Each page has its own password overlay. Session storage remembers unlock state within a session. The two passwords use separate session storage keys (`siteUnlocked` vs `rsvpUnlocked`), so unlocking the main site does not unlock RSVP, and vice versa.
 
 ### Surface Layering
 

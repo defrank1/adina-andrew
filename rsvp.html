@@ -30,8 +30,8 @@
 
     <script>
         // If already unlocked, redirect immediately
-        if (sessionStorage.getItem('saveTheDateUnlocked') === 'true') {
-            window.location.href = '/savethedate';
+        if (sessionStorage.getItem('rsvpUnlocked') === 'true') {
+            window.location.href = '/';
         }
 
         document.body.classList.add('locked');
@@ -42,7 +42,7 @@
             document.documentElement.classList.add('dark-mode');
         }
 
-        const correctPassword = 'october17';
+        const correctPassword = 'beautifulsuperstar';
         const passwordForm = document.getElementById('password-form');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
@@ -50,8 +50,8 @@
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('saveTheDateUnlocked', 'true');
-                window.location.href = '/savethedate';
+                sessionStorage.setItem('rsvpUnlocked', 'true');
+                window.location.href = '/';
             } else {
                 passwordError.classList.add('show');
                 passwordInput.value = '';

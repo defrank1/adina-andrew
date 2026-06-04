@@ -13,11 +13,11 @@
     <link rel="preload" as="image" href="images/textures/combined-dark.png">
 </head>
 
-<body>
+<body class="page-home">
     <!-- Password Protection Overlay -->
     <div id="password-overlay">
         <div class="password-container">
-            <h2>Save the Date</h2>
+            <h2>Welcome</h2>
             <p>Please enter the password:</p>
             <form id="password-form">
                 <input type="password" id="password-input" class="password-input" placeholder="Enter password"
@@ -28,30 +28,67 @@
         </div>
     </div>
 
+    <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Protected Content -->
+    <div id="protected-content">
+
+        <main class="registry-page">
+            <section class="registry-section">
+                <div class="content-wrapper homepage-hero">
+
+                    <img src="images/names/names-image.png" alt="Adina Nelson & Andrew DeFrank"
+                        class="std-names-image" id="names-image"
+                        data-light="images/names/names-image.png"
+                        data-dark="images/names/names-image-dark.png">
+
+                    <p class="homepage-date">October 17, 2026</p>
+                    <p class="homepage-location">Washington, DC</p>
+
+                    <div class="homepage-illustration">
+                        <img src="images/illustrations/Dupont-light.png" alt="" class="dupont-icon" id="dupont-icon"
+                            data-light="images/illustrations/Dupont-light.png"
+                            data-dark="images/illustrations/Dupont-dark.png">
+                    </div>
+
+                </div>
+            </section>
+        </main>
+
+        <div id="footer-placeholder"></div>
+
+    </div>
+
     <script>
-        // Apply saved dark mode preference before rendering
+        // Apply dark mode immediately to prevent flash
         if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
             document.documentElement.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
         }
 
-        // If already unlocked, redirect immediately
-        if (sessionStorage.getItem('saveTheDateUnlocked') === 'true') {
-            window.location.href = '/savethedate';
+        // ===========================
+        // Password Protection
+        // ===========================
+        if (location.hash.includes('figmacapture=')) {
+            sessionStorage.setItem('siteUnlocked', 'true');
         }
-
-        document.body.classList.add('locked');
-
         const correctPassword = 'october17';
+        const passwordOverlay = document.getElementById('password-overlay');
+        const protectedContent = document.getElementById('protected-content');
         const passwordForm = document.getElementById('password-form');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
 
+        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+            unlockContent();
+        }
+
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('saveTheDateUnlocked', 'true');
-                window.location.href = '/savethedate';
+                sessionStorage.setItem('siteUnlocked', 'true');
+                unlockContent();
             } else {
                 passwordError.classList.add('show');
                 passwordInput.value = '';
@@ -59,10 +96,22 @@
             }
         });
 
+        function unlockContent() {
+            passwordOverlay.classList.add('hidden');
+            protectedContent.classList.add('unlocked');
+            document.body.classList.remove('locked');
+        }
+
+        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
+            document.body.classList.add('locked');
+        }
+
         passwordInput.addEventListener('input', function () {
             passwordError.classList.remove('show');
         });
+
     </script>
+    <script src="includes/site-init.js"></script>
 </body>
 
 </html>
