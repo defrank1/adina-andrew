@@ -1027,9 +1027,9 @@ body.page-faq .registry-page {
 
 .faq-question {
     font-family: var(--font-heading);
-    font-size: 1.1rem;
+    font-size: 0.82rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     margin-bottom: 0.75rem;
     font-weight: 700;
 }
@@ -1563,9 +1563,9 @@ body.dark-mode .section-divider {
 
 .travel-hotel-name {
     font-family: var(--font-heading);
-    font-size: 1.1rem;
+    font-size: 0.82rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     margin-bottom: 0.75rem;
     font-weight: 700;
 }
