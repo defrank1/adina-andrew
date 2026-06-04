@@ -1606,22 +1606,8 @@ body.dark-mode .travel-link:hover {
 }
 
 .travel-direction-item {
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    line-height: 1.7;
     text-align: left;
-    opacity: 0.85;
     margin-bottom: 1.5rem;
-}
-
-.travel-direction-item strong {
-    font-family: var(--font-heading);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    display: block;
-    margin-bottom: 0.3rem;
-    opacity: 1;
 }
 
 /* ===========================
