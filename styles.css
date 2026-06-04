@@ -1107,6 +1107,9 @@ body.dark-mode .page-intro {
 #faq-illustration {
     max-width: 240px;
     height: 240px;
+    /* Shared .registry-illustration sets margin-bottom: 1.2rem;
+       nudge it up slightly for breathing room above the first text — FAQ only. */
+    margin-bottom: 1.8rem;
 }
 
 body.page-faq .password-container {
