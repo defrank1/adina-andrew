@@ -255,6 +255,32 @@ body.dark-mode .person-block + .person-block {
     border-top-color: rgba(241, 237, 234, 0.15);
 }
 
+/* Schedule-style event details inside the form (scaled down for the denser,
+   repeated form context vs. the standalone schedule page) */
+body.page-rsvp-internal .schedule-event-name {
+    font-size: 1.9rem;
+    margin-bottom: 0.6rem;
+}
+
+.event-group .radio-group {
+    margin-top: 1.1rem;
+}
+
+/* Info-only event (the afterparty) — softer, signals no response needed */
+.event-group.event-info {
+    background-color: transparent;
+    border-left-color: rgba(26, 58, 46, 0.35);
+}
+
+body.dark-mode .event-group.event-info {
+    border-left-color: rgba(241, 237, 234, 0.3);
+}
+
+.event-info-note {
+    margin-top: 0.6rem;
+    opacity: 0.6;
+}
+
 /* Empty-search state */
 .guest-suggestion-empty {
     cursor: default;
@@ -367,5 +393,9 @@ body.dark-mode .invitation-details {
 
     .event-group {
         padding: 1rem;
+    }
+
+    body.page-rsvp-internal .schedule-event-name {
+        font-size: 1.6rem;
     }
 }
