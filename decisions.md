@@ -866,3 +866,20 @@ Every "Where to Eat" / "What to Do" `<ul class="dc-list">` on the DC Guide becam
 ### Decision: Delete .htaccess
 
 `.htaccess` is an Apache server configuration file. GitHub Pages does not run Apache — it uses its own CDN infrastructure. The file had no effect and was removed.
+
+---
+
+## Copy Conventions and Heading Hierarchy
+
+### Decision: Lock copy conventions and fix skipped heading levels (June 4, 2026)
+
+A review pass across the content pages established three copy conventions and corrected the semantic heading hierarchy. These are recorded here so future edits hold the line.
+
+**Copy conventions:**
+- **"metro"** is written lowercase — it's treated as a generic noun (like "subway"), not a proper name. Applies wherever the system is referenced in body or alt text (Travel, FAQ, Our Story).
+- **"DC"**, not "D.C.", in display and body text — no periods. Applies to location lines, alt text, and prose.
+- The **venue** is written with an em-dash everywhere it appears: "InterContinental Washington, DC — The Wharf" (not a hyphen).
+
+**Heading hierarchy:** Content pages follow `h1` (page title) → `h2` (first subsection) → `h3` (sub-subsection). This pass fixed skipped levels: FAQ questions and Schedule event names moved `h3` → `h2`; DC Guide "Where to Eat / What to Do" labels moved `h4` → `h3`. Every subheading is styled by **class** (`.faq-question`, `.schedule-event-name`, `.dc-day-label`), not by element tag — the only element-level heading rule is `.password-container h2`, scoped to the overlay. So these are accessibility/semantic changes with **no visual effect** and no CSS change. The `.dc-day-label` class name was intentionally left as-is despite the tag change — renaming it across HTML + CSS has no visual or functional benefit.
+
+**Minor copy fixes:** Our Story Copenhagen image alt corrected to "brewery" (matching its caption, which already read "brewery"); DC Guide "The Wharf" capitalized in the National Mall intro; "farmers market" with no apostrophe (matching the Eastern Market usage); "Bistrot du Coin" with lowercase *du* (matching the venue's own styling); the seven Our Story proposal images given descriptive alt text ("Andrew's proposal to Adina at Malcolm X Park") in place of the placeholder "Proposal moment N" — the same text on all seven is intentional for now and may be refined per-photo later. A stale TODO comment on the Family section was removed.
