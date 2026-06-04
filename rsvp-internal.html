@@ -39,83 +39,26 @@
             <section class="registry-section">
                 <div class="content-wrapper">
                     <h1 class="registry-title">RSVP</h1>
-                    <p class="page-intro">We can't wait to celebrate with you. Find your name below to
-                        respond to the events you're invited to.</p>
+                    <p class="page-intro">We can't wait to celebrate with you! Type the email you received your
+                        invitation at below to RSVP.</p>
 
                     <form id="rsvpForm" class="rsvp-form" novalidate>
-                        <input type="hidden" id="selectedGuestId">
 
-                        <!-- Guest name search -->
+                        <!-- Email lookup -->
                         <div class="form-group">
-                            <label for="guestSearch">Find your invitation</label>
-                            <input type="text" id="guestSearch" autocomplete="off"
-                                placeholder="Start typing your name…">
-                            <div class="guest-suggestions" id="guestSuggestions"></div>
-                            <p class="form-hint">Type at least three letters of the name on your invitation.</p>
+                            <label for="emailSearch">Find your invitation</label>
+                            <input type="text" id="emailSearch" autocomplete="off" inputmode="email"
+                                placeholder="Start typing your email…">
+                            <div class="guest-suggestions" id="emailSuggestions"></div>
+                            <p class="form-hint">Type at least three letters of the email at which you received your
+                                invitation.</p>
                         </div>
 
-                        <!-- Everything below appears once a guest is selected -->
+                        <!-- Appears once an invitation is selected. Per-person blocks
+                             (name + event choices + meal) are built by js/rsvp-form.js. -->
                         <div id="mainForm" style="display: none;">
 
-                            <div class="form-group">
-                                <label for="email">Your email</label>
-                                <input type="email" id="email" autocomplete="email"
-                                    placeholder="you@example.com">
-                                <p class="form-hint">So we can send your confirmation.</p>
-                            </div>
-
-                            <p class="event-rsvp-heading">Will you be joining us?</p>
-
-                            <!-- Only the events a guest is invited to are shown -->
-                            <div id="fridayGroup" class="event-group" style="display: none;">
-                                <p class="event-label">Friday Welcome Drinks</p>
-                                <div class="radio-group">
-                                    <label class="radio-label"><input type="radio" class="event-radio"
-                                            name="fridayAttending" value="yes"><span>Joyfully accepts</span></label>
-                                    <label class="radio-label"><input type="radio" class="event-radio"
-                                            name="fridayAttending" value="no"><span>Regretfully declines</span></label>
-                                </div>
-                            </div>
-
-                            <div id="saturdayGroup" class="event-group" style="display: none;">
-                                <p class="event-label">Saturday Wedding</p>
-                                <div class="radio-group">
-                                    <label class="radio-label"><input type="radio" class="event-radio"
-                                            name="saturdayAttending" value="yes"><span>Joyfully accepts</span></label>
-                                    <label class="radio-label"><input type="radio" class="event-radio"
-                                            name="saturdayAttending" value="no"><span>Regretfully declines</span></label>
-                                </div>
-                            </div>
-
-                            <div id="sundayGroup" class="event-group" style="display: none;">
-                                <p class="event-label">Sunday Brunch</p>
-                                <div class="radio-group">
-                                    <label class="radio-label"><input type="radio" class="event-radio"
-                                            name="sundayAttending" value="yes"><span>Joyfully accepts</span></label>
-                                    <label class="radio-label"><input type="radio" class="event-radio"
-                                            name="sundayAttending" value="no"><span>Regretfully declines</span></label>
-                                </div>
-                            </div>
-
-                            <!-- Shown only if attending at least one event -->
-                            <div id="attendingDetails" style="display: none;">
-                                <div class="form-group">
-                                    <label for="guestCount">Number attending</label>
-                                    <select id="guestCount"></select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="dietary">Dietary restrictions</label>
-                                    <input type="text" id="dietary"
-                                        placeholder="Allergies, vegetarian, etc. (optional)">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="songRequest">Song request</label>
-                                    <input type="text" id="songRequest"
-                                        placeholder="A song to get you on the dance floor (optional)">
-                                </div>
-                            </div>
+                            <div id="peopleContainer"></div>
 
                             <div class="form-group">
                                 <label for="message">A note for us</label>

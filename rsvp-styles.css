@@ -238,6 +238,23 @@
     margin-bottom: 1.2rem;
 }
 
+/* Per-person blocks (name heading + event choices + meal) */
+.person-name {
+    text-align: left;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.person-block + .person-block {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(26, 58, 46, 0.15);
+}
+
+body.dark-mode .person-block + .person-block {
+    border-top-color: rgba(241, 237, 234, 0.15);
+}
+
 /* Empty-search state */
 .guest-suggestion-empty {
     cursor: default;
