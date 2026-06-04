@@ -115,7 +115,9 @@
     color: var(--color-dark-green);
     background-color: var(--color-soft-white);
     border: 2px solid rgba(26, 58, 46, 0.2);
-    transition: border-color 0.3s ease;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .form-group input[type="text"]:focus,
@@ -124,6 +126,7 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--color-dark-green);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-group textarea {
@@ -167,19 +170,11 @@
     margin-top: 0.5rem;
 }
 
-/* Submit Button */
-.rsvp-form .cta-button {
+/* Submit Button — uses the shared debossed .btn-priority, full width here */
+.rsvp-form .rsvp-submit {
+    display: block;
     width: 100%;
-    margin-top: 2rem;
-    cursor: pointer;
-    border: 2px solid var(--color-dark-green);
-    background-color: var(--color-dark-green);
-    color: var(--color-soft-white);
-}
-
-.rsvp-form .cta-button:hover {
-    background-color: var(--color-accent);
-    border-color: var(--color-accent);
+    margin-top: 2.5rem;
 }
 
 /* Confirmation Message */
@@ -243,8 +238,84 @@
     margin-bottom: 1.2rem;
 }
 
+/* Empty-search state */
+.guest-suggestion-empty {
+    cursor: default;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: rgba(26, 58, 46, 0.6);
+}
+
+.guest-suggestion-empty:hover {
+    background-color: transparent;
+}
+
+/* ===========================
+   Dark mode overrides
+   =========================== */
+body.dark-mode .form-group label,
+body.dark-mode .event-rsvp-heading,
+body.dark-mode .event-label,
+body.dark-mode .confirmation-message h3,
+body.dark-mode .confirmation-message p {
+    color: var(--color-soft-white);
+}
+
+body.dark-mode .form-group input[type="text"],
+body.dark-mode .form-group input[type="email"],
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+    color: var(--color-soft-white);
+    background-color: var(--color-dark-bg);
+    border-color: rgba(241, 237, 234, 0.2);
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus,
+body.dark-mode .form-group textarea:focus {
+    border-color: var(--color-soft-white);
+}
+
+body.dark-mode .radio-label input[type="radio"] {
+    accent-color: var(--color-soft-white);
+}
+
+body.dark-mode .guest-suggestions {
+    background-color: var(--color-dark-bg);
+    border-color: var(--color-soft-white);
+}
+
+body.dark-mode .guest-suggestion-item {
+    color: var(--color-soft-white);
+    border-bottom-color: rgba(241, 237, 234, 0.12);
+}
+
+body.dark-mode .guest-suggestion-item:hover {
+    background-color: rgba(241, 237, 234, 0.08);
+}
+
+body.dark-mode .guest-suggestion-item.selected {
+    background-color: rgba(241, 237, 234, 0.14);
+}
+
+body.dark-mode .guest-suggestion-empty,
+body.dark-mode .form-hint {
+    color: rgba(241, 237, 234, 0.55);
+}
+
+body.dark-mode .event-group {
+    background-color: rgba(241, 237, 234, 0.04);
+    border-left-color: var(--color-soft-white);
+}
+
+body.dark-mode .confirmation-message,
+body.dark-mode .invitation-details {
+    background-color: rgba(241, 237, 234, 0.05);
+    border-color: var(--color-soft-white);
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .rsvp-hero {
         min-height: 35vh;
         padding: 3rem 1.5rem 1.5rem;
