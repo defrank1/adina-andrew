@@ -834,6 +834,62 @@ body.page-rsvp-internal .registry-page {
     flex: 1;
 }
 
+/* ===========================
+   Rive intro (rsvp.html)
+   Fullscreen Metro animation layer that plays after password unlock,
+   then fades out to reveal the RSVP page beneath. Managed by js/rive-intro.js.
+   z-index sits above the nav (1000/1001) but below the password overlay (9999).
+   =========================== */
+#rive-container {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background-color: var(--color-dark-green);
+    /* #1a3a2e — matches the Rive tunnel scene so there's no seam before first frame */
+    opacity: 1;
+    transition: opacity 0.8s ease;
+    pointer-events: auto;
+}
+
+#rive-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#rive-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#skip-intro {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2001;
+    color: rgba(241, 237, 234, 0.4);
+    /* #F1EDEA at 40% */
+    font-family: var(--font-heading);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 8px;
+}
+
+#skip-intro:hover,
+#skip-intro:focus-visible {
+    color: rgba(241, 237, 234, 0.8);
+    outline: none;
+}
+
+#skip-intro.hidden {
+    display: none;
+}
+
 .homepage-illustration {
     margin-top: 2rem;
 }
@@ -1043,6 +1099,15 @@ body.dark-mode .page-intro {
 /* ===========================
    FAQ Page
    =========================== */
+
+/* Joan of Arc illustration size — FAQ only.
+   Overrides the shared .registry-illustration size so other pages are untouched.
+   Tweak both numbers together (height is the binding constraint for the tall figure;
+   max-width caps the width so neither clamps it). */
+#faq-illustration {
+    max-width: 240px;
+    height: 240px;
+}
 
 body.page-faq .password-container {
     max-width: 600px;
@@ -1869,6 +1934,14 @@ body.dark-mode .travel-link:hover {
     .registry-illustration {
         max-width: 150px;
         height: 150px;
+    }
+
+    /* Joan of Arc illustration size — FAQ only, mobile.
+       Needed because #faq-illustration (id) outweighs .registry-illustration (class),
+       so without this the desktop 240px would persist on mobile. */
+    #faq-illustration {
+        max-width: 180px;
+        height: 180px;
     }
 
     .story-photo-caption {

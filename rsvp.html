@@ -46,6 +46,15 @@
 
     </div>
 
+    <!-- Rive intro canvas — sits outside #protected-content so its stacking context
+         isn't broken by the parent. Starts hidden; rive-intro.js reveals it only when
+         the animation actually plays (after password unlock), then fades it out on complete. -->
+    <div id="rive-container" class="hidden" aria-hidden="true">
+        <canvas id="rive-canvas"></canvas>
+    </div>
+    <!-- Skip button — shown during the animation, hidden otherwise -->
+    <button id="skip-intro" class="hidden" aria-label="Skip intro animation">Skip</button>
+
     <script>
         // Apply dark mode immediately to prevent flash
         if (localStorage.getItem('darkMode') === 'enabled') {
@@ -97,6 +106,7 @@
         });
     </script>
     <script src="includes/site-init.js"></script>
+    <script src="js/rive-intro.js"></script>
 </body>
 
 </html>
