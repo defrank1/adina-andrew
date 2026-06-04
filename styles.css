@@ -803,6 +803,37 @@ body.page-home .registry-section {
     margin-bottom: 0;
 }
 
+/* RSVP "Coming Soon" — single line vertically + horizontally centered */
+body.page-rsvp #protected-content.unlocked {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body.page-rsvp .registry-page {
+    padding-top: 120px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+body.page-rsvp .registry-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.page-rsvp .registry-title {
+    margin-bottom: 0;
+}
+
+/* RSVP internal staging page — standard content-page top padding to clear the fixed nav */
+body.page-rsvp-internal .registry-page {
+    padding-top: 120px;
+    flex: 1;
+}
+
 .homepage-illustration {
     margin-top: 2rem;
 }

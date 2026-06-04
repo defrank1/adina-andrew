@@ -13,7 +13,7 @@
     <link rel="preload" as="image" href="images/textures/combined-dark.png">
 </head>
 
-<body class="page-rsvp">
+<body class="page-rsvp-internal">
     <!-- Password Protection Overlay -->
     <div id="password-overlay">
         <div class="password-container">
@@ -37,7 +37,18 @@
         <main class="registry-page">
             <section class="registry-section">
                 <div class="content-wrapper">
-                    <h1 class="registry-title">Coming Soon!</h1>
+                    <h1 class="registry-title">RSVP</h1>
+
+                    <!-- ===========================================================
+                         RSVP FORM BUILD AREA
+                         This is the internal staging page for the real RSVP form
+                         (served at /rsvp-internal, gated by the RSVP password).
+                         Build the form + Google Sheets integration here, then
+                         swap this content into rsvp.html when it's ready to go live.
+                         See rsvp-styles.css and rsvp-workflow/ for the pieces.
+                         =========================================================== -->
+                    <p class="page-intro">RSVP form coming here.</p>
+
                 </div>
             </section>
         </main>
@@ -54,26 +65,23 @@
         }
 
         // ===========================
-        // Password Protection
+        // Password Protection (RSVP — separate key from the main site)
         // ===========================
-        if (location.hash.includes('figmacapture=')) {
-            sessionStorage.setItem('siteUnlocked', 'true');
-        }
-        const correctPassword = 'october17';
+        const correctPassword = 'beautifulsuperstar';
         const passwordOverlay = document.getElementById('password-overlay');
         const protectedContent = document.getElementById('protected-content');
         const passwordForm = document.getElementById('password-form');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
 
-        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+        if (sessionStorage.getItem('rsvpUnlocked') === 'true') {
             unlockContent();
         }
 
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('siteUnlocked', 'true');
+                sessionStorage.setItem('rsvpUnlocked', 'true');
                 unlockContent();
             } else {
                 passwordError.classList.add('show');
@@ -88,7 +96,7 @@
             document.body.classList.remove('locked');
         }
 
-        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
+        if (sessionStorage.getItem('rsvpUnlocked') !== 'true') {
             document.body.classList.add('locked');
         }
 
