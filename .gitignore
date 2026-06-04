@@ -1,2 +1,3 @@
 .DS_Store
 vectors/credentials.json
+.claude/worktrees/
