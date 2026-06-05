@@ -36,8 +36,7 @@
             address: '223 Pennsylvania Avenue SE',
             mapUrl: 'https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC',
             dress: 'Semi-Formal',
-            dressNote: 'Sport coats and trousers, or dresses, jumpsuits, and blouses',
-            description: "Please join us to kick off the weekend! We're hosting a welcome party at a wine bar on Capitol Hill. There will be drinks and light bites, but please make dinner plans beforehand."
+            description: "Please join us to kick off the weekend! We're hosting a welcome party at a wine bar on Capitol Hill. There will be drinks and light bites, but please make dinner plans beforehand. It'll be semi-formal – sport coats, trousers, dresses, jumpsuits, and blouses."
         },
         saturday: {
             name: 'Wedding Ceremony and Reception',
@@ -107,15 +106,22 @@
         var ev = document.createElement('div');
         ev.className = 'weekend-event';
 
+        var name = document.createElement('h3');
+        name.className = 'weekend-event-name';
+        name.textContent = detail.name;
+        ev.appendChild(name);
+
         var when = document.createElement('p');
         when.className = 'weekend-event-when';
         when.textContent = detail.when;
         ev.appendChild(when);
 
-        var name = document.createElement('h3');
-        name.className = 'weekend-event-name';
-        name.textContent = detail.name;
-        ev.appendChild(name);
+        if (!isInfo && detail.dress) {
+            var dress = document.createElement('span');
+            dress.className = 'weekend-event-dress';
+            dress.textContent = detail.dress;
+            ev.appendChild(dress);
+        }
 
         var where = document.createElement('p');
         where.className = 'weekend-event-where';
@@ -129,21 +135,6 @@
         a.textContent = detail.address;
         where.appendChild(a);
         ev.appendChild(where);
-
-        if (!isInfo && detail.dress) {
-            var dress = document.createElement('span');
-            dress.className = 'weekend-event-dress';
-            dress.textContent = detail.dress;
-            ev.appendChild(dress);
-        }
-
-        // Dress description — Welcome Party (Friday) only; never Saturday/Sunday.
-        if (detail.dressNote) {
-            var dnote = document.createElement('p');
-            dnote.className = 'weekend-event-dress-note';
-            dnote.textContent = detail.dressNote;
-            ev.appendChild(dnote);
-        }
 
         if (detail.description) {
             var desc = document.createElement('p');
