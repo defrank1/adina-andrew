@@ -61,6 +61,7 @@
     background-color: var(--color-soft-white);
     border: 2px solid var(--color-dark-green);
     border-top: none;
+    border-radius: 0 0 25px 25px;
     z-index: 100;
     display: none;
 }
@@ -77,6 +78,7 @@
 
 .guest-suggestion-item:last-child {
     border-bottom: none;
+    border-radius: 0 0 23px 23px;
 }
 
 .guest-suggestion-item:hover {
@@ -110,9 +112,8 @@
     color: var(--color-dark-green);
     background-color: var(--color-soft-white);
     border: 2px solid rgba(26, 58, 46, 0.2);
-    border-radius: 6px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 25px;
+    transition: border-color 0.3s ease;
 }
 
 .form-group input[type="text"]:focus,
@@ -121,7 +122,14 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--color-dark-green);
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* When the autocomplete is open, flatten the input's bottom corners so it
+   reads as one continuous capsule with the dropdown below. */
+.form-group input.suggestions-open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: var(--color-dark-green);
 }
 
 .form-group textarea {
@@ -197,7 +205,7 @@
     font-size: 0.62rem;
     letter-spacing: 0.08em;
     border: 1px solid rgba(26, 58, 46, 0.35);
-    border-radius: 3px;
+    border-radius: 100px;
     padding: 3px 7px;
     opacity: 0.8;
     margin-top: 0.5rem;
@@ -279,6 +287,20 @@
     flex: 1;
     align-items: flex-start;
     font-size: 0.85rem;
+}
+
+/* Meal row: stack the options vertically instead of in columns */
+.rsvp-choice-row--stacked {
+    align-items: flex-start;
+}
+
+.rsvp-choice-row--stacked .rsvp-choice-options {
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.rsvp-choice-row--stacked .rsvp-choice-options .radio-label {
+    flex: 0 0 auto;
 }
 
 /* Radio labels (wrapper) */
@@ -396,6 +418,11 @@ body.dark-mode .form-group textarea {
 body.dark-mode .form-group input:focus,
 body.dark-mode .form-group select:focus,
 body.dark-mode .form-group textarea:focus {
+    border-color: var(--color-soft-white);
+}
+
+/* Open-capsule input border matches the dropdown (cream) in dark mode */
+body.dark-mode .form-group input.suggestions-open {
     border-color: var(--color-soft-white);
 }
 

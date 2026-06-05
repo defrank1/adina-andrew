@@ -39,6 +39,7 @@
         },
         saturday: {
             name: 'Wedding Ceremony and Reception',
+            shortName: 'Ceremony and Reception',
             when: 'Saturday, October 17th · 5:30–11:00 PM',
             venue: 'InterContinental Washington, DC — The Wharf',
             address: '801 Wharf Street SW',
@@ -154,9 +155,9 @@
 
     // ---- Part B: compact decision rows -------------------------------------
 
-    function makeChoiceRow(labelText, name, choices) {
+    function makeChoiceRow(labelText, name, choices, extraClass) {
         var row = document.createElement('div');
-        row.className = 'rsvp-choice-row';
+        row.className = 'rsvp-choice-row' + (extraClass ? ' ' + extraClass : '');
 
         var label = document.createElement('span');
         label.className = 'rsvp-choice-label';
@@ -224,6 +225,7 @@
                 empty.textContent = 'No match found — check the email on your invitation.';
                 emailSuggestions.appendChild(empty);
                 emailSuggestions.style.display = 'block';
+                emailSearchInput.classList.add('suggestions-open');
                 return;
             }
             invitations.forEach(function (inv) {
@@ -234,11 +236,13 @@
                 emailSuggestions.appendChild(div);
             });
             emailSuggestions.style.display = 'block';
+            emailSearchInput.classList.add('suggestions-open');
         }
 
         function hideSuggestions() {
             emailSuggestions.style.display = 'none';
             emailSuggestions.innerHTML = '';
+            emailSearchInput.classList.remove('suggestions-open');
         }
 
         function selectInvitation(inv) {
@@ -302,7 +306,7 @@
                 EVENT_ORDER.forEach(function (key) {
                     if (invited.indexOf(key) === -1) { return; }
                     block.appendChild(makeChoiceRow(
-                        EVENT_DETAILS[key].name,
+                        EVENT_DETAILS[key].shortName || EVENT_DETAILS[key].name,
                         'p' + idx + '_' + key,
                         [{ value: 'yes', label: 'Joyfully accepts' }, { value: 'no', label: 'Regretfully declines' }]
                     ));
@@ -313,7 +317,8 @@
                     block.appendChild(makeChoiceRow(
                         'Meal choice',
                         'p' + idx + '_meal',
-                        MEAL_OPTIONS.map(function (m) { return { value: m.key, label: m.label }; })
+                        MEAL_OPTIONS.map(function (m) { return { value: m.key, label: m.label }; }),
+                        'rsvp-choice-row--stacked'
                     ));
                 }
 
