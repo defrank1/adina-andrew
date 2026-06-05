@@ -36,6 +36,7 @@
             address: '223 Pennsylvania Avenue SE',
             mapUrl: 'https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC',
             dress: 'Semi-Formal',
+            dressNote: 'Sport coats and trousers, or dresses, jumpsuits, and blouses',
             description: "Please join us to kick off the weekend! We're hosting a welcome party at a wine bar on Capitol Hill. There will be drinks and light bites, but please make dinner plans beforehand."
         },
         saturday: {
@@ -134,6 +135,14 @@
             dress.className = 'weekend-event-dress';
             dress.textContent = detail.dress;
             ev.appendChild(dress);
+        }
+
+        // Dress description — Welcome Party (Friday) only; never Saturday/Sunday.
+        if (detail.dressNote) {
+            var dnote = document.createElement('p');
+            dnote.className = 'weekend-event-dress-note';
+            dnote.textContent = detail.dressNote;
+            ev.appendChild(dnote);
         }
 
         if (detail.description) {

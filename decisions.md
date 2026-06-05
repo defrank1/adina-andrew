@@ -905,3 +905,7 @@ Native radios (`accent-color`) read as a generic OS control inside a form whose 
 ### Decision: Shorten RSVP dress strings; full definitions move to FAQ (June 4, 2026)
 
 In the reference block, dress codes render as small bordered **tags**, so the Welcome Party's parenthetical ("sport coats and trousers, or dresses, jumpsuits, and blouses") was trimmed to just **"Semi-Formal"**. The fuller definition is assumed to live on the FAQ (a separate task), keeping the RSVP form scannable. Also in this pass: the italic `.form-hint` was de-italicized to honor the locked "Sentient is never italic" rule, and the now-dead carded RSVP CSS (`.event-group` family, `.radio-group`, `.event-label`, the `.schedule-event-name` form override) was removed.
+
+### Decision: Scope the dress-code definitions (June 5, 2026)
+
+Reversing part of the trim above: the **semi-formal** description ("Sport coats and trousers, or dresses, jumpsuits, and blouses") lives on the RSVP Welcome Party (Friday, via `.weekend-event-dress-note`, scoped per-invitation) and on `schedule.html` — matching wording, **not** in the FAQ. **Black tie preferred** is defined once in the FAQ ("What is Black Tie Preferred?") and left a bare tag everywhere else; "Come as you are" likewise stays a bare tag. The FAQ carries no Friday/semi-formal reference by design.
