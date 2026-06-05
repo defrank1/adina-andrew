@@ -35,6 +35,9 @@
 
 /* Form Groups */
 .form-group {
+    position: relative;
+    /* establishes the containing block for the absolutely-positioned
+       .guest-suggestions dropdown, so its width: 100% is the field, not the page */
     margin-bottom: 2rem;
 }
 
