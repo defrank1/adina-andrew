@@ -268,7 +268,7 @@
             var invited = inv.invitedTo || [];
 
             var eyebrow = document.createElement('p');
-            eyebrow.className = 'weekend-eyebrow';
+            eyebrow.className = 'rsvp-section-label';
             eyebrow.textContent = 'The Weekend';
             weekendContainer.appendChild(eyebrow);
 

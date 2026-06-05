@@ -137,18 +137,21 @@
 /* ===========================
    Part A — "The Weekend" reference block (logistics once)
    =========================== */
-.weekend-eyebrow {
+/* Shared section header — same treatment as the "FIND YOUR INVITATION" form
+   label. Used for "The Weekend" (built in JS) and "Your Response" (in HTML). */
+.rsvp-section-label {
     font-family: var(--font-heading);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 0.75rem;
-    opacity: 0.6;
+    letter-spacing: 0.1em;
+    font-size: 0.9rem;
+    color: var(--color-dark-green);
+    margin-top: 2.6rem;
     margin-bottom: 1.4rem;
 }
 
 .weekend-event {
-    margin-bottom: 1.8rem;
+    margin-bottom: 2.6rem;
 }
 
 .weekend-event-when {
@@ -158,20 +161,20 @@
     letter-spacing: 0.1em;
     font-size: 0.72rem;
     opacity: 0.7;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.35rem;
 }
 
 .weekend-event-name {
     font-family: var(--font-title);
-    font-size: 1.7rem;
-    line-height: 1.1;
-    margin-bottom: 0.3rem;
+    font-size: 2.1rem;
+    line-height: 1.15;
+    margin-bottom: 0.45rem;
 }
 
 .weekend-event-where {
     font-family: var(--font-body);
     font-size: 0.95rem;
-    line-height: 1.55;
+    line-height: 1.6;
     opacity: 0.85;
 }
 
@@ -186,7 +189,7 @@
     border-radius: 3px;
     padding: 3px 7px;
     opacity: 0.8;
-    margin-top: 0.45rem;
+    margin-top: 0.7rem;
 }
 
 .weekend-event-note {
@@ -224,12 +227,14 @@
     border-top: 1px solid rgba(26, 58, 46, 0.15);
 }
 
-/* Compact decision row: event/meal label on the left, two radios on the right */
+/* Compact decision row: label on the left, response options in a fixed-width
+   zone on the right so the radios line up in columns regardless of label length. */
 .rsvp-choice-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.85rem 0;
+    gap: 1.5rem;
+    padding: 0.95rem 0;
     border-bottom: 1px solid rgba(26, 58, 46, 0.12);
 }
 
@@ -242,13 +247,17 @@
 }
 
 .rsvp-choice-options {
+    flex: 0 0 auto;
+    width: 330px;
     display: flex;
     flex-direction: row;
-    gap: 1.1rem;
-    align-items: center;
+    align-items: flex-start;
 }
 
+/* Each option is an equal-width column, so the radios align down the form */
 .rsvp-choice-options .radio-label {
+    flex: 1;
+    align-items: flex-start;
     font-size: 0.85rem;
 }
 
@@ -265,14 +274,15 @@
     flex: 1;
 }
 
-/* Hairline custom radio — muted ring at rest, darkens on hover,
-   solid dot on select, green focus ring. Fast (120ms), not grain-swap timing. */
+/* Hairline custom radio — muted ring at rest, darkens on hover, a hand-drawn
+   check on select, green focus ring. Fast (120ms), not grain-swap timing. */
 .radio-label input[type="radio"] {
     appearance: none;
     -webkit-appearance: none;
+    flex: 0 0 auto;
     width: 18px;
     height: 18px;
-    margin-right: 0.7rem;
+    margin-right: 0.6rem;
     border: 1.5px solid rgba(26, 58, 46, 0.45);
     border-radius: 50%;
     display: inline-grid;
@@ -281,12 +291,14 @@
     transition: border-color 120ms ease;
 }
 
+/* Check mark, masked so its color follows the theme; centered in the ring */
 .radio-label input[type="radio"]::before {
     content: "";
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--color-dark-green);
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-dark-green);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M5%2013l4%204L19%207'%20fill='none'%20stroke='black'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M5%2013l4%204L19%207'%20fill='none'%20stroke='black'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
     transform: scale(0);
     transition: transform 120ms ease;
 }
@@ -341,6 +353,7 @@
    Dark mode overrides
    =========================== */
 body.dark-mode .form-group label,
+body.dark-mode .rsvp-section-label,
 body.dark-mode .event-rsvp-heading,
 body.dark-mode .rsvp-choice-label,
 body.dark-mode .confirmation-message h3,
@@ -376,7 +389,7 @@ body.dark-mode .radio-label input[type="radio"]:checked {
 }
 
 body.dark-mode .radio-label input[type="radio"]::before {
-    background: var(--color-soft-white);
+    background-color: var(--color-soft-white);
 }
 
 body.dark-mode .radio-label input[type="radio"]:focus-visible {
@@ -449,7 +462,7 @@ body.dark-mode .confirmation-message {
     }
 
     .weekend-event-name {
-        font-size: 1.4rem;
+        font-size: 1.7rem;
     }
 
     /* Stack each decision row so the radios don't crush against the label */
@@ -457,5 +470,9 @@ body.dark-mode .confirmation-message {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.6rem;
+    }
+
+    .rsvp-choice-options {
+        width: 100%;
     }
 }

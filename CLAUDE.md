@@ -252,10 +252,10 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 
 ### Form Radios (RSVP)
 
-Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-styles.css`) are **custom hairline controls**, not native — `appearance: none` with an 18px circular ring and a `::before` center dot. They follow the site's hairline/no-glow-at-rest language:
+Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-styles.css`) are **custom hairline controls**, not native — `appearance: none` with an 18px circular ring and a `::before` center **checkmark** (a masked SVG, so its color follows the theme). They follow the site's hairline/no-glow-at-rest language:
 - **Rest:** hairline ring `rgba(26,58,46,0.45)` (cream `rgba(241,237,234,0.45)` in dark mode), no fill, no glow.
 - **Hover:** ring darkens to `…0.8`.
-- **Checked:** ring goes full green (cream in dark), and the center dot fills via `transform: scale(0→1)`.
+- **Checked:** ring goes full green (cream in dark), and the center checkmark scales in via `transform: scale(0→1)` — a hand-drawn "response" feel rather than a filled dot.
 - **Focus-visible:** 2px green (cream in dark) outline, echoing input focus.
 - Transitions are fast (**120ms**) — interaction feedback, not the 400ms grain/theme-swap timing.
 
