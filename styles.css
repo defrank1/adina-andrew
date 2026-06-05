@@ -57,6 +57,14 @@
 }
 
 @font-face {
+    font-family: 'PP Watch';
+    src: url('fonts/PPWatch-Medium.woff2') format('woff2'),
+        url('fonts/PPWatch-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
     font-family: 'Sentient';
     src: url('fonts/Sentient-Regular.woff2') format('woff2'),
         url('fonts/Sentient-Regular.woff') format('woff');
@@ -264,6 +272,7 @@ body.dark-mode .password-input {
 .password-submit {
     padding: 0.5rem 1.2rem;
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -417,6 +426,7 @@ body.dark-mode .site-title:hover .nav-monogram {
 /* Desktop inline nav links */
 .nav-link-inline {
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -513,6 +523,7 @@ main.menu-open,
 
 .footer-info {
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.55rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -622,6 +633,7 @@ body.dark-mode .toggle-aura {
 .btn-normal {
     display: inline-block;
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -668,6 +680,7 @@ body.dark-mode .btn-normal:active {
 .btn-priority {
     display: inline-block;
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -793,7 +806,7 @@ body.page-home .registry-section {
     font-size: 1.2rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    font-weight: 400;
+    font-weight: 700;
     margin-bottom: 0.4rem;
 }
 
@@ -870,6 +883,7 @@ body.page-rsvp-internal .registry-page {
     color: rgba(241, 237, 234, 0.4);
     /* #F1EDEA at 40% */
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -984,6 +998,7 @@ body.page-rsvp-internal .registry-page {
 
 .std-hotel-name {
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -1196,6 +1211,7 @@ body.page-schedule .registry-cta {
 
 .schedule-event-detail {
     font-family: var(--font-heading);
+    font-weight: 500;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -1262,6 +1278,7 @@ body.page-dc-guide .registry-page {
 
 .story-year {
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -1340,6 +1357,7 @@ body.dark-mode .story-caption {
 
 .story-caption-label {
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1475,6 +1493,7 @@ body.dark-mode .story-carousel-track:focus-visible {
     color: var(--color-dark-green);
     border: 2px solid rgba(26, 58, 46, 0.2);
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 1.1rem;
     line-height: 1;
     display: flex;
@@ -1716,6 +1735,7 @@ body.dark-mode .travel-link:hover {
     .mobile-menu-btn {
         display: inline-block;
         font-family: var(--font-heading);
+        font-weight: 700;
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
@@ -1795,6 +1815,7 @@ body.dark-mode .travel-link:hover {
         display: block;
         text-align: center;
         font-family: var(--font-heading);
+        font-weight: 700;
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;

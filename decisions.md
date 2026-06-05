@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: April 4, 2026
+Last updated: June 4, 2026
 
 ---
 
@@ -883,3 +883,25 @@ A review pass across the content pages established three copy conventions and co
 **Heading hierarchy:** Content pages follow `h1` (page title) → `h2` (first subsection) → `h3` (sub-subsection). This pass fixed skipped levels: FAQ questions and Schedule event names moved `h3` → `h2`; DC Guide "Where to Eat / What to Do" labels moved `h4` → `h3`. Every subheading is styled by **class** (`.faq-question`, `.schedule-event-name`, `.dc-day-label`), not by element tag — the only element-level heading rule is `.password-container h2`, scoped to the overlay. So these are accessibility/semantic changes with **no visual effect** and no CSS change. The `.dc-day-label` class name was intentionally left as-is despite the tag change — renaming it across HTML + CSS has no visual or functional benefit.
 
 **Minor copy fixes:** Our Story Copenhagen image alt corrected to "brewery" (matching its caption, which already read "brewery"); DC Guide "The Wharf" capitalized in the National Mall intro; "farmers market" with no apostrophe (matching the Eastern Market usage); "Bistrot du Coin" with lowercase *du* (matching the venue's own styling); the seven Our Story proposal images given descriptive alt text ("Andrew's proposal to Adina at Malcolm X Park") in place of the placeholder "Proposal moment N" — the same text on all seven is intentional for now and may be refined per-photo later. A stale TODO comment on the Family section was removed.
+
+---
+
+## RSVP Form Redesign and PP Watch Weight Split
+
+### Decision: PP Watch two-weight split — Bold 700 (structural) + Medium 500 (supporting caps) (June 4, 2026)
+
+PP Watch was previously loaded at a single weight (Bold 700), so every uppercase label — including small supporting-caps lines like the schedule date/venue details — rendered heavy. Small caps at Bold read as bulky. We registered a second `@font-face` for **PP Watch Medium (500)** and split usage: Bold stays the default for structural labels (nav, buttons, page/section headings, form labels); Medium is reserved for the quieter small-caps set (`.schedule-event-detail` and the RSVP `.weekend-event-when` / `-dress` / `-note` / `.rsvp-choice-label`).
+
+The split is expressed purely via `font-weight`, with **no new CSS variable** — `--font-heading` stays the single family token. **Regression guard:** because 400/unspecified now resolves to ~500 once Medium is loaded, every `--font-heading` rule that must stay Bold received an explicit `font-weight: 700`. Without that pin, elements would have silently lightened the moment the Medium file landed. (`.homepage-date` had a latent `font-weight: 400` that only ever rendered Bold; it was pinned to 700 to preserve its current appearance.) Until `PPWatch-Medium.woff2/.woff` are added to `/fonts`, 500 falls back to Bold — the split simply doesn't show yet, and nothing breaks.
+
+### Decision: RSVP form — logistics once, decisions compact (June 4, 2026)
+
+The first RSVP build reprinted every event's full logistics (date/venue/dress/description) inside each person's block, so a couple invited to the whole weekend saw the same four event cards twice. We restructured into two parts: **Part A — "The Weekend"** reference block renders each invited event's logistics exactly **once**; **Part B** collapses each person to **compact decision rows** (event-name label + accept/decline), plus a meal-choice row shown only when Saturday (the reception dinner) is invited. The Saturday afterparty lives only in the reference block as info (no RSVP). This cuts repetition, shortens the form, and separates "here's what's happening" from "here's your response." The backend seams (`searchInvitations` / `submitRsvp` over placeholder data) were untouched.
+
+### Decision: Hairline custom radios over native `accent-color` (June 4, 2026)
+
+Native radios (`accent-color`) read as a generic OS control inside a form whose every other surface uses the site's hairline/letterpress language. We replaced them with `appearance: none` custom radios: a hairline ring (muted at rest, no glow — consistent with the nav's "no glow at rest" rule), darkening on hover, a solid green/cream center dot on select, and a green/cream focus-visible outline echoing input focus. Transitions are 120ms (interaction feedback), deliberately faster than the 400ms grain/theme-swap timing.
+
+### Decision: Shorten RSVP dress strings; full definitions move to FAQ (June 4, 2026)
+
+In the reference block, dress codes render as small bordered **tags**, so the Welcome Party's parenthetical ("sport coats and trousers, or dresses, jumpsuits, and blouses") was trimmed to just **"Semi-Formal"**. The fuller definition is assumed to live on the FAQ (a separate task), keeping the RSVP form scannable. Also in this pass: the italic `.form-hint` was de-italicized to honor the locked "Sentient is never italic" rule, and the now-dead carded RSVP CSS (`.event-group` family, `.radio-group`, `.event-label`, the `.schedule-event-name` form override) was removed.

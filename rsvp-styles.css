@@ -16,6 +16,7 @@
 
 .rsvp-subtitle {
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.15em;
@@ -40,6 +41,7 @@
 .form-group label {
     display: block;
     font-family: var(--font-heading);
+    font-weight: 700;
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -47,11 +49,7 @@
     color: var(--color-dark-green);
 }
 
-/* Guest Search Autocomplete */
-#guestSearch {
-    position: relative;
-}
-
+/* Email Search Autocomplete */
 .guest-suggestions {
     position: absolute;
     width: 100%;
@@ -86,21 +84,15 @@
     background-color: rgba(26, 58, 46, 0.1);
 }
 
-/* Event RSVP Heading */
-.event-rsvp-heading {
-    font-family: var(--font-title);
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-    color: var(--color-dark-green);
-    text-align: center;
+.guest-suggestion-empty {
+    cursor: default;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: rgba(26, 58, 46, 0.6);
 }
 
-.event-label {
-    font-family: var(--font-heading);
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 500;
+.guest-suggestion-empty:hover {
+    background-color: transparent;
 }
 
 /* Input Fields */
@@ -134,13 +126,133 @@
     min-height: 100px;
 }
 
-/* Radio Buttons */
-.radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+/* Form Hints */
+.form-hint {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: rgba(26, 58, 46, 0.6);
+    margin-top: 0.5rem;
 }
 
+/* ===========================
+   Part A — "The Weekend" reference block (logistics once)
+   =========================== */
+.weekend-eyebrow {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-bottom: 1.4rem;
+}
+
+.weekend-event {
+    margin-bottom: 1.8rem;
+}
+
+.weekend-event-when {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.72rem;
+    opacity: 0.7;
+    margin-bottom: 0.2rem;
+}
+
+.weekend-event-name {
+    font-family: var(--font-title);
+    font-size: 1.7rem;
+    line-height: 1.1;
+    margin-bottom: 0.3rem;
+}
+
+.weekend-event-where {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    opacity: 0.85;
+}
+
+.weekend-event-dress {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(26, 58, 46, 0.35);
+    border-radius: 3px;
+    padding: 3px 7px;
+    opacity: 0.8;
+    margin-top: 0.45rem;
+}
+
+.weekend-event-note {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    opacity: 0.55;
+    margin-top: 0.5rem;
+}
+
+/* ===========================
+   Part B — per-person decision blocks
+   =========================== */
+.event-rsvp-heading {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--color-dark-green);
+    text-align: center;
+}
+
+.person-name {
+    font-size: 2.5rem;
+    line-height: 1.1;
+    text-align: left;
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.person-block + .person-block {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(26, 58, 46, 0.15);
+}
+
+/* Compact decision row: event/meal label on the left, two radios on the right */
+.rsvp-choice-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(26, 58, 46, 0.12);
+}
+
+.rsvp-choice-label {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.85rem;
+}
+
+.rsvp-choice-options {
+    display: flex;
+    flex-direction: row;
+    gap: 1.1rem;
+    align-items: center;
+}
+
+.rsvp-choice-options .radio-label {
+    font-size: 0.85rem;
+}
+
+/* Radio labels (wrapper) */
 .radio-label {
     display: flex;
     align-items: center;
@@ -149,25 +261,51 @@
     font-size: 1rem;
 }
 
-.radio-label input[type="radio"] {
-    margin-right: 0.8rem;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: var(--color-dark-green);
-}
-
 .radio-label span {
     flex: 1;
 }
 
-/* Form Hints */
-.form-hint {
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    font-style: italic;
-    color: rgba(26, 58, 46, 0.6);
-    margin-top: 0.5rem;
+/* Hairline custom radio — muted ring at rest, darkens on hover,
+   solid dot on select, green focus ring. Fast (120ms), not grain-swap timing. */
+.radio-label input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-right: 0.7rem;
+    border: 1.5px solid rgba(26, 58, 46, 0.45);
+    border-radius: 50%;
+    display: inline-grid;
+    place-content: center;
+    cursor: pointer;
+    transition: border-color 120ms ease;
+}
+
+.radio-label input[type="radio"]::before {
+    content: "";
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-dark-green);
+    transform: scale(0);
+    transition: transform 120ms ease;
+}
+
+.radio-label input[type="radio"]:hover {
+    border-color: rgba(26, 58, 46, 0.8);
+}
+
+.radio-label input[type="radio"]:checked {
+    border-color: var(--color-dark-green);
+}
+
+.radio-label input[type="radio"]:checked::before {
+    transform: scale(1);
+}
+
+.radio-label input[type="radio"]:focus-visible {
+    outline: 2px solid var(--color-dark-green);
+    outline-offset: 2px;
 }
 
 /* Submit Button — uses the shared debossed .btn-priority, full width here */
@@ -199,113 +337,12 @@
     color: var(--color-dark-green);
 }
 
-/* Invitation Details Display */
-.invitation-details {
-    margin: 2rem 0 3rem;
-    padding: 2rem;
-    background-color: rgba(26, 58, 46, 0.05);
-    border: 1px solid rgba(26, 58, 46, 0.2);
-    text-align: center;
-}
-
-.invitation-heading {
-    font-family: var(--font-title);
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: var(--color-dark-green);
-}
-
-.invited-events-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.invited-events-list li {
-    font-family: var(--font-heading);
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0.5rem 0;
-    color: var(--color-dark-green);
-}
-
-/* Event Groups */
-.event-group {
-    padding: 1.2rem;
-    background-color: rgba(26, 58, 46, 0.02);
-    border-left: 3px solid var(--color-dark-green);
-    margin-bottom: 1.2rem;
-}
-
-/* Per-person blocks (name heading + event choices + meal) */
-.person-name {
-    font-size: 2.5rem;
-    line-height: 1.1;
-    text-align: left;
-    margin-top: 0.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.person-block + .person-block {
-    margin-top: 2.5rem;
-    padding-top: 2.5rem;
-    border-top: 1px solid rgba(26, 58, 46, 0.15);
-}
-
-body.dark-mode .person-block + .person-block {
-    border-top-color: rgba(241, 237, 234, 0.15);
-}
-
-/* Event names render in PP Watch (uppercase) for readability inside the form.
-   Logistics lines (.schedule-event-detail) are also PP Watch but smaller and
-   lighter, so the event name reads as the header and the details as supporting. */
-body.page-rsvp-internal .schedule-event-name {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    line-height: 1.3;
-    margin-bottom: 0.7rem;
-}
-
-.event-group .radio-group {
-    margin-top: 1.1rem;
-}
-
-/* Info-only event (the afterparty) — softer, signals no response needed */
-.event-group.event-info {
-    background-color: transparent;
-    border-left-color: rgba(26, 58, 46, 0.35);
-}
-
-body.dark-mode .event-group.event-info {
-    border-left-color: rgba(241, 237, 234, 0.3);
-}
-
-.event-info-note {
-    margin-top: 0.6rem;
-    opacity: 0.6;
-}
-
-/* Empty-search state */
-.guest-suggestion-empty {
-    cursor: default;
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    color: rgba(26, 58, 46, 0.6);
-}
-
-.guest-suggestion-empty:hover {
-    background-color: transparent;
-}
-
 /* ===========================
    Dark mode overrides
    =========================== */
 body.dark-mode .form-group label,
 body.dark-mode .event-rsvp-heading,
-body.dark-mode .event-label,
+body.dark-mode .rsvp-choice-label,
 body.dark-mode .confirmation-message h3,
 body.dark-mode .confirmation-message p {
     color: var(--color-soft-white);
@@ -327,7 +364,35 @@ body.dark-mode .form-group textarea:focus {
 }
 
 body.dark-mode .radio-label input[type="radio"] {
-    accent-color: var(--color-soft-white);
+    border-color: rgba(241, 237, 234, 0.45);
+}
+
+body.dark-mode .radio-label input[type="radio"]:hover {
+    border-color: rgba(241, 237, 234, 0.8);
+}
+
+body.dark-mode .radio-label input[type="radio"]:checked {
+    border-color: var(--color-soft-white);
+}
+
+body.dark-mode .radio-label input[type="radio"]::before {
+    background: var(--color-soft-white);
+}
+
+body.dark-mode .radio-label input[type="radio"]:focus-visible {
+    outline-color: var(--color-soft-white);
+}
+
+body.dark-mode .rsvp-choice-row {
+    border-bottom-color: rgba(241, 237, 234, 0.12);
+}
+
+body.dark-mode .person-block + .person-block {
+    border-top-color: rgba(241, 237, 234, 0.15);
+}
+
+body.dark-mode .weekend-event-dress {
+    border-color: rgba(241, 237, 234, 0.35);
 }
 
 body.dark-mode .guest-suggestions {
@@ -353,28 +418,13 @@ body.dark-mode .form-hint {
     color: rgba(241, 237, 234, 0.55);
 }
 
-body.dark-mode .event-group {
-    background-color: rgba(241, 237, 234, 0.04);
-    border-left-color: var(--color-soft-white);
-}
-
-body.dark-mode .confirmation-message,
-body.dark-mode .invitation-details {
+body.dark-mode .confirmation-message {
     background-color: rgba(241, 237, 234, 0.05);
     border-color: var(--color-soft-white);
 }
 
 /* Responsive */
 @media (max-width: 900px) {
-    .rsvp-hero {
-        min-height: 35vh;
-        padding: 3rem 1.5rem 1.5rem;
-    }
-
-    .rsvp-subtitle {
-        font-size: 0.8rem;
-    }
-
     .rsvp-form-section {
         padding: 2rem 0 3rem;
     }
@@ -394,19 +444,18 @@ body.dark-mode .invitation-details {
         font-size: 1.5rem;
     }
 
-    .event-label {
-        font-size: 0.9rem;
-    }
-
-    .event-group {
-        padding: 1rem;
-    }
-
     .person-name {
         font-size: 2rem;
     }
 
-    body.page-rsvp-internal .schedule-event-name {
-        font-size: 1.05rem;
+    .weekend-event-name {
+        font-size: 1.4rem;
+    }
+
+    /* Stack each decision row so the radios don't crush against the label */
+    .rsvp-choice-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
     }
 }

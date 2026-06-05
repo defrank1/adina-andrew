@@ -32,7 +32,7 @@ Last updated: June 4, 2026
 - `our-story.html` — Narrative-prose page with photo carousels (seven sections separated by `.story-divider`s, several with multi-photo carousels) — `<body class="page-our-story">`
 - `dc-guide.html` — DC recommendations (Food + Activities sections), follows Travel page template — `<body class="page-dc-guide">`
 - `rsvp.html` — **Public RSVP placeholder.** The nav's RSVP link points here (`/rsvp`). Shows only "Coming Soon!" centered in the PP Playground title font (`.registry-title`), with the shared nav + footer. Gated by the guest password (`october17` / `siteUnlocked`). `<body class="page-rsvp">` (centering rules scoped under that class in `styles.css`). When the real form is ready, its content swaps in here.
-- `rsvp-internal.html` — **Internal staging page for the real RSVP form** (served at `/rsvp-internal`). This is where the form + Google Sheets integration (rsvp-workflow/google-apps-script.js, rsvp-styles.css) get built. Gated by the RSVP password (`beautifulsuperstar` / `rsvpUnlocked`). `<body class="page-rsvp-internal">`. Currently a scaffold: "RSVP" title + placeholder line.
+- `rsvp-internal.html` — **Internal staging page for the real RSVP form** (served at `/rsvp-internal`). Gated by the RSVP password (`beautifulsuperstar` / `rsvpUnlocked`). `<body class="page-rsvp-internal">`. Front-end is built (styles in `rsvp-styles.css`, logic in `js/rsvp-form.js`); the live Google Sheets backend (rsvp-workflow/) is not wired yet — `searchInvitations()` / `submitRsvp()` are seams over placeholder data. **Structure:** lookup by **email** (live dropdown) → **Part A "The Weekend" reference block** (each invited event's logistics shown ONCE: when / script name / where / dress tag / description; the Saturday afterparty appears here as info only, no RSVP) → **Part B per-person compact decision rows** (one row per invited event = name label + accept/decline; plus a meal-choice row shown only when Saturday is invited). Logistics are NOT reprinted per person. Radios are custom **hairline** controls (see CTA/Radio notes). When the form is final it swaps into `rsvp.html`.
 
 ### Illustration Assignments
 
@@ -71,10 +71,15 @@ These are final. Do not change these without explicit instruction from Andrew.
 | Role | Font | Notes |
 |------|------|-------|
 | Titles | PP Playground Medium | Large, expressive, calligraphic |
-| Headings / UI | PP Watch Bold | Uppercase, small, structural |
+| Headings / UI | PP Watch — **Bold (700)** and **Medium (500)** | Uppercase, small, structural. See the weight split below. |
 | Body text | Sentient Regular | **Never italic.** Always `font-style: normal` |
 
-Font files are in `/fonts/`. All three are loaded via `@font-face` in `styles.css`.
+**PP Watch weight split (`--font-heading`).** PP Watch is loaded at two weights via `@font-face`: **Bold 700** and **Medium 500**. The split is expressed purely through `font-weight` — there is no separate CSS variable.
+- **Bold (700) = structural labels:** the default. Nav links, footer labels, buttons, page/section headings, FAQ/schedule headers, form labels, etc. Every `var(--font-heading)` rule that must stay Bold carries an explicit `font-weight: 700` (because once Medium is loaded, an unspecified weight resolves to ~500 and would silently lighten — so the explicit pin prevents regressions).
+- **Medium (500) = small supporting caps:** the quieter detail set only. Currently `.schedule-event-detail` (shared with schedule.html) and the RSVP reference/decision classes `.weekend-event-when`, `.weekend-event-dress`, `.weekend-event-note`, `.rsvp-choice-label`.
+- When adding a new `--font-heading` element, default to `font-weight: 700` unless it's intentionally part of the supporting-caps set.
+
+Font files are in `/fonts/` (`PPWatch-Bold` + `PPWatch-Medium`). All faces are loaded via `@font-face` in `styles.css`. If `PPWatch-Medium` is ever missing, 500 falls back to the Bold face — nothing breaks, the split just doesn't render until the file is present.
 
 Apply `-webkit-font-smoothing: antialiased` and `text-rendering: optimizeLegibility` to `body`.
 
@@ -244,6 +249,15 @@ Two button styles exist, both using a **letterpress/deboss interaction model** �
 - Dark mode overrides in `body.dark-mode` adjust opacities
 
 **Interaction model:** rest (subtle impression) → hover (deeper, darker) → active (deepest, darkest, 0.5px down). Button never lifts off page. No gradient sweep. No outer shadow.
+
+### Form Radios (RSVP)
+
+Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-styles.css`) are **custom hairline controls**, not native — `appearance: none` with an 18px circular ring and a `::before` center dot. They follow the site's hairline/no-glow-at-rest language:
+- **Rest:** hairline ring `rgba(26,58,46,0.45)` (cream `rgba(241,237,234,0.45)` in dark mode), no fill, no glow.
+- **Hover:** ring darkens to `…0.8`.
+- **Checked:** ring goes full green (cream in dark), and the center dot fills via `transform: scale(0→1)`.
+- **Focus-visible:** 2px green (cream in dark) outline, echoing input focus.
+- Transitions are fast (**120ms**) — interaction feedback, not the 400ms grain/theme-swap timing.
 
 ### Footer
 

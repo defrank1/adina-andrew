@@ -2,12 +2,14 @@
    RSVP form — front-end logic (rsvp-internal.html)
    ---------------------------------------------------------------------------
    Lookup is by EMAIL. An invitation (one email) covers one or two named people.
-   After lookup, the form builds a block PER PERSON. Within each person's block,
-   every event they're invited to shows schedule-style details (date/time/
-   location/dress/description — matching schedule.html) followed by an
-   accept/decline. The Saturday Wedding Afterparty is INFO ONLY (no RSVP) and
-   appears right after the Saturday wedding. A meal choice (always shown) closes
-   each person's block.
+   After lookup the form renders in two parts:
+
+     Part A — "The Weekend" reference block (ONCE): each invited event's full
+              logistics (when / name / where / dress / description). The Saturday
+              afterparty appears here as info only (no RSVP). No radios.
+     Part B — per-person compact decision rows: one row per invited RSVP event
+              (event name + accept/decline) and a meal-choice row. Logistics are
+              NOT reprinted per person.
 
    Two seams isolate the backend so this works front-end-only today and flips to
    the live private backend later with no structural change:
@@ -26,7 +28,6 @@
     var MIN_QUERY = 3;
     var DEBOUNCE_MS = 180;
 
-    // Full schedule-style detail for each RSVP event. Keep in sync with schedule.html.
     var EVENT_DETAILS = {
         friday: {
             name: 'Welcome Party',
@@ -34,8 +35,7 @@
             venue: 'Sonoma Restaurant & Wine Bar',
             address: '223 Pennsylvania Avenue SE',
             mapUrl: 'https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC',
-            dress: 'Semi-Formal (sport coats and trousers, or dresses, jumpsuits, and blouses)',
-            dressNote: '',
+            dress: 'Semi-Formal',
             description: "Please join us to kick off the weekend! We're hosting a welcome party at a wine bar on Capitol Hill. There will be drinks and light bites, but please make dinner plans beforehand."
         },
         saturday: {
@@ -45,7 +45,6 @@
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Black Tie Preferred',
-            dressNote: '',
             description: 'Please arrive early, as the ceremony will begin promptly at 5:30 PM.'
         },
         sunday: {
@@ -55,12 +54,11 @@
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Come as you are',
-            dressNote: '',
             description: "Please join us for breakfast before you leave town. We'll be at the hotel restaurant on the first floor."
         }
     };
 
-    // Info-only block shown after the Saturday wedding (no accept/decline).
+    // Info-only block shown after the Saturday wedding (no accept/decline, no dress tag).
     var AFTERPARTY_DETAILS = {
         name: 'Wedding Afterparty',
         when: 'Saturday, October 17th · 11:00 PM – 1:00 AM',
@@ -102,95 +100,77 @@
         return Promise.resolve();
     }
 
-    // ---- small DOM helpers -------------------------------------------------
+    // ---- Part A: "The Weekend" reference block -----------------------------
 
-    function detailLine(text) {
-        var p = document.createElement('p');
-        p.className = 'schedule-event-detail';
-        p.textContent = text;
-        return p;
-    }
+    function makeReferenceEvent(detail, isInfo) {
+        var ev = document.createElement('div');
+        ev.className = 'weekend-event';
 
-    function venueLine(venue, address, mapUrl) {
-        var p = document.createElement('p');
-        p.className = 'schedule-event-detail';
-        p.appendChild(document.createTextNode(venue));
-        p.appendChild(document.createElement('br'));
+        var when = document.createElement('p');
+        when.className = 'weekend-event-when';
+        when.textContent = detail.when;
+        ev.appendChild(when);
+
+        var name = document.createElement('h3');
+        name.className = 'weekend-event-name';
+        name.textContent = detail.name;
+        ev.appendChild(name);
+
+        var where = document.createElement('p');
+        where.className = 'weekend-event-where';
+        where.appendChild(document.createTextNode(detail.venue));
+        where.appendChild(document.createElement('br'));
         var a = document.createElement('a');
         a.className = 'schedule-link';
-        a.href = mapUrl;
+        a.href = detail.mapUrl;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
-        a.textContent = address;
-        p.appendChild(a);
-        return p;
+        a.textContent = detail.address;
+        where.appendChild(a);
+        ev.appendChild(where);
+
+        if (!isInfo && detail.dress) {
+            var dress = document.createElement('span');
+            dress.className = 'weekend-event-dress';
+            dress.textContent = detail.dress;
+            ev.appendChild(dress);
+        }
+
+        if (detail.description) {
+            var desc = document.createElement('p');
+            desc.className = 'schedule-event-description';
+            desc.textContent = detail.description;
+            ev.appendChild(desc);
+        }
+
+        if (isInfo) {
+            var note = document.createElement('p');
+            note.className = 'weekend-event-note';
+            note.textContent = 'Everyone is welcome — no RSVP needed';
+            ev.appendChild(note);
+        }
+
+        return ev;
     }
 
-    function descriptionLine(text) {
-        var p = document.createElement('p');
-        p.className = 'schedule-event-description';
-        p.textContent = text;
-        return p;
-    }
+    // ---- Part B: compact decision rows -------------------------------------
 
-    // The shared schedule-style detail header for an event (name + when + venue).
-    function appendEventDetails(group, detail) {
-        var name = document.createElement('h3');
-        name.className = 'schedule-event-name';
-        name.textContent = detail.name;
-        group.appendChild(name);
+    function makeChoiceRow(labelText, name, choices) {
+        var row = document.createElement('div');
+        row.className = 'rsvp-choice-row';
 
-        group.appendChild(detailLine(detail.when));
-        group.appendChild(venueLine(detail.venue, detail.address, detail.mapUrl));
-        if (detail.dress) { group.appendChild(detailLine(detail.dress)); }
-        if (detail.dressNote) { group.appendChild(descriptionLine(detail.dressNote)); }
-        if (detail.description) { group.appendChild(descriptionLine(detail.description)); }
-    }
-
-    // An RSVP event: schedule details + accept/decline radios.
-    function makeEventBlock(detail, radioName) {
-        var group = document.createElement('div');
-        group.className = 'event-group';
-        appendEventDetails(group, detail);
-
-        var radios = document.createElement('div');
-        radios.className = 'radio-group';
-        [{ value: 'yes', label: 'Joyfully accepts' }, { value: 'no', label: 'Regretfully declines' }]
-            .forEach(function (choice) {
-                radios.appendChild(radioLabel(radioName, choice.value, choice.label));
-            });
-        group.appendChild(radios);
-        return group;
-    }
-
-    // The info-only afterparty: schedule details + a "no RSVP needed" note.
-    function makeInfoBlock(detail) {
-        var group = document.createElement('div');
-        group.className = 'event-group event-info';
-        appendEventDetails(group, detail);
-        var note = detailLine('Everyone is welcome — no RSVP needed');
-        note.classList.add('event-info-note');
-        group.appendChild(note);
-        return group;
-    }
-
-    // A labelled radio group (used for the meal choice).
-    function makeChoiceGroup(labelText, name, choices, extraClass) {
-        var group = document.createElement('div');
-        group.className = 'event-group' + (extraClass ? ' ' + extraClass : '');
-
-        var label = document.createElement('p');
-        label.className = 'event-label';
+        var label = document.createElement('span');
+        label.className = 'rsvp-choice-label';
         label.textContent = labelText;
-        group.appendChild(label);
+        row.appendChild(label);
 
-        var radios = document.createElement('div');
-        radios.className = 'radio-group';
+        var options = document.createElement('div');
+        options.className = 'rsvp-choice-options';
         choices.forEach(function (choice) {
-            radios.appendChild(radioLabel(name, choice.value, choice.label));
+            options.appendChild(radioLabel(name, choice.value, choice.label));
         });
-        group.appendChild(radios);
-        return group;
+        row.appendChild(options);
+        return row;
     }
 
     function radioLabel(name, value, labelText) {
@@ -215,6 +195,7 @@
         var emailSearchInput = document.getElementById('emailSearch');
         var emailSuggestions = document.getElementById('emailSuggestions');
         var mainForm = document.getElementById('mainForm');
+        var weekendContainer = document.getElementById('weekendContainer');
         var peopleContainer = document.getElementById('peopleContainer');
         var confirmationMessage = document.getElementById('confirmationMessage');
 
@@ -262,12 +243,14 @@
             selectedInvitation = inv;
             emailSearchInput.value = inv.email;
             hideSuggestions();
+            buildWeekend(inv);
             buildPeople(inv);
             mainForm.style.display = 'block';
         }
 
         function clearSelection() {
             selectedInvitation = null;
+            weekendContainer.innerHTML = '';
             peopleContainer.innerHTML = '';
             mainForm.style.display = 'none';
         }
@@ -278,7 +261,28 @@
             }
         });
 
-        // ====== PER-PERSON BLOCKS ======
+        // ====== PART A: reference block (once) ======
+
+        function buildWeekend(inv) {
+            weekendContainer.innerHTML = '';
+            var invited = inv.invitedTo || [];
+
+            var eyebrow = document.createElement('p');
+            eyebrow.className = 'weekend-eyebrow';
+            eyebrow.textContent = 'The Weekend';
+            weekendContainer.appendChild(eyebrow);
+
+            EVENT_ORDER.forEach(function (key) {
+                if (invited.indexOf(key) === -1) { return; }
+                weekendContainer.appendChild(makeReferenceEvent(EVENT_DETAILS[key], false));
+                // The afterparty follows the Saturday wedding (info only).
+                if (key === 'saturday') {
+                    weekendContainer.appendChild(makeReferenceEvent(AFTERPARTY_DETAILS, true));
+                }
+            });
+        }
+
+        // ====== PART B: per-person decision rows ======
 
         function buildPeople(inv) {
             peopleContainer.innerHTML = '';
@@ -295,17 +299,21 @@
 
                 EVENT_ORDER.forEach(function (key) {
                     if (invited.indexOf(key) === -1) { return; }
-                    block.appendChild(makeEventBlock(EVENT_DETAILS[key], 'p' + idx + '_' + key));
-                    // The afterparty follows the Saturday wedding (info only).
-                    if (key === 'saturday') { block.appendChild(makeInfoBlock(AFTERPARTY_DETAILS)); }
+                    block.appendChild(makeChoiceRow(
+                        EVENT_DETAILS[key].name,
+                        'p' + idx + '_' + key,
+                        [{ value: 'yes', label: 'Joyfully accepts' }, { value: 'no', label: 'Regretfully declines' }]
+                    ));
                 });
 
-                block.appendChild(makeChoiceGroup(
-                    'Meal choice',
-                    'p' + idx + '_meal',
-                    MEAL_OPTIONS.map(function (m) { return { value: m.key, label: m.label }; }),
-                    'meal-group'
-                ));
+                // Meal = the Saturday reception dinner; only shown to Saturday invitees.
+                if (invited.indexOf('saturday') !== -1) {
+                    block.appendChild(makeChoiceRow(
+                        'Meal choice',
+                        'p' + idx + '_meal',
+                        MEAL_OPTIONS.map(function (m) { return { value: m.key, label: m.label }; })
+                    ));
+                }
 
                 peopleContainer.appendChild(block);
             });
