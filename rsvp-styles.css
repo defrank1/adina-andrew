@@ -166,7 +166,7 @@
 
 .weekend-event-name {
     font-family: var(--font-title);
-    font-size: 2.1rem;
+    font-size: 2.5rem;
     line-height: 1.15;
     margin-bottom: 0.45rem;
 }
@@ -471,7 +471,7 @@ body.dark-mode .confirmation-message {
     }
 
     .weekend-event-name {
-        font-size: 1.7rem;
+        font-size: 2rem;
     }
 
     /* Stack each decision row so the radios don't crush against the label */

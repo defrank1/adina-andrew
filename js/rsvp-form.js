@@ -25,7 +25,6 @@
     'use strict';
 
     // ---- CONFIG ------------------------------------------------------------
-    var MIN_QUERY = 3;
     var DEBOUNCE_MS = 180;
 
     var EVENT_DETAILS = {
@@ -208,7 +207,10 @@
             var term = this.value.trim();
             if (selectedInvitation && term !== selectedInvitation.email) { clearSelection(); }
             if (debounceTimer) { clearTimeout(debounceTimer); }
-            if (term.length < MIN_QUERY) { hideSuggestions(); return; }
+            // Only surface matches once the guest has typed past the "@" — keeps the
+            // list private (you can't fish for other people's emails from a few letters).
+            var at = term.indexOf('@');
+            if (at === -1 || term.length <= at + 1) { hideSuggestions(); return; }
             debounceTimer = setTimeout(function () {
                 searchInvitations(term).then(displaySuggestions);
             }, DEBOUNCE_MS);
