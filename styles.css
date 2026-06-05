@@ -65,6 +65,14 @@
 }
 
 @font-face {
+    font-family: 'PP Watch';
+    src: url('fonts/PPWatch-Extralight.woff2') format('woff2'),
+        url('fonts/PPWatch-Extralight.woff') format('woff');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
     font-family: 'Sentient';
     src: url('fonts/Sentient-Regular.woff2') format('woff2'),
         url('fonts/Sentient-Regular.woff') format('woff');
