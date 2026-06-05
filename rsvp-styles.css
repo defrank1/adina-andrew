@@ -166,6 +166,11 @@
 
 .weekend-event-name {
     font-family: var(--font-title);
+    /* h3 defaults to bold; PP Playground has only a 500 face, so 700 would
+       synthesize faux-bold. Pin 400 (like .registry-title) to render true Medium,
+       then add a hair of stroke for a touch more body (a "middle" weight). */
+    font-weight: 400;
+    -webkit-text-stroke: 0.35px currentColor;
     font-size: 2.8rem;
     line-height: 1.15;
     margin-bottom: 0.45rem;
@@ -223,6 +228,8 @@
 }
 
 .person-name {
+    font-weight: 400;
+    -webkit-text-stroke: 0.35px currentColor;
     font-size: 2.5rem;
     line-height: 1.1;
     text-align: left;
