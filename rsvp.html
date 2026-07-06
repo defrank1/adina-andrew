@@ -34,13 +34,17 @@
     <!-- Protected Content -->
     <div id="protected-content">
 
-        <main class="registry-page">
-            <section class="registry-section">
-                <div class="content-wrapper">
-                    <h1 class="registry-title">Coming Soon!</h1>
-                </div>
-            </section>
-        </main>
+        <!-- Invitation end-state: the static page the Metro intro hard-cuts to. It matches
+             the animation's final frame (centered invitation card on a 16:9 field, green
+             matte on the letterbox). Hidden until rive-intro.js reveals it at the cut so it
+             doesn't flash before the animation plays. This is the "invitation state" the
+             sequenced RSVP form will grow out of next. -->
+        <div id="invitation-endstate" class="invitation-endstate pre-reveal">
+            <div class="invitation-field">
+                <img class="invitation-card" src="images/invitation/invitation.svg"
+                    alt="Adina Beth and Andrew Spencer — wedding invitation" />
+            </div>
+        </div>
 
         <div id="footer-placeholder"></div>
 

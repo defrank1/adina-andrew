@@ -824,29 +824,72 @@ body.page-home .registry-section {
     margin-bottom: 0;
 }
 
-/* RSVP "Coming Soon" — single line vertically + horizontally centered */
-body.page-rsvp #protected-content.unlocked {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+/* Matte-green base so the brief gap between unlock and the first tunnel frame reads
+   as green (like the tunnel opening), never a cream flash. The texture tile is opaque,
+   so background-image must be cleared for the color to show. */
+body.page-rsvp {
+    background-image: none;
+    background-color: #183a2c;
 }
 
-body.page-rsvp .registry-page {
-    padding-top: 120px;
-    flex: 1;
+/* RSVP invitation end-state — the static page the Metro intro hard-cuts to.
+   Reproduces the animation's final frame: a 16:9 field (Fit.Contain of the Rive
+   artboard) holding the centered invitation card, with the tunnel-green matte
+   filling the letterbox on tall/wide/mobile viewports. Managed by js/rive-intro.js,
+   which reveals #invitation-endstate at the hard cut (see .pre-reveal below). */
+body.page-rsvp .invitation-endstate {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    /* Same matte green as #rive-container so the hard cut is seamless in the letterbox. */
+    background-color: #183a2c;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
-body.page-rsvp .registry-section {
-    flex: 1;
+/* Hidden until the intro tears down (hard cut / skip / bail); prevents the
+   invitation from flashing before the tunnel animation plays. */
+body.page-rsvp .invitation-endstate.pre-reveal {
+    display: none;
+}
+
+/* 16:9 field = the Rive artboard, contained + centered in the viewport. On a
+   portrait/mobile viewport this is width-limited (green bars top+bottom); on an
+   ultra-wide viewport it is height-limited (green bars left+right). */
+body.page-rsvp .invitation-field {
+    position: relative;
+    width: min(100vw, calc(100vh * 16 / 9));
+    aspect-ratio: 16 / 9;
+    /* Warm light field around the card, sampled from the .riv end frame (#DFDEDA). */
+    background-color: #dfdeda;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-body.page-rsvp .registry-title {
-    margin-bottom: 0;
+/* The invitation card (self-contained SVG: cream fill + green border + text).
+   Sized so its border spans ~90% of the field height, matching the end frame; the
+   card sits slightly high (more room below), as in the animation. */
+body.page-rsvp .invitation-card {
+    /* Height-matched to the Rive end frame (border ≈ 90.6% of the field height),
+       sitting slightly high (top ≈ 1.3%, more room below). The provided SVG is a hair
+       more slender than the baked card, so widths differ by ~11% — matching height keeps
+       the text rows vertically aligned, which is the least-jarring compromise at the cut. */
+    height: 95%;
+    width: auto;
+    max-width: 96%;
+    display: block;
+    transform: translateY(-3.5%);
+}
+
+/* The invitation end-state stands alone (no site chrome) so it matches the
+   animation's final frame exactly at the cut. The sequenced RSVP form (next step)
+   will reintroduce navigation as needed. */
+body.page-rsvp .main-nav,
+body.page-rsvp .site-footer {
+    display: none;
 }
 
 /* RSVP internal staging page — standard content-page top padding to clear the fixed nav */
@@ -865,10 +908,13 @@ body.page-rsvp-internal .registry-page {
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background-color: var(--color-dark-green);
-    /* #1a3a2e — matches the Rive tunnel scene so there's no seam before first frame */
+    background-color: #183a2c;
+    /* Tunnel matte green (sampled from the .riv). The animation uses Fit.Contain, so on
+       any viewport that isn't 16:9 this fill shows as the letterbox bars (top/bottom on
+       tall/mobile viewports, sides on wide ones) — matching the tunnel scene's own
+       background. It is the SAME green as .invitation-endstate below, so the hard cut to
+       the static invitation is seamless across the letterbox too. */
     opacity: 1;
-    transition: opacity 0.8s ease;
     pointer-events: auto;
 }
 
@@ -1456,8 +1502,10 @@ body.dark-mode .story-prose {
 
 .story-carousel-track {
     display: flex;
+    gap: 8px;                               /* space between photos — tunable */
+    height: var(--story-carousel-h, 360px); /* uniform photo height — tunable */
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;          /* was mandatory — gentler for a strip */
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1478,14 +1526,13 @@ body.dark-mode .story-carousel-track:focus-visible {
 }
 
 .story-carousel-slide {
-    flex: 0 0 100%;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
+    flex: 0 0 auto;              /* width follows the photo, not the track */
+    scroll-snap-align: start;
 }
 
 .story-carousel-slide img {
-    width: 100%;
-    height: auto;
+    height: 100%;
+    width: auto;
     display: block;
     border-radius: 4px;
 }
@@ -2065,6 +2112,10 @@ body.dark-mode .travel-link:hover {
     /* Carousel arrows overlay inside the photo on mobile */
     .story-carousel {
         max-width: 100%;
+    }
+
+    .story-carousel-track {
+        --story-carousel-h: 260px;          /* smaller uniform height on phones — tunable */
     }
 
     .story-carousel-arrow {

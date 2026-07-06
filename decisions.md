@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: June 4, 2026
+Last updated: July 6, 2026
 
 ---
 
@@ -193,7 +193,33 @@ Rive was chosen because the sequence requires state machine logic (idle → trai
 
 **SVG export rules for Rive:** Outline all strokes before export, use Presentation Attributes styling (not CSS `<style>` blocks), decimal precision 2, release unnecessary clipping masks, use descriptive group/layer names (these become `id` attributes that map to Rive objects).
 
-**Status:** Assets separated and export prep underway. Rive implementation not yet started.
+### Decision: Owned RAF loop scrubbing a linear timeline, not autoplay + a state-machine `complete` event (July 6, 2026)
+
+The finished export (`metro-intro.riv`, ~1.2 MB, invitation PNG baked in) turned out to be a **single linear timeline**, not the interactive state machine originally envisioned. The first integration in `js/rive-intro.js` used `autoplay: true` and listened for a state-machine `complete` state to trigger the fade/handoff — the wrong model for this file: under autoplay a linear timeline **loops**, and there is no state machine, so `complete` would never fire. The intro would have looped forever and never handed off.
+
+**Final playback model:** `initRive()` loads with `autoplay: false` and `animations: ANIMATION_NAME` (the linear timeline), and `js/rive-intro.js` owns its own `requestAnimationFrame` loop (`tick`). Each frame accumulates `elapsed` from **RAF timestamp deltas** (not wall-clock — so a backgrounded tab pauses the intro instead of jumping on return), quantizes to a stepped cadence `STEP_HZ = 15` via `Math.floor(elapsed * STEP_HZ) / STEP_HZ`, and calls `riveInstance.scrub(ANIMATION_NAME, clamped)`. **Completion is time-based:** when `clamped` reaches `DURATION_S = 22.14` (the card fully expanded), `completeIntro()` runs the fade + reveal. The `SAFETY_MS` timer (26 s) is now only a backstop. The RAF loop is cancelled in every teardown path (`fadeOutAndRemove`, `removeNow`) so it can't scrub a torn-down instance, and `cleanupRive()` is deferred until **after** the 800 ms fade so the final cream frame stays painted during the cream-on-cream handoff (no one-frame flash).
+
+**15fps stepped cadence** was chosen by Andrew after A/B-ing step rates in a throwaway harness (`rive-quantize-test.html`) — stop-motion "on 4s" (of a 60 Hz base) reads as intentional hand-drawn craft rather than sterile smoothness. It's a named constant (`STEP_HZ`); set `0` for smooth.
+
+**Runtime pinned:** `@rive-app/canvas@2.38.3` (was `@latest`, which can silently pull a breaking runtime).
+
+**Asset naming caveat:** the committed timeline is named **`Timeline 1`** (verified via `animationNames` / `contents.artboards[0].animations`), even though task notes referred to it as "Timeline 19." `scrub()` needs the exact name, so `ANIMATION_NAME = 'Timeline 1'`; if a future export renames the timeline, that one constant is the only change.
+
+**Status:** Implemented and verified on `rsvp.html` — loads, plays stepped, hands off at 22.14 s, Skip and once-per-session gating both work, no console errors. (The original 800 ms cross-fade in this entry was superseded by the hard-cut model below.)
+
+### Decision: Contain + green matte, and a hard cut to a static invitation end-state (July 6, 2026)
+
+Two changes to how the intro fills the screen and how it hands off.
+
+**Fit.Contain + tunnel-green matte (was Fit.Cover).** The Rive artboard is **1920×1080 (16:9)** with the invitation card centered inside it. `Cover` cropped the scene on non-16:9 viewports; `Contain` never crops — the full scene/invitation always fits, and `#rive-container`'s background (`#183a2c`, the tunnel green sampled from the .riv) shows as the letterbox: **top/bottom bars on tall/mobile viewports, left/right bars on wide ones.** The matte matches the tunnel's own background, so the letterbox is invisible during playback.
+
+**Hard cut to a static invitation (was an 800 ms fade to "Coming Soon").** `rsvp.html`'s protected content is now `#invitation-endstate` — a static reproduction of the animation's final frame: the green matte, a 16:9 field (`#dfdeda`) that is the artboard contained + centered, and the invitation card (`images/invitation/invitation.svg`) centered in it. On completion the intro sits on the final frame for `END_HOLD_MS` (500 ms), then `removeNow()` reveals the (already-rendered) static invitation sitting beneath the canvas and removes the canvas instantly — **no fade.** Because the static layer shares the same matte and reproduces the final frame, the swap is (near-)invisible. `#invitation-endstate` starts `.pre-reveal` (display:none) so it doesn't flash before the animation; every teardown path (complete, Skip, reduced-motion/return-visit bail) reveals it. `body.page-rsvp` is matte-green so the brief unlock→first-frame gap never flashes cream. Nav + footer are hidden on this page so the end-state matches the animation's chrome-less final frame; the sequenced RSVP form (next step) grows from this "invitation state."
+
+**The invitation SVG.** Its card rect was transparent (`fill-opacity:0`); enabling the baked-in cream fill makes it a self-contained card (cream + border + text). An inner border rect was added to match the baked frame's **double** border (gap measured from the end frame at ~2% of card width). **Known residual diffs** (the provided SVG isn't pixel-identical to the baked frame, so the cut isn't perfectly invisible): the SVG is ~11% more slender than the baked card (aspect 0.71 vs 0.80 — matched on height, so text rows align but card edges are slightly inset), and the baked field carries faint tunnel "ghost" line-art that the clean static field omits. A truly pixel-perfect cut would need an SVG matching the baked frame exactly, or extracting the final frame as a raster.
+
+**Mobile note:** containing a 16:9 landscape scene into a portrait phone leaves the invitation small between large green bars. That is faithful to the animation's framing but may warrant a mobile-specific treatment when the form is built.
+
+**Status:** Implemented and verified — Contain letterboxes green on tall/wide/mobile viewports, matte blends with the tunnel, animation → 500 ms hold → hard cut → static invitation, Skip and return-visit bail both land on the invitation, no console errors. Files changed: `js/rive-intro.js`, `styles.css`, `rsvp.html`, `images/invitation/invitation.svg` (new).
 
 ---
 
