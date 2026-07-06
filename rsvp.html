@@ -59,6 +59,14 @@
     <!-- Skip button — shown during the animation, hidden otherwise -->
     <button id="skip-intro" class="hidden" aria-label="Skip intro animation">Skip</button>
 
+    <!-- Replay icon — fades in with the settle (body.intro-complete). Clears the
+         once-per-session gate and reloads, re-entering the single playback pipeline.
+         Image is a placeholder (DC flag) using the standard light/dark swap. -->
+    <button id="replay-intro" class="replay-intro" aria-label="Replay intro animation">
+        <img src="images/illustrations/flag-light.png" data-light="images/illustrations/flag-light.png"
+            data-dark="images/illustrations/flag-dark.png" alt="">
+    </button>
+
     <script>
         // Apply dark mode immediately to prevent flash
         if (localStorage.getItem('darkMode') === 'enabled') {

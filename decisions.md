@@ -221,6 +221,18 @@ Two changes to how the intro fills the screen and how it hands off.
 
 **Status:** Implemented and verified — Contain letterboxes green on tall/wide/mobile viewports, matte blends with the tunnel, animation → 500 ms hold → hard cut → static invitation, Skip and return-visit bail both land on the invitation, no console errors. Files changed: `js/rive-intro.js`, `styles.css`, `rsvp.html`, `images/invitation/invitation.svg` (new).
 
+### Decision: Two-stage landing — matched cut, then a settle into the brand page (July 6, 2026)
+
+The hard cut alone left `rsvp.html` stranded in the animation's flat, chrome-less end frame. It now lands in **two stages**: **Stage 1** (unchanged) — the hard cut reveals `#invitation-endstate` in its Rive-matched state (green matte `#183a2c`, flat `#dfdeda` 16:9 field, no chrome). **Stage 2** — after `SETTLE_DELAY_MS` (150 ms), JS adds `intro-complete` to `<body>`; CSS transitions (all keyed to `var(--settle-ms)`, set from `SETTLE_MS = 450` in `js/rive-intro.js`, so the JS constants stay the single source of truth) convert that frame into a normal site page: the matte and field fade to transparent revealing the standard textured cream beneath (green stays only via `body.page-rsvp:not(.intro-complete)`, so once settled the **global** body rules — including dark mode — take over untouched), the endstate layer drops to `z-index: 1` so nav/footer float over it like on any page, nav + footer fade from `opacity: 0` (present-but-hidden during the intro, `pointer-events: none` until visible — no more `display: none`), and the card gains the `.registry-illustration` emboss drop-shadow pair (dark variant included; the card fill stays cream in dark mode — it reads as a physical card on the dark surface). The footer pins to the viewport bottom via `min-height: 100vh` on `#protected-content.unlocked` + `margin-top: auto` on the placeholder.
+
+**Grain is intentionally NOT in the .riv** — the animation stays flat; the paper texture arrives with the settle, as the moment the animation "becomes" the site.
+
+**Bail paths land settled instantly.** Return visit (`intro-seen`), reduced-motion, and missing-asset all call `settleInstant()`: `--settle-ms` is zeroed and `intro-complete` added immediately — the page appears as a normal brand page with no green flash and no transition. Skip = the same hard cut + the same settle as natural completion.
+
+**Replay icon.** Fixed bottom-left button (44px, icon-only, `aria-label`), placeholder DC-flag asset with the standard `data-light`/`data-dark` swap (picked up by `site-init.js`'s generic `[data-light][data-dark]` selector — no extension needed). Rest opacity 0.7, full on hover/focus; hidden until `intro-complete`; `z-index: 1600` (above content, below the Rive canvas at 2000). **One playback pipeline:** clicking clears `sessionStorage['intro-seen']` and reloads — no second in-place replay path. Hidden entirely under `prefers-reduced-motion: reduce` (their setting says no animation, and the bail path would no-op it anyway).
+
+**Status:** Verified — fresh play → cut → settle (450 ms) with nav/footer/replay fading in; return visit lands settled instantly (`--settle-ms: 0ms`); Skip = cut + settle; dark-mode toggle on the settled page swaps surface/tile/card-shadow/replay-icon correctly; replay click replays the full pipeline; nav menu opens (6 links). No `background-blend-mode` anywhere; `.riv` and the playback core untouched.
+
 ---
 
 ## Monogram

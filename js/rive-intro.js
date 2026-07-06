@@ -29,6 +29,8 @@
     var DURATION_S = 22.14;     // handoff moment (card fully expanded), in seconds
     var STEP_HZ = 15;           // stepped cadence; set 0 for smooth playback
     var END_HOLD_MS = 500;      // sit on the final frame this long, then HARD-CUT (no fade)
+    var SETTLE_DELAY_MS = 150;  // pause on the matched frame before settling
+    var SETTLE_MS = 450;        // settle transition length (0 = instant brand page)
     var SAFETY_MS = 26000;      // backstop only — DURATION_S plus margin
 
     var container = document.getElementById('rive-container');
@@ -38,10 +40,16 @@
     // (same matte + final frame) and is revealed at teardown so the swap is invisible.
     var endState = document.getElementById('invitation-endstate');
 
-    // Nothing to do if the markup isn't present. Still reveal the invitation so the
-    // page is usable even if the animation layer is absent.
+    // SETTLE_MS is the single source of truth for the settle length — the CSS
+    // transitions read it via var(--settle-ms). Bail paths zero it (settleInstant)
+    // so return visits land on the brand page with no transition.
+    document.body.style.setProperty('--settle-ms', SETTLE_MS + 'ms');
+
+    // Nothing to do if the markup isn't present. Still land on the settled brand
+    // page so it's usable even if the animation layer is absent.
     if (!container || !canvas) {
         if (endState) { endState.classList.remove('pre-reveal'); }
+        settleInstant();
         return;
     }
 
@@ -94,21 +102,40 @@
         try { sessionStorage.setItem('intro-seen', 'true'); } catch (e) { /* private mode */ }
     }
 
+    // ---- stage 2: the settle ------------------------------------------------
+    // The hard cut lands on the Rive-matched flat state (stage 1). Shortly after,
+    // `intro-complete` on <body> transitions the page into the normal brand page —
+    // textured cream, nav/footer/replay fade in, card gains the illustration emboss.
+    // All animation is CSS, driven by the class; JS only schedules it.
+
+    function settle() {
+        setTimeout(function () {
+            document.body.classList.add('intro-complete');
+        }, SETTLE_DELAY_MS);
+    }
+
+    // settleInstant — bail paths (return visit, reduced motion, missing asset) must
+    // land directly on the brand page: zero the transition length, then settle.
+    function settleInstant() {
+        document.body.style.setProperty('--settle-ms', '0ms');
+        document.body.classList.add('intro-complete');
+    }
+
     // completeIntro — animation reached its end naturally. Sit on the final frame for
-    // END_HOLD_MS, then hard-cut to the static invitation.
+    // END_HOLD_MS, hard-cut to the static invitation, then settle.
     function completeIntro() {
         if (finished) { return; }
         markSeen();
-        setTimeout(removeNow, END_HOLD_MS);
+        setTimeout(function () { removeNow(); settle(); }, END_HOLD_MS);
     }
 
     // skipIntro — user pressed Skip, or Rive errored after the canvas was shown.
-    // Hard-cut immediately (no hold).
-    function skipIntro() { markSeen(); removeNow(); }
+    // Hard-cut immediately (no hold), then the same settle.
+    function skipIntro() { markSeen(); removeNow(); settle(); }
 
     // bailSilently — never showed the canvas (reduced motion, return visit, missing
-    // asset); reveal the invitation immediately with no animation.
-    function bailSilently() { markSeen(); removeNow(); }
+    // asset); land on the settled brand page immediately, no green, no transition.
+    function bailSilently() { markSeen(); removeNow(); settleInstant(); }
 
     // ---- canvas sizing -----------------------------------------------------
 
@@ -244,6 +271,17 @@
 
     // Skip button (keyboard-focusable <button>; Enter/Space fire click natively).
     if (skipBtn) { skipBtn.addEventListener('click', skipIntro); }
+
+    // Replay icon — clear the once-per-session gate and reload. One playback
+    // pipeline: the reloaded page runs the normal fresh-visit flow (intro -> cut ->
+    // settle). Hidden under prefers-reduced-motion via CSS.
+    var replayBtn = document.getElementById('replay-intro');
+    if (replayBtn) {
+        replayBtn.addEventListener('click', function () {
+            try { sessionStorage.removeItem('intro-seen'); } catch (e) { /* private mode */ }
+            location.reload();
+        });
+    }
 
     // Option A: start only after the password overlay has been cleared. The inline
     // password script adds `.unlocked` to #protected-content on success (or on load

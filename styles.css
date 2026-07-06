@@ -824,10 +824,21 @@ body.page-home .registry-section {
     margin-bottom: 0;
 }
 
-/* Matte-green base so the brief gap between unlock and the first tunnel frame reads
-   as green (like the tunnel opening), never a cream flash. The texture tile is opaque,
-   so background-image must be cleared for the color to show. */
-body.page-rsvp {
+/* ===========================
+   RSVP two-stage landing (rsvp.html)
+   Stage 1 (hard cut): #invitation-endstate in its Rive-matched state — green matte,
+   flat #dfdeda 16:9 field, no chrome. Stage 2 (settle): js/rive-intro.js adds
+   `intro-complete` to <body> shortly after the cut; the rules below transition the
+   page into a normal brand page over var(--settle-ms) (set from SETTLE_MS in JS;
+   bail paths set it to 0ms so return visits land settled instantly).
+   =========================== */
+
+/* Matte-green base until the settle, so the unlock -> first-frame gap and the cut
+   both read as tunnel green, never a cream flash. The texture tile is opaque, so
+   background-image must be cleared for the color to show. Once .intro-complete is
+   present this rule stops matching and the GLOBAL body rules take over — standard
+   textured cream, and dark mode via the existing body.dark-mode mechanism. */
+body.page-rsvp:not(.intro-complete) {
     background-image: none;
     background-color: #183a2c;
 }
@@ -847,6 +858,18 @@ body.page-rsvp .invitation-endstate {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    /* Nothing inside is interactive — let clicks reach the nav/footer/replay beneath. */
+    pointer-events: none;
+    transition: background-color var(--settle-ms, 450ms) ease;
+}
+
+/* Settle: the matte fades out, revealing the textured brand page beneath (the
+   texture arrives here — it is intentionally NOT in the .riv). The layer drops
+   below the nav/footer (z 1000+) so the chrome floats over the card like on any
+   other page. Explicit rgba (not `transparent`) so the fade keeps the green hue. */
+body.page-rsvp.intro-complete .invitation-endstate {
+    background-color: rgba(24, 58, 44, 0);
+    z-index: 1;
 }
 
 /* Hidden until the intro tears down (hard cut / skip / bail); prevents the
@@ -867,6 +890,12 @@ body.page-rsvp .invitation-field {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color var(--settle-ms, 450ms) ease;
+}
+
+/* Settle: the flat field dissolves so the card sits directly on the page texture. */
+body.page-rsvp.intro-complete .invitation-field {
+    background-color: rgba(223, 222, 218, 0);
 }
 
 /* The invitation card (self-contained SVG: cream fill + green border + text).
@@ -882,14 +911,88 @@ body.page-rsvp .invitation-card {
     max-width: 96%;
     display: block;
     transform: translateY(-3.5%);
+    transition: filter var(--settle-ms, 450ms) ease;
 }
 
-/* The invitation end-state stands alone (no site chrome) so it matches the
-   animation's final frame exactly at the cut. The sequenced RSVP form (next step)
-   will reintroduce navigation as needed. */
+/* Settle: the card gains the site's illustration emboss (same drop-shadow pair as
+   .registry-illustration, incl. the dark variant). The card fill stays cream in dark
+   mode — it reads as a physical card on the dark surface. */
+body.page-rsvp.intro-complete .invitation-card {
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+}
+
+body.dark-mode.page-rsvp.intro-complete .invitation-card {
+    filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+}
+
+/* Nav + footer: present but invisible during the intro (so they can fade in with the
+   settle), and non-interactive until visible. */
 body.page-rsvp .main-nav,
 body.page-rsvp .site-footer {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--settle-ms, 450ms) ease;
+}
+
+body.page-rsvp.intro-complete .main-nav,
+body.page-rsvp.intro-complete .site-footer {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Pin the footer (the only in-flow content — the endstate is fixed) to the bottom
+   of the viewport, like the site's other single-viewport pages. */
+body.page-rsvp #protected-content.unlocked {
+    min-height: 100vh;
+}
+
+body.page-rsvp #footer-placeholder {
+    margin-top: auto;
+}
+
+/* Replay icon — fixed bottom-left, icon-only. Hidden until the settle; fades in with
+   it. Asset is a placeholder (DC flag) with the standard data-light/data-dark swap —
+   keep the CSS asset-agnostic. z-index above the (settled) content, below the Rive
+   canvas (2000) while the intro plays. */
+.replay-intro {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1600;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--settle-ms, 450ms) ease;
+}
+
+.replay-intro img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+body.intro-complete .replay-intro {
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+body.intro-complete .replay-intro:hover,
+body.intro-complete .replay-intro:focus-visible {
+    opacity: 1;
+}
+
+/* Their setting says no animation — and the bail path skips the intro anyway,
+   so replay would no-op. Hide it entirely. */
+@media (prefers-reduced-motion: reduce) {
+    .replay-intro {
+        display: none;
+    }
 }
 
 /* RSVP internal staging page — standard content-page top padding to clear the fixed nav */
