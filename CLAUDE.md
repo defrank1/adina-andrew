@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: June 4, 2026
+Last updated: July 6, 2026
 
 ---
 
@@ -31,7 +31,7 @@ Last updated: June 4, 2026
 - `travel.html` — Hotels (4 blocks) + transportation directions, cherry blossom illustration — `<body class="page-travel">`
 - `our-story.html` — Narrative-prose page with photo carousels (seven sections separated by `.story-divider`s, several with multi-photo carousels) — `<body class="page-our-story">`
 - `dc-guide.html` — DC recommendations (Food + Activities sections), follows Travel page template — `<body class="page-dc-guide">`
-- `rsvp.html` — **Public RSVP placeholder.** The nav's RSVP link points here (`/rsvp`). Shows only "Coming Soon!" centered in the PP Playground title font (`.registry-title`), with the shared nav + footer. Gated by the guest password (`october17` / `siteUnlocked`). `<body class="page-rsvp">` (centering rules scoped under that class in `styles.css`). When the real form is ready, its content swaps in here.
+- `rsvp.html` — **Metro Rive intro → static invitation end-state.** The nav's RSVP link points here (`/rsvp`). After the guest password (`october17` / `siteUnlocked`), the hand-drawn DC Metro intro plays: `js/rive-intro.js` owns a `requestAnimationFrame` loop that scrubs the linear timeline (`Timeline 1` in `assets/rive/metro-intro.riv`) at a **15fps stepped cadence**, using `Fit.Contain` so the 16:9 scene is never cropped — the tunnel-green matte (`#183a2c`) fills the letterbox on tall/wide/mobile viewports. At `DURATION_S` (22.14s, card fully expanded) it holds ~0.5s, then **hard-cuts (no fade)** to `#invitation-endstate`: a static reproduction of the final frame — green matte + a 16:9 field (`#dfdeda`) holding the centered invitation card (`images/invitation/invitation.svg`, a self-contained cream card with double green border + text). The cut is (near-)invisible because the static layer reuses the same matte/frame. Plays once per session (`intro-seen`), respects `prefers-reduced-motion` (skips to the invitation), and bails to the invitation if the `.riv` is missing. Nav + footer are hidden on this page so the end-state matches the animation's chrome-less frame. `<body class="page-rsvp">`. The **sequenced RSVP form is the next step** — it will grow out of this "invitation state." (See decisions.md, July 6, 2026.)
 - `rsvp-internal.html` — **Internal staging page for the real RSVP form** (served at `/rsvp-internal`). Gated by the RSVP password (`beautifulsuperstar` / `rsvpUnlocked`). `<body class="page-rsvp-internal">`. Front-end is built (styles in `rsvp-styles.css`, logic in `js/rsvp-form.js`); the live Google Sheets backend (rsvp-workflow/) is not wired yet — `searchInvitations()` / `submitRsvp()` are seams over placeholder data. **Structure:** lookup by **email** (live dropdown) → **Part A "The Weekend" reference block** (each invited event's logistics shown ONCE: when / script name / where / dress tag / description; the Saturday afterparty appears here as info only, no RSVP) → **Part B per-person compact decision rows** (one row per invited event = name label + accept/decline; plus a meal-choice row shown only when Saturday is invited). Logistics are NOT reprinted per person. Radios are custom **hairline** controls (see CTA/Radio notes). When the form is final it swaps into `rsvp.html`.
 
 ### Illustration Assignments
@@ -43,7 +43,7 @@ Last updated: June 4, 2026
 | DC Guide | D.C. Flag (`flag-light.png` / `flag-dark.png`) | Done |
 | Registry | Rowhouse | Stays |
 | Our Story | None (removed) | Done |
-| RSVP | None / Rive animation | — |
+| RSVP | Metro intro (Rive) → invitation end-state | Done |
 | Schedule | TBD | — |
 | Homepage | Dupont fountain (closing decorative element, not page illustration) | Done |
 
@@ -146,7 +146,7 @@ Old texture files (`paper-grain-light.png`, `noise-grain-light.png`, `paper-grai
 
 The site uses two passwords:
 
-- **Guest password:** `october17` — The main guest-facing password. Used on the homepage (`index.html`) and every content page: `travel.html`, `faq.html`, `schedule.html`, `registry.html`, `our-story.html`, `dc-guide.html`, and the public RSVP placeholder `rsvp.html` ("Coming Soon!"). Session key: `siteUnlocked`. Entering it on any of these pages unlocks all of them for that browser session.
+- **Guest password:** `october17` — The main guest-facing password. Used on the homepage (`index.html`) and every content page: `travel.html`, `faq.html`, `schedule.html`, `registry.html`, `our-story.html`, `dc-guide.html`, and `rsvp.html` (Metro intro → invitation end-state). Session key: `siteUnlocked`. Entering it on any of these pages unlocks all of them for that browser session.
 - **RSVP password:** `beautifulsuperstar` — Gates `rsvp-internal.html` only — the internal staging page where the real RSVP form is being built. Session key: `rsvpUnlocked`. Kept separate so the in-progress RSVP form stays locked even after the rest of the site is unlocked.
 
 Each page has its own password overlay. Session storage remembers unlock state within a session. The two passwords use separate session storage keys (`siteUnlocked` vs `rsvpUnlocked`), so unlocking the main site does not unlock RSVP, and vice versa.
@@ -353,7 +353,7 @@ Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-sty
 ├── travel.html             (Hotels + directions)
 ├── our-story.html          (Photo timeline — page-our-story)
 ├── dc-guide.html           (DC recommendations — page-dc-guide)
-├── rsvp.html               (public "Coming Soon!" placeholder — october17)
+├── rsvp.html               (Metro Rive intro → invitation end-state — october17)
 ├── rsvp-internal.html      (internal staging for the real RSVP form — beautifulsuperstar)
 ├── includes/
 │   ├── nav.html            (shared nav markup — injected via fetch)
