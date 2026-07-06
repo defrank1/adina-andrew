@@ -26,12 +26,14 @@
     // needs the exact name, so this uses the real one. If a future export renames
     // the timeline, update this one constant.
     var ANIMATION_NAME = 'Timeline 1';
-    var DURATION_S = 22.14;     // handoff moment (card fully expanded), in seconds
-    var STEP_HZ = 15;           // stepped cadence; set 0 for smooth playback
-    var END_HOLD_MS = 500;      // sit on the final frame this long, then HARD-CUT (no fade)
-    var SETTLE_DELAY_MS = 150;  // pause on the matched frame before settling
-    var SETTLE_MS = 450;        // settle transition length (0 = instant brand page)
-    var SAFETY_MS = 26000;      // backstop only — DURATION_S plus margin
+    var DURATION_S = 22.22;       // handoff moment — end of the in-Rive cream cover fade
+    var FADE_SYNC_START = 21.0;   // when the in-Rive cover fade begins (21.00 -> 22.22)
+    var FADE_SYNC_MS = 1220;      // letterbox fade duration, synced to the cover fade
+    var STEP_HZ = 15;             // stepped cadence; set 0 for smooth playback
+    var SETTLE_DELAY_MS = 150;    // pause on the matched frame before settling
+    var SETTLE_MS = 450;          // settle transition length (0 = instant brand page)
+    var COVER_CREAM = '#F1EDEA';  // matches the in-Rive cover rect exactly
+    var SAFETY_MS = 26000;        // backstop only — DURATION_S plus margin
 
     var container = document.getElementById('rive-container');
     var canvas = document.getElementById('rive-canvas');
@@ -64,6 +66,8 @@
     var rafId = null;           // owned playback loop handle
     var elapsed = 0;            // accumulated play time (seconds), from RAF deltas
     var lastTs = null;          // previous RAF timestamp; null resets the delta
+    var lastScrubT = -1;        // last quantized time actually scrubbed (dedup)
+    var fadeSynced = false;     // letterbox fade fired once at FADE_SYNC_START
 
     // ---- teardown helpers --------------------------------------------------
 
@@ -74,17 +78,25 @@
         if (endState) { endState.classList.remove('pre-reveal'); }
     }
 
-    // removeNow — the single teardown + HARD CUT. Reveal the invitation (behind the
-    // canvas), then remove the canvas instantly (no fade) so the swap is invisible.
-    // Idempotent via the `finished` guard, so double-calls (e.g. Skip during the hold)
-    // are safe.
-    function removeNow() {
+    // hardCut — the seamless swap: reveal the pixel-registered end-state and hide the
+    // canvas in the SAME frame (display, not an opacity fade — no dissolve, no hold).
+    // The canvas NODE is removed only after the settle completes; removing it
+    // mid-transition caused a one-frame glitch flash in the previous model.
+    // Idempotent via the `finished` guard.
+    function hardCut() {
         if (finished) { return; }
         finished = true;
         if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-        if (resizeHandler) { window.removeEventListener('resize', resizeHandler); resizeHandler = null; }
         revealEndState();
+        container.style.display = 'none';
+        if (skipBtn) { skipBtn.classList.add('hidden'); }
+        setTimeout(destroyIntro, SETTLE_DELAY_MS + SETTLE_MS + 100);
+    }
+
+    // destroyIntro — final teardown once nothing can still be transitioning.
+    function destroyIntro() {
+        if (resizeHandler) { window.removeEventListener('resize', resizeHandler); resizeHandler = null; }
         cleanupRive();
         if (container && container.parentNode) { container.parentNode.removeChild(container); }
         if (skipBtn && skipBtn.parentNode) { skipBtn.parentNode.removeChild(skipBtn); }
@@ -121,21 +133,18 @@
         document.body.classList.add('intro-complete');
     }
 
-    // completeIntro — animation reached its end naturally. Sit on the final frame for
-    // END_HOLD_MS, hard-cut to the static invitation, then settle.
-    function completeIntro() {
-        if (finished) { return; }
-        markSeen();
-        setTimeout(function () { removeNow(); settle(); }, END_HOLD_MS);
-    }
+    // completeIntro — the loop reached DURATION_S (end of the in-Rive cream fade).
+    // Hard cut in the same frame — no hold timer (the old stacked timeouts caused a
+    // measured ~3.6s frozen stall) — then the settle after SETTLE_DELAY_MS.
+    function completeIntro() { markSeen(); hardCut(); settle(); }
 
     // skipIntro — user pressed Skip, or Rive errored after the canvas was shown.
-    // Hard-cut immediately (no hold), then the same settle.
-    function skipIntro() { markSeen(); removeNow(); settle(); }
+    // Lands DIRECTLY on the settled state (no transition).
+    function skipIntro() { markSeen(); hardCut(); settleInstant(); }
 
     // bailSilently — never showed the canvas (reduced motion, return visit, missing
-    // asset); land on the settled brand page immediately, no green, no transition.
-    function bailSilently() { markSeen(); removeNow(); settleInstant(); }
+    // asset); land settled immediately and tear down now (double-destroy is safe).
+    function bailSilently() { markSeen(); hardCut(); settleInstant(); destroyIntro(); }
 
     // ---- canvas sizing -----------------------------------------------------
 
@@ -191,15 +200,30 @@
         elapsed += (ts - lastTs) / 1000;
         lastTs = ts;
 
+        // Synced letterbox fade: the in-Rive cream cover only fills the 16:9 artboard;
+        // the container background (the letterbox bars on non-16:9 viewports) fades
+        // green -> cream in step with it, so by DURATION_S the whole viewport is flat
+        // #F1EDEA at any window shape. Fires exactly once.
+        if (!fadeSynced && elapsed >= FADE_SYNC_START) {
+            fadeSynced = true;
+            container.style.transition = 'background-color ' + FADE_SYNC_MS + 'ms ease-in-out';
+            container.style.backgroundColor = COVER_CREAM;
+        }
+
         var t = (STEP_HZ === 0)
             ? elapsed
             : Math.floor(elapsed * STEP_HZ) / STEP_HZ;   // quantize to STEP_HZ steps/sec
         var clamped = Math.min(t, DURATION_S);
 
-        try { riveInstance.scrub(ANIMATION_NAME, clamped); } catch (e) { /* no-op */ }
+        // Scrub only when the quantized time advances — at 15 steps/s a 60Hz loop
+        // would otherwise redraw the identical frame 3 extra times per step.
+        if (clamped !== lastScrubT) {
+            lastScrubT = clamped;
+            try { riveInstance.scrub(ANIMATION_NAME, clamped); } catch (e) { /* no-op */ }
+        }
 
         if (clamped >= DURATION_S) {
-            completeIntro();          // fade + reveal RSVP page
+            completeIntro();          // hard cut in this same frame — no hold, no fade
             return;
         }
         rafId = requestAnimationFrame(tick);

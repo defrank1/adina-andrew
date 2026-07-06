@@ -833,6 +833,15 @@ body.page-home .registry-section {
    bail paths set it to 0ms so return visits land settled instantly).
    =========================== */
 
+/* Fixed one-viewport composition — nothing scrolls (the card is fixed, the footer is
+   pinned). Also load-bearing for registration: no scrollbars means the layout width
+   always equals window.innerWidth, so the canvas box (sized from innerWidth/Height)
+   and .invitation-field (sized from 100vw/100dvh) are the SAME box in every browser,
+   including classic-scrollbar ones. */
+body.page-rsvp {
+    overflow: hidden;
+}
+
 /* Matte-green base until the settle, so the unlock -> first-frame gap and the cut
    both read as tunnel green, never a cream flash. The texture tile is opaque, so
    background-image must be cleared for the color to show. Once .intro-complete is
@@ -852,8 +861,12 @@ body.page-rsvp .invitation-endstate {
     position: fixed;
     inset: 0;
     z-index: 1500;
-    /* Same matte green as #rive-container so the hard cut is seamless in the letterbox. */
-    background-color: #183a2c;
+    /* Flat cover cream — the .riv ends with a full-artboard #F1EDEA cover, and the
+       synced letterbox fade brings #rive-container to the same cream, so the cut
+       frame is flat cream + card at any window shape. Same hex as the page surface;
+       the settle only fades this flat layer out to reveal the textured tile beneath
+       (grain is intentionally NOT in the .riv — it arrives with the settle). */
+    background-color: #F1EDEA;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -863,12 +876,11 @@ body.page-rsvp .invitation-endstate {
     transition: background-color var(--settle-ms, 450ms) ease;
 }
 
-/* Settle: the matte fades out, revealing the textured brand page beneath (the
-   texture arrives here — it is intentionally NOT in the .riv). The layer drops
-   below the nav/footer (z 1000+) so the chrome floats over the card like on any
-   other page. Explicit rgba (not `transparent`) so the fade keeps the green hue. */
+/* Settle: the flat cream fades out, revealing the textured brand page beneath.
+   The layer drops below the nav/footer (z 1000+) so the chrome floats over the
+   card like on any other page. Explicit rgba (not `transparent`) keeps the hue. */
 body.page-rsvp.intro-complete .invitation-endstate {
-    background-color: rgba(24, 58, 44, 0);
+    background-color: rgba(241, 237, 234, 0);
     z-index: 1;
 }
 
@@ -878,45 +890,48 @@ body.page-rsvp .invitation-endstate.pre-reveal {
     display: none;
 }
 
-/* 16:9 field = the Rive artboard, contained + centered in the viewport. On a
-   portrait/mobile viewport this is width-limited (green bars top+bottom); on an
-   ultra-wide viewport it is height-limited (green bars left+right). */
+/* 16:9 field = a Contain replica of the canvas box: the 1920x1080 artboard as
+   rendered in the viewport (width-limited on portrait, height-limited on wide),
+   centered both axes exactly like the fullscreen canvas. It is purely a
+   REGISTRATION box for the card — no background of its own — and must not clip:
+   the card intentionally bleeds ~20px past its top and bottom edges. */
 body.page-rsvp .invitation-field {
     position: relative;
     width: min(100vw, calc(100vh * 16 / 9));
+    width: min(100vw, calc(100dvh * 16 / 9));
     aspect-ratio: 16 / 9;
-    /* Warm light field around the card, sampled from the .riv end frame (#DFDEDA). */
-    background-color: #dfdeda;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color var(--settle-ms, 450ms) ease;
+    overflow: visible;
 }
 
-/* Settle: the flat field dissolves so the card sits directly on the page texture. */
-body.page-rsvp.intro-complete .invitation-field {
-    background-color: rgba(223, 222, 218, 0);
-}
-
-/* The invitation card (self-contained SVG: cream fill + green border + text).
-   Sized so its border spans ~90% of the field height, matching the end frame; the
-   card sits slightly high (more room below), as in the animation. */
+/* The invitation card — the SAME PNG that is baked into the .riv (byte-different
+   re-encode, pixel-identical), placed by MEASURED artboard fractions of 1920x1080
+   so it lands pixel-on-pixel where the animation's final frame draws it:
+   x = 559/1920 = 29.11%, width = 800/1920 = 41.67%. Height derives from width via
+   the asset's intrinsic ratio (1069x1496 -> 800x1120 on the artboard).
+   VERTICAL (measured, supersedes the earlier "centered ±20px" derivation): the
+   animation parks the card HIGH — top ≈ -10.47% of the artboard height (~-113 of
+   1080), so it bleeds ~113px past the artboard top and ends ~73px above its bottom.
+   Two measurement methods bracket this: border-line feature solve -10.34%, pixel
+   cross-correlation (SAD) -10.60% — the value splits them, putting both within
+   ±0.5px at typical sizes. Final ±1px is an eyeball call on a frame-stepped
+   recording. The artboard does NOT clip, so the bleed really renders — the field
+   must not clip either. */
 body.page-rsvp .invitation-card {
-    /* Height-matched to the Rive end frame (border ≈ 90.6% of the field height),
-       sitting slightly high (top ≈ 1.3%, more room below). The provided SVG is a hair
-       more slender than the baked card, so widths differ by ~11% — matching height keeps
-       the text rows vertically aligned, which is the least-jarring compromise at the cut. */
-    height: 95%;
-    width: auto;
-    max-width: 96%;
+    position: absolute;
+    left: 29.11%;
+    width: 41.67%;
+    top: -10.47%;
+    height: auto;
+    aspect-ratio: 1069 / 1496;
     display: block;
-    transform: translateY(-3.5%);
     transition: filter var(--settle-ms, 450ms) ease;
 }
 
 /* Settle: the card gains the site's illustration emboss (same drop-shadow pair as
-   .registry-illustration, incl. the dark variant). The card fill stays cream in dark
-   mode — it reads as a physical card on the dark surface. */
+   .registry-illustration, incl. the dark variant). Text is baked into the PNG, so
+   the filter presses text AND border together — the intended embossed-card look.
+   Filters don't reflow: this cannot move the card. In dark mode the card asset
+   itself INVERTS to green via the data-light/data-dark swap. */
 body.page-rsvp.intro-complete .invitation-card {
     filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
 }
