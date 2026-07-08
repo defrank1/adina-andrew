@@ -19,7 +19,7 @@
     <!-- Password Protection Overlay -->
     <div id="password-overlay">
         <div class="password-container">
-            <h2>RSVP</h2>
+            <h2>Coming Soon!</h2>
             <p>Please enter the password:</p>
             <form id="password-form">
                 <input type="password" id="password-input" class="password-input" placeholder="Enter password"
@@ -86,23 +86,23 @@
         // Password Protection
         // ===========================
         if (location.hash.includes('figmacapture=')) {
-            sessionStorage.setItem('siteUnlocked', 'true');
+            sessionStorage.setItem('rsvpUnlocked', 'true');
         }
-        const correctPassword = 'october17';
+        const correctPassword = 'beautifulsuperstar';
         const passwordOverlay = document.getElementById('password-overlay');
         const protectedContent = document.getElementById('protected-content');
         const passwordForm = document.getElementById('password-form');
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
 
-        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+        if (sessionStorage.getItem('rsvpUnlocked') === 'true') {
             unlockContent();
         }
 
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('siteUnlocked', 'true');
+                sessionStorage.setItem('rsvpUnlocked', 'true');
                 unlockContent();
             } else {
                 passwordError.classList.add('show');
@@ -117,7 +117,7 @@
             document.body.classList.remove('locked');
         }
 
-        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
+        if (sessionStorage.getItem('rsvpUnlocked') !== 'true') {
             document.body.classList.add('locked');
         }
 
