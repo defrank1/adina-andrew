@@ -349,6 +349,18 @@ body.locked .main-nav {
     display: none;
 }
 
+/* The RSVP "Coming Soon!" gate is a dead-end for guests (they can't unlock it),
+   so keep the nav visible ABOVE the password overlay (z-index 9999) so they can
+   still navigate away. Overrides both the locked-page hide and the Metro intro's
+   opacity:0/pointer-events:none hold (which resumes normally once unlocked).
+   Other page gates stay covered as usual. */
+body.page-rsvp.locked .main-nav {
+    display: block;
+    z-index: 10000;
+    opacity: 1;
+    pointer-events: auto;
+}
+
 /* Default unlocked: flex column (nav + footer layout) */
 #protected-content.unlocked {
     display: flex;
