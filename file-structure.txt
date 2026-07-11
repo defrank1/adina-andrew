@@ -1,83 +1,68 @@
 wedding-website/
 ├── CLAUDE.md                    # Design spec — Claude Code reads this before changes
-├── CNAME                        # Custom domain: adinaandrew2026.com
 ├── decisions.md                 # Design & technical decision log
+├── file-structure.txt           # This file — quick-reference tree
+├── CNAME                        # Custom domain: adinaandrew2026.com
 ├── .htaccess
 ├── .gitattributes
 ├── .gitignore
 │
-├── index.html                   # Homepage (currently redirects to save-the-date)
-├── savethedate.html             # Save the Date — NO nav, NO footer
+│   # ── Pages (served) ──────────────────────────────────────────
+├── index.html                   # Homepage, served at site root
+├── homepage.html                # Retired — redirect stub to /
+├── savethedate.html             # Retired — redirect stub to / (NO nav, NO footer)
 ├── registry.html                # Registry page
 ├── faq.html                     # Questions & Answers
-├── schedule.html                # Wedding weekend schedule (Invitation)
+├── schedule.html                # Wedding weekend invitation
 ├── travel.html                  # Hotels + transportation directions
-├── rsvp.html                    # RSVP form
+├── our-story.html               # Photo timeline / narrative
+├── dc-guide.html                # DC recommendations
+├── rsvp.html                    # Metro Rive intro → invitation end-state → card flow
+├── rsvp-internal.html           # Internal RSVP staging form (superseded by rsvp.html flow)
+│
+│   # ── Styles ──────────────────────────────────────────────────
 ├── styles.css                   # Global styles (all pages)
 ├── rsvp-styles.css              # RSVP-specific styles
 │
 ├── includes/
 │   ├── nav.html                 # Shared nav markup (injected via fetch)
 │   ├── footer.html              # Shared footer markup (injected via fetch)
-│   └── site-init.js             # Dark mode, menu toggle, image swap, include injection
+│   ├── site-init.js             # Dark mode + menu toggle + image swap
+│   └── carousel.js              # Photo carousel logic (our-story.html only)
 │
-├── fonts/
-│   ├── PPPlayground-Medium.woff
-│   ├── PPPlayground-Medium.woff2
-│   ├── PPWatch-Bold.woff
-│   ├── PPWatch-Bold.woff2
-│   ├── Sentient-Regular.woff
-│   └── Sentient-Regular.woff2
+├── js/
+│   ├── rive-intro.js            # Metro intro playback + hard cut + settle (rsvp.html)
+│   ├── rsvp-flow.js             # Sequenced RSVP card flow (rsvp.html)
+│   └── rsvp-form.js             # Staging single-page form (rsvp-internal.html)
+│
+├── assets/
+│   └── rive/
+│       └── metro-intro.riv      # Hand-drawn Metro intro — do not touch
+│
+├── fonts/                       # WEB fonts only (.woff/.woff2) — .otf sources in _source/fonts/
+│   ├── PPPlayground-Medium.woff / .woff2
+│   ├── PPWatch-Bold.woff / .woff2
+│   ├── PPWatch-Medium.woff / .woff2
+│   ├── PPWatch-Extralight.woff / .woff2
+│   └── Sentient-Regular.woff / .woff2
 │
 ├── images/
 │   ├── favicon.png
-│   ├── Monogram/
-│   │   ├── monogram-green.png
-│   │   └── monogram-white.png
-│   ├── names/
-│   │   ├── names-image.png
-│   │   └── names-image-dark.png
-│   ├── illustrations/
-│   │   ├── Dupont-light.png
-│   │   ├── Dupont-dark.png
-│   │   ├── flag-light.png
-│   │   └── flag-dark.png
-│   ├── nav/
-│   │   ├── nav-diamond-light.png
-│   │   ├── nav-diamond-dark.png
-│   │   ├── mobile-nav-light.png
-│   │   ├── mobile-nav-dark.png
-│   │   ├── mobile-nav-light-old.png
-│   │   └── mobile-nav-dark-old.png
-│   └── textures/
-│       ├── combined-light.png       # Baked texture tile — light mode (in use)
-│       ├── combined-dark.png        # Baked texture tile — dark mode (in use)
-│       ├── paper-grain-light.png    # Legacy — no longer referenced in CSS
-│       ├── noise-grain-light.png    # Legacy
-│       ├── paper-grain-light-two.png # Legacy
-│       ├── noise-grain-light-two.png # Legacy
-│       ├── paper-grain-dark.png     # Legacy
-│       ├── noise-grain-dark.png     # Legacy
-│       └── old/                     # Previous texture versions
-│
-├── vectors/
-│   ├── rowhouse.svg
-│   ├── rowhouse-dark.svg
-│   ├── names-flat.svg
-│   ├── nav shapes.af               # Affinity Designer source
-│   ├── credentials.json
-│   └── mobile-nav/
-│       ├── mobile-nav-light.svg
-│       ├── mobile-nav-dark.svg
-│       ├── mobile-nav-open-light.svg
-│       └── mobile-nav-open-dark.svg
+│   ├── Monogram/                # monogram-green.png, monogram-white.png
+│   ├── names/                   # names-image.png, names-image-dark.png
+│   ├── illustrations/           # Dupont, flag, blossom, joan (light/dark PNGs) + rowhouse.svg / rowhouse-dark.svg
+│   ├── invitation/              # invitation-light-new.png, invitation-dark-new.png (RSVP end-state card)
+│   ├── nav/                     # wide-nav-light.png, wide-nav-dark.png (only active nav PNGs)
+│   ├── our-story/               # web-optimized JPGs (web-*.jpg)
+│   └── textures/                # combined-light.png, combined-dark.png (only active tiles)
 │
 ├── rsvp-workflow/
-│   ├── google-apps-script.js        # Google Sheets integration
-│   ├── guests.js                    # Guest list data
-│   └── rsvp-script.js              # RSVP form client-side logic
+│   └── google-apps-script.js    # Backend: Guests/Responses sheet; lookup GET + per-person POST
 │
-└── .claude/
-    ├── settings.local.json
-    ├── daub-reference.md            # DAUB UI design system reference
-    └── figma-design-system-rules.md
+├── _source/                     # SOURCE & WORKING FILES — in git, NOT hosted (Jekyll skips _-prefixed dirs)
+│   ├── fonts/                   # .otf desktop faces (source for deployed .woff/.woff2)
+│   ├── vectors/                 # nav shapes.af, names-flat.svg, mobile-nav/ SVGs, credentials.json (gitignored)
+│   ├── sandbox/                 # Throwaway test pages (rive-quantize-test.html, rsvp-checkmark-demos.html)
+│   └── archive/                 # Retired unreferenced assets (legacy nav PNGs, old grains, invitation.svg, legacy rsvp scripts)
+│
+└── .claude/                     # Claude Code config (launch.json, settings, references)

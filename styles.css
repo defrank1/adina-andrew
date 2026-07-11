@@ -1328,6 +1328,9 @@ body.page-faq .registry-page {
     max-width: 600px;
     margin: 0 auto 2.5rem;
     text-align: left;
+    /* Clears the fixed nav when a deep-link (e.g. #faq-black-tie from the RSVP
+       dress tag) scrolls an item to the top. */
+    scroll-margin-top: 110px;
 }
 
 .faq-item:last-child {

@@ -4,7 +4,7 @@
 
 This is the design specification for adinaandrew2026.com. Claude Code should read this file before making ANY changes to the site. All design decisions below are locked and final unless Andrew explicitly says otherwise.
 
-Last updated: July 6, 2026
+Last updated: July 11, 2026
 
 ---
 
@@ -31,8 +31,10 @@ Last updated: July 6, 2026
 - `travel.html` — Hotels (4 blocks) + transportation directions, cherry blossom illustration — `<body class="page-travel">`
 - `our-story.html` — Narrative-prose page with photo carousels (seven sections separated by `.story-divider`s, several with multi-photo carousels) — `<body class="page-our-story">`
 - `dc-guide.html` — DC recommendations (Food + Activities sections), follows Travel page template — `<body class="page-dc-guide">`
-- `rsvp.html` — **Metro Rive intro → pixel-registered hard cut → settle into a brand page.** The nav's RSVP link points here (`/rsvp`). Gated behind a **"Coming Soon!"** password overlay (`beautifulsuperstar` / `rsvpUnlocked` — the exclusive RSVP password, not the guest `october17`); after unlock, the hand-drawn DC Metro intro plays: `js/rive-intro.js` owns a `requestAnimationFrame` loop that scrubs the linear timeline (`Timeline 1` in `assets/rive/metro-intro.riv`) at a **15fps stepped cadence** (scrubs deduped to actual step advances), using `Fit.Contain` — the tunnel-green (`#183a2c`) letterbox bars fade to `#F1EDEA` over **21.00→22.22s in sync with the in-Rive cream cover fade**, so the final frame is flat cream + card at any window shape. At `DURATION_S` (**22.22s**) it **hard-cuts in the same frame** (canvas `display:none`, no hold, no dissolve; the node is removed only after the settle) to `#invitation-endstate`: flat `#F1EDEA` + the card `images/invitation/invitation-light-new.png` — **the same PNG baked into the .riv** (pixel-identical; byte-different re-encode), absolutely placed by **measured artboard fractions**: `left 29.11%`, `width 41.67%`, `top -10.47%` (the card parks HIGH, bleeding ~113/1080 past the artboard top — measured, not centered). `body.page-rsvp { overflow: hidden }` is **load-bearing for registration** (no scrollbar ⇒ canvas box = field box). ~150ms later the page **settles** over 450ms (`body.intro-complete` + `var(--settle-ms)`): flat cream fades to the textured tile, nav + footer + replay icon fade in, the card gains the `.registry-illustration` emboss. **Dark mode: the card INVERTS** to `invitation-dark-new.png` (green card, cream text — intentionally tone-on-tone) via the standard `data-light`/`data-dark` swap. Replay icon bottom-left (placeholder DC flag): clears `intro-seen` + reloads; hidden under `prefers-reduced-motion`. Skip / return visits / reduced-motion / load-error land settled **directly**. Plays once per session (`intro-seen`). `invitation.svg` is retired here. `<body class="page-rsvp">`. The **sequenced RSVP form is the next step** — it will grow out of this settled invitation page. (See decisions.md, July 6, 2026 — "Pixel-registered handoff".)
-- `rsvp-internal.html` — **Internal staging page for the real RSVP form** (served at `/rsvp-internal`). Gated by the RSVP password (`beautifulsuperstar` / `rsvpUnlocked`). `<body class="page-rsvp-internal">`. Front-end is built (styles in `rsvp-styles.css`, logic in `js/rsvp-form.js`); the live Google Sheets backend (rsvp-workflow/) is not wired yet — `searchInvitations()` / `submitRsvp()` are seams over placeholder data. **Structure:** lookup by **email** (live dropdown) → **Part A "The Weekend" reference block** (each invited event's logistics shown ONCE: when / script name / where / dress tag / description; the Saturday afterparty appears here as info only, no RSVP) → **Part B per-person compact decision rows** (one row per invited event = name label + accept/decline; plus a meal-choice row shown only when Saturday is invited). Logistics are NOT reprinted per person. Radios are custom **hairline** controls (see CTA/Radio notes). When the form is final it swaps into `rsvp.html`.
+- `rsvp.html` — **Metro Rive intro → pixel-registered hard cut → settle into a brand page.** The nav's RSVP link points here (`/rsvp`). Gated behind a **"Coming Soon!"** password overlay (`beautifulsuperstar` / `rsvpUnlocked` — the exclusive RSVP password, not the guest `october17`); after unlock, the hand-drawn DC Metro intro plays: `js/rive-intro.js` owns a `requestAnimationFrame` loop that scrubs the linear timeline (`Timeline 1` in `assets/rive/metro-intro.riv`) at a **15fps stepped cadence** (scrubs deduped to actual step advances), using `Fit.Contain` — the tunnel-green (`#183a2c`) letterbox bars fade to `#F1EDEA` over **21.00→22.22s in sync with the in-Rive cream cover fade**, so the final frame is flat cream + card at any window shape. At `DURATION_S` (**22.22s**) it **hard-cuts in the same frame** (canvas `display:none`, no hold, no dissolve; the node is removed only after the settle) to `#invitation-endstate`: flat `#F1EDEA` + the card `images/invitation/invitation-light-new.png` — **the same PNG baked into the .riv** (pixel-identical; byte-different re-encode), absolutely placed by **measured artboard fractions**: `left 29.11%`, `width 41.67%`, `top -10.47%` (the card parks HIGH, bleeding ~113/1080 past the artboard top — measured, not centered). `body.page-rsvp { overflow: hidden }` is **load-bearing for registration** (no scrollbar ⇒ canvas box = field box). ~150ms later the page **settles** over 450ms (`body.intro-complete` + `var(--settle-ms)`): flat cream fades to the textured tile, nav + footer + replay icon fade in, the card gains the `.registry-illustration` emboss. **Dark mode: the card INVERTS** to `invitation-dark-new.png` (green card, cream text — intentionally tone-on-tone) via the standard `data-light`/`data-dark` swap. Replay icon bottom-left (placeholder DC flag): clears `intro-seen` + reloads; hidden under `prefers-reduced-motion`. Skip / return visits / reduced-motion / load-error land settled **directly**. Plays once per session (`intro-seen`). `invitation.svg` is retired here. `<body class="page-rsvp">`. (See decisions.md, July 6, 2026 — "Pixel-registered handoff".)
+  **Dark-mode reset on animation exit:** the animation's final frames are effectively light mode, so `hardCut()` in `js/rive-intro.js` calls `resetThemeToLight()` (class + `localStorage` + image swap + footer sun glyph) **only when the canvas actually played** (natural completion or Skip). Bail paths (return visit / reduced-motion / load-error) preserve the user's theme. (decisions.md, July 11, 2026.)
+  **The sequenced card-based RSVP flow lives here.** After the settle, a hairline **RSVP arrow** (`#rsvp-arrow`, PP Watch Bold + inline-SVG arrow) sits to the card's right (below it on ≤900px), positioned by the card's artboard fractions inside `.invitation-field`; it fades in with the settle, has the nav hover glow, and carries an optional breathing glow behind the `.rsvp-arrow-breathe` class (delete the class to kill it). Clicking it slides the invitation off-screen left (`body.rsvp-flow-active` translates `#invitation-endstate`; geometry untouched) and enters `#rsvp-flow`: a horizontal track of one-viewport panels (`transform: translateX(-i·100%)`, 600ms cubic-bezier(0.4,0,0.2,1); instant under reduced-motion), each centering a printed **reply card** made of the **same baked paper grain as the invitation PNG** (the `combined-light/dark.png` tile lives ON the card at 200px, so it carries its own grain as it slides), with a **double-rule frame matching the invitation PNG** (a 2px outer line + a 1px inner line, `::before`/`::after`, square corners), nav-diamond raised shadow; dark mode: `#1a3a2e` card + dark tile, cream frame). Title is "Rsvp" (sentence case, PP Playground); the reply line is a Sentient sentence-case line over an uppercased PP Watch Medium date. The custom radios / kosher checkbox use a **clean curved ink-stroke check** (round caps, vertex centered on the ring — no turbulence; the ring stays a plain circle — the PP Playground "O" glyph was explored as a ring and rejected as too ornate/illegible at 18px, so the hand-drawn character lives in the check, not the ring). The forward CTA (Next / Review) sits to the card's **right**, vertically centered — the same affordance as the RSVP arrow (below the card, centered, on ≤900px). Each event's dress tag is a bordered capsule; Saturday's "Black Tie Preferred" is a **button that deep-links (new tab) to its FAQ answer** (`faq.html#faq-black-tie` — `faq.html`'s `unlockContent()` honors the hash after unlock, and `.faq-item` has `scroll-margin-top` to clear the nav); Friday's "Semi-Formal" and Sunday's "Come as you are" have no FAQ section so they stay plain tags. A `position: fixed` texture backdrop keeps the grain stationary while cards slide/scroll (NOT `background-attachment: fixed` — broken on iOS). Steps: `email` (autocomplete with the "typed past the @" privacy rule; selection advances) → one card per **invited** event in `EVENT_ORDER` (per-person hairline radios, "Accepts with pleasure / Declines with regret"; Saturday adds the afterparty info block, per-person meal radios — Branzino / Chicken / Cauliflower Steak — and a hairline "Kosher?" checkbox active only for the selected kosherable meal) → review-and-send (per-person summary, optional note, `.btn-priority` Send) → thank-you. Validation is inline on the card (no `alert()`); back arrows preserve selections; editing the email resets the step list. `overflow` on the body relaxes to `overflow-x: hidden; overflow-y: auto` only once `.rsvp-flow-active` is set (post-settle, so pre-cut registration is untouched). Logic: `js/rsvp-flow.js` (its `searchInvitations` / `submitRsvp` are the ONLY network seams; `APPS_SCRIPT_URL` empty = placeholder data + no-op submit). Styles: the `/* === Card flow === */` section of `rsvp-styles.css` (now loaded by rsvp.html too). Submission shape: `{ email, people: [{ name, events: {friday:'yes'|'no',…}, meal, mealKosher }], message }`.
+- `rsvp-internal.html` — **Internal staging page, now superseded by the card flow on `rsvp.html`** (served at `/rsvp-internal`; still untouched — Andrew will retire it). Gated by the RSVP password (`beautifulsuperstar` / `rsvpUnlocked`). `<body class="page-rsvp-internal">`. Single-page form (styles in `rsvp-styles.css`, logic in `js/rsvp-form.js`) over the same placeholder-data seams. **Structure:** lookup by **email** (live dropdown) → **Part A "The Weekend" reference block** (each invited event's logistics shown ONCE) → **Part B per-person compact decision rows**. The card flow in `js/rsvp-flow.js` lifted this page's data model, autocomplete (incl. the "@" privacy rule), and control language; keep the two in mind together when editing `rsvp-styles.css` (shared file).
 
 ### Illustration Assignments
 
@@ -360,31 +362,45 @@ Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-sty
 │   ├── footer.html         (shared footer markup — injected via fetch)
 │   ├── site-init.js        (dark mode init + toggle + menu toggle + image swap logic)
 │   └── carousel.js         (photo carousel logic — loaded only on our-story.html)
-├── fonts/
+├── js/
+│   ├── rive-intro.js       (Metro intro playback + hard cut + settle + dark-mode reset — rsvp.html)
+│   ├── rsvp-flow.js        (sequenced card flow: steps, cards, validation, backend seams — rsvp.html)
+│   └── rsvp-form.js        (staging single-page form — rsvp-internal.html only)
+├── assets/
+│   └── rive/
+│       └── metro-intro.riv (hand-drawn Metro intro — do not touch)
+├── fonts/                  (WEB fonts only — .woff/.woff2; the .otf source faces live in _source/fonts/)
 │   ├── PPPlayground-Medium.woff / .woff2
 │   ├── PPWatch-Bold.woff / .woff2
+│   ├── PPWatch-Medium.woff / .woff2
+│   ├── PPWatch-Extralight.woff / .woff2
 │   └── Sentient-Regular.woff / .woff2
 ├── images/
 │   ├── favicon.png
 │   ├── Monogram/           (monogram-green.png, monogram-white.png)
 │   ├── names/              (names-image.png, names-image-dark.png)
-│   ├── illustrations/      (Dupont-light.png, Dupont-dark.png, flag-light.png, flag-dark.png)
-│   ├── nav/                (wide-nav-light.png, wide-nav-dark.png — active; nav-diamond-light.png, nav-diamond-dark.png — legacy, no longer referenced)
+│   ├── illustrations/      (Dupont, flag, blossom, joan — light/dark PNGs; rowhouse.svg / rowhouse-dark.svg — used by registry.html + schedule.html)
+│   ├── invitation/         (invitation-light-new.png, invitation-dark-new.png — the RSVP end-state card; also baked into metro-intro.riv)
+│   ├── nav/                (wide-nav-light.png, wide-nav-dark.png — the only active nav PNGs; legacy diamond/mobile PNGs moved to _source/archive/nav/)
 │   ├── our-story/          (web-optimized photos: web-blossoms.jpg, web-engagement.jpg, web-copenhagen.jpg, etc. Originals also in folder but not referenced in HTML)
-│   └── textures/
-│       ├── combined-light.png          (baked texture tile — light mode)
-│       ├── combined-dark.png           (baked texture tile — dark mode)
-│       └── old/                        (legacy individual grain PNGs — no longer referenced in CSS)
-├── vectors/
-│   ├── rowhouse.svg / rowhouse-dark.svg
-│   ├── nav-diamond-light.svg / nav-diamond-dark.svg  (source SVGs — PNGs are used in production)
-│   ├── names-flat.svg
-│   ├── nav shapes.af       (Affinity source file)
-│   └── mobile-nav/         (source SVGs from Affinity — not used in production)
+│   └── textures/           (combined-light.png, combined-dark.png — the only active tiles; legacy grains moved to _source/archive/)
 ├── rsvp-workflow/
-│   ├── google-apps-script.js
-│   ├── guests.js
-│   └── rsvp-script.js
+│   └── google-apps-script.js  (REWRITTEN July 2026: Guests/Responses two-tab sheet; GET ?action=lookup&q=
+│                               returns [{email, invitedTo, people}]; POST appends one Responses row PER PERSON
+│                               (Timestamp | Email | Name | Friday | Saturday | Sunday | Meal | Kosher | Message);
+│                               guarded confirmation email. Deploy as web app "execute as Me / access Anyone",
+│                               paste URL into APPS_SCRIPT_URL in js/rsvp-flow.js. Front end POSTs JSON as
+│                               Content-Type: text/plain to dodge CORS preflight — do not "fix" this.
+│                               Caveat: "Anyone" access means the lookup URL itself is the privacy boundary.)
+│                               (legacy guests.js / rsvp-script.js moved to _source/archive/)
+├── _source/                (SOURCE & WORKING FILES — versioned in git but NOT hosted. The leading
+│   │                        underscore makes GitHub Pages/Jekyll skip the folder at build time, so nothing
+│   │                        here is served on the live site. Do not link to anything in here from a page.)
+│   ├── fonts/              (.otf desktop faces — source for the deployed .woff/.woff2)
+│   ├── vectors/            (nav shapes.af, names-flat.svg, mobile-nav/ source SVGs; credentials.json — gitignored)
+│   ├── sandbox/            (throwaway test pages: rive-quantize-test.html, rsvp-checkmark-demos.html)
+│   └── archive/            (retired, unreferenced assets: legacy nav PNGs, old grain textures, invitation.svg,
+│                            legacy rsvp-workflow scripts — kept for reference, safe to delete)
 └── .claude/
     ├── figma-design-system-rules.md
     └── settings.local.json

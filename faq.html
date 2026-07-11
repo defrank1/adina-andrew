@@ -58,7 +58,7 @@
                         <p class="faq-answer">Please RSVP by September 1, 2026.</p>
                     </div>
 
-                    <div class="faq-item">
+                    <div class="faq-item" id="faq-black-tie">
                         <h2 class="label-heading">What is Black Tie Preferred?</h2>
                         <p class="faq-answer">Tuxedos and full-length gowns are encouraged. Dark suits with a white
                             shirt and dark tie, or formal cocktail dresses, are also welcome.
@@ -141,6 +141,15 @@
             passwordOverlay.classList.add('hidden');
             protectedContent.classList.add('unlocked');
             document.body.classList.remove('locked');
+            // Honor a deep-link hash (e.g. #faq-black-tie from the RSVP dress tag):
+            // the content was display:none until now, so the browser's own
+            // on-load scroll can't have landed it — do it explicitly once shown.
+            if (location.hash && location.hash.length > 1) {
+                var target = document.getElementById(location.hash.slice(1));
+                if (target) {
+                    setTimeout(function () { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+                }
+            }
         }
 
         if (sessionStorage.getItem('siteUnlocked') !== 'true') {

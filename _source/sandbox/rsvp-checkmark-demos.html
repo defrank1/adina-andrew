@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP checkmark demos</title>
+    <!-- Throwaway workshop harness (like rive-quantize-test.html). Not linked from
+         the site. Renders candidate "response" checkmarks inside the real hairline
+         ring so Andrew can pick one. Delete when a check is chosen. -->
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            padding: 3rem 2rem 6rem;
+            background-image: url('images/textures/combined-light.png');
+            background-size: 200px 200px;
+        }
+
+        h1 {
+            font-family: var(--font-title);
+            font-weight: 400;
+            -webkit-text-stroke: 0.35px currentColor;
+            font-size: 3rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .lead {
+            font-family: var(--font-body);
+            max-width: 640px;
+            opacity: 0.85;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .demo {
+            background-color: #F1EDEA;
+            background-image: url('images/textures/combined-light.png');
+            background-size: 200px 200px;
+            border: 1px solid var(--color-dark-green);
+            border-radius: 2px;
+            padding: 1.6rem 1.4rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.4rem;
+        }
+
+        .demo .name {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.72rem;
+            text-align: center;
+        }
+
+        /* Enlarged ring with a center crosshair so we can judge whether the check
+           vertex is centered. Ring is a 96px version of the 18px control. */
+        .ring-big {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            border: 8px solid rgba(26, 58, 46, 0.9);
+            border-radius: 50%;
+            display: grid;
+            place-content: center;
+        }
+
+        .ring-big::after {
+            /* crosshair at exact ring center */
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 11px;
+            height: 11px;
+            transform: translate(-50%, -50%);
+            background:
+                linear-gradient(to right, transparent 45%, rgba(200, 40, 40, 0.8) 45%, rgba(200, 40, 40, 0.8) 55%, transparent 55%),
+                linear-gradient(to bottom, transparent 45%, rgba(200, 40, 40, 0.8) 45%, rgba(200, 40, 40, 0.8) 55%, transparent 55%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .ring-big svg {
+            width: 138px;
+            height: 138px;
+            overflow: visible;
+            color: var(--color-dark-green);
+        }
+
+        /* Real-size row: the 18px control as it appears in the flow. */
+        .real-row {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+        }
+
+        .ring-real {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid var(--color-dark-green);
+            border-radius: 50%;
+            display: grid;
+            place-content: center;
+            flex: 0 0 auto;
+        }
+
+        .ring-real svg {
+            width: 26px;
+            height: 26px;
+            overflow: visible;
+            color: var(--color-dark-green);
+        }
+
+        /* Dark panel duplicate */
+        .dark-wrap {
+            margin-top: 3rem;
+            padding: 2rem;
+            border-radius: 6px;
+            background-image: url('images/textures/combined-dark.png');
+            background-size: 200px 200px;
+            background-color: #122a20;
+        }
+
+        .dark-wrap .demo {
+            background-color: #1a3a2e;
+            background-image: url('images/textures/combined-dark.png');
+            border-color: var(--color-soft-white);
+        }
+
+        .dark-wrap .demo .name,
+        .dark-wrap h2 {
+            color: var(--color-soft-white);
+        }
+
+        .dark-wrap .ring-big {
+            border-color: rgba(241, 237, 234, 0.9);
+        }
+
+        .dark-wrap .ring-big svg,
+        .dark-wrap .ring-real svg {
+            color: var(--color-soft-white);
+        }
+
+        .dark-wrap .ring-real {
+            border-color: var(--color-soft-white);
+        }
+
+        .dark-wrap .real-row {
+            color: var(--color-soft-white);
+        }
+
+        h2 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 0.8rem;
+            margin-bottom: 1.4rem;
+        }
+
+        /* ---- Ring shape comparison ---- */
+        .ring-section {
+            margin-top: 3.5rem;
+        }
+
+        .ring-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.3rem;
+        }
+
+        /* Enlarged ring stage — 96px, with the ink check overlaid dead-center. */
+        .ring-stage {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: grid;
+            place-content: center;
+        }
+
+        .ring-stage.circle {
+            border: 8px solid var(--color-dark-green);
+            border-radius: 50%;
+        }
+
+        /* Actual PP Playground glyph used as the ring (the font the reference's
+           circles come from). The counter of an O/o renders as a calligraphic
+           ring naturally. */
+        .ring-stage .glyph {
+            font-family: var(--font-title);
+            font-weight: 400;
+            color: var(--color-dark-green);
+            line-height: 1;
+            font-size: 150px;
+            -webkit-text-stroke: 0.3px currentColor;
+        }
+
+        .ring-stage .glyph.lc {
+            font-size: 190px;
+        }
+
+        .ring-stage .ink {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 172px;
+            height: 172px;
+            transform: translate(-50%, -50%);
+            overflow: visible;
+            color: var(--color-dark-green);
+            pointer-events: none;
+        }
+
+        /* nudge the check to the optical center of each glyph */
+        .ring-stage.oh .ink { transform: translate(-50%, -46%); }
+        .ring-stage.ol .ink { width: 150px; height: 150px; transform: translate(-50%, -42%); }
+
+        .ring-cap {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.72rem;
+            text-align: center;
+        }
+
+        /* real-size ring glyphs */
+        .ring-real-glyph {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            display: grid;
+            place-content: center;
+            flex: 0 0 auto;
+        }
+
+        .ring-real-glyph .glyph {
+            font-family: var(--font-title);
+            color: var(--color-dark-green);
+            line-height: 1;
+            font-size: 24px;
+        }
+
+        .ring-real-glyph .glyph.lc {
+            font-size: 30px;
+        }
+
+        .ring-real-glyph .ink {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 26px;
+            height: 26px;
+            transform: translate(-50%, -48%);
+            overflow: visible;
+            color: var(--color-dark-green);
+        }
+
+        .dark-wrap .ring-stage.circle { border-color: var(--color-soft-white); }
+        .dark-wrap .ring-stage .glyph,
+        .dark-wrap .ring-stage .ink,
+        .dark-wrap .ring-real-glyph .glyph,
+        .dark-wrap .ring-real-glyph .ink { color: var(--color-soft-white); }
+    </style>
+</head>
+
+<body>
+    <h1>Checkmark demos</h1>
+    <p class="lead">Each candidate "response" mark shown inside the real hairline ring — enlarged (with a red
+        crosshair at the ring's exact center) and at true 18px size. The goal: a clean <em>ink stroke</em> (not a
+        rough pencil), with the checkmark's divet/vertex sitting on the crosshair. Pick a number and I'll wire it in
+        as the shared radio + kosher-checkbox mark.</p>
+
+    <div class="grid" id="grid-light"></div>
+
+    <div class="dark-wrap">
+        <h2>Dark mode</h2>
+        <div class="grid" id="grid-dark"></div>
+    </div>
+
+    <div class="ring-section">
+        <h2>Ring shape — circle vs PP Playground glyph</h2>
+        <p class="lead">Your reference's rings come from PP Playground. Here's the current clean circle next to the
+            actual PP Playground “O” and lowercase “o” glyphs used as the ring (with the chosen ink check inside).
+            The glyph rings carry the font's calligraphic thick/thin. Judge the enlarged versions; the bottom row is
+            true 18px size.</p>
+        <div class="grid" id="ring-light"></div>
+    </div>
+
+    <div class="dark-wrap ring-section">
+        <h2>Ring shape — dark mode</h2>
+        <div class="grid" id="ring-dark"></div>
+    </div>
+
+    <script>
+        var INK_CHECK = '<svg class="ink" viewBox="0 0 24 24"><path d="M6.8 10 C8.6 11 10.6 11.8 12 12.6 C13.8 9.4 16.2 5.8 19.2 3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+        var RINGS = [
+            { cap: 'Circle (current)', stage: 'circle', glyph: '', realClass: 'ring-real' },
+            { cap: 'PP Playground “O”', stage: 'oh', glyph: '<span class="glyph">O</span>' },
+            { cap: 'PP Playground “o”', stage: 'ol', glyph: '<span class="glyph lc">o</span>' }
+        ];
+
+        function renderRings(id) {
+            var grid = document.getElementById(id);
+            RINGS.forEach(function (r) {
+                var demo = document.createElement('div');
+                demo.className = 'demo';
+
+                var cell = document.createElement('div');
+                cell.className = 'ring-cell';
+
+                var stage = document.createElement('div');
+                stage.className = 'ring-stage ' + r.stage;
+                stage.innerHTML = r.glyph + INK_CHECK;
+                cell.appendChild(stage);
+
+                var cap = document.createElement('div');
+                cap.className = 'ring-cap';
+                cap.textContent = r.cap;
+                cell.appendChild(cap);
+
+                // real-size
+                var row = document.createElement('div');
+                row.className = 'real-row';
+                if (r.stage === 'circle') {
+                    var ring = document.createElement('span');
+                    ring.className = 'ring-real';
+                    ring.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6.8 10 C8.6 11 10.6 11.8 12 12.6 C13.8 9.4 16.2 5.8 19.2 3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+                    row.appendChild(ring);
+                } else {
+                    var rg = document.createElement('span');
+                    rg.className = 'ring-real-glyph';
+                    rg.innerHTML = r.glyph + INK_CHECK;
+                    row.appendChild(rg);
+                }
+                var lbl = document.createElement('span');
+                lbl.textContent = 'Accepts with pleasure';
+                row.appendChild(lbl);
+                cell.appendChild(row);
+
+                demo.appendChild(cell);
+                grid.appendChild(demo);
+            });
+        }
+
+        // Each variant: a name + the inner SVG markup (drawn in a 0 0 24 24 viewBox,
+        // where 12,12 is the ring center). Vertex is placed at/near 12,12 so the
+        // divet lands on the crosshair.
+        var VARIANTS = [
+            {
+                name: '1 · Clean ink, vertex centered',
+                svg: '<path d="M7.5 8 L12 12 L18.5 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+            },
+            {
+                name: '2 · Fine ink',
+                svg: '<path d="M7.5 8 L12 12 L18.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+            },
+            {
+                name: '3 · Deeper hook',
+                svg: '<path d="M6.5 9 L12 12 L19 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+            },
+            {
+                name: '4 · Curved ink (a touch of hand)',
+                svg: '<path d="M6.8 9.4 C8.6 10.4 10.6 11.2 12 12 C13.8 9.2 16.2 5.6 19.2 3.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'
+            },
+            {
+                name: '5 · Tapered brush (filled)',
+                // Variable-width calligraphic stroke: thin short arm swelling toward
+                // the vertex, tapering to a point on the long arm.
+                svg: '<path d="M6.9 8.4 C8.8 9.6 10.6 10.8 12 12.6 C13.8 9.4 16.4 5.6 19.4 3 C16.8 6.4 14.2 10 12.4 12.4 C10.8 10.8 8.8 9.6 7.6 8.9 Z" fill="currentColor"/>'
+            },
+            {
+                name: '6 · Current (turbulence)',
+                svg: '<filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/></filter><path d="M2.5 12.5 C5 14 7.5 16.5 9 19.5 C12 13 16 6.5 22.5 2" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" filter="url(%23rough)"/>'.replace('%23rough', '#rough')
+            }
+        ];
+
+        function renderGrid(id) {
+            var grid = document.getElementById(id);
+            VARIANTS.forEach(function (v, i) {
+                var demo = document.createElement('div');
+                demo.className = 'demo';
+
+                var name = document.createElement('div');
+                name.className = 'name';
+                name.textContent = v.name;
+                demo.appendChild(name);
+
+                var big = document.createElement('div');
+                big.className = 'ring-big';
+                big.innerHTML = '<svg viewBox="0 0 24 24">' + uniq(v.svg, id + i) + '</svg>';
+                demo.appendChild(big);
+
+                var row = document.createElement('div');
+                row.className = 'real-row';
+                var ring = document.createElement('span');
+                ring.className = 'ring-real';
+                ring.innerHTML = '<svg viewBox="0 0 24 24">' + uniq(v.svg, id + i + 'r') + '</svg>';
+                row.appendChild(ring);
+                var lbl = document.createElement('span');
+                lbl.textContent = 'Accepts with pleasure';
+                row.appendChild(lbl);
+                demo.appendChild(row);
+
+                grid.appendChild(demo);
+            });
+        }
+
+        // Filter ids must be unique per instance or the browser reuses the first.
+        function uniq(svg, key) {
+            return svg.replace(/id="rough"/g, 'id="rough-' + key + '"')
+                .replace(/url\(#rough\)/g, 'url(#rough-' + key + ')');
+        }
+
+        renderGrid('grid-light');
+        renderGrid('grid-dark');
+        renderRings('ring-light');
+        renderRings('ring-dark');
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,384 @@
+<!--
+  rive-quantize-test.html — DISPOSABLE stop-motion cadence test harness.
+
+  Purpose: play the DC Metro intro .riv under a quantized ("on twos") playback
+  loop so Andrew can FEEL whether stepped cadence improves the animation before
+  touching the real rsvp.html integration.
+
+  This file is throwaway. Delete it once the cadence decision is made. It does
+  NOT touch rsvp.html, js/rive-intro.js, styles.css, the nav, or the footer.
+
+  If on-twos feels right, the real change is to rework js/rive-intro.js to own
+  its own rAF loop and scrub the linear timeline, detecting completion by
+  elapsed time instead of the state machine's `complete` event. That is a
+  SEPARATE task — not part of this one.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rive Quantize Test</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #0a0a0a;
+    color: #f4f4f4;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    overflow: hidden;
+  }
+  #stage {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+  #rive-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #panel {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 10px;
+    padding: 14px 16px;
+    max-width: 340px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    user-select: none;
+  }
+  #panel h1 {
+    margin: 0 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9aa;
+  }
+  .cadence-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .cadence-btn {
+    flex: 1 1 auto;
+    min-width: 64px;
+    padding: 8px 6px;
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1.25;
+    text-align: center;
+    color: #ddd;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+  .cadence-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .cadence-btn.active {
+    color: #0a0a0a;
+    background: #f4f4f4;
+    border-color: #f4f4f4;
+    font-weight: 600;
+  }
+  .controls-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  #restart-btn {
+    flex: 1;
+    padding: 8px;
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #ddd;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+  #restart-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  #readout {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #cfd6d3;
+  }
+  #readout .val {
+    color: #fff;
+    font-weight: 600;
+  }
+  #readout .flag-clean { color: #8fa; }
+  #readout .flag-uneven { color: #ffb454; }
+  #status {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 11px;
+    line-height: 1.5;
+    color: #8fa;
+  }
+  #status.warn {
+    color: #ffb454;
+  }
+  #status.error {
+    color: #ff6b6b;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="rive-canvas"></canvas>
+</div>
+
+<div id="panel">
+  <h1>Cadence Test</h1>
+  <div class="cadence-row" id="cadence-row"></div>
+  <div class="controls-row">
+    <button id="restart-btn">Restart</button>
+  </div>
+  <div id="readout">
+    Cadence: <span class="val" id="ro-cadence">Smooth (60)</span><br>
+    Display: <span class="val" id="ro-refresh">measuring…</span><br>
+    <span id="ro-flag-line">Stepping: <span class="val" id="ro-flag"></span><br></span>
+    t: <span class="val" id="ro-t">0.00</span> / <span id="ro-dur">22</span>s
+  </div>
+  <div id="status">Loading runtime…</div>
+</div>
+
+<!-- Pinned Rive high-level canvas runtime — do NOT use @latest (keep reproducible). -->
+<script src="https://unpkg.com/@rive-app/canvas@2.38.3"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ---- CONFIG (one-line changes live here) --------------------------------
+  const ANIMATION_NAME = 'Timeline 1'; // linear timeline, NOT a state machine
+  const DURATION_S = 22;               // seconds of meaningful content (card fills ~22s)
+  const RIV_SRC = 'assets/rive/metro-intro.riv';
+  // -------------------------------------------------------------------------
+
+  // Cadence ladder, subtle → moderate. STEP_HZ = 0 means smooth (no quantization).
+  // The choppy low range (10/8/6) was dropped — this comparison is the 12..60 band.
+  const CADENCES = [
+    { hz: 0,  label: 'Smooth (60)' },
+    { hz: 30, label: '30' },
+    { hz: 24, label: '24' },
+    { hz: 20, label: '20' },
+    { hz: 18, label: '18' },
+    { hz: 15, label: '15' },
+    { hz: 12, label: '12' },
+  ];
+
+  let STEP_HZ = 0;          // live-mutable current cadence
+  let startTime = 0;        // performance.now() at (re)start
+  let complete = false;     // reached DURATION_S
+  let riveInstance = null;
+  let rafId = 0;
+  let detectedRefresh = null; // measured display refresh in Hz (null until measured)
+
+  // Redraw detection: scrub() while paused must advance AND redraw. We can't
+  // read pixels reliably cross-origin-safe here, so we detect the failure
+  // mode by tracking whether scrub is even being called with changing values
+  // while time climbs — and we surface a loud warning if the canvas looks
+  // frozen. The real signal Andrew watches is visual, so we make the caveat
+  // explicit in status text the moment we start scrubbing.
+  let sawScrub = false;
+  let scrubWarned = false;
+
+  const canvas    = document.getElementById('rive-canvas');
+  const cadRow    = document.getElementById('cadence-row');
+  const restart   = document.getElementById('restart-btn');
+  const roCadence = document.getElementById('ro-cadence');
+  const roRefresh = document.getElementById('ro-refresh');
+  const roFlag    = document.getElementById('ro-flag');
+  const roFlagLine= document.getElementById('ro-flag-line');
+  const roT       = document.getElementById('ro-t');
+  const roDur     = document.getElementById('ro-dur');
+  const statusEl  = document.getElementById('status');
+
+  roDur.textContent = String(DURATION_S);
+
+  function setStatus(msg, kind) {
+    statusEl.textContent = msg;
+    statusEl.className = kind || '';
+  }
+
+  // ---- Readout ------------------------------------------------------------
+  // Whether the selected step rate divides evenly into the display refresh.
+  // Even → each step holds for a constant number of screen frames ("clean").
+  // Uneven → steps hold for a variable frame count and may judder.
+  function updateReadout() {
+    roCadence.textContent = STEP_HZ === 0 ? 'Smooth (60)' : STEP_HZ + ' fps';
+    roRefresh.textContent = detectedRefresh ? detectedRefresh + ' Hz' : 'measuring…';
+
+    if (STEP_HZ === 0) {
+      roFlagLine.style.display = 'none';           // blank when Smooth
+    } else {
+      roFlagLine.style.display = '';
+      if (!detectedRefresh) {
+        roFlag.textContent = '(measuring refresh…)';
+        roFlag.className = 'val';
+      } else if (detectedRefresh % STEP_HZ === 0) {
+        roFlag.textContent = 'clean';
+        roFlag.className = 'val flag-clean';
+      } else {
+        roFlag.textContent = 'uneven — may judder';
+        roFlag.className = 'val flag-uneven';
+      }
+    }
+  }
+
+  // ---- Refresh-rate detection ---------------------------------------------
+  // Sample ~30 rAF intervals, take the median delta, snap ~16.6ms → 60Hz and
+  // ~8.3ms → 120Hz, otherwise report the measured rate. Median (not mean)
+  // shrugs off the occasional long frame.
+  function measureRefresh() {
+    const deltas = [];
+    let last = performance.now();
+    function sample(now) {
+      deltas.push(now - last);
+      last = now;
+      if (deltas.length < 30) {
+        requestAnimationFrame(sample);
+      } else {
+        deltas.sort(function (a, b) { return a - b; });
+        const median = deltas[Math.floor(deltas.length / 2)];
+        if (Math.abs(median - 16.6) < 2)      detectedRefresh = 60;
+        else if (Math.abs(median - 8.3) < 1.5) detectedRefresh = 120;
+        else                                   detectedRefresh = Math.round(1000 / median);
+        updateReadout();
+      }
+    }
+    requestAnimationFrame(sample);
+  }
+
+  // ---- Cadence buttons ----------------------------------------------------
+  const buttons = [];
+  CADENCES.forEach(function (c) {
+    const btn = document.createElement('button');
+    btn.className = 'cadence-btn' + (c.hz === STEP_HZ ? ' active' : '');
+    btn.textContent = c.label;
+    btn.addEventListener('click', function () {
+      STEP_HZ = c.hz; // takes effect immediately, no reload
+      buttons.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      updateReadout();
+    });
+    buttons.push(btn);
+    cadRow.appendChild(btn);
+  });
+
+  updateReadout();
+  measureRefresh();
+
+  restart.addEventListener('click', function () {
+    startTime = performance.now();
+    complete = false;
+    if (statusEl.className === 'warn' && scrubWarned) {
+      // keep the warning; otherwise refresh to running
+    } else if (riveInstance) {
+      setStatus('Playing — scrub() driving the linear timeline.', '');
+    }
+  });
+
+  // ---- Canvas sizing ------------------------------------------------------
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width  = Math.max(1, Math.round(rect.width  * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    if (riveInstance) {
+      // High-level runtime helper — matches the drawing surface to the canvas box.
+      if (typeof riveInstance.resizeDrawingSurfaceToCanvas === 'function') {
+        riveInstance.resizeDrawingSurfaceToCanvas();
+      } else if (typeof riveInstance.resizeToCanvas === 'function') {
+        riveInstance.resizeToCanvas();
+      }
+    }
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  // ---- Playback loop (the actual point of the test) -----------------------
+  function frame() {
+    rafId = requestAnimationFrame(frame);
+    if (!riveInstance) return;
+
+    const elapsed = (performance.now() - startTime) / 1000;
+    const t = STEP_HZ === 0
+      ? elapsed                                  // smooth
+      : Math.floor(elapsed * STEP_HZ) / STEP_HZ; // stepped
+    const clamped = Math.min(t, DURATION_S);
+
+    try {
+      riveInstance.scrub(ANIMATION_NAME, clamped);
+      if (!sawScrub) {
+        sawScrub = true;
+        // First successful scrub — remind Andrew to watch for a frozen canvas.
+        if (!complete) {
+          setStatus('Playing — watch the canvas. If it stays frozen on frame 1 ' +
+            'while t climbs, scrub() is not redrawing while paused (needs low-level runtime).', '');
+        }
+      }
+    } catch (err) {
+      if (!scrubWarned) {
+        scrubWarned = true;
+        setStatus('scrub() threw: ' + err.message +
+          ' — this animation/runtime may need the low-level runtime.', 'error');
+      }
+    }
+
+    roT.textContent = clamped.toFixed(2);
+
+    if (clamped >= DURATION_S && !complete) {
+      complete = true;
+      setStatus('Complete — reached DURATION_S (' + DURATION_S + 's). ' +
+        'Press Restart to replay at the selected cadence.', '');
+    }
+  }
+
+  // ---- Boot ---------------------------------------------------------------
+  if (typeof rive === 'undefined') {
+    setStatus('Rive runtime failed to load (check network / unpkg).', 'error');
+    return;
+  }
+
+  setStatus('Loading ' + RIV_SRC + ' …', '');
+
+  riveInstance = new rive.Rive({
+    src: RIV_SRC,
+    canvas: canvas,
+    autoplay: false,
+    animations: ANIMATION_NAME, // linear timeline, NOT stateMachines
+    layout: new rive.Layout({ fit: rive.Fit.Cover, alignment: rive.Alignment.Center }),
+    onLoad: function () {
+      resizeCanvas();
+      startTime = performance.now();
+      complete = false;
+      setStatus('Loaded. Playing "' + ANIMATION_NAME + '" via scrub().', '');
+      rafId = requestAnimationFrame(frame);
+    },
+    onLoadError: function (err) {
+      setStatus('Failed to load .riv — ' +
+        (err && err.message ? err.message : 'is assets/rive/metro-intro.riv present?'), 'error');
+    },
+  });
+})();
+</script>
+</body>
+</html>

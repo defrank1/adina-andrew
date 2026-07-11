@@ -9,6 +9,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="rsvp-styles.css">
     <link rel="preload" as="image" href="images/textures/combined-light.png">
     <link rel="preload" as="image" href="images/textures/combined-dark.png">
     <!-- The end-state card must be decoded before the hard cut lands on it. -->
@@ -51,7 +52,30 @@
                     data-light="images/invitation/invitation-light-new.png"
                     data-dark="images/invitation/invitation-dark-new.png"
                     alt="Adina Beth and Andrew Spencer — wedding invitation" />
+                <!-- RSVP arrow — the entry into the card flow. Positioned off the card's
+                     artboard fractions (not viewport pixels) so it tracks any future
+                     card re-placement. Fades in with the settle; pointer-events: auto
+                     re-enables it inside the pointer-events: none end-state. The
+                     .rsvp-arrow-breathe class carries the optional breathing glow —
+                     delete the class to kill it. -->
+                <button id="rsvp-arrow" class="rsvp-arrow rsvp-arrow-breathe" aria-label="Begin RSVP">
+                    <span class="rsvp-arrow-label">RSVP</span>
+                    <svg class="rsvp-arrow-icon" viewBox="0 0 34 16" width="34" height="16" aria-hidden="true"
+                        fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M1 8 H 31 M 24.5 1.5 L 31 8 L 24.5 14.5" />
+                    </svg>
+                </button>
             </div>
+        </div>
+
+        <!-- Card flow — the sequenced RSVP. Hidden until the arrow starts the flow
+             (body.rsvp-flow-active). A fixed texture backdrop keeps the grain
+             stationary while the card track slides/scrolls above it on its own
+             plane. Panels are built by js/rsvp-flow.js. -->
+        <div id="rsvp-flow" class="rsvp-flow" hidden>
+            <div class="rsvp-flow-backdrop" aria-hidden="true"></div>
+            <div id="rsvp-flow-track" class="rsvp-flow-track"></div>
         </div>
 
         <div id="footer-placeholder"></div>
@@ -127,6 +151,7 @@
     </script>
     <script src="includes/site-init.js"></script>
     <script src="js/rive-intro.js"></script>
+    <script src="js/rsvp-flow.js"></script>
 </body>
 
 </html>

@@ -78,6 +78,31 @@
         if (endState) { endState.classList.remove('pre-reveal'); }
     }
 
+    // resetThemeToLight — the animation's final frames are effectively light mode
+    // (cream cover + light card), so exiting the animation always lands the page in
+    // light mode; a dark settle would snap awkwardly. Runs while the canvas still
+    // covers the page, so nothing visibly flips. Mirrors site-init.js's toggle logic
+    // (class + localStorage + image swap + footer symbol) so the toggle keeps
+    // working normally afterward. The user's preference is intentionally
+    // overridden, once per animation viewing (see decisions.md, July 11, 2026).
+    function resetThemeToLight() {
+        document.documentElement.classList.remove('dark-mode');
+        document.body.classList.remove('dark-mode');
+        try { localStorage.setItem('darkMode', 'disabled'); } catch (e) { /* private mode */ }
+        if (typeof updateImages === 'function') {
+            updateImages(false);   // site-init.js's swap loop, reused
+        } else {
+            document.querySelectorAll('[data-light][data-dark]').forEach(function (img) {
+                img.src = img.dataset.light;
+            });
+        }
+        var sym = document.getElementById('toggle-sym');
+        if (sym && sym.childNodes[0]) {
+            sym.childNodes[0].textContent = '☀';
+            sym.style.fontSize = '36px';
+        }
+    }
+
     // hardCut — the seamless swap: reveal the pixel-registered end-state and hide the
     // canvas in the SAME frame (display, not an opacity fade — no dissolve, no hold).
     // The canvas NODE is removed only after the settle completes; removing it
@@ -88,6 +113,11 @@
         finished = true;
         if (safetyTimer) { clearTimeout(safetyTimer); safetyTimer = null; }
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        // Light-mode reset fires ONLY on the animation path — the canvas was actually
+        // shown (revealCanvas removed .hidden), i.e. real-time completion, Skip, or a
+        // post-reveal Rive error. Bail paths (return visit / reduced-motion / missing
+        // asset) never reveal the canvas and land settled with the user's theme intact.
+        if (!container.classList.contains('hidden')) { resetThemeToLight(); }
         revealEndState();
         container.style.display = 'none';
         if (skipBtn) { skipBtn.classList.add('hidden'); }
