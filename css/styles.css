@@ -42,40 +42,40 @@
 
 @font-face {
     font-family: 'PP Playground Medium';
-    src: url('fonts/PPPlayground-Medium.woff2') format('woff2'),
-        url('fonts/PPPlayground-Medium.woff') format('woff');
+    src: url('../fonts/PPPlayground-Medium.woff2') format('woff2'),
+        url('../fonts/PPPlayground-Medium.woff') format('woff');
     font-weight: 500;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'PP Watch';
-    src: url('fonts/PPWatch-Bold.woff2') format('woff2'),
-        url('fonts/PPWatch-Bold.woff') format('woff');
+    src: url('../fonts/PPWatch-Bold.woff2') format('woff2'),
+        url('../fonts/PPWatch-Bold.woff') format('woff');
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'PP Watch';
-    src: url('fonts/PPWatch-Medium.woff2') format('woff2'),
-        url('fonts/PPWatch-Medium.woff') format('woff');
+    src: url('../fonts/PPWatch-Medium.woff2') format('woff2'),
+        url('../fonts/PPWatch-Medium.woff') format('woff');
     font-weight: 500;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'PP Watch';
-    src: url('fonts/PPWatch-Extralight.woff2') format('woff2'),
-        url('fonts/PPWatch-Extralight.woff') format('woff');
+    src: url('../fonts/PPWatch-Extralight.woff2') format('woff2'),
+        url('../fonts/PPWatch-Extralight.woff') format('woff');
     font-weight: 200;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Sentient';
-    src: url('fonts/Sentient-Regular.woff2') format('woff2'),
-        url('fonts/Sentient-Regular.woff') format('woff');
+    src: url('../fonts/Sentient-Regular.woff2') format('woff2'),
+        url('../fonts/Sentient-Regular.woff') format('woff');
     font-weight: 400;
     font-style: normal;
 }
@@ -120,7 +120,7 @@
 body {
     font-family: var(--font-body);
     background-color: #F1EDEA;
-    background-image: url('images/textures/combined-light.png');
+    background-image: url('../images/textures/combined-light.png');
     background-size: 200px 200px;
     background-repeat: repeat;
     color: var(--color-dark-green);
@@ -136,7 +136,7 @@ body {
 
 body.dark-mode {
     background-color: #122a20;
-    background-image: url('images/textures/combined-dark.png');
+    background-image: url('../images/textures/combined-dark.png');
     background-size: 200px 200px;
     background-repeat: repeat;
     color: var(--color-soft-white);
@@ -192,14 +192,14 @@ body.locked {
     z-index: 1;
     pointer-events: none;
     background-color: #F1EDEA;
-    background-image: url('images/textures/combined-light.png');
+    background-image: url('../images/textures/combined-light.png');
     background-size: 200px 200px;
     background-repeat: repeat;
 }
 
 body.dark-mode #password-overlay::before {
     background-color: #122a20;
-    background-image: url('images/textures/combined-dark.png');
+    background-image: url('../images/textures/combined-dark.png');
     background-size: 200px 200px;
     background-repeat: repeat;
 }

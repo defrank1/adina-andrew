@@ -333,17 +333,16 @@
     transition: border-color 120ms ease;
 }
 
-/* Ink check — a clean curved single-stroke tick with round caps/joins (an ink
-   stroke, not a rough pencil), its vertex/divet centered on the ring, sized a
+/* Plain checkmark — a standard two-segment tick, round caps/joins, sized a
    little larger than the ring so the long arm spills past the circle. Masked,
-   so its colour follows the theme. (Chosen from rsvp-checkmark-demos.html.) */
+   so its colour follows the theme. */
 .radio-label input[type="radio"]::before {
     content: "";
     width: 26px;
     height: 26px;
     background-color: var(--color-dark-green);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M6.8%2010%20C8.6%2011%2010.6%2011.8%2012%2012.6%20C13.8%209.4%2016.2%205.8%2019.2%203.4'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M6.8%2010%20C8.6%2011%2010.6%2011.8%2012%2012.6%20C13.8%209.4%2016.2%205.8%2019.2%203.4'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M5%2012.5%20L10%2017.5%20L19%207'%20fill='none'%20stroke='black'%20stroke-width='2.2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M5%2012.5%20L10%2017.5%20L19%207'%20fill='none'%20stroke='black'%20stroke-width='2.2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
     transform: scale(0);
     transition: transform 140ms ease;
 }
@@ -708,14 +707,14 @@ body.page-rsvp.rsvp-flow-active .site-footer {
     inset: 0;
     z-index: 0;
     background-color: #F1EDEA;
-    background-image: url('images/textures/combined-light.png');
+    background-image: url('../images/textures/combined-light.png');
     background-size: 200px 200px;
     background-repeat: repeat;
 }
 
 body.dark-mode .rsvp-flow-backdrop {
     background-color: #122a20;
-    background-image: url('images/textures/combined-dark.png');
+    background-image: url('../images/textures/combined-dark.png');
 }
 
 .rsvp-flow-track {
@@ -756,22 +755,18 @@ body.dark-mode .rsvp-flow-backdrop {
 
 /* ---- The reply card ------------------------------------------------------- */
 
-/* Modeled on the printed RSVP enclosure — and now made of the SAME paper as the
-   invitation PNG: the baked grain tile lives ON the card (not just the page
-   plane behind it), at the same 200px scale as the body, so each successive
-   card reads as a physical piece of the same stock. The card carries its own
-   grain WITH it as it slides; the fixed backdrop keeps the page's grain still
-   behind it. Single hairline inner frame, near-sharp corners, nav-diamond
-   raised shadow. */
+/* Modeled on the printed RSVP enclosure. Surface follows the SAME logic as the
+   floating nav diamond: a flat fill color distinct from the body (#EBE7E3 light
+   / #0e2319 dark — the nav's dark fill) that floats on the grainy page plane
+   with a single drop-shadow for separation (the page's grain lives on the fixed
+   backdrop behind the card, not on the card). Double-rule inner frame, near-
+   sharp corners. */
 .rsvp-card {
     position: relative;
     width: min(520px, 100%);
-    background-color: #F1EDEA;
-    background-image: url('images/textures/combined-light.png');
-    background-size: 200px 200px;
-    background-repeat: repeat;
+    background-color: #EBE7E3;
     border-radius: 2px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22), 0 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
     padding: 2.75rem 2.4rem 2.5rem;
     color: var(--color-dark-green);
     outline: none;
@@ -799,10 +794,9 @@ body.dark-mode .rsvp-flow-backdrop {
 }
 
 body.dark-mode .rsvp-card {
-    background-color: #1a3a2e;
-    background-image: url('images/textures/combined-dark.png');
+    background-color: #0e2319;
     color: var(--color-soft-white);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .rsvp-card::before,
@@ -864,36 +858,108 @@ body.dark-mode .rsvp-card-title {
     font-size: 0.9rem;
 }
 
-/* Dress tag as a button — deep-links to its FAQ answer (currently only Black
-   Tie Preferred). Keeps the bordered-capsule look; gains a hover so it reads as
-   clickable. */
-.weekend-event-dress-link {
-    text-decoration: none;
-    color: inherit;
+/* Dress tag as a popover trigger — the bordered capsule is a <button>; hovering,
+   focusing, or clicking it reveals the dress-code definition in a small popover.
+   Keeps the capsule look, gains a hover so it reads as interactive. */
+.weekend-event-dress-wrap {
+    position: relative;
+    display: inline-block;
+    margin: 0.5rem 0 0.55rem;
+}
+
+/* Button reset — the capsule border/type come from .weekend-event-dress; strip
+   the native button chrome and its baked-in margins (moved to the wrap). */
+.weekend-event-dress-btn {
+    margin: 0;
+    background: none;
     cursor: pointer;
     transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
-.weekend-event-dress-link:hover,
-.weekend-event-dress-link:focus-visible {
+.weekend-event-dress-btn:hover,
+.weekend-event-dress-btn:focus-visible {
     border-color: var(--color-dark-green);
     color: var(--color-accent);
     opacity: 1;
 }
 
-.weekend-event-dress-link:focus-visible {
+.weekend-event-dress-btn:focus-visible {
     outline: 2px solid var(--color-dark-green);
     outline-offset: 2px;
 }
 
-body.dark-mode .weekend-event-dress-link:hover,
-body.dark-mode .weekend-event-dress-link:focus-visible {
+body.dark-mode .weekend-event-dress-btn:hover,
+body.dark-mode .weekend-event-dress-btn:focus-visible {
     border-color: var(--color-soft-white);
     color: var(--color-soft-white);
 }
 
-body.dark-mode .weekend-event-dress-link:focus-visible {
+body.dark-mode .weekend-event-dress-btn:focus-visible {
     outline-color: var(--color-soft-white);
+}
+
+/* The popover itself — a small card in the same surface language as the reply
+   card (flat fill, hairline border, drop shadow), sitting below the tag with an
+   upward caret. Hidden until hover/focus/.open. */
+.dress-popover {
+    position: absolute;
+    top: calc(100% + 11px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    z-index: 20;
+    width: max-content;
+    max-width: 240px;
+    padding: 0.7rem 0.85rem;
+    background-color: #EBE7E3;
+    border: 1px solid var(--color-dark-green);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    letter-spacing: normal;
+    text-transform: none;
+    text-align: center;
+    color: var(--color-dark-green);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+/* Upward caret */
+.dress-popover::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 50%) rotate(45deg);
+    width: 9px;
+    height: 9px;
+    background-color: #EBE7E3;
+    border-left: 1px solid var(--color-dark-green);
+    border-top: 1px solid var(--color-dark-green);
+}
+
+.weekend-event-dress-wrap:hover .dress-popover,
+.weekend-event-dress-btn:focus-visible + .dress-popover,
+.dress-popover.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+body.dark-mode .dress-popover {
+    background-color: #0e2319;
+    border-color: var(--color-soft-white);
+    color: var(--color-soft-white);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .dress-popover::before {
+    background-color: #0e2319;
+    border-color: var(--color-soft-white);
 }
 
 /* Afterparty info block — quieter, separated by a hairline. */
@@ -1027,8 +1093,8 @@ body.dark-mode .rsvp-card-person {
     width: 20px;
     height: 20px;
     background-color: var(--color-dark-green);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M6.8%2010%20C8.6%2011%2010.6%2011.8%2012%2012.6%20C13.8%209.4%2016.2%205.8%2019.2%203.4'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M6.8%2010%20C8.6%2011%2010.6%2011.8%2012%2012.6%20C13.8%209.4%2016.2%205.8%2019.2%203.4'%20fill='none'%20stroke='black'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M5%2012.5%20L10%2017.5%20L19%207'%20fill='none'%20stroke='black'%20stroke-width='2.2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M5%2012.5%20L10%2017.5%20L19%207'%20fill='none'%20stroke='black'%20stroke-width='2.2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
     transform: scale(0);
     transition: transform 140ms ease;
 }

@@ -1,11 +1,14 @@
 wedding-website/
-├── CLAUDE.md                    # Design spec — Claude Code reads this before changes
-├── decisions.md                 # Design & technical decision log
-├── file-structure.txt           # This file — quick-reference tree
+├── CLAUDE.md                    # Design spec — Claude Code reads this before changes (stays at root)
 ├── CNAME                        # Custom domain: adinaandrew2026.com
 ├── .htaccess
 ├── .gitattributes
 ├── .gitignore
+│
+│   # ── Docs ────────────────────────────────────────────────────
+├── docs/
+│   ├── decisions.md             # Design & technical decision log
+│   └── file-structure.txt       # This file — quick-reference tree
 │
 │   # ── Pages (served) ──────────────────────────────────────────
 ├── index.html                   # Homepage, served at site root
@@ -21,8 +24,9 @@ wedding-website/
 ├── rsvp-internal.html           # Internal RSVP staging form (superseded by rsvp.html flow)
 │
 │   # ── Styles ──────────────────────────────────────────────────
-├── styles.css                   # Global styles (all pages)
-├── rsvp-styles.css              # RSVP-specific styles
+├── css/                         # url() paths inside are ../-relative to root
+│   ├── styles.css               # Global styles (all pages)
+│   └── rsvp-styles.css          # RSVP-specific styles
 │
 ├── includes/
 │   ├── nav.html                 # Shared nav markup (injected via fetch)

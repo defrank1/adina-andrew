@@ -51,7 +51,8 @@
             venue: 'Sonoma Restaurant & Wine Bar',
             address: '223 Pennsylvania Avenue SE',
             mapUrl: 'https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC',
-            dress: 'Semi-Formal'
+            dress: 'Semi-Formal',
+            dressInfo: 'Sport coats and trousers, or dresses, jumpsuits, and blouses.'
         },
         saturday: {
             name: 'Wedding Ceremony and Reception',
@@ -61,10 +62,7 @@
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Black Tie Preferred',
-            // Deep-link the dress tag to its FAQ answer ("What is Black Tie
-            // Preferred?"). Friday's Semi-Formal is defined in its own copy and
-            // Sunday's "Come as you are" is a bare tag, so neither links out.
-            faqAnchor: 'faq-black-tie'
+            dressInfo: 'Tuxedos and full-length gowns are encouraged. Dark suits with a white shirt and dark tie, or formal cocktail dresses, are also welcome.'
         },
         sunday: {
             name: 'Farewell Brunch',
@@ -72,7 +70,8 @@
             venue: 'Willowsong at InterContinental Washington, DC — The Wharf',
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
-            dress: 'Come as you are'
+            dress: 'Come as you are',
+            dressInfo: 'Wear whatever feels comfortable — no need to dress up.'
         }
     };
 
@@ -164,6 +163,54 @@
         return labelEl;
     }
 
+    // Dress tag as a popover trigger: the bordered capsule is a button; clicking
+    // or hovering it reveals the dress-code definition in a small popover, so the
+    // guidance lives on the card (no jump to the FAQ). Hover/focus show it on
+    // desktop (CSS); click toggles it (and persists) for touch.
+    var dressPopoverId = 0;
+
+    function makeDressTag(detail) {
+        // No definition → keep it a plain, non-interactive tag.
+        if (!detail.dressInfo) {
+            return el('span', 'weekend-event-dress', detail.dress);
+        }
+
+        var wrap = el('span', 'weekend-event-dress-wrap');
+
+        var btn = el('button', 'weekend-event-dress weekend-event-dress-btn', detail.dress);
+        btn.type = 'button';
+        btn.setAttribute('aria-expanded', 'false');
+
+        var pop = el('span', 'dress-popover', detail.dressInfo);
+        pop.setAttribute('role', 'tooltip');
+        pop.id = 'dress-pop-' + (++dressPopoverId);
+        btn.setAttribute('aria-describedby', pop.id);
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var willOpen = !pop.classList.contains('open');
+            closeAllDressPopovers();
+            if (willOpen) {
+                pop.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+            }
+        });
+
+        wrap.appendChild(btn);
+        wrap.appendChild(pop);
+        return wrap;
+    }
+
+    function closeAllDressPopovers() {
+        var open = document.querySelectorAll('.dress-popover.open');
+        for (var i = 0; i < open.length; i++) {
+            open[i].classList.remove('open');
+            var wrap = open[i].parentNode;
+            var btn = wrap && wrap.querySelector('.weekend-event-dress-btn');
+            if (btn) { btn.setAttribute('aria-expanded', 'false'); }
+        }
+    }
+
     // Condensed event header for a card: when / dress tag / venue + address link.
     function makeCardEventMeta(detail) {
         var wrap = el('div', 'weekend-event');
@@ -171,18 +218,7 @@
         wrap.appendChild(el('p', 'weekend-event-when', detail.when));
 
         if (detail.dress) {
-            // If the dress code has a matching FAQ answer, the tag becomes a
-            // button that deep-links to it (new tab, so the in-progress RSVP
-            // isn't lost). Otherwise it stays a plain tag.
-            if (detail.faqAnchor) {
-                var dressLink = el('a', 'weekend-event-dress weekend-event-dress-link', detail.dress);
-                dressLink.href = '/faq#' + detail.faqAnchor;
-                dressLink.target = '_blank';
-                dressLink.rel = 'noopener noreferrer';
-                wrap.appendChild(dressLink);
-            } else {
-                wrap.appendChild(el('span', 'weekend-event-dress', detail.dress));
-            }
+            wrap.appendChild(makeDressTag(detail));
         }
 
         var where = el('p', 'weekend-event-where');
@@ -208,6 +244,17 @@
 
         var prefersReduced = window.matchMedia &&
             window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Dress-code popovers: any click outside a dress tag, or Escape, closes
+        // them (the trigger's own click stops propagation so it can toggle).
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest || !e.target.closest('.weekend-event-dress-wrap')) {
+                closeAllDressPopovers();
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { closeAllDressPopovers(); }
+        });
 
         // ---- flow state ----
         var invitation = null;        // the selected { email, invitedTo, people }

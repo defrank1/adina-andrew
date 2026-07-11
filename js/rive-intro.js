@@ -84,7 +84,7 @@
     // covers the page, so nothing visibly flips. Mirrors site-init.js's toggle logic
     // (class + localStorage + image swap + footer symbol) so the toggle keeps
     // working normally afterward. The user's preference is intentionally
-    // overridden, once per animation viewing (see decisions.md, July 11, 2026).
+    // overridden, once per animation viewing (see docs/decisions.md, July 11, 2026).
     function resetThemeToLight() {
         document.documentElement.classList.remove('dark-mode');
         document.body.classList.remove('dark-mode');
