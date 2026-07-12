@@ -42,6 +42,9 @@ function initCarousel(carousel) {
         captionEl.textContent = slides[0].getAttribute('data-caption') || '';
     }
 
+    // Slide 0 starts as the active (undimmed) photo
+    slides[0].classList.add('is-active');
+
     function updateCaption(index) {
         if (!captionEl) return;
         const text = slides[index].getAttribute('data-caption') || '';
@@ -84,6 +87,9 @@ function initCarousel(carousel) {
             currentIndex = nearest;
             dots.forEach(function (dot, i) {
                 dot.classList.toggle('active', i === currentIndex);
+            });
+            slides.forEach(function (slide, i) {
+                slide.classList.toggle('is-active', i === currentIndex);
             });
             updateCaption(currentIndex);
         }

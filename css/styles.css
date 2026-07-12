@@ -1661,6 +1661,12 @@ body.dark-mode .story-carousel-track:focus-visible {
 .story-carousel-slide {
     flex: 0 0 auto;              /* width follows the photo, not the track */
     scroll-snap-align: start;
+    opacity: 0.4;               /* non-centered photos dim so the caption's photo is clear */
+    transition: opacity 0.3s ease;
+}
+
+.story-carousel-slide.is-active {
+    opacity: 1;
 }
 
 .story-carousel-slide img {
