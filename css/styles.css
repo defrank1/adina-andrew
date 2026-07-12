@@ -1676,6 +1676,95 @@ body.dark-mode .story-carousel-track:focus-visible {
     border-radius: 4px;
 }
 
+/* Any story photo can be clicked to enlarge */
+.story-carousel-slide img,
+.story-photo-single img,
+.story-photo-pair img {
+    cursor: zoom-in;
+}
+
+/* Lightbox — enlarged photo over a dimmed page */
+.story-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 5vmin;
+    background: rgba(10, 22, 16, 0.94);   /* dims the whole page behind the photo */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    cursor: zoom-out;
+}
+
+.story-lightbox.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.story-lightbox-figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 94vw;
+}
+
+.story-lightbox-img {
+    max-width: 94vw;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 12px 44px rgba(0, 0, 0, 0.55);
+}
+
+.story-lightbox-caption {
+    color: var(--color-soft-white);
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: center;
+    opacity: 0.9;
+    max-width: 60ch;
+}
+
+.story-lightbox-close {
+    position: fixed;
+    top: 1rem;
+    right: 1.2rem;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-soft-white);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.story-lightbox-close:hover {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .story-lightbox {
+        transition: none;
+    }
+}
+
 .story-carousel-arrow {
     position: absolute;
     top: 50%;

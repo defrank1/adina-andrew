@@ -2,9 +2,76 @@
 // carousel.js — Photo carousels for Our Story
 // ===========================
 
+// ===========================
+// Lightbox — click any story photo to view it enlarged, page dimmed behind
+// ===========================
+let lightbox = null;
+
+function ensureLightbox() {
+    if (lightbox) return lightbox;
+    const overlay = document.createElement('div');
+    overlay.className = 'story-lightbox';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.innerHTML =
+        '<button class="story-lightbox-close" type="button" aria-label="Close photo">×</button>' +
+        '<figure class="story-lightbox-figure">' +
+        '<img class="story-lightbox-img" alt="">' +
+        '<figcaption class="story-lightbox-caption"></figcaption>' +
+        '</figure>';
+    const bigImg = overlay.querySelector('.story-lightbox-img');
+    const bigCap = overlay.querySelector('.story-lightbox-caption');
+    let lastFocus = null;
+
+    function close() {
+        if (!overlay.classList.contains('open')) return;
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+        lastFocus = null;
+    }
+
+    function open(src, alt, caption, trigger) {
+        lastFocus = trigger || null;
+        bigImg.src = src;
+        bigImg.alt = alt || '';
+        bigCap.textContent = caption || '';
+        bigCap.style.display = caption ? '' : 'none';
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';   // stop the page scrolling behind
+        overlay.querySelector('.story-lightbox-close').focus();
+    }
+
+    // Click anywhere on the scrim (image, caption, or the × button) dismisses it.
+    overlay.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') close();
+    });
+
+    document.body.appendChild(overlay);
+    lightbox = { open: open };
+    return lightbox;
+}
+
+function makePhotoZoomable(img, caption) {
+    if (img.dataset.zoomable) return;   // don't double-bind
+    img.dataset.zoomable = '1';
+    img.addEventListener('click', function () {
+        ensureLightbox().open(img.currentSrc || img.src, img.alt, caption, img);
+    });
+}
+
 function initCarousels() {
     const carousels = document.querySelectorAll('[data-carousel]');
     carousels.forEach(initCarousel);
+
+    // Standalone (non-carousel) story photos are zoomable too
+    document.querySelectorAll('.story-photo-single img, .story-photo-pair img').forEach(function (img) {
+        makePhotoZoomable(img, img.alt);
+    });
 }
 
 function initCarousel(carousel) {
@@ -15,6 +82,12 @@ function initCarousel(carousel) {
     const nextBtn = carousel.querySelector('.story-carousel-arrow-next');
 
     if (!track || slides.length === 0) return;
+
+    // Each slide photo can be clicked to view enlarged (caption follows the slide)
+    slides.forEach(function (slide) {
+        const img = slide.querySelector('img');
+        if (img) makePhotoZoomable(img, slide.getAttribute('data-caption') || img.alt);
+    });
 
     // Find the per-photo caption element within the same .story-moment, if present
     const moment = carousel.closest('.story-moment');
