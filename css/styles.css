@@ -1635,10 +1635,9 @@ body.dark-mode .story-prose {
 
 .story-carousel-track {
     display: flex;
-    gap: 8px;                               /* space between photos — tunable */
-    height: var(--story-carousel-h, 360px); /* uniform photo height — tunable */
+    height: var(--story-carousel-h, 360px); /* carousel box height — tunable */
     overflow-x: auto;
-    scroll-snap-type: x proximity;          /* was mandatory — gentler for a strip */
+    scroll-snap-type: x mandatory;          /* one photo at a time */
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1659,19 +1658,19 @@ body.dark-mode .story-carousel-track:focus-visible {
 }
 
 .story-carousel-slide {
-    flex: 0 0 auto;              /* width follows the photo, not the track */
-    scroll-snap-align: start;
-    opacity: 0.4;               /* non-centered photos dim so the caption's photo is clear */
-    transition: opacity 0.3s ease;
-}
-
-.story-carousel-slide.is-active {
-    opacity: 1;
+    flex: 0 0 100%;             /* each slide fills the frame — one photo at a time */
+    scroll-snap-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;    /* photo centered; blank space on the sides if narrower */
 }
 
 .story-carousel-slide img {
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     width: auto;
+    height: auto;
+    object-fit: contain;
     display: block;
     border-radius: 4px;
 }
