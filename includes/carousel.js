@@ -36,6 +36,7 @@ function initCarousel(carousel) {
     let currentIndex = 0;
     let scrollRaf = null;
     let captionFadeTimeout = null;
+    let navLockUntil = 0;   // while > now, ignore scroll-driven sync (a nav click is in control)
 
     // Initialize caption to slide 0's text immediately (no fade)
     if (captionEl) {
@@ -60,31 +61,11 @@ function initCarousel(carousel) {
         }, fadeMs);
     }
 
-    function scrollToSlide(index) {
+    // Apply an active index to dots / slide dimming / caption. The single source of truth.
+    function setActive(index) {
         const clamped = Math.max(0, Math.min(slides.length - 1, index));
-        const slide = slides[clamped];
-        track.scrollTo({
-            left: slide.offsetLeft - track.offsetLeft,
-            behavior: 'smooth',
-        });
-    }
-
-    function updateActive() {
-        const trackRect = track.getBoundingClientRect();
-        const trackCenter = trackRect.left + trackRect.width / 2;
-        let nearest = 0;
-        let minDist = Infinity;
-        slides.forEach(function (slide, i) {
-            const rect = slide.getBoundingClientRect();
-            const slideCenter = rect.left + rect.width / 2;
-            const dist = Math.abs(slideCenter - trackCenter);
-            if (dist < minDist) {
-                minDist = dist;
-                nearest = i;
-            }
-        });
-        if (nearest !== currentIndex) {
-            currentIndex = nearest;
+        if (clamped !== currentIndex) {
+            currentIndex = clamped;
             dots.forEach(function (dot, i) {
                 dot.classList.toggle('active', i === currentIndex);
             });
@@ -94,6 +75,50 @@ function initCarousel(carousel) {
             updateCaption(currentIndex);
         }
         updateArrowState();
+    }
+
+    function scrollToSlide(index) {
+        const clamped = Math.max(0, Math.min(slides.length - 1, index));
+        const slide = slides[clamped];
+        // Nav is authoritative: set the active slide directly. Scroll position can't
+        // distinguish slides that share the final screen (their snap targets both clamp
+        // to max scroll), so we don't rely on it here.
+        navLockUntil = Date.now() + 500;
+        setActive(clamped);
+        track.scrollTo({
+            left: slide.offsetLeft - track.offsetLeft,
+            behavior: 'smooth',
+        });
+    }
+
+    // Free-scroll (swipe/drag): infer the active slide from scroll position.
+    function updateActive() {
+        if (Date.now() < navLockUntil) {   // a nav click owns the active state right now
+            updateArrowState();
+            return;
+        }
+        const maxScroll = track.scrollWidth - track.clientWidth;
+        let nearest;
+        if (maxScroll > 0 && track.scrollLeft >= maxScroll - 2) {
+            nearest = slides.length - 1;   // pinned to the end → last slide is active
+        } else if (track.scrollLeft <= 2) {
+            nearest = 0;                   // pinned to the start → first slide is active
+        } else {
+            const trackRect = track.getBoundingClientRect();
+            const trackCenter = trackRect.left + trackRect.width / 2;
+            nearest = 0;
+            let minDist = Infinity;
+            slides.forEach(function (slide, i) {
+                const rect = slide.getBoundingClientRect();
+                const slideCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(slideCenter - trackCenter);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = i;
+                }
+            });
+        }
+        setActive(nearest);
     }
 
     function updateArrowState() {
