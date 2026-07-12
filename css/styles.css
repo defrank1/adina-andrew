@@ -120,7 +120,7 @@
 body {
     font-family: var(--font-body);
     background-color: #F1EDEA;
-    background-image: url('../images/textures/combined-light.png');
+    background-image: url('../assets/textures/combined-light.png');
     background-size: 200px 200px;
     background-repeat: repeat;
     color: var(--color-dark-green);
@@ -136,7 +136,7 @@ body {
 
 body.dark-mode {
     background-color: #122a20;
-    background-image: url('../images/textures/combined-dark.png');
+    background-image: url('../assets/textures/combined-dark.png');
     background-size: 200px 200px;
     background-repeat: repeat;
     color: var(--color-soft-white);
@@ -192,14 +192,14 @@ body.locked {
     z-index: 1;
     pointer-events: none;
     background-color: #F1EDEA;
-    background-image: url('../images/textures/combined-light.png');
+    background-image: url('../assets/textures/combined-light.png');
     background-size: 200px 200px;
     background-repeat: repeat;
 }
 
 body.dark-mode #password-overlay::before {
     background-color: #122a20;
-    background-image: url('../images/textures/combined-dark.png');
+    background-image: url('../assets/textures/combined-dark.png');
     background-size: 200px 200px;
     background-repeat: repeat;
 }

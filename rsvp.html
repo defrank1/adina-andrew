@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Adina and Andrew's wedding website.">
     <title>Adina & Andrew - RSVP</title>
-    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/favicon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/assets/favicon/favicon.png">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/rsvp-styles.css">
-    <link rel="preload" as="image" href="images/textures/combined-light.png">
-    <link rel="preload" as="image" href="images/textures/combined-dark.png">
+    <link rel="preload" as="image" href="assets/textures/combined-light.png">
+    <link rel="preload" as="image" href="assets/textures/combined-dark.png">
     <!-- The end-state card must be decoded before the hard cut lands on it. -->
-    <link rel="preload" as="image" href="images/invitation/invitation-light-new.png">
+    <link rel="preload" as="image" href="assets/invitation/invitation-light-new.png">
 </head>
 
 <body class="page-rsvp">
@@ -48,9 +48,9 @@
                      rasterization on both sides of the cut is what makes it invisible.
                      Dark mode swaps to the inverted green card via the standard
                      data-light/data-dark mechanism. -->
-                <img class="invitation-card" src="images/invitation/invitation-light-new.png"
-                    data-light="images/invitation/invitation-light-new.png"
-                    data-dark="images/invitation/invitation-dark-new.png"
+                <img class="invitation-card" src="assets/invitation/invitation-light-new.png"
+                    data-light="assets/invitation/invitation-light-new.png"
+                    data-dark="assets/invitation/invitation-dark-new.png"
                     alt="Adina Beth and Andrew Spencer — wedding invitation" />
                 <!-- RSVP arrow — the entry into the card flow. Positioned off the card's
                      artboard fractions (not viewport pixels) so it tracks any future
@@ -95,8 +95,8 @@
          once-per-session gate and reloads, re-entering the single playback pipeline.
          Image is a placeholder (DC flag) using the standard light/dark swap. -->
     <button id="replay-intro" class="replay-intro" aria-label="Replay intro animation">
-        <img src="images/illustrations/flag-light.png" data-light="images/illustrations/flag-light.png"
-            data-dark="images/illustrations/flag-dark.png" alt="">
+        <img src="assets/illustrations/flag-light.png" data-light="assets/illustrations/flag-light.png"
+            data-dark="assets/illustrations/flag-dark.png" alt="">
     </button>
 
     <script>

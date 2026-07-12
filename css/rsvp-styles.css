@@ -707,14 +707,14 @@ body.page-rsvp.rsvp-flow-active .site-footer {
     inset: 0;
     z-index: 0;
     background-color: #F1EDEA;
-    background-image: url('../images/textures/combined-light.png');
+    background-image: url('../assets/textures/combined-light.png');
     background-size: 200px 200px;
     background-repeat: repeat;
 }
 
 body.dark-mode .rsvp-flow-backdrop {
     background-color: #122a20;
-    background-image: url('../images/textures/combined-dark.png');
+    background-image: url('../assets/textures/combined-dark.png');
 }
 
 .rsvp-flow-track {

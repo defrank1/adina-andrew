@@ -39,7 +39,15 @@ wedding-website/
 │   ├── rsvp-flow.js             # Sequenced RSVP card flow (rsvp.html)
 │   └── rsvp-form.js             # Staging single-page form (rsvp-internal.html)
 │
-├── assets/
+├── assets/                      # ALL media — image subfolders live here directly (no images/ superfolder)
+│   ├── favicon/                 # favicon.png
+│   ├── monogram/                # monogram-green.png, monogram-white.png (lowercase folder)
+│   ├── names/                   # names-image.png, names-image-dark.png
+│   ├── illustrations/           # Dupont, flag, blossom, joan (light/dark PNGs) + rowhouse.svg / rowhouse-dark.svg
+│   ├── invitation/              # invitation-light-new.png, invitation-dark-new.png (RSVP end-state card)
+│   ├── nav/                     # wide-nav-light.png, wide-nav-dark.png (only active nav PNGs)
+│   ├── our-story/               # web-optimized JPGs (web-*.jpg)
+│   ├── textures/                # combined-light.png, combined-dark.png (only active tiles)
 │   └── rive/
 │       └── metro-intro.riv      # Hand-drawn Metro intro — do not touch
 │
@@ -49,16 +57,6 @@ wedding-website/
 │   ├── PPWatch-Medium.woff / .woff2
 │   ├── PPWatch-Extralight.woff / .woff2
 │   └── Sentient-Regular.woff / .woff2
-│
-├── images/
-│   ├── favicon.png
-│   ├── Monogram/                # monogram-green.png, monogram-white.png
-│   ├── names/                   # names-image.png, names-image-dark.png
-│   ├── illustrations/           # Dupont, flag, blossom, joan (light/dark PNGs) + rowhouse.svg / rowhouse-dark.svg
-│   ├── invitation/              # invitation-light-new.png, invitation-dark-new.png (RSVP end-state card)
-│   ├── nav/                     # wide-nav-light.png, wide-nav-dark.png (only active nav PNGs)
-│   ├── our-story/               # web-optimized JPGs (web-*.jpg)
-│   └── textures/                # combined-light.png, combined-dark.png (only active tiles)
 │
 ├── rsvp-workflow/
 │   └── google-apps-script.js    # Backend: Guests/Responses sheet; lookup GET + per-person POST
