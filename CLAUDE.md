@@ -397,11 +397,20 @@ Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-sty
 ├── _source/                (SOURCE & WORKING FILES — versioned in git but NOT hosted. The leading
 │   │                        underscore makes GitHub Pages/Jekyll skip the folder at build time, so nothing
 │   │                        here is served on the live site. Do not link to anything in here from a page.)
-│   ├── fonts/              (.otf desktop faces — source for the deployed .woff/.woff2)
-│   ├── vectors/            (nav shapes.af, names-flat.svg, mobile-nav/ source SVGs; credentials.json — gitignored)
+│   ├── design/             (all editable design source — Affinity + SVG masters for the site)
+│   │   ├── artboards/      (big .af visioning files: Save the Date, stamp ideas, grain, STD_final_*)
+│   │   ├── animation/      (Rive metro-intro source SVGs + animation-assets.af)
+│   │   ├── invitation/     (invitation .af/.svg/.png sources for invitation-*-new.png)
+│   │   ├── ceremony/       (ceremony-card.af — no live equivalent)
+│   │   ├── svg/            (illustration/nav/footer/favicon/monogram source SVGs + names-flat.svg, mobile-nav/)
+│   │   ├── png/            (footer PNG exports)
+│   │   └── nav-shapes.af   (current nav-diamond source; older Mar-13 copy is in archive/)
+│   ├── fonts/              (full font family source: .otf + woff/woff2/ttf + demo.html, stylesheet.css)
+│   ├── notes/              (build docs: site-audit, SETUP-GUIDE, file-listing — historical)
 │   ├── sandbox/            (throwaway test pages: rive-quantize-test.html, rsvp-checkmark-demos.html)
-│   └── archive/            (retired, unreferenced assets: legacy nav PNGs, old grain textures, invitation.svg,
-│                            legacy rsvp-workflow scripts — kept for reference, safe to delete)
+│   ├── archive/            (retired, unreferenced assets: legacy nav PNGs, old grain textures, invitation.svg,
+│   │                        legacy rsvp-workflow scripts, rowhouse SVGs — kept for reference, safe to delete)
+│   └── credentials.json    (gitignored — Apps Script creds)
 └── .claude/
     ├── figma-design-system-rules.md
     └── settings.local.json

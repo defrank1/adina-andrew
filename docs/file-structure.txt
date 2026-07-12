@@ -62,9 +62,18 @@ wedding-website/
 │   └── google-apps-script.js    # Backend: Guests/Responses sheet; lookup GET + per-person POST
 │
 ├── _source/                     # SOURCE & WORKING FILES — in git, NOT hosted (Jekyll skips _-prefixed dirs)
-│   ├── fonts/                   # .otf desktop faces (source for deployed .woff/.woff2)
-│   ├── vectors/                 # nav shapes.af, names-flat.svg, mobile-nav/ SVGs, credentials.json (gitignored)
+│   ├── design/                  # Editable design source (Affinity + SVG masters)
+│   │   ├── artboards/           #   big .af visioning files (Save the Date, stamp ideas, grain, STD_final_*)
+│   │   ├── animation/           #   Rive metro-intro source SVGs + animation-assets.af
+│   │   ├── invitation/          #   invitation .af/.svg/.png sources
+│   │   ├── ceremony/            #   ceremony-card.af (no live equivalent)
+│   │   ├── svg/                 #   illustration/nav/footer/favicon source SVGs + names-flat, mobile-nav/
+│   │   ├── png/                 #   footer PNG exports
+│   │   └── nav-shapes.af        #   current nav-diamond source
+│   ├── fonts/                   # Full font family source (.otf + woff/woff2/ttf + demo.html, stylesheet.css)
+│   ├── notes/                   # Build docs (site-audit, SETUP-GUIDE, file-listing — historical)
 │   ├── sandbox/                 # Throwaway test pages (rive-quantize-test.html, rsvp-checkmark-demos.html)
-│   └── archive/                 # Retired unreferenced assets (legacy nav PNGs, old grains, invitation.svg, legacy rsvp scripts)
+│   ├── archive/                 # Retired unreferenced assets (legacy nav PNGs, old grains, invitation.svg, rowhouse SVGs)
+│   └── credentials.json         # gitignored — Apps Script creds
 │
 └── .claude/                     # Claude Code config (launch.json, settings, references)

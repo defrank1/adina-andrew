@@ -1,0 +1,141 @@
+=== find . -not -path './.git/*' | sort ===
+.
+./.DS_Store
+./.claude
+./.claude/figma-design-system-rules.md
+./.claude/settings.local.json
+./.git
+./.gitattributes
+./.gitignore
+./.htaccess
+./CLAUDE.md
+./CNAME
+./SETUP-GUIDE.md
+./artboards
+./artboards/.DS_Store
+./artboards/STD_final_back.af
+./artboards/STD_final_back_envelope.af
+./artboards/STD_final_front.af
+./artboards/Save the Date ideas.af
+./artboards/favicon.af
+./artboards/grain-dark.af
+./artboards/grain.af
+./artboards/stamp ideas.af
+./favicon.png
+./file-listing.txt
+./fonts
+./fonts/PPPlayground-Light.woff
+./fonts/PPPlayground-Light.woff2
+./fonts/PPPlayground-Medium.ttf
+./fonts/PPPlayground-Medium.woff
+./fonts/PPPlayground-Medium.woff2
+./fonts/PPPlayground-Thin.woff
+./fonts/PPPlayground-Thin.woff2
+./fonts/PPWatch-Black.woff
+./fonts/PPWatch-Black.woff2
+./fonts/PPWatch-Bold.ttf
+./fonts/PPWatch-Bold.woff
+./fonts/PPWatch-Bold.woff2
+./fonts/PPWatch-Extralight.woff
+./fonts/PPWatch-Extralight.woff2
+./fonts/PPWatch-Medium.woff
+./fonts/PPWatch-Medium.woff2
+./fonts/README.md
+./fonts/Sentient-Bold.woff
+./fonts/Sentient-Bold.woff2
+./fonts/Sentient-BoldItalic.woff
+./fonts/Sentient-BoldItalic.woff2
+./fonts/Sentient-Extralight.woff
+./fonts/Sentient-Extralight.woff2
+./fonts/Sentient-ExtralightItalic.woff
+./fonts/Sentient-ExtralightItalic.woff2
+./fonts/Sentient-Italic.woff
+./fonts/Sentient-Italic.woff2
+./fonts/Sentient-Light.woff
+./fonts/Sentient-Light.woff2
+./fonts/Sentient-LightItalic.woff
+./fonts/Sentient-LightItalic.woff2
+./fonts/Sentient-Medium.woff
+./fonts/Sentient-Medium.woff2
+./fonts/Sentient-MediumItalic.woff
+./fonts/Sentient-MediumItalic.woff2
+./fonts/Sentient-Regular.ttf
+./fonts/Sentient-Regular.woff
+./fonts/Sentient-Regular.woff2
+./fonts/demo.html
+./fonts/stylesheet.css
+./google-apps-script.js
+./guests.js
+./images
+./images/.DS_Store
+./images/Monogram
+./images/Monogram/monogram-green.png
+./images/Monogram/monogram-white.png
+./images/illustrations
+./images/illustrations/Dupont-dark.png
+./images/illustrations/Dupont.png
+./images/illustrations/dark-mode-button.png
+./images/illustrations/light-mode-button.png
+./images/names
+./images/names/names-image-dark.png
+./images/names/names-image.png
+./images/textures
+./images/textures/.DS_Store
+./images/textures/footer-dark.png
+./images/textures/footer.png
+./images/textures/grain-dark.png
+./images/textures/grain.png
+./index.html
+./registry-admin.html
+./registry.html
+./rsvp-script.js
+./rsvp-styles.css
+./rsvp.html
+./savethedate.html
+./site-audit-revised.md
+./styles.css
+./travel.html
+./vectors
+./vectors/.DS_Store
+./vectors/Dupont-dark.svg
+./vectors/Dupont.svg
+./vectors/bareloveflag-dark.svg
+./vectors/bareloveflag.svg
+./vectors/bloomingdales-dark.svg
+./vectors/bloomingdales.svg
+./vectors/crate-and-barrel-dark.svg
+./vectors/crate-and-barrel.svg
+./vectors/favicon.svg
+./vectors/flag-dark.svg
+./vectors/flag.svg
+./vectors/floating-header-green.svg
+./vectors/floating-header-white.svg
+./vectors/footer-dark.svg
+./vectors/footer.svg
+./vectors/icon.svg
+./vectors/loveflag.svg
+./vectors/monogram-nav-dark.svg
+./vectors/monogram-nav.svg
+./vectors/monogram.svg
+./vectors/names-flat.svg
+./vectors/names.svg
+./vectors/names_dark.svg
+./vectors/rowhouse-dark.svg
+./vectors/rowhouse.svg
+
+=== grep -rh 'src=|url(' *.html *.css | sort -u ===
+                            src="images/illustrations/dark-mode-button.png"
+                        <img src="images/illustrations/Dupont.png" alt="" class="dupont-icon" id="dupont-icon">
+                        src="vectors/rowhouse.svg"
+                    <img src="images/Monogram/monogram-green.png" alt="Adina & Andrew — Home"
+                    <img src="images/names/names-image.png" alt="Adina Nelson & Andrew DeFrank" class="std-names-image"
+            background-image: url('images/textures/grain-dark.png');
+            background-image: url('images/textures/grain.png');
+        url('fonts/PPPlayground-Medium.woff') format('woff');
+        url('fonts/PPWatch-Bold.woff') format('woff');
+        url('fonts/Sentient-Regular.woff') format('woff');
+    background-image: url('images/textures/grain-dark.png');
+    background-image: url('images/textures/grain.png');
+    src: url('fonts/PPPlayground-Medium.woff2') format('woff2'),
+    src: url('fonts/PPWatch-Bold.woff2') format('woff2'),
+    src: url('fonts/Sentient-Regular.woff2') format('woff2'),
