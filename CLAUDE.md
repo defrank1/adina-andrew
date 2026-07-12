@@ -372,7 +372,7 @@ Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-sty
 │   ├── favicon/            (favicon.png)
 │   ├── monogram/           (monogram-green.png, monogram-white.png — lowercase folder)
 │   ├── names/              (names-image.png, names-image-dark.png)
-│   ├── illustrations/      (Dupont, flag, blossom, joan — light/dark PNGs; rowhouse.svg / rowhouse-dark.svg — used by registry.html + schedule.html)
+│   ├── illustrations/      (Dupont, flag, blossom, joan, rowhouse — all light/dark PNGs; rowhouse used by registry.html + schedule.html. Retired rowhouse SVGs live in _source/archive/)
 │   ├── invitation/         (invitation-light-new.png, invitation-dark-new.png — the RSVP end-state card; also baked into metro-intro.riv)
 │   ├── nav/                (wide-nav-light.png, wide-nav-dark.png — the only active nav PNGs; legacy diamond/mobile PNGs moved to _source/archive/nav/)
 │   ├── our-story/          (web-optimized photos: web-blossoms.jpg, web-engagement.jpg, web-copenhagen.jpg, etc. Originals also in folder but not referenced in HTML)

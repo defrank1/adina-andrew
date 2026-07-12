@@ -43,7 +43,7 @@ wedding-website/
 │   ├── favicon/                 # favicon.png
 │   ├── monogram/                # monogram-green.png, monogram-white.png (lowercase folder)
 │   ├── names/                   # names-image.png, names-image-dark.png
-│   ├── illustrations/           # Dupont, flag, blossom, joan (light/dark PNGs) + rowhouse.svg / rowhouse-dark.svg
+│   ├── illustrations/           # Dupont, flag, blossom, joan, rowhouse — all light/dark PNGs
 │   ├── invitation/              # invitation-light-new.png, invitation-dark-new.png (RSVP end-state card)
 │   ├── nav/                     # wide-nav-light.png, wide-nav-dark.png (only active nav PNGs)
 │   ├── our-story/               # web-optimized JPGs (web-*.jpg)
