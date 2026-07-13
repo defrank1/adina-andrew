@@ -50,7 +50,7 @@
         sunday: {
             name: 'Farewell Brunch',
             when: 'Sunday, October 18th · 9:00–11:00 AM',
-            venue: 'Willowsong at InterContinental Washington, DC — The Wharf',
+            venue: 'InterContinental Washington, DC — The Wharf',
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Come as you are',

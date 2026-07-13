@@ -1198,21 +1198,34 @@ body.dark-mode .rsvp-card-next:focus-visible {
     outline-color: var(--color-soft-white);
 }
 
-/* Back arrow — top-left inside the card frame, mirrors the forward styling. */
+/* Wrapper is transparent to layout on desktop, so Back/Next each position
+   absolutely against the card (turns into a flex row below the card on mobile). */
+.rsvp-card-nav {
+    display: contents;
+}
+
+/* Back — twin of the forward CTA, mirrored outside the card's left edge. */
 .rsvp-card-back {
     position: absolute;
-    top: 21px;
-    left: 21px;
-    z-index: 1;
+    right: calc(100% + 26px);
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
     align-items: center;
+    gap: 0.6rem;
     background: none;
     border: none;
-    padding: 0.35rem 0.45rem;
+    padding: 0.45rem 0.6rem;
     cursor: pointer;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.74rem;
     color: var(--color-dark-green);
-    opacity: 0.65;
-    transition: color 0.2s ease, opacity 0.2s ease, filter 0.25s ease;
+    text-shadow: none;
+    white-space: nowrap;
+    transition: color 0.2s ease, filter 0.25s ease;
 }
 
 .rsvp-card-back svg {
@@ -1222,13 +1235,16 @@ body.dark-mode .rsvp-card-next:focus-visible {
 .rsvp-card-back:hover,
 .rsvp-card-back:focus-visible {
     color: var(--color-accent);
-    opacity: 1;
-    filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4));
+    filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4)) drop-shadow(0 0 16px rgba(45, 90, 74, 0.25));
 }
 
 .rsvp-card-back:focus-visible {
     outline: 2px solid var(--color-dark-green);
     outline-offset: 2px;
+}
+
+.rsvp-card-back:active {
+    transform: translateY(calc(-50% + 0.5px));
 }
 
 body.dark-mode .rsvp-card-back {
@@ -1238,7 +1254,7 @@ body.dark-mode .rsvp-card-back {
 body.dark-mode .rsvp-card-back:hover,
 body.dark-mode .rsvp-card-back:focus-visible {
     color: var(--color-soft-white);
-    filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35));
+    filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35)) drop-shadow(0 0 16px rgba(241, 237, 234, 0.2));
 }
 
 body.dark-mode .rsvp-card-back:focus-visible {
@@ -1358,20 +1374,24 @@ body.dark-mode .rsvp-review-person {
         font-size: 1.5rem;
     }
 
-    .rsvp-card-back {
-        top: 17px;
-        left: 17px;
+    /* No room outside the card on mobile — Back and Next drop below it as a
+       row (Back left, Next right), still twins of each other. */
+    .rsvp-card-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.7rem;
     }
 
-    /* No room to the card's right on mobile — the forward CTA drops below the
-       card, centered, still pointing right (mirrors the RSVP arrow's mobile
-       placement). */
+    .rsvp-card-back,
     .rsvp-card-next {
         position: static;
         transform: none;
-        margin: 1.6rem auto 0;
+        margin: 0;
     }
 
+    .rsvp-card-back:active,
     .rsvp-card-next:active {
         transform: translateY(0.5px);
     }

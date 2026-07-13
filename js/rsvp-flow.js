@@ -67,7 +67,7 @@
         sunday: {
             name: 'Farewell Brunch',
             when: 'Sunday, October 18th · 9:00–11:00 AM',
-            venue: 'Willowsong at InterContinental Washington, DC — The Wharf',
+            venue: 'InterContinental Washington, DC — The Wharf',
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Come as you are',
@@ -403,7 +403,10 @@
             var btn = el('button', 'rsvp-card-back');
             btn.type = 'button';
             btn.setAttribute('aria-label', 'Back');
-            btn.innerHTML = ARROW_LEFT;
+            var iconWrap = el('span');
+            iconWrap.innerHTML = ARROW_LEFT;
+            btn.appendChild(iconWrap.firstChild);
+            btn.appendChild(el('span', null, 'Back'));
             btn.addEventListener('click', function () {
                 if (stepIndex > 0) { goToStep(stepIndex - 1); }
             });
@@ -422,6 +425,15 @@
             return btn;
         }
 
+        // Back + forward as twins: a wrapper transparent to layout on desktop (each
+        // button positions absolutely outside the card), a flex row below on mobile.
+        function cardNav(forwardEl) {
+            var nav = el('div', 'rsvp-card-nav');
+            nav.appendChild(backButton());
+            if (forwardEl) { nav.appendChild(forwardEl); }
+            return nav;
+        }
+
         // ---- event cards ----
 
         function buildEventPanel(inv, eventKey, isLast) {
@@ -430,7 +442,6 @@
             card.tabIndex = -1;
             card.dataset.event = eventKey;
 
-            card.appendChild(backButton());
             card.appendChild(el('h2', 'rsvp-card-title', detail.shortName || detail.name));
             card.appendChild(makeCardEventMeta(detail));
 
@@ -478,12 +489,12 @@
             error.setAttribute('role', 'alert');
             card.appendChild(error);
 
-            card.appendChild(nextButton(isLast ? 'Review' : 'Next', function () {
+            card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
                 if (validateEventCard(card, eventKey)) {
                     error.classList.remove('show');
                     goToStep(stepIndex + 1);
                 }
-            }));
+            })));
 
             return appendPanel(eventKey, card);
         }
@@ -571,7 +582,6 @@
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
 
-            card.appendChild(backButton());
             card.appendChild(el('h2', 'rsvp-card-title', 'Your response'));
 
             reviewSummary = el('div', 'rsvp-review-summary');
@@ -590,6 +600,8 @@
             reviewError = el('p', 'rsvp-card-error');
             reviewError.setAttribute('role', 'alert');
             card.appendChild(reviewError);
+
+            card.appendChild(cardNav(null));
 
             reviewSubmitBtn = el('button', 'btn-priority rsvp-submit', 'Send RSVP');
             reviewSubmitBtn.type = 'button';
