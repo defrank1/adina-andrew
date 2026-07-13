@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="css/rsvp-styles.css">
     <link rel="preload" as="image" href="assets/textures/combined-light.png">
     <link rel="preload" as="image" href="assets/textures/combined-dark.png">
-    <!-- The end-state card must be decoded before the hard cut lands on it. -->
-    <link rel="preload" as="image" href="assets/invitation/invitation-light-new.png">
+    <!-- The end-state card's ink layer must be decoded before the hard cut lands on it. -->
+    <link rel="preload" as="image" href="assets/invitation/invitation-ink-light.png">
 </head>
 
 <body class="page-rsvp">
@@ -44,14 +44,18 @@
              sequenced RSVP form will grow out of next. -->
         <div id="invitation-endstate" class="invitation-endstate pre-reveal">
             <div class="invitation-field">
-                <!-- Same PNG that is baked into the .riv (pixel-identical) — identical
-                     rasterization on both sides of the cut is what makes it invisible.
-                     Dark mode swaps to the inverted green card via the standard
+                <!-- Layered paper-card (see .paper-card in styles.css): CSS grain +
+                     baked ink PNG + sheet shadow, flat at the hard cut and gaining
+                     grain/shadow/emboss at the settle. Ink is the same art baked into
+                     the .riv (pixel-identical), just re-exported as a transparent PNG.
+                     Dark mode swaps to the inverted green ink via the standard
                      data-light/data-dark mechanism. -->
-                <img class="invitation-card" src="assets/invitation/invitation-light-new.png"
-                    data-light="assets/invitation/invitation-light-new.png"
-                    data-dark="assets/invitation/invitation-dark-new.png"
-                    alt="Adina Beth and Andrew Spencer — wedding invitation" />
+                <div class="paper-card invitation-card">
+                    <img class="paper-card__ink" src="assets/invitation/invitation-ink-light.png"
+                        data-light="assets/invitation/invitation-ink-light.png"
+                        data-dark="assets/invitation/invitation-ink-dark.png"
+                        alt="Adina Beth and Andrew Spencer — wedding invitation" />
+                </div>
                 <!-- RSVP arrow — the entry into the card flow. Positioned off the card's
                      artboard fractions (not viewport pixels) so it tracks any future
                      card re-placement. Fades in with the settle; pointer-events: auto

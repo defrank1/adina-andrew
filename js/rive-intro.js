@@ -35,6 +35,11 @@
     var COVER_CREAM = '#F1EDEA';  // matches the in-Rive cover rect exactly
     var SAFETY_MS = 26000;        // backstop only — DURATION_S plus margin
 
+    // ?debug-registration — a dev-only verification mode (see debugRegistration()
+    // below). Fully gated behind this flag; nothing it does can run without the
+    // query param, so the normal playback path is unaffected.
+    var DEBUG_REGISTRATION = new URLSearchParams(location.search).has('debug-registration');
+
     var container = document.getElementById('rive-container');
     var canvas = document.getElementById('rive-canvas');
     var skipBtn = document.getElementById('skip-intro');
@@ -277,6 +282,10 @@
                     resizeCanvas();
                     resizeHandler = resizeCanvas;
                     window.addEventListener('resize', resizeHandler);
+                    if (DEBUG_REGISTRATION) {
+                        debugRegistration();
+                        return;
+                    }
                     // Start the owned loop from a clean slate.
                     elapsed = 0;
                     lastTs = null;
@@ -293,7 +302,32 @@
             return;
         }
         // Backstop only: if the loop somehow never reaches DURATION_S, hand off anyway.
-        safetyTimer = setTimeout(completeIntro, SAFETY_MS);
+        // Debug mode pauses indefinitely on purpose — never arm the backstop for it.
+        if (!DEBUG_REGISTRATION) {
+            safetyTimer = setTimeout(completeIntro, SAFETY_MS);
+        }
+    }
+
+    // ---- registration debug overlay ----------------------------------------
+    // ?debug-registration scrubs to the final frame and pauses there (no hard
+    // cut, no settle) so the DOM invitation card — placed by the CSS values in
+    // .invitation-card, which are now authoritative — can be visually compared
+    // against the .riv's own final-frame card. The endstate is brought above
+    // the paused canvas with its opaque cream fill stripped, and only the card
+    // is shown, at 50% opacity, so both are visible at once. Use this to nudge
+    // the .riv's final keyframes in the Rive editor until it sits under the
+    // ghost; the CSS values themselves do not get adjusted to match.
+    function debugRegistration() {
+        try { riveInstance.scrub(ANIMATION_NAME, DURATION_S); } catch (e) { /* no-op */ }
+        if (endState) {
+            endState.classList.remove('pre-reveal');
+            endState.style.zIndex = '2001';           // above #rive-container (2000)
+            endState.style.backgroundColor = 'transparent';
+        }
+        var cardEl = document.querySelector('.invitation-card');
+        if (cardEl) { cardEl.style.opacity = '0.5'; }
+        console.log('[debug-registration] canvas rect', canvas.getBoundingClientRect());
+        console.log('[debug-registration] card rect', cardEl ? cardEl.getBoundingClientRect() : null);
     }
 
     // ---- entry point -------------------------------------------------------
@@ -303,9 +337,11 @@
         started = true;
 
         // Skip entirely (no visible canvas) for reduced motion or return visits.
+        // Debug mode always forces the real animation path so the overlay is
+        // reachable without clearing session state first.
         var seen = false;
         try { seen = sessionStorage.getItem('intro-seen') === 'true'; } catch (e) { /* ignore */ }
-        if (prefersReduced || seen) { bailSilently(); return; }
+        if (!DEBUG_REGISTRATION && (prefersReduced || seen)) { bailSilently(); return; }
 
         // Only commit to the animation once we know the asset exists — keeps the
         // page clean and console-error-free while the .riv is still being built.

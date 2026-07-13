@@ -837,6 +837,77 @@ body.page-home .registry-section {
 }
 
 /* ===========================
+   Paper Card System — shared "sheet of paper" component
+   Three layers: CSS-tiled grain (::before), baked ink or frame PNG
+   (.paper-card__ink / .paper-card__frame), and a sheet box-shadow. Follows the
+   floating nav's physical logic (flat fill + shadow = separation), extended
+   with CSS grain because these are opaque rectangles, not the nav's
+   alpha-shaped diamond — the "no CSS grain" rule applies to alpha-shaped
+   transparent PNGs, not opaque rectangles (the body proves grain-on-rectangle
+   is safe). Used by the RSVP invitation end-state (.invitation-card) and,
+   going forward, the RSVP form cards (.paper-card--page).
+   =========================== */
+.paper-card {
+    position: relative;
+    aspect-ratio: 1500 / 2100;
+    background-color: #F1EDEA;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.paper-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/textures/combined-light.png');
+    background-size: 200px 200px;
+    background-repeat: repeat;
+    /* Custom property so a settle transition (e.g. the RSVP hard cut) can fade
+       grain in rather than having it present from the first paint. */
+    opacity: var(--card-grain-opacity, 1);
+    pointer-events: none;
+    transition: opacity var(--settle-ms, 450ms) ease;
+}
+
+body.dark-mode .paper-card {
+    background-color: #0e2319;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .paper-card::before {
+    background-image: url('../assets/textures/combined-card-dark.png');
+}
+
+.paper-card__ink,
+.paper-card__frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.paper-card__content {
+    position: relative;
+    padding: 8% 10%;
+}
+
+/* Form-card scaffold (shell only — no form/typography built here). Each step
+   of the RSVP flow is intended to render as .paper-card.paper-card--page:
+   the same paper/grain/shadow, a shared resting width so the invitation and
+   the form cards can be aligned in one place later (the post-cut resize
+   settle itself is separate, unconfirmed work), a .paper-card__frame overlay,
+   and ink-scoped text/controls so content reads as the card's surface rather
+   than the page's. */
+.paper-card--page {
+    width: var(--card-resting-width, min(90vw, 560px));
+    color: #1a3a2e;
+}
+
+body.dark-mode .paper-card--page {
+    color: #F1EDEA;
+}
+
+/* ===========================
    RSVP two-stage landing (rsvp.html)
    Stage 1 (hard cut): #invitation-endstate in its Rive-matched state — green matte,
    flat #dfdeda 16:9 field, no chrome. Stage 2 (settle): js/rive-intro.js adds
@@ -915,40 +986,55 @@ body.page-rsvp .invitation-field {
     overflow: visible;
 }
 
-/* The invitation card — the SAME PNG that is baked into the .riv (byte-different
-   re-encode, pixel-identical), placed by MEASURED artboard fractions of 1920x1080
-   so it lands pixel-on-pixel where the animation's final frame draws it:
-   x = 559/1920 = 29.11%, width = 800/1920 = 41.67%. Height derives from width via
-   the asset's intrinsic ratio (1069x1496 -> 800x1120 on the artboard).
-   VERTICAL (measured, supersedes the earlier "centered ±20px" derivation): the
-   animation parks the card HIGH — top ≈ -10.47% of the artboard height (~-113 of
-   1080), so it bleeds ~113px past the artboard top and ends ~73px above its bottom.
-   Two measurement methods bracket this: border-line feature solve -10.34%, pixel
-   cross-correlation (SAD) -10.60% — the value splits them, putting both within
-   ±0.5px at typical sizes. Final ±1px is an eyeball call on a frame-stepped
-   recording. The artboard does NOT clip, so the bleed really renders — the field
-   must not clip either. */
+/* The invitation card — a .paper-card (see the Paper Card System block above),
+   placed by CHOSEN artboard fractions of 1920x1080 (registration policy
+   inversion, July 2026: this CSS is now the source of truth and the .riv's
+   final keyframes get nudged to match it via the ?debug-registration overlay
+   in js/rive-intro.js — these values are no longer measured off the .riv).
+   Target artboard rect: x=650, w=620, y=145 -> left = 650/1920 = 33.854%,
+   width = 620/1920 = 32.292%, top = 145/1080 = 13.426%. Centered horizontally,
+   parked high with margin above and below (card height ≈ 80% of field height
+   at this aspect ratio) — no bleed past the field's top or bottom edges. */
 body.page-rsvp .invitation-card {
     position: absolute;
-    left: 29.11%;
-    width: 41.67%;
-    top: -10.47%;
+    left: 33.854%;
+    width: 32.292%;
+    top: 13.426%;
     height: auto;
-    aspect-ratio: 1069 / 1496;
+    aspect-ratio: 1500 / 2100;
     display: block;
-    transition: filter var(--settle-ms, 450ms) ease;
+    /* Flat at the hard cut — must be pixel-identical to the .riv's final frame,
+       which has no grain and no shadow. Both arrive with the settle below. */
+    --card-grain-opacity: 0;
+    box-shadow: none;
+    transition: box-shadow var(--settle-ms, 450ms) ease;
 }
 
-/* Settle: the card gains the site's illustration emboss (same drop-shadow pair as
-   .registry-illustration, incl. the dark variant). Text is baked into the PNG, so
-   the filter presses text AND border together — the intended embossed-card look.
-   Filters don't reflow: this cannot move the card. In dark mode the card asset
-   itself INVERTS to green via the data-light/data-dark swap. */
+/* Settle: grain and the sheet shadow fade in together on the wrapper... */
 body.page-rsvp.intro-complete .invitation-card {
-    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+    --card-grain-opacity: 1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 
 body.dark-mode.page-rsvp.intro-complete .invitation-card {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+/* ...while the illustration emboss (same drop-shadow pair as
+   .registry-illustration, incl. the dark variant) applies to the ink layer
+   itself, not the wrapper — text and frame press into the paper while the
+   sheet shadow lifts the whole card off the page. Filters don't reflow: this
+   cannot move the card. In dark mode the ink asset INVERTS to cream via the
+   data-light/data-dark swap. */
+body.page-rsvp .invitation-card .paper-card__ink {
+    transition: filter var(--settle-ms, 450ms) ease;
+}
+
+body.page-rsvp.intro-complete .invitation-card .paper-card__ink {
+    filter: drop-shadow(0px 2px 2px rgba(255, 255, 255, 1)) drop-shadow(0px -1px 1px rgba(0, 0, 0, 0.15));
+}
+
+body.dark-mode.page-rsvp.intro-complete .invitation-card .paper-card__ink {
     filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
 }
 

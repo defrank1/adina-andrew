@@ -546,15 +546,16 @@ body.dark-mode .confirmation-message {
 /* ---- The RSVP arrow on the settled invitation page ----------------------- */
 
 /* Positioned off the card's artboard fractions inside .invitation-field —
-   card right edge = left 29.11% + width 41.67% = 70.78% of field width.
-   Vertical center = card top (-10.47%) + half the card height; card height in
-   field-height terms = 41.67% × (1496/1069) × (16/9) ≈ 103.67%, so the center
-   sits at ≈ 41.37% of field height. If the card's placement fractions change,
-   update these two derived numbers with them. */
+   card right edge = left 33.854% + width 32.292% = 66.146% of field width.
+   Vertical center = card top (13.426%) + half the card height; card height in
+   field-height terms = 32.292% (a field-WIDTH fraction) × 16/9 (axis
+   conversion) ≈ 80.37%, so the center sits at ≈ 53.611% of field height. If
+   the card's placement fractions change, update these two derived numbers
+   with them. */
 body.page-rsvp .rsvp-arrow {
     position: absolute;
-    left: calc(70.78% + 28px);
-    top: 41.37%;
+    left: calc(66.146% + 28px);
+    top: 53.611%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
@@ -1334,11 +1335,11 @@ body.dark-mode .rsvp-review-person {
 @media (max-width: 900px) {
 
     /* No room to the card's right — arrow + label sit below the card,
-       centered, still pointing right. Card bottom = -10.47% + 103.67% ≈
-       93.2% of field height. */
+       centered, still pointing right. Card bottom = 13.426% + 80.37% ≈
+       93.796% of field height. */
     body.page-rsvp .rsvp-arrow {
         left: 50%;
-        top: calc(93.2% + 10px);
+        top: calc(93.796% + 10px);
         transform: translateX(-50%);
     }
 
