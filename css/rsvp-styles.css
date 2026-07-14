@@ -535,12 +535,15 @@ body.dark-mode .confirmation-message {
 /* ===========================================================================
    === Card flow === (rsvp.html)
    ---------------------------------------------------------------------------
-   The sequenced card-based RSVP that grows out of the settled invitation page.
-   Everything below is scoped to body.page-rsvp / #rsvp-flow so nothing leaks
-   into rsvp-internal.html (which also loads this file). Driven by
-   js/rsvp-flow.js. None of these rules can match before the settle
-   (.intro-complete / .rsvp-flow-active), so the pre-cut registration chain in
-   styles.css is untouched.
+   The RSVP paper suite that grows out of the settled invitation page: a
+   file-to-back stack of .paper-card--page reply cards sharing the invitation
+   card's own on-screen rect (see .rsvp-stack in styles.css). Everything below
+   is scoped to body.page-rsvp so nothing leaks into rsvp-internal.html (which
+   also loads this file). Driven by js/rsvp-flow.js. None of these rules can
+   match before the settle (.intro-complete / .rsvp-peek-visible /
+   .rsvp-flow-active), so the pre-cut registration chain in styles.css is
+   untouched — and none of them run under ?debug-registration, which pauses
+   pre-settle and never reaches .intro-complete.
    =========================================================================== */
 
 /* ---- The RSVP arrow on the settled invitation page ----------------------- */
@@ -571,16 +574,31 @@ body.page-rsvp .rsvp-arrow {
     letter-spacing: 0.14em;
     color: var(--color-dark-green);
     text-shadow: none;
-    /* Invisible + inert until the settle; fades in with the nav/footer/replay. */
+    /* Invisible + inert until the peek — fades in WITH the peeking lookup
+       card (js/rsvp-flow.js adds .rsvp-peek-visible to <body> ~800ms after
+       the settle completes), not at the settle itself like nav/footer/replay. */
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--settle-ms, 450ms) ease, color 0.2s ease;
 }
 
-body.page-rsvp.intro-complete .rsvp-arrow {
+body.page-rsvp.rsvp-peek-visible .rsvp-arrow {
     opacity: 1;
     /* #invitation-endstate is pointer-events: none — re-enable just the arrow. */
     pointer-events: auto;
+}
+
+/* The lookup card fades in alongside the arrow. It's built and inserted at
+   the exact peek moment (js/rsvp-flow.js's revealPeek), so it never exists
+   in the DOM a moment before it's meant to appear — this is purely the
+   entrance fade, not a visibility gate. */
+body.page-rsvp .rsvp-stack .paper-card--page {
+    opacity: 0;
+    transition: opacity var(--settle-ms, 450ms) ease;
+}
+
+body.page-rsvp.rsvp-peek-visible .rsvp-stack .paper-card--page {
+    opacity: 1;
 }
 
 .rsvp-arrow-icon {
@@ -652,194 +670,99 @@ body.dark-mode.page-rsvp.intro-complete .rsvp-arrow.rsvp-arrow-breathe {
     }
 }
 
-/* Once the flow starts the arrow slides off with the invitation — make sure it
-   can't be re-clicked mid-exit. */
+/* Once the swap has happened, the arrow's one-time job (a glowing "look
+   here" nudge toward the first interaction) is done — fade it out rather
+   than leave it sitting, inert, beside whatever card is now on top. Filing
+   back to the invitation doesn't bring it back: the returning peek (the
+   lookup card's own offset edge) is the recurring affordance for swapping
+   forward again, matching how it worked the very first time before either
+   was ever clicked. */
 body.page-rsvp.rsvp-flow-active .rsvp-arrow {
+    opacity: 0;
     pointer-events: none;
 }
 
-/* ---- Entering the flow: invitation slides off, scroll unlocks ------------ */
+/* ---- Entering the flow: scroll unlocks ------------------------------------ */
 
 /* Pre-cut, overflow: hidden on body.page-rsvp is load-bearing for pixel
    registration (styles.css). The flow can only start post-settle, where that
    constraint is over: allow vertical scrolling for cards taller than the
-   viewport; horizontal stays clipped. */
+   viewport; horizontal stays clipped. (body.page-rsvp.intro-complete already
+   unlocks this at the settle, before the flow starts — this duplicate rule is
+   a defensive no-op that stays correct even reached a different way.) */
 body.page-rsvp.rsvp-flow-active {
     overflow-x: hidden;
     overflow-y: auto;
 }
 
-/* The invitation end-state slides off-screen left in the same motion as the
-   track sliding in — one continuous leftward shift. By this point (rsvp-flow-active
-   only ever follows intro-complete) it's already the settled, scrollable
-   position:absolute box from styles.css — this rule adds only a transform on
-   top, same as it always has. After its transition ends, JS adds .rsvp-offstage. */
-body.page-rsvp.rsvp-flow-active .invitation-endstate {
-    transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateX(-100vw);
-}
-
-body.page-rsvp.rsvp-flow-active .invitation-endstate.rsvp-offstage {
-    visibility: hidden;
-}
-
 /* Collapse the scroll spacer (styles.css) once the flow is entered — otherwise
-   it would still hold its settled-page height and push the flow's first panel
-   down by that much. js/rsvp-flow.js already resets scroll to 0 on entry, so
-   between that and this the flow always opens at a clean, un-offset top. */
+   it would still hold its settled-page height and push the stack down by that
+   much. js/rsvp-flow.js resets scroll to 0 when the flow starts, so between
+   that and this the stack always opens at a clean, un-offset top. */
 body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
     display: none;
 }
 
-/* The footer (dark-mode toggle) sits after the flow in the flex column; lift
-   it above the flow's fixed backdrop so it stays visible and clickable. */
-body.page-rsvp.rsvp-flow-active .site-footer {
-    position: relative;
-    z-index: 3;
+/* Its mobile-only counterpart (see the @media block below) starts hidden on
+   every viewport — desktop cards all fit the settled view already. */
+.rsvp-flow-scroll-spacer {
+    display: none;
 }
 
-/* ---- The flow stage, backdrop, and track ---------------------------------- */
-
-.rsvp-flow {
-    position: relative;
-    z-index: 2;              /* above the (settled) end-state at z-index 1 */
-    width: 100%;
-    overflow-x: hidden;      /* clips the off-screen panels */
-    flex: 1;                 /* fills #protected-content so the footer stays pinned */
-}
-
-/* Stationary texture plane behind the cards — the same baked tile as the body,
-   but position: fixed so it does NOT move while the track slides or the page
-   scrolls (background-attachment: fixed is broken on iOS Safari; a fixed
-   element is the reliable equivalent). Cards float above it like the nav. */
-.rsvp-flow-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background-color: #F1EDEA;
-    background-image: url('../assets/textures/combined-light.png');
-    background-size: 200px 200px;
-    background-repeat: repeat;
-}
-
-body.dark-mode .rsvp-flow-backdrop {
-    background-color: #122a20;
-    background-image: url('../assets/textures/combined-dark.png');
-}
-
-.rsvp-flow-track {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: stretch;
-    transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: transform;
-}
-
-/* One viewport-wide step per panel. Top padding clears the floating nav
-   (matching the content offset on other pages). Inactive panels are clipped to
-   one viewport height so the page's scroll length always belongs to the ACTIVE
-   card — a tall Saturday card never adds scroll room to the email step. */
-.rsvp-panel {
-    flex: 0 0 100%;
-    min-width: 0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 120px 1.25rem 3.5rem;
-    max-height: 100vh;
-    overflow: hidden;
-}
-
-.rsvp-panel.active {
-    max-height: none;
-    overflow: visible;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .rsvp-flow-track,
-    body.page-rsvp.rsvp-flow-active .invitation-endstate {
-        transition: none;
-    }
-}
+/* No @media (prefers-reduced-motion: reduce) block here: the stack's
+   file-to-back transforms/transitions are set inline by js/rsvp-flow.js,
+   which checks prefers-reduced-motion itself and skips straight to each
+   move's end state with no transition at all — there's nothing for CSS to
+   override. */
 
 /* ---- The reply card ------------------------------------------------------- */
 
-/* Modeled on the printed RSVP enclosure. Surface follows the SAME logic as the
-   floating nav diamond: a flat fill color distinct from the body (#EBE7E3 light
-   / #0e2319 dark — the nav's dark fill) that floats on the grainy page plane
-   with a single drop-shadow for separation (the page's grain lives on the fixed
-   backdrop behind the card, not on the card). Double-rule inner frame, near-
-   sharp corners. */
+/* Paper-suite reskin: each stack card is `.paper-card.paper-card--page` (grain
+   + sheet shadow + baked frame overlay, see styles.css) wrapping a
+   `.paper-card__frame` img (card-frame-light/dark.png) and this element,
+   `.rsvp-card`, which now plays the `.paper-card__content` role directly —
+   the padded, ink-colored content layer sitting above the grain/frame. It no
+   longer draws its own surface (that moved to .paper-card) or its own frame
+   (that moved to the baked PNG) — both the flat #EBE7E3/#0e2319 fill and the
+   CSS double-rule frame from the earlier reply-card design are retired in
+   favor of the same paper/frame system the invitation uses. */
 .rsvp-card {
     position: relative;
-    width: min(520px, 100%);
-    background-color: #EBE7E3;
-    border-radius: 2px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-    padding: 2.75rem 2.4rem 2.5rem;
-    color: var(--color-dark-green);
-    outline: none;
-}
-
-/* Double-rule frame, matching the invitation PNG: a thicker outer line + a
-   thinner inner line with a small gap between them. ::before = outer, ::after =
-   inner. */
-.rsvp-card::before {
-    content: "";
-    position: absolute;
-    inset: 12px;
-    border: 2px solid var(--color-dark-green);
-    border-radius: 0;
-    pointer-events: none;
-}
-
-.rsvp-card::after {
-    content: "";
-    position: absolute;
-    inset: 18px;
-    border: 1px solid var(--color-dark-green);
-    border-radius: 0;
-    pointer-events: none;
-}
-
-body.dark-mode .rsvp-card {
-    background-color: #0e2319;
-    color: var(--color-soft-white);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .rsvp-card::before,
-body.dark-mode .rsvp-card::after {
-    border-color: var(--color-soft-white);
-}
-
-/* Script title — same optical treatment as .weekend-event-name. */
-.rsvp-card-title {
-    font-family: var(--font-title);
-    font-weight: 400;
-    -webkit-text-stroke: 0.35px currentColor;
-    font-size: 2.6rem;
-    line-height: 1.15;
-    text-align: center;
-    margin-bottom: 0.5rem;
+    width: 100%;
+    height: 100%;
+    padding: 8% 10%;
     color: inherit;
-    text-shadow: 0 1px 1.5px rgba(255, 255, 255, 0.6), 0 -0.5px 0.5px rgba(26, 58, 46, 0.06);
+    outline: none;
+    /* No overflow:hidden — Back/Next sit outside this box (calc(100% + 26px))
+       on desktop and would get clipped; on mobile, leaving overflow visible
+       means any content that doesn't fit the fixed 5:7 box is an obvious,
+       catchable problem during the content-budget audit rather than a
+       silently-clipped one. */
 }
 
-body.dark-mode .rsvp-card-title {
-    text-shadow: 0 0.5px 1px rgba(241, 237, 234, 0.07), 0 1px 2.5px rgba(0, 0, 0, 0.4);
+/* Small-caps label title (was a PP Playground script headline) — "card
+   titles" are PP Watch Medium uppercase per the paper-suite type budget. */
+.rsvp-card-title {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-align: center;
+    margin-bottom: 0.9rem;
+    color: inherit;
 }
 
 /* Reply-block, matching the printed card: line 1 is a Sentient sentence-case
    line, line 2 is an uppercased small-caps date (PP Watch Medium). */
 .rsvp-card-request {
     font-family: var(--font-body);
-    font-size: 0.98rem;
+    font-size: 0.9rem;
     line-height: 1.5;
     opacity: 0.85;
     text-align: center;
-    margin-bottom: 1.6rem;
+    margin-bottom: 1.4rem;
 }
 
 .rsvp-card-request-by {
@@ -847,25 +770,61 @@ body.dark-mode .rsvp-card-title {
     font-family: var(--font-heading);
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    font-size: 0.68rem;
     opacity: 0.85;
     margin-top: 0.4rem;
 }
 
 /* Event logistics on a card: the weekend-event vocabulary, condensed and
-   centered like a printed enclosure header. */
+   centered like a printed enclosure header. Event name demoted from the
+   PP Playground script treatment to the same PP Watch Medium uppercase label
+   as the card title — "event names" are explicitly type-budget combo 1. */
 .rsvp-card .weekend-event {
     text-align: center;
-    margin-bottom: 1.4rem;
+    margin-bottom: 0.7rem;
+}
+
+/* Zero the UA-default <p> margins .weekend-event-when/-where/-note pick up
+   from their shared base rules (rsvp-styles.css "Part A" block, also used by
+   rsvp-internal.html) — pure unintended vertical waste on a card this
+   size-constrained. Scoped to .rsvp-card so the shared base rules and their
+   Part A usage are untouched. */
+.rsvp-card .weekend-event-when {
+    margin-top: 0;
+}
+
+.rsvp-card .weekend-event-where {
+    margin-top: 0.3rem;
+    margin-bottom: 0;
 }
 
 .rsvp-card .weekend-event-name {
-    font-size: 2.4rem;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    -webkit-text-stroke: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-shadow: none;
+}
+
+.rsvp-card .weekend-event-when {
+    letter-spacing: 0.16em;
 }
 
 .rsvp-card .schedule-event-description {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+}
+
+.rsvp-card .weekend-event-where {
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.rsvp-card .weekend-event-dress-wrap {
+    margin: 0.3rem 0 0.35rem;
 }
 
 /* Dress tag as a popover trigger — the bordered capsule is a <button>; hovering,
@@ -972,11 +931,20 @@ body.dark-mode .dress-popover::before {
     border-color: var(--color-soft-white);
 }
 
-/* Afterparty info block — quieter, separated by a hairline. */
+/* Card-scoped tracking bump for the shared dress-tag/tag-like labels — the
+   base rules (styles.css/rsvp-styles.css "Part A" block) are shared with
+   rsvp-internal.html and stay as they are; only the paper-suite cards adopt
+   the ~0.16em type-budget tracking. */
+.rsvp-card .weekend-event-dress {
+    letter-spacing: 0.16em;
+}
+
+/* Afterparty info block — quieter, separated by a hairline; its event name
+   stays smaller than a primary event's so it still reads as secondary. */
 .rsvp-card .rsvp-card-afterparty {
-    margin-top: 1.4rem;
-    margin-bottom: 1.4rem;
-    padding-top: 1.3rem;
+    margin-top: 0.7rem;
+    margin-bottom: 0.6rem;
+    padding-top: 0.6rem;
     border-top: 1px solid rgba(26, 58, 46, 0.15);
 }
 
@@ -985,14 +953,29 @@ body.dark-mode .rsvp-card .rsvp-card-afterparty {
 }
 
 .rsvp-card .rsvp-card-afterparty .weekend-event-name {
-    font-size: 1.7rem;
+    font-size: 0.85rem;
+    margin-top: 0;
+    margin-bottom: 0.3rem;
+}
+
+.rsvp-card .rsvp-card-afterparty .weekend-event-when {
+    margin-bottom: 0.25rem;
+}
+
+.rsvp-card .rsvp-card-afterparty .weekend-event-where {
+    margin-bottom: 0.4rem;
+}
+
+.rsvp-card .weekend-event-note {
+    margin-top: 0.35rem;
+    margin-bottom: 0;
 }
 
 /* ---- Per-person response block on event cards ----------------------------- */
 
 .rsvp-card-person {
-    margin-top: 1.3rem;
-    padding-top: 1.3rem;
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
     border-top: 1px solid rgba(26, 58, 46, 0.15);
 }
 
@@ -1002,11 +985,11 @@ body.dark-mode .rsvp-card-person {
 
 .rsvp-card-person-name {
     font-family: var(--font-heading);
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.82rem;
-    margin-bottom: 0.85rem;
+    letter-spacing: 0.16em;
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
 }
 
 /* Stacked accept/decline — the printed reply-card register. Reuses the
@@ -1014,17 +997,17 @@ body.dark-mode .rsvp-card-person {
 .rsvp-card-choices {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.4rem;
 }
 
 .rsvp-card-choices .radio-label {
-    font-size: 0.98rem;
+    font-size: 0.88rem;
 }
 
 /* ---- Meal choice (Saturday card) ------------------------------------------ */
 
 .rsvp-card-meal {
-    margin-top: 1rem;
+    margin-top: 0.6rem;
     transition: opacity 0.2s ease;
 }
 
@@ -1038,10 +1021,10 @@ body.dark-mode .rsvp-card-person {
     font-family: var(--font-heading);
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    font-size: 0.68rem;
     opacity: 0.75;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.35rem;
 }
 
 /* One meal row: the radio on the left, the kosher checkbox (branzino/chicken
@@ -1054,11 +1037,11 @@ body.dark-mode .rsvp-card-person {
 }
 
 .rsvp-meal-option + .rsvp-meal-option {
-    margin-top: 0.55rem;
+    margin-top: 0.4rem;
 }
 
 .rsvp-meal-option .radio-label {
-    font-size: 0.98rem;
+    font-size: 0.88rem;
 }
 
 /* Hairline kosher checkbox — same control language as the radios: square ring
@@ -1066,12 +1049,12 @@ body.dark-mode .rsvp-card-person {
 .kosher-label {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.4rem;
     font-family: var(--font-heading);
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    font-size: 0.6rem;
     cursor: pointer;
     opacity: 0.85;
     transition: opacity 0.2s ease;
@@ -1165,9 +1148,9 @@ body.dark-mode .kosher-label input[type="checkbox"]:focus-visible {
     padding: 0.45rem 0.6rem;
     cursor: pointer;
     font-family: var(--font-heading);
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     font-size: 0.74rem;
     color: var(--color-dark-green);
     text-shadow: none;
@@ -1214,6 +1197,34 @@ body.dark-mode .rsvp-card-next:focus-visible {
     display: contents;
 }
 
+/* The lookup card's own Back button exists in the DOM from the moment it's
+   built (revealPeek, well before the guest has ever swapped forward) — it
+   has nothing to reverse yet, so it stays invisible/inert until the first
+   swap (.rsvp-flow-active, added the instant startFlow fires). Every other
+   card's Back button is only ever built after that class is already set, so
+   this has no effect on them (already-matching selector at insertion time =
+   no fade, just present). */
+body.page-rsvp .rsvp-card-back {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.page-rsvp.rsvp-flow-active .rsvp-card-back {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Every other card in a stack — buried behind the top one, marked [inert]
+   by js/rsvp-flow.js — must not show its own Back/Next. inert only removes
+   interactivity, not visibility, and each card's nav sits just 7-8px off
+   from the next one's (see the depth transform), so left alone every buried
+   card's controls "ghost" through at nearly the same spot as the top
+   card's, doubled and overlapping. */
+body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card-back,
+body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card-next {
+    visibility: hidden;
+}
+
 /* Back — twin of the forward CTA, mirrored outside the card's left edge. */
 .rsvp-card-back {
     position: absolute;
@@ -1228,9 +1239,9 @@ body.dark-mode .rsvp-card-next:focus-visible {
     padding: 0.45rem 0.6rem;
     cursor: pointer;
     font-family: var(--font-heading);
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     font-size: 0.74rem;
     color: var(--color-dark-green);
     text-shadow: none;
@@ -1304,11 +1315,11 @@ body.dark-mode .rsvp-review-person {
 
 .rsvp-review-person-name {
     font-family: var(--font-heading);
-    font-weight: 700;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 0.82rem;
-    margin-bottom: 0.6rem;
+    letter-spacing: 0.16em;
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
 }
 
 .rsvp-review-line {
@@ -1356,32 +1367,35 @@ body.dark-mode .rsvp-review-person {
         transform: translateX(-50%) translateY(0.5px);
     }
 
-    .rsvp-panel {
-        padding: 104px 1rem 3rem;
+    /* .rsvp-card's padding is percentage-based (8% 10%), which still applies
+       automatically once the width below changes. */
+
+    /* The invitation's own field-fraction width (~116px at 360px viewports —
+       fine for a static keepsake card, unusable for a form) is too small for
+       the reply-card stack's actual content. Andrew's call: on mobile the
+       stack fills the page width with the site's standard 1.5rem side
+       margin, independent of the invitation's size — the invitation itself
+       is untouched. Height still follows the frame's own aspect ratio, so
+       the frame PNG never distorts; content taller than that scrolls into
+       view (see ensureMobileScrollRoom in js/rsvp-flow.js, which grows
+       .rsvp-flow-scroll-spacer below to fit whatever the current top card
+       needs) rather than getting clipped by .invitation-endstate's own box
+       (overflow: visible, just below). */
+    body.page-rsvp .rsvp-stack .paper-card--page {
+        left: 1.5rem;
+        width: calc(100vw - 3rem);
     }
 
-    .rsvp-card {
-        padding: 2.4rem 1.5rem 2.1rem;
+    body.page-rsvp.intro-complete .invitation-endstate {
+        overflow: visible;
     }
 
-    .rsvp-card::before {
-        inset: 10px;
-    }
-
-    .rsvp-card::after {
-        inset: 15px;
-    }
-
-    .rsvp-card-title {
-        font-size: 2.1rem;
-    }
-
-    .rsvp-card .weekend-event-name {
-        font-size: 1.9rem;
-    }
-
-    .rsvp-card .rsvp-card-afterparty .weekend-event-name {
-        font-size: 1.5rem;
+    /* .invitation-scroll-spacer (styles.css) is the pre-flow settled-page
+       spacer and collapses once .rsvp-flow-active — this is its mobile-only
+       counterpart for the flow itself, height set dynamically by
+       ensureMobileScrollRoom in js/rsvp-flow.js. */
+    body.page-rsvp.rsvp-flow-active .rsvp-flow-scroll-spacer {
+        display: block;
     }
 
     /* No room outside the card on mobile — Back and Next drop below it as a
@@ -1391,7 +1405,7 @@ body.dark-mode .rsvp-review-person {
         justify-content: space-between;
         align-items: center;
         gap: 1rem;
-        margin-top: 1.7rem;
+        margin-top: 1rem;
     }
 
     .rsvp-card-back,

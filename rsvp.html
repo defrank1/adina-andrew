@@ -31,6 +31,15 @@
         </div>
     </div>
 
+    <!-- Fixed grain backdrop — "the paper field stays fixed" (like the nav)
+         while the settled card/stack scroll normally over it. Not
+         background-attachment: fixed (disabled on iOS Safari) — a real
+         position: fixed element instead, painted behind everything else.
+         Lives outside #protected-content for the same reason the nav does.
+         Hidden until the settle (see styles.css) so it can't cause the
+         cream-flash the matte-green pre-settle phase is built to avoid. -->
+    <div class="rsvp-fixed-backdrop" aria-hidden="true"></div>
+
     <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
     <div id="nav-placeholder"></div>
 
@@ -70,6 +79,12 @@
                         <path d="M1 8 H 31 M 24.5 1.5 L 31 8 L 24.5 14.5" />
                     </svg>
                 </button>
+                <!-- File-to-back reply card stack — the lookup card, one card per
+                     invited event, review, and thank-you. Empty until the peek
+                     (js/rsvp-flow.js builds and positions cards here at runtime);
+                     shares the invitation card's own on-screen rect (.rsvp-stack
+                     in styles.css). -->
+                <div id="rsvp-stack" class="rsvp-stack"></div>
             </div>
         </div>
 
@@ -79,14 +94,13 @@
              through. -->
         <div class="invitation-scroll-spacer" aria-hidden="true"></div>
 
-        <!-- Card flow — the sequenced RSVP. Hidden until the arrow starts the flow
-             (body.rsvp-flow-active). A fixed texture backdrop keeps the grain
-             stationary while the card track slides/scrolls above it on its own
-             plane. Panels are built by js/rsvp-flow.js. -->
-        <div id="rsvp-flow" class="rsvp-flow" hidden>
-            <div class="rsvp-flow-backdrop" aria-hidden="true"></div>
-            <div id="rsvp-flow-track" class="rsvp-flow-track"></div>
-        </div>
+        <!-- Scroll room for the reply-card stack, mobile only (rsvp-styles.css) —
+             .invitation-scroll-spacer above collapses once the flow starts (it's
+             the pre-flow settled-page spacer), so this is a dedicated one for it.
+             Height is set dynamically by js/rsvp-flow.js (ensureMobileScrollRoom)
+             to fit whatever the current top card needs; empty on desktop, where
+             every card already fits the viewport. -->
+        <div class="rsvp-flow-scroll-spacer" aria-hidden="true"></div>
 
         <div id="footer-placeholder"></div>
 

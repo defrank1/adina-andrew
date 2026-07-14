@@ -1009,17 +1009,56 @@ body.page-rsvp.intro-complete .invitation-endstate {
     z-index: 1;
 }
 
-/* Scroll room below the settled card — plain paper (body's own grain shows
-   through; no background of its own), no new content. Collapsed to nothing
-   pre-settle so it can't affect the registration-critical pre-cut layout, and
-   again once the RSVP card flow is entered (rsvp-styles.css) so it doesn't push
-   the flow's first panel down. Height is 100vh (the settled card view the
-   endstate box occupies, which this in-flow spacer starts underneath at the
-   same document position) + 60vh of genuine extra: #protected-content's own
-   min-height:100vh floor would otherwise absorb a plain 60vh spacer via the
-   footer's margin-top:auto (same mechanism that pins a short page's footer to
-   the bottom on every other page) before the column ever grows past one
-   viewport, leaving nothing to scroll into. */
+/* Fixed grain backdrop (July 2026 — "Settled RSVP page: fixed paper field,
+   card scrolls over it"). #invitation-endstate above is already fully
+   transparent post-settle and already scrolls normally with the document
+   (position: absolute inside the normally-flowing #protected-content) — it
+   was built that way so body's own grain would show through as the page
+   scrolled. That's also exactly the "card scrolls over a backdrop" shape
+   this wants; the only thing that needed to change is that the backdrop
+   itself must NOT scroll. This div is a genuinely position: fixed element
+   (NOT background-attachment: fixed, which iOS Safari disables) carrying the
+   same grain tile as body's own background, painted behind everything else.
+   As #invitation-endstate's own cream matte fades out at the settle, it
+   reveals this stationary layer instead of body's (formerly scrolling) one —
+   the fade logic itself is completely untouched. Hidden until intro-complete
+   so it can never appear during the matte-green pre-settle phase (would
+   otherwise be a cream flash during the brief unlock -> canvas-reveal gap on
+   a first-time playback, since #rive-container sits at opacity: 0 for a
+   moment before revealCanvas() runs). */
+body.page-rsvp .rsvp-fixed-backdrop {
+    display: none;
+}
+
+body.page-rsvp.intro-complete .rsvp-fixed-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-color: #F1EDEA;
+    background-image: url('../assets/textures/combined-light.png');
+    background-size: 200px 200px;
+    background-repeat: repeat;
+}
+
+body.dark-mode.page-rsvp.intro-complete .rsvp-fixed-backdrop {
+    background-color: #122a20;
+    background-image: url('../assets/textures/combined-dark.png');
+}
+
+/* Scroll room below the settled card — the fixed backdrop above shows
+   through (no background of its own here), no new content. Collapsed to
+   nothing pre-settle so it can't affect the registration-critical pre-cut
+   layout, and again once the RSVP card flow is entered (rsvp-styles.css) so
+   it doesn't push the flow's first panel down. Height is 100vh (the settled
+   card view the endstate box occupies, which this in-flow spacer starts
+   underneath at the same document position) + 60vh of genuine extra:
+   #protected-content's own min-height:100vh floor would otherwise absorb a
+   plain 60vh spacer via the footer's margin-top:auto (same mechanism that
+   pins a short page's footer to the bottom on every other page) before the
+   column ever grows past one viewport, leaving nothing to scroll into. On
+   mobile, js/rsvp-flow.js grows this further to fit whatever the current
+   reply-card-stack card needs (see ensureMobileScrollRoom). */
 .invitation-scroll-spacer {
     display: none;
 }
@@ -1098,6 +1137,46 @@ body.page-rsvp.intro-complete .invitation-card .paper-card__ink {
 
 body.dark-mode.page-rsvp.intro-complete .invitation-card .paper-card__ink {
     filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.5)) drop-shadow(0px -1px 1px rgba(255, 255, 255, 0.1));
+}
+
+/* ===========================
+   RSVP paper suite — the reply-card stack
+   Shares .invitation-field's coordinate system so every stack card (lookup,
+   event cards, review, thanks) renders in the EXACT same on-screen rect as
+   .invitation-card above — same field, same three fractions, restated here
+   rather than factored into a shared variable so .invitation-card's own rule
+   (registration-critical, ?debug-registration-verified) is never touched by
+   this feature. If the target artboard rect above ever changes, update both.
+   z-index: 0 gives .invitation-field its own stacking context so the stack's
+   depth-based z-indices (see js/rsvp-flow.js) can't collide with anything
+   else on the page.
+   =========================== */
+body.page-rsvp .invitation-field {
+    z-index: 0;
+}
+
+.rsvp-stack {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+body.page-rsvp .rsvp-stack .paper-card--page {
+    position: absolute;
+    left: 33.854%;
+    width: 32.292%;
+    top: 13.426%;
+    height: auto;
+    /* aspect-ratio: 1500/2100 already set by the base .paper-card rule */
+    display: block;
+    pointer-events: auto;
+}
+
+/* .invitation-card only gains a resting transform/z-index once it becomes a
+   stack participant (the moment the peek appears) — js/rsvp-flow.js adds this
+   class then, never before, so the cut/settle frame is untouched by it. */
+body.page-rsvp .invitation-card.rsvp-stack-member {
+    z-index: 500;
 }
 
 /* Nav + footer: present but invisible during the intro (so they can fade in with the
