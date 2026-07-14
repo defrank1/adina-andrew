@@ -107,7 +107,7 @@ Old variables `--color-nav-bg`, `--color-nav-bg-dark`, `--color-footer-bg`, and 
 ### Dark Mode
 
 - Supported on all pages (except `savethedate.html`, which has a standalone toggle but no nav/footer)
-- Toggle via Unicode symbol with breathing aura glow: `☀` (sun, 36px) in light mode, `⏾` (moon, 28px) in dark mode. Rendered via `background-clip: text` for tinted foil effect. CSS-animated aura (`@keyframes breathe`, 4s cycle). No label text, no SVG, no PNG swap. Located in footer, right-aligned.
+- Toggle via Unicode symbol with breathing aura glow: `⏾` (moon, 28px) in light mode, `✹` (twelve-pointed star, 36px) in dark mode — the icon shows the mode a click will switch *to*, not the current mode. `✹` (U+2739) replaced the original `☀` sun-with-rays glyph, which read as "clip art"; the star was chosen over more minimal ring-based alternatives (`☉`, `☼`) as the closer match to the moon's crescent character. Rendered via `background-clip: text` for tinted foil effect. CSS-animated aura (`@keyframes breathe`, 4s cycle). No label text, no SVG, no PNG swap. Located in footer, right-aligned. (Flipped from the original sun-in-light/moon-in-dark mapping, then the sun glyph itself replaced with the star — decisions.md, July 14, 2026.)
 - Icon swaps: `data-light` / `data-dark` attributes on `<img>` tags
 - Images that change: monogram, illustrations, nav diamond PNG
 - Dark mode preference saved to `localStorage`
@@ -327,7 +327,7 @@ Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-sty
 #### footer.html Contains
 
 - `.site-footer` wrapper
-- Dark mode toggle button with Unicode symbol (`☀` / `⏾`) and breathing aura
+- Dark mode toggle button with Unicode symbol (`✹` / `⏾`) and breathing aura
 
 ---
 
@@ -431,7 +431,7 @@ Radios in the RSVP form (`.radio-label input[type="radio"]`, styled in `rsvp-sty
 - **Page body classes** (`page-registry`, `page-savethedate`, `page-faq`, `page-schedule`, `page-travel`, `page-our-story`, `page-dc-guide`, `page-home`) scope page-specific styles in styles.css — no inline `<style>` blocks.
 - **Password overlay** recreates grain via `::before` pseudo-element with the same baked texture tiles.
 - **Buttons:** Letterpress/deboss model using `--shadow-raised`/`--shadow-lifted`/`--shadow-pressed` CSS custom properties (all inset). Surface texture via `::before` with SVG `feTurbulence`. No outer shadows, no gradient sweep.
-- **Dark mode toggle:** Unicode symbol (`☀` / `⏾`) with `background-clip: text` foil effect and CSS breathing aura. No SVG, no PNG swap.
+- **Dark mode toggle:** Unicode symbol (`✹` / `⏾`) with `background-clip: text` foil effect and CSS breathing aura. No SVG, no PNG swap.
 - **Mobile nav:** Menu pill button (`.mobile-menu-btn`) top-right with dropdown panel (`.mobile-menu-panel`). Inline diamond and links hidden. Toggle logic in `initMenu()` in `site-init.js`.
 - **No `background-blend-mode` anywhere** — all textures are pre-composited in Figma and exported as flat PNG tiles. Eliminates cross-browser rendering differences.
 - **Toggle aura:** Pure CSS animation via `@keyframes breathe` — no JavaScript for the glow effect

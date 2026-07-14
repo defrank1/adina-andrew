@@ -86,8 +86,8 @@
             venue: 'InterContinental — The Wharf',
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
-            dress: 'Black Tie Preferred',
-            dressInfo: 'Tuxedos and full-length gowns are encouraged. Dark suits with a white shirt and dark tie, or formal cocktail dresses, are also welcome.'
+            dress: 'Cocktail Attire',
+            dressInfo: 'Suits or sport coats, or cocktail dresses and elegant separates.'
         },
         sunday: {
             name: 'Farewell Brunch',
@@ -173,9 +173,6 @@
         if (text !== undefined) { node.textContent = text; }
         return node;
     }
-
-    var ARROW_RIGHT = '<svg viewBox="0 0 30 14" width="30" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7 H 27 M 21 1.5 L 27 7 L 21 12.5"/></svg>';
-    var ARROW_LEFT = '<svg viewBox="0 0 30 14" width="30" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M29 7 H 3 M 9 1.5 L 3 7 L 9 12.5"/></svg>';
 
     function radioLabel(name, value, labelText) {
         var labelEl = el('label', 'radio-label');
@@ -274,9 +271,10 @@
     document.addEventListener('DOMContentLoaded', function () {
         var stackEl = document.getElementById('rsvp-stack');
         var arrowBtn = document.getElementById('rsvp-arrow');
+        var backBtn = document.getElementById('rsvp-stack-back');
         var invitationCardEl = document.querySelector('.invitation-card');
         var scrollSpacerEl = document.querySelector('.rsvp-flow-scroll-spacer');
-        if (!stackEl || !arrowBtn || !invitationCardEl) { return; }
+        if (!stackEl || !arrowBtn || !backBtn || !invitationCardEl) { return; }
 
         var MOBILE_BREAKPOINT = 900;
 
@@ -504,6 +502,7 @@
             if (top && top.dataset.step === 'review') {
                 buildSummaryInto(reviewSummary, collectData());
             }
+            updateStackNav();
             if (window.innerWidth <= MOBILE_BREAKPOINT) {
                 window.scrollTo(0, 0);
             }
@@ -513,6 +512,88 @@
             setTimeout(function () {
                 card.focus({ preventScroll: true });
             }, prefersReduced ? 0 : STACK_MOVE_MS + 20);
+        }
+
+        // ---- persistent stack nav (Back/#rsvp-arrow-as-Next) ------------------
+
+        // What the CURRENT top card wants from the persistent nav: whether a
+        // forward action exists at all (lookup advances only by selecting a
+        // suggestion; review advances only via its own Send button; thanks
+        // is terminal — none of those get a generic forward control), its
+        // label, and its validation (null = none, e.g. afterparty). `back`
+        // is true for everything except thanks (nothing to reverse from a
+        // completed submission) — Back is otherwise always meaningful since
+        // the whole flow, invitation included, is one continuous stack.
+        function stackNavInfoFor(wrapper) {
+            if (!wrapper) { return { forward: false, back: false }; }
+            if (wrapper === invitationCardEl) {
+                return { forward: true, back: false, label: 'RSVP' };
+            }
+            var step = wrapper.dataset.step || '';
+            if (step === 'lookup') {
+                return { forward: false, back: true };
+            }
+            if (step === 'review' || step === 'thanks') {
+                return { forward: false, back: step === 'review' };
+            }
+            var card = wrapper.querySelector('.rsvp-card');
+            var label = isLastPersonalCard(wrapper) ? 'Review' : 'Next';
+            if (step === 'afterparty') {
+                return { forward: true, back: true, label: label, validate: null };
+            }
+            if (step.indexOf('saturday_') === 0) {
+                var personIdx = parseInt(step.slice('saturday_'.length), 10);
+                return {
+                    forward: true, back: true, label: label,
+                    validate: function () { return validateSaturdayPersonCard(card, personIdx); }
+                };
+            }
+            // friday / sunday
+            return {
+                forward: true, back: true, label: label,
+                validate: function () { return validateEventCard(card, step); }
+            };
+        }
+
+        // The card right before review in the currently-dealt personal
+        // stack — i.e. whichever one should say "Review" instead of "Next".
+        function isLastPersonalCard(wrapper) {
+            return personalCards.length >= 2 && wrapper === personalCards[personalCards.length - 2];
+        }
+
+        // Reflects the current top of `stack` onto the two persistent nav
+        // buttons: label, and whether each is usable at all. Inline styles
+        // (not a CSS class) so this always wins regardless of any other
+        // opacity rule, and `disabled` so a hidden control is also out of
+        // the tab order and unclickable, not just invisible.
+        function updateStackNav() {
+            var info = stackNavInfoFor(stack[0]);
+            var arrowLabel = arrowBtn.querySelector('.rsvp-arrow-label');
+            if (info.forward) {
+                arrowLabel.textContent = info.label || 'RSVP';
+            }
+            arrowBtn.disabled = !info.forward;
+            arrowBtn.style.opacity = info.forward ? '' : '0';
+            arrowBtn.style.pointerEvents = info.forward ? '' : 'none';
+
+            backBtn.disabled = !info.back;
+            backBtn.style.opacity = info.back ? '1' : '0';
+            backBtn.style.pointerEvents = info.back ? 'auto' : 'none';
+        }
+
+        // The one click handler for #rsvp-arrow throughout the whole flow —
+        // "Begin RSVP" on the invitation, "Next"/"Review" on every card
+        // after. Also reused as the peek's click handler (see revealPeek):
+        // stackNavInfoFor(lookup) always returns forward:false, so clicking
+        // the peek once lookup is already on top correctly no-ops here,
+        // with no separate "already swapped" guard needed.
+        function onForwardClick() {
+            var info = stackNavInfoFor(stack[0]);
+            if (!info.forward) { return; }
+            if (info.validate && !info.validate()) { return; }
+            document.body.classList.add('rsvp-flow-active');
+            window.scrollTo(0, 0);
+            fileForward(stack, afterMove);
         }
 
         // ---- stack card shell --------------------------------------------
@@ -587,10 +668,6 @@
             group.appendChild(el('p', 'form-hint',
                 'Type the email at which you received your invitation.'));
             card.appendChild(group);
-
-            // Back — files the lookup card away and returns the invitation to
-            // the top ("file back to re-read the invitation").
-            card.appendChild(cardNav(null));
 
             emailInput.addEventListener('input', onEmailInput);
             document.addEventListener('click', function (e) {
@@ -700,10 +777,12 @@
             var invited = EVENT_ORDER.filter(function (key) {
                 return (inv.invitedTo || []).indexOf(key) !== -1;
             });
-            // Ordered build list. isLast (and so the Next-button's "Review"
-            // label) is computed off this actual sequence, not EVENT_ORDER
-            // position, since afterparty, more Saturday people, or a later
-            // event may still follow.
+            // Ordered build list. The persistent nav's "Next" vs "Review"
+            // label is computed dynamically per current top card (see
+            // isLastPersonalCard) against this same personalCards order, not
+            // baked in at build time — so it stays correct regardless of
+            // EVENT_ORDER position, afterparty, or how many Saturday people
+            // there are.
             var steps = [];
             invited.forEach(function (key) {
                 if (key === 'saturday') {
@@ -715,15 +794,14 @@
                     steps.push({ type: 'event', key: key });
                 }
             });
-            steps.forEach(function (step, i) {
-                var isLast = i === steps.length - 1;
+            steps.forEach(function (step) {
                 var built;
                 if (step.type === 'saturday-person') {
-                    built = buildSaturdayPersonPanel(inv, step.personIdx, isLast);
+                    built = buildSaturdayPersonPanel(inv, step.personIdx);
                 } else if (step.type === 'afterparty') {
-                    built = buildAfterpartyPanel(isLast);
+                    built = buildAfterpartyPanel();
                 } else {
-                    built = buildEventPanel(inv, step.key, isLast);
+                    built = buildEventPanel(inv, step.key);
                 }
                 personalCards.push(built);
             });
@@ -740,48 +818,13 @@
             stack.forEach(function (elCard, i) { applyRestingInstant(elCard, i); });
         }
 
-        function backButton() {
-            var btn = el('button', 'rsvp-card-back');
-            btn.type = 'button';
-            btn.setAttribute('aria-label', 'Back');
-            var iconWrap = el('span');
-            iconWrap.innerHTML = ARROW_LEFT;
-            btn.appendChild(iconWrap.firstChild);
-            btn.appendChild(el('span', null, 'Back'));
-            btn.addEventListener('click', function () {
-                fileBackward(stack, afterMove);
-            });
-            return btn;
-        }
-
-        function nextButton(labelText, onClick) {
-            var btn = el('button', 'rsvp-card-next');
-            btn.type = 'button';
-            var span = el('span', null, labelText);
-            btn.appendChild(span);
-            var iconWrap = el('span');
-            iconWrap.innerHTML = ARROW_RIGHT;
-            btn.appendChild(iconWrap.firstChild);
-            btn.addEventListener('click', onClick);
-            return btn;
-        }
-
-        // Back + forward as twins: a wrapper transparent to layout on desktop (each
-        // button positions absolutely outside the card), a flex row below on mobile.
-        function cardNav(forwardEl) {
-            var nav = el('div', 'rsvp-card-nav');
-            nav.appendChild(backButton());
-            if (forwardEl) { nav.appendChild(forwardEl); }
-            return nav;
-        }
-
         // ---- event cards ----
 
         // Friday/Sunday: one card per event, all invited people on it (they
         // only carry an accept/decline each, light enough to share a card).
         // Saturday is dense enough (meal + kosher per person) that it gets
         // its own per-person function below instead.
-        function buildEventPanel(inv, eventKey, isLast) {
+        function buildEventPanel(inv, eventKey) {
             var detail = EVENT_DETAILS[eventKey];
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
@@ -806,13 +849,6 @@
             error.setAttribute('role', 'alert');
             card.appendChild(error);
 
-            card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
-                if (validateEventCard(card, eventKey)) {
-                    error.classList.remove('show');
-                    fileForward(stack, afterMove);
-                }
-            })));
-
             return makeStackCard(card, eventKey);
         }
 
@@ -821,7 +857,7 @@
         // already-slimmed-down shared card (see decisions.md). Same event
         // meta as any other event card, just one person's accept/decline +
         // dinner selection instead of a loop over everyone.
-        function buildSaturdayPersonPanel(inv, personIdx, isLast) {
+        function buildSaturdayPersonPanel(inv, personIdx) {
             var detail = EVENT_DETAILS.saturday;
             var name = inv.people[personIdx];
             var card = el('div', 'rsvp-card');
@@ -854,20 +890,13 @@
             error.setAttribute('role', 'alert');
             card.appendChild(error);
 
-            card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
-                if (validateSaturdayPersonCard(card, personIdx)) {
-                    error.classList.remove('show');
-                    fileForward(stack, afterMove);
-                }
-            })));
-
             return makeStackCard(card, 'saturday_' + personIdx);
         }
 
         // Info-only afterparty card — no accept/decline, just the details.
         // Always immediately after Saturday's last person card when
         // Saturday is invited (see dealPersonalStack's step list).
-        function buildAfterpartyPanel(isLast) {
+        function buildAfterpartyPanel() {
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
             card.dataset.event = 'afterparty';
@@ -875,10 +904,6 @@
             card.appendChild(el('h2', 'rsvp-card-title', AFTERPARTY_DETAILS.name));
             card.appendChild(makeCardEventMeta(AFTERPARTY_DETAILS));
             card.appendChild(el('p', 'weekend-event-note', AFTERPARTY_DETAILS.note));
-
-            card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
-                fileForward(stack, afterMove);
-            })));
 
             return makeStackCard(card, 'afterparty');
         }
@@ -936,8 +961,15 @@
             section.classList.toggle('is-disabled', declined);
         }
 
+        // Both validate* functions are self-contained: clear any previous
+        // error first, then either set a new one and return false, or leave
+        // it cleared and return true. The old per-card Next handler used to
+        // clear the error itself right before advancing; now that
+        // validation runs from the persistent nav's onForwardClick instead
+        // (stackNavInfoFor), clearing has to happen in here.
         function validateEventCard(card, eventKey) {
             var error = card.querySelector('.rsvp-card-error');
+            error.classList.remove('show');
             for (var idx = 0; idx < invitation.people.length; idx++) {
                 var name = invitation.people[idx];
                 var answer = card.querySelector('input[name="fp' + idx + '_' + eventKey + '"]:checked');
@@ -952,6 +984,7 @@
 
         function validateSaturdayPersonCard(card, personIdx) {
             var error = card.querySelector('.rsvp-card-error');
+            error.classList.remove('show');
             var name = invitation.people[personIdx];
             var answer = card.querySelector('input[name="fp' + personIdx + '_saturday"]:checked');
             if (!answer) {
@@ -996,8 +1029,6 @@
             reviewError = el('p', 'rsvp-card-error');
             reviewError.setAttribute('role', 'alert');
             card.appendChild(reviewError);
-
-            card.appendChild(cardNav(null));
 
             reviewSubmitBtn = el('button', 'btn-priority rsvp-submit', 'Send RSVP');
             reviewSubmitBtn.type = 'button';
@@ -1133,7 +1164,7 @@
 
             card.appendChild(el('h2', 'rsvp-card-title', 'Thank you'));
             card.appendChild(el('p', 'rsvp-card-thanks-line',
-                "Your RSVP has been received. We can't wait to celebrate with you."));
+                "Your RSVP has been received. We can't wait to celebrate with you!"));
 
             thanksSummary = el('div', 'rsvp-review-summary');
             card.appendChild(thanksSummary);
@@ -1195,8 +1226,8 @@
             applyRestingInstant(lookupWrapper, 1);
             // Exception to "only the top card is interactive": the lookup
             // card's own offset sliver, peeking out behind the invitation,
-            // IS the click target that starts the flow (see startFlow) — it
-            // can't be inert. The invitation sits above it everywhere the two
+            // IS the click target that starts the flow (see onForwardClick)
+            // — it can't be inert. The invitation sits above it everywhere the two
             // overlap, so the buried email input/back button are never
             // reachable by mouse regardless; they're technically still
             // keyboard-tabbable for this one moment, a deliberately accepted
@@ -1217,20 +1248,12 @@
             lookupWrapper.style.transition = '';
             void lookupWrapper.offsetWidth;
             document.body.classList.add('rsvp-peek-visible');
-            lookupWrapper.addEventListener('click', startFlow);
-            arrowBtn.addEventListener('click', startFlow);
-        }
-
-        // Plays the invitation -> lookup file-to-back swap (arrow or peek,
-        // same action). Guards on the lookup card not already being on top,
-        // rather than a one-shot flag, so filing back to re-read the
-        // invitation (the lookup card's own Back button) and then swapping
-        // forward again both work identically to the first time.
-        function startFlow() {
-            if (stack[0] === lookupWrapper) { return; }
-            document.body.classList.add('rsvp-flow-active');
-            window.scrollTo(0, 0);
-            fileForward(stack, afterMove);
+            lookupWrapper.addEventListener('click', onForwardClick);
+            arrowBtn.addEventListener('click', onForwardClick);
+            backBtn.addEventListener('click', function () {
+                if (!stackNavInfoFor(stack[0]).back) { return; }
+                fileBackward(stack, afterMove);
+            });
         }
     });
 })();

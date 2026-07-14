@@ -35,8 +35,8 @@ function initTheme() {
     // Set initial toggle symbol
     var sym = document.getElementById('toggle-sym');
     if (sym && isDark) {
-        sym.childNodes[0].textContent = '\u23FE';
-        sym.style.fontSize = '28px';
+        sym.childNodes[0].textContent = '\u2739';
+        sym.style.fontSize = '36px';
     }
 
     const darkModeBtn = document.getElementById('dark-mode-toggle');
@@ -51,11 +51,11 @@ function initTheme() {
         var sym = document.getElementById('toggle-sym');
         if (sym) {
             if (isDarkNow) {
+                sym.childNodes[0].textContent = '\u2739';
+                sym.style.fontSize = '36px';
+            } else {
                 sym.childNodes[0].textContent = '\u23FE';
                 sym.style.fontSize = '28px';
-            } else {
-                sym.childNodes[0].textContent = '\u2600';
-                sym.style.fontSize = '36px';
             }
         }
     });

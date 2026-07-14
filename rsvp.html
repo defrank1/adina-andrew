@@ -65,12 +65,18 @@
                         data-dark="assets/invitation/invitation-ink-dark.png"
                         alt="Adina Beth and Andrew Spencer — wedding invitation" />
                 </div>
-                <!-- RSVP arrow — the entry into the card flow. Positioned off the card's
-                     artboard fractions (not viewport pixels) so it tracks any future
-                     card re-placement. Fades in with the settle; pointer-events: auto
-                     re-enables it inside the pointer-events: none end-state. The
-                     .rsvp-arrow-breathe class carries the optional breathing glow —
-                     delete the class to kill it. -->
+                <!-- RSVP arrow — the entry into the card flow, and (July 2026) the
+                     PERSISTENT forward control for the whole stack, not just the
+                     first swap. Positioned off the card's artboard fractions (not
+                     viewport pixels), so it never moves — the earlier per-card
+                     Next button (a DOM child of each sliding card) got crowded by
+                     the growing stack depth and visibly slid with its card, which
+                     read as a bug. js/rsvp-flow.js relabels it ("RSVP" -> "Next" /
+                     "Review") and swaps its validation per the current top card;
+                     see updateStackNav. Fades in with the settle; pointer-events:
+                     auto re-enables it inside the pointer-events: none end-state.
+                     The .rsvp-arrow-breathe class carries the optional breathing
+                     glow — delete the class to kill it. -->
                 <button id="rsvp-arrow" class="rsvp-arrow rsvp-arrow-breathe" aria-label="Begin RSVP">
                     <span class="rsvp-arrow-label">RSVP</span>
                     <svg class="rsvp-arrow-icon" viewBox="0 0 34 16" width="34" height="16" aria-hidden="true"
@@ -78,6 +84,17 @@
                         stroke-linejoin="round">
                         <path d="M1 8 H 31 M 24.5 1.5 L 31 8 L 24.5 14.5" />
                     </svg>
+                </button>
+                <!-- Back — mirrors the arrow on the card's other side, same
+                     "persistent, never slides with the card" reasoning. Hidden
+                     until the flow starts (nothing to go back to before then). -->
+                <button id="rsvp-stack-back" class="rsvp-stack-back" aria-label="Back">
+                    <svg class="rsvp-stack-back-icon" viewBox="0 0 34 16" width="34" height="16" aria-hidden="true"
+                        fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M33 8 H 3 M 9.5 1.5 L 3 8 L 9.5 14.5" />
+                    </svg>
+                    <span class="rsvp-stack-back-label">Back</span>
                 </button>
                 <!-- File-to-back reply card stack — the lookup card, one card per
                      invited event, review, and thank-you. Empty until the peek

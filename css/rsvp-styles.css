@@ -560,6 +560,13 @@ body.page-rsvp .rsvp-arrow {
     left: calc(66.146% + 28px);
     top: 53.611%;
     transform: translateY(-50%);
+    /* Explicit, above every stack card (max z-index 500 — see depthZ in
+       js/rsvp-flow.js) rather than relying on implicit z-index:auto
+       ordering — that worked by chance against most cards but lost to the
+       lookup card specifically on mobile once this became position:fixed
+       (still a descendant of .invitation-field's stacking context even
+       though fixed positioning escapes its layout). */
+    z-index: 600;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -670,16 +677,16 @@ body.dark-mode.page-rsvp.intro-complete .rsvp-arrow.rsvp-arrow-breathe {
     }
 }
 
-/* Once the swap has happened, the arrow's one-time job (a glowing "look
-   here" nudge toward the first interaction) is done — fade it out rather
-   than leave it sitting, inert, beside whatever card is now on top. Filing
-   back to the invitation doesn't bring it back: the returning peek (the
-   lookup card's own offset edge) is the recurring affordance for swapping
-   forward again, matching how it worked the very first time before either
-   was ever clicked. */
-body.page-rsvp.rsvp-flow-active .rsvp-arrow {
-    opacity: 0;
-    pointer-events: none;
+/* The arrow stays visible and usable for the whole flow now (relabeled
+   "Next"/"Review" by js/rsvp-flow.js's updateStackNav) rather than fading
+   out after the first swap — see rsvp.html's comment on this element. The
+   breathing glow, though, was specifically a "look here, start now" nudge
+   for the very first interaction; it stops making sense once the label has
+   changed to a routine form-navigation control, so it's suppressed for the
+   rest of the flow (independent of visibility — updateStackNav toggles
+   inline opacity/pointer-events/disabled per card via JS, not this class). */
+body.page-rsvp.rsvp-flow-active .rsvp-arrow.rsvp-arrow-breathe {
+    animation: none;
 }
 
 /* ---- Entering the flow: scroll unlocks ------------------------------------ */
@@ -781,8 +788,32 @@ body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
     justify-content: center;
 }
 
+/* .rsvp-card .form-group (below, shared with the review card's note/Send)
+   sets text-align: left — override back to center here so the email field,
+   hint text, and (via .rsvp-lookup-label) the label all read as one
+   centered block, matching the invitation card's own centered layout. */
+.paper-card--page[data-step="lookup"] .form-group {
+    text-align: center;
+}
+
 .rsvp-lookup-label {
     text-align: center;
+}
+
+/* "Rsvp" as the card's one PP Playground accent line (type budget combo 3)
+   — was sized down to 0.85rem along with every other card's title to fit
+   "Ceremony and Reception" on one line, which left it reading smaller and
+   lighter than "FIND YOUR INVITATION" below it. This is the single most
+   important word on the card (echoing the invitation's own big script
+   names), so it gets the display face back, sized up for real presence. */
+.paper-card--page[data-step="lookup"] .rsvp-card-title {
+    font-family: var(--font-title);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-bottom: 0.6rem;
 }
 
 /* Matches .password-input (styles.css) exactly — same gradient foil
@@ -812,9 +843,72 @@ body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
     border-color: var(--color-dark-green);
 }
 
-.paper-card--page[data-step="lookup"] .form-group input[type="text"].suggestions-open {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+/* The dropdown now floats free below the input (see .guest-suggestions
+   below) rather than sitting flush against it, so there's no longer a
+   flush edge to flatten — the input keeps its full pill shape regardless
+   of suggestions-open state. */
+
+/* Restyled to match the dress-code popover (.dress-popover below) — small,
+   centered under the input with a gap and an upward caret, not a full-width
+   list flush against it. The old full-width treatment sized for the card's
+   ~330px content area no longer matched the input once it shrank to the
+   200px password-box width; this is what Andrew pointed to as "one that
+   works well." */
+.paper-card--page[data-step="lookup"] .guest-suggestions {
+    position: absolute;
+    top: calc(100% + 11px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    min-width: 220px;
+    max-width: 260px;
+    max-height: none;
+    overflow-y: visible;
+    padding: 0.3rem 0;
+    background-color: #EBE7E3;
+    border: 1px solid var(--color-dark-green);
+    border-radius: 0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.paper-card--page[data-step="lookup"] .guest-suggestions::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 50%) rotate(45deg);
+    width: 9px;
+    height: 9px;
+    background-color: #EBE7E3;
+    border-left: 1px solid var(--color-dark-green);
+    border-top: 1px solid var(--color-dark-green);
+}
+
+.paper-card--page[data-step="lookup"] .guest-suggestion-item {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.82rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(26, 58, 46, 0.12);
+}
+
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:last-child {
+    border-bottom: none;
+    border-radius: 0;
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestions {
+    background-color: #0e2319;
+    border-color: var(--color-soft-white);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestions::before {
+    background-color: #0e2319;
+    border-color: var(--color-soft-white);
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item {
+    border-bottom-color: rgba(241, 237, 234, 0.14);
 }
 
 body.dark-mode .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
@@ -1154,168 +1248,93 @@ body.dark-mode .kosher-label input[type="checkbox"]:focus-visible {
     outline-color: var(--color-soft-white);
 }
 
-/* ---- Card navigation: hairline arrows + inline errors --------------------- */
+/* ---- Stack navigation: persistent Back/Next + inline errors --------------- */
 
-/* Forward CTA — hairline arrow + label, nav-link hover language (no glow at
-   rest, glow + accent on hover). Sits to the RIGHT of the card, vertically
-   centered on it — the same affordance as the RSVP arrow beside the invitation
-   on the settled page. (Below the card, centered, on ≤900px.) */
-.rsvp-card-next {
+/* Back/Next used to be DOM children of each sliding card, positioned outside
+   it — that meant they visibly slid with their card during the file-to-back
+   move, and (with the stack now up to 7-8 cards deep for a fully-invited
+   guest) got crowded by the growing peek depth to the point of reading as
+   cut off. Andrew's fix: both are persistent, field-fixed controls that
+   never move — #rsvp-arrow (doubling as "Next"/"Review" once the flow
+   starts — see rsvp.html's comment and updateStackNav in js/rsvp-flow.js)
+   and #rsvp-stack-back here, its mirror image on the card's other side.
+   Visibility/label/disabled state are all toggled by JS per current top
+   card; there is deliberately no CSS here for per-card variants.
+   right: calc(66.146% + 28px) is the exact mirror of .rsvp-arrow's
+   left: calc(66.146% + 28px) — the card sits centered in the field (its
+   33.854% left margin equals its 100%-66.146%=33.854% right margin), so
+   the same derived number works from both edges. */
+body.page-rsvp .rsvp-stack-back {
     position: absolute;
-    left: calc(100% + 26px);
-    top: 50%;
+    right: calc(66.146% + 28px);
+    top: 53.611%;
     transform: translateY(-50%);
+    /* Explicit z-index — see the matching comment on .rsvp-arrow above. */
+    z-index: 600;
     display: flex;
     align-items: center;
     gap: 0.6rem;
     background: none;
     border: none;
-    padding: 0.45rem 0.6rem;
+    padding: 0.5rem 0.6rem;
     cursor: pointer;
     font-family: var(--font-heading);
-    font-weight: 500;
+    font-weight: 700;
+    font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.74rem;
+    letter-spacing: 0.14em;
     color: var(--color-dark-green);
     text-shadow: none;
-    white-space: nowrap;
-    transition: color 0.2s ease, filter 0.25s ease;
-}
-
-.rsvp-card-next svg {
-    display: block;
-}
-
-.rsvp-card-next:hover,
-.rsvp-card-next:focus-visible {
-    color: var(--color-accent);
-    filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4)) drop-shadow(0 0 16px rgba(45, 90, 74, 0.25));
-}
-
-.rsvp-card-next:focus-visible {
-    outline: 2px solid var(--color-dark-green);
-    outline-offset: 2px;
-}
-
-.rsvp-card-next:active {
-    transform: translateY(calc(-50% + 0.5px));
-}
-
-body.dark-mode .rsvp-card-next {
-    color: var(--color-soft-white);
-}
-
-body.dark-mode .rsvp-card-next:hover,
-body.dark-mode .rsvp-card-next:focus-visible {
-    color: var(--color-soft-white);
-    filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35)) drop-shadow(0 0 16px rgba(241, 237, 234, 0.2));
-}
-
-body.dark-mode .rsvp-card-next:focus-visible {
-    outline-color: var(--color-soft-white);
-}
-
-/* Wrapper is transparent to layout on desktop, so Back/Next each position
-   absolutely against the card (turns into a flex row below the card on mobile). */
-.rsvp-card-nav {
-    display: contents;
-}
-
-/* The lookup card's own Back button exists in the DOM from the moment it's
-   built (revealPeek, well before the guest has ever swapped forward) — it
-   has nothing to reverse yet, so it stays invisible/inert until the first
-   swap (.rsvp-flow-active, added the instant startFlow fires). Every other
-   card's Back button is only ever built after that class is already set, so
-   this has no effect on them (already-matching selector at insertion time =
-   no fade, just present). */
-body.page-rsvp .rsvp-card-back {
+    /* Hidden until JS enables it (updateStackNav) — nothing to go back to
+       before the flow starts. */
     opacity: 0;
     pointer-events: none;
+    transition: opacity 0.2s ease, color 0.2s ease;
 }
 
-body.page-rsvp.rsvp-flow-active .rsvp-card-back {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* Every other card in a stack — buried behind the top one, marked [inert]
-   by js/rsvp-flow.js — must not show its own Back/Next. inert only removes
-   interactivity, not visibility, and each card's nav sits just 7-8px off
-   from the next one's (see the depth transform), so left alone every buried
-   card's controls "ghost" through at nearly the same spot as the top
-   card's, doubled and overlapping. */
-body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card-back,
-body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card-next {
-    visibility: hidden;
-}
-
-/* Same problem, for a buried card's own CONTENT: .rsvp-card deliberately has
-   no overflow clipping (see its own comment) so overflow on the ACTIVE top
-   card stays an obvious, auditable problem rather than a silently-clipped
-   one — but that means a buried card whose content is taller than its box
-   (e.g. Saturday's meal/kosher choices) paints straight through underneath
-   whatever's on top of it. Clip it for [inert] cards only; the top card
-   keeps overflow: visible. */
-body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card {
-    overflow: hidden;
-}
-
-/* Back — twin of the forward CTA, mirrored outside the card's left edge. */
-.rsvp-card-back {
-    position: absolute;
-    right: calc(100% + 26px);
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: none;
-    border: none;
-    padding: 0.45rem 0.6rem;
-    cursor: pointer;
-    font-family: var(--font-heading);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.74rem;
-    color: var(--color-dark-green);
-    text-shadow: none;
-    white-space: nowrap;
-    transition: color 0.2s ease, filter 0.25s ease;
-}
-
-.rsvp-card-back svg {
+.rsvp-stack-back-icon {
     display: block;
+    flex: 0 0 auto;
 }
 
-.rsvp-card-back:hover,
-.rsvp-card-back:focus-visible {
+body.page-rsvp.intro-complete .rsvp-stack-back:hover,
+body.page-rsvp.intro-complete .rsvp-stack-back:focus-visible {
     color: var(--color-accent);
     filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4)) drop-shadow(0 0 16px rgba(45, 90, 74, 0.25));
 }
 
-.rsvp-card-back:focus-visible {
+.rsvp-stack-back:focus-visible {
     outline: 2px solid var(--color-dark-green);
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
 
-.rsvp-card-back:active {
+.rsvp-stack-back:active {
     transform: translateY(calc(-50% + 0.5px));
 }
 
-body.dark-mode .rsvp-card-back {
+body.dark-mode.page-rsvp .rsvp-stack-back {
     color: var(--color-soft-white);
 }
 
-body.dark-mode .rsvp-card-back:hover,
-body.dark-mode .rsvp-card-back:focus-visible {
+body.dark-mode.page-rsvp.intro-complete .rsvp-stack-back:hover,
+body.dark-mode.page-rsvp.intro-complete .rsvp-stack-back:focus-visible {
     color: var(--color-soft-white);
     filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35)) drop-shadow(0 0 16px rgba(241, 237, 234, 0.2));
 }
 
-body.dark-mode .rsvp-card-back:focus-visible {
+body.dark-mode.page-rsvp .rsvp-stack-back:focus-visible {
     outline-color: var(--color-soft-white);
+}
+
+/* Buried [inert] cards' own content still can't clip-bleed through the
+   active top card. .rsvp-card deliberately has no overflow clipping of its
+   own (see its own comment) so overflow on the ACTIVE top card stays an
+   obvious, auditable problem rather than a silently-clipped one — but that
+   means a buried card whose content is taller than its box (e.g. Saturday's
+   meal/kosher choices) would otherwise paint straight through underneath
+   whatever's on top of it. Clip it for [inert] cards only. */
+body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card {
+    overflow: hidden;
 }
 
 /* Inline validation / submit error — no alert()s in the flow. */
@@ -1434,25 +1453,36 @@ body.dark-mode .rsvp-review-person {
         display: block;
     }
 
-    /* No room outside the card on mobile — Back and Next drop below it as a
-       row (Back left, Next right), still twins of each other. */
-    .rsvp-card-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .rsvp-card-back,
-    .rsvp-card-next {
-        position: static;
+    /* Once inside the flow, cards are much wider — and often taller than the
+       viewport, requiring scroll (see ensureMobileScrollRoom) — than the
+       tiny invitation the arrow's default field-relative position is tuned
+       for. Pin both nav controls to the VIEWPORT instead, so they stay
+       reachable and stationary regardless of which card is active, how
+       tall it is, or how far the guest has scrolled into it — the mobile
+       equivalent of "stay in place while the pages move." Bottom corners,
+       mirroring the desktop flanking layout (Back left, Next right).
+       .replay-intro normally lives at this same bottom-left corner — see
+       its own rule for why it's hidden once the flow starts. */
+    body.page-rsvp.rsvp-flow-active .rsvp-arrow,
+    body.page-rsvp.rsvp-flow-active .rsvp-stack-back {
+        position: fixed;
+        top: auto;
+        bottom: 20px;
         transform: none;
-        margin: 0;
     }
 
-    .rsvp-card-back:active,
-    .rsvp-card-next:active {
+    body.page-rsvp.rsvp-flow-active .rsvp-arrow {
+        left: auto;
+        right: 1.5rem;
+    }
+
+    body.page-rsvp.rsvp-flow-active .rsvp-stack-back {
+        right: auto;
+        left: 1.5rem;
+    }
+
+    body.page-rsvp.rsvp-flow-active .rsvp-arrow:active,
+    body.page-rsvp.rsvp-flow-active .rsvp-stack-back:active {
         transform: translateY(0.5px);
     }
 }

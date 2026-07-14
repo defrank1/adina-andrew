@@ -584,7 +584,7 @@ body.dark-mode .footer-info {
 }
 
 .toggle-sym {
-    font-size: 36px;
+    font-size: 28px;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -601,7 +601,7 @@ body.dark-mode .footer-info {
 }
 
 body.dark-mode .toggle-sym {
-    font-size: 28px;
+    font-size: 36px;
     background: rgba(45, 90, 74, 0.5);
     -webkit-background-clip: text;
     background-clip: text;
@@ -1250,6 +1250,15 @@ body.intro-complete .replay-intro {
 body.intro-complete .replay-intro:hover,
 body.intro-complete .replay-intro:focus-visible {
     opacity: 1;
+}
+
+/* Once inside the RSVP card flow (mobile), the persistent stack-nav Back
+   button pins to this exact bottom-left corner (rsvp-styles.css) — and
+   replaying the intro mid-form doesn't make sense anyway, so it's hidden
+   rather than overlapping. */
+body.page-rsvp.rsvp-flow-active .replay-intro {
+    opacity: 0;
+    pointer-events: none;
 }
 
 /* Hover/focus jiggle — the train rocks in place, as if idling on its track. Small
