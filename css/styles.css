@@ -909,8 +909,8 @@ body.dark-mode .paper-card--page {
 
 /* ===========================
    RSVP two-stage landing (rsvp.html)
-   Stage 1 (hard cut): #invitation-endstate in its Rive-matched state — green matte,
-   flat #dfdeda 16:9 field, no chrome. Stage 2 (settle): js/rive-intro.js adds
+   Stage 1 (hard cut): #invitation-endstate in its Rive-matched state — flat cream
+   (#F1EDEA) 16:9 field, no chrome. Stage 2 (settle): js/rive-intro.js adds
    `intro-complete` to <body> shortly after the cut; the rules below transition the
    page into a normal brand page over var(--settle-ms) (set from SETTLE_MS in JS;
    bail paths set it to 0ms so return visits land settled instantly).
@@ -962,9 +962,12 @@ body.page-rsvp:not(.intro-complete) {
 
 /* RSVP invitation end-state — the static page the Metro intro hard-cuts to.
    Reproduces the animation's final frame: a 16:9 field (Fit.Contain of the Rive
-   artboard) holding the centered invitation card, with the tunnel-green matte
-   filling the letterbox on tall/wide/mobile viewports. Managed by js/rive-intro.js,
-   which reveals #invitation-endstate at the hard cut (see .pre-reveal below). */
+   artboard) holding the centered invitation card, with a flat cream matte filling
+   the letterbox on tall/wide/mobile viewports — matching what #rive-container's
+   own letterbox has faded to by the cut (see its comment; hardCut() also forces
+   that fade to completion, so the two are never out of sync at the swap). Managed
+   by js/rive-intro.js, which reveals #invitation-endstate at the hard cut (see
+   .pre-reveal below). */
 body.page-rsvp .invitation-endstate {
     position: fixed;
     inset: 0;
@@ -1126,19 +1129,21 @@ body.page-rsvp #footer-placeholder {
    it. Asset is the Metro car line illustration (train-light.svg/train-dark.svg) with
    the standard data-light/data-dark swap. z-index above the (settled) content, below
    the Rive canvas (2000) while the intro plays.
-   Box is landscape (52x36) rather than the old flag's 44x44 square: the train's
-   native ~165x92 (~1.79:1) ratio, run through object-fit: contain at 44x44, rendered
-   far smaller than the old flag did (the flag's ~0.61:1 portrait ratio filled the
-   square's full height) — a thin, weak-looking icon. 52x36 was sized so the train
-   renders at roughly the same visual area the flag had (~46x26 within the old box),
-   flex-centered with a little breathing room rather than a hard-cropped fit. */
+   Box is landscape (70x48, ~1.79:1) rather than the old flag's 44x44 square — the
+   train's native ~165x92 ratio would render small and thin inside a square built
+   for the flag's tall ~0.61:1 portrait shape. 70x48 is the box first sized to the
+   train's own proportions (52x36, see prior revision), then scaled up ~35% at
+   Andrew's request so it reads as a clearly bigger button next to the footer
+   toggle, still flex-centered with a little breathing room rather than a
+   hard-cropped fit. bottom/left stay at 20px — same corner, box grows up/right
+   from that anchor. */
 .replay-intro {
     position: fixed;
     bottom: 20px;
     left: 20px;
     z-index: 1600;
-    width: 52px;
-    height: 36px;
+    width: 70px;
+    height: 48px;
     padding: 0;
     background: none;
     border: none;
@@ -1168,11 +1173,36 @@ body.intro-complete .replay-intro:focus-visible {
     opacity: 1;
 }
 
+/* Hover/focus jiggle — the train rocks in place, as if idling on its track. Small
+   rotation + horizontal shimmy, pivoting near the base (where the wheels would
+   meet the rail) rather than the center. Lives on the img, not the button, so it's
+   a pure compositor transform with no effect on the button's own box or anything
+   around it. No glow — RSVP's breathing glow is the site's sole glow exception. */
+@keyframes replay-train-jiggle {
+    0%, 100% { transform: rotate(0deg) translateX(0); }
+    25% { transform: rotate(-2deg) translateX(-1px); }
+    50% { transform: rotate(0deg) translateX(0); }
+    75% { transform: rotate(2deg) translateX(1px); }
+}
+
+body.intro-complete .replay-intro:hover img,
+body.intro-complete .replay-intro:focus-visible img {
+    transform-origin: 50% 100%;
+    animation: replay-train-jiggle 0.6s ease-in-out infinite;
+}
+
 /* Their setting says no animation — and the bail path skips the intro anyway,
-   so replay would no-op. Hide it entirely. */
+   so replay would no-op. Hide it entirely (which alone already keeps the jiggle
+   above unreachable; the explicit override just makes that self-contained here
+   too, independent of the display:none). */
 @media (prefers-reduced-motion: reduce) {
     .replay-intro {
         display: none;
+    }
+
+    body.intro-complete .replay-intro:hover img,
+    body.intro-complete .replay-intro:focus-visible img {
+        animation: none;
     }
 }
 
@@ -1193,11 +1223,14 @@ body.page-rsvp-internal .registry-page {
     inset: 0;
     z-index: 2000;
     background-color: #183a2c;
-    /* Tunnel matte green (sampled from the .riv). The animation uses Fit.Contain, so on
-       any viewport that isn't 16:9 this fill shows as the letterbox bars (top/bottom on
-       tall/mobile viewports, sides on wide ones) — matching the tunnel scene's own
-       background. It is the SAME green as .invitation-endstate below, so the hard cut to
-       the static invitation is seamless across the letterbox too. */
+    /* Tunnel matte green (sampled from the .riv) — the resting color for most of the
+       intro. The animation uses Fit.Contain, so on any viewport that isn't 16:9 this
+       fill shows as the letterbox bars (top/bottom on tall/mobile viewports, sides on
+       wide ones) — matching the tunnel scene's own background. js/rive-intro.js fades
+       this to #F1EDEA (COVER_CREAM) starting at FADE_SYNC_START, in sync with the
+       in-Rive cream cover, and hardCut() forces that fade to its end state at the cut
+       regardless of whether the transition had time to finish on its own — so by the
+       swap this is cream, matching #invitation-endstate below, not green. */
     opacity: 1;
     pointer-events: auto;
 }

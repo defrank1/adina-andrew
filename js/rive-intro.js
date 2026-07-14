@@ -103,8 +103,9 @@
     // ---- teardown helpers --------------------------------------------------
 
     function revealEndState() {
-        // Show the static invitation sitting beneath the canvas. It shares the same
-        // green matte and reproduces the final frame, so revealing it under the canvas
+        // Show the static invitation sitting beneath the canvas. It's flat cream
+        // (#F1EDEA) and reproduces the final frame, matching what hardCut() has just
+        // forced #rive-container's own letterbox to, so revealing it under the canvas
         // and then removing the canvas is a seamless swap.
         if (endState) { endState.classList.remove('pre-reveal'); }
     }
@@ -149,6 +150,18 @@
         // post-reveal Rive error. Bail paths (return visit / reduced-motion / missing
         // asset) never reveal the canvas and land settled with the user's theme intact.
         if (!container.classList.contains('hidden')) { resetThemeToLight(); }
+        // Force the container's letterbox to its final cream instantly, regardless of
+        // whether the FADE_SYNC_MS transition (kicked off in tick() at FADE_SYNC_START)
+        // has had its full real-time duration to visually finish by now. The gap
+        // between the fade's nominal end and DURATION_S is only ~20-30ms, easily eaten
+        // by an unlucky frame, a GC pause, or (worst case, observed under a throttled
+        // tab) elapsed jumping past both marks in a single tick — any of which leaves
+        // the transition mid-flight, still tinted green, for the frame(s) right before
+        // the cut. Removing the transition and snapping the color guarantees the
+        // container can never be the thing rendering non-cream at the moment of the
+        // swap, independent of how much real time the fade actually got.
+        container.style.transition = 'none';
+        container.style.backgroundColor = COVER_CREAM;
         revealEndState();
         container.style.display = 'none';
         if (skipBtn) { skipBtn.classList.add('hidden'); }
