@@ -741,21 +741,25 @@ body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
 }
 
 /* Small-caps label title (was a PP Playground script headline) — "card
-   titles" are PP Watch Medium uppercase per the paper-suite type budget. */
+   titles" are PP Watch Medium uppercase per the paper-suite type budget.
+   Sized down from 1.05rem so the longest title ("Ceremony and Reception")
+   fits on one line at the card's own width (fits from 0.88rem; 0.85rem
+   leaves a small margin rather than a knife-edge fit) — smaller than the
+   rest of the type budget, closer to the invitation's own title scale. */
 .rsvp-card-title {
     font-family: var(--font-heading);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.16em;
-    font-size: 1.05rem;
+    font-size: 0.85rem;
     line-height: 1.3;
     text-align: center;
     margin-bottom: 0.9rem;
     color: inherit;
 }
 
-/* Reply-block, matching the printed card: line 1 is a Sentient sentence-case
-   line, line 2 is an uppercased small-caps date (PP Watch Medium). */
+/* Reply-block — one flowing Sentient line, no separate PP Watch date
+   treatment (that split was dropped per Andrew's feedback). */
 .rsvp-card-request {
     font-family: var(--font-body);
     font-size: 0.9rem;
@@ -765,15 +769,60 @@ body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
     margin-bottom: 1.4rem;
 }
 
-.rsvp-card-request-by {
-    display: inline-block;
-    font-family: var(--font-heading);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.68rem;
-    opacity: 0.85;
-    margin-top: 0.4rem;
+/* ---- Lookup card: centered content, "Find your invitation" label centered,
+   email input matching the site's password boxes exactly -------------------- */
+
+/* Everything on this one card centers as a block, rather than sitting
+   top-anchored under the padding — the card has real breathing room below
+   the (short) form, so it reads better centered than pinned to the top. */
+.paper-card--page[data-step="lookup"] .rsvp-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rsvp-lookup-label {
+    text-align: center;
+}
+
+/* Matches .password-input (styles.css) exactly — same gradient foil
+   text-fill, border, padding, radius — per Andrew's "should match the
+   password boxes in style 100%". More specific than the generic
+   .form-group input[type="text"] rule below so it wins regardless of
+   source order. */
+.paper-card--page[data-step="lookup"] .form-group input[type="text"] {
+    width: 200px;
+    max-width: 100%;
+    min-width: 150px;
+    padding: 0.5rem 1.2rem;
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    border: 2px solid var(--color-dark-green);
+    background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.paper-card--page[data-step="lookup"] .form-group input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-dark-green);
+}
+
+.paper-card--page[data-step="lookup"] .form-group input[type="text"].suggestions-open {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
+    border-color: var(--color-soft-white);
+    background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* Event logistics on a card: the weekend-event vocabulary, condensed and
@@ -939,33 +988,9 @@ body.dark-mode .dress-popover::before {
     letter-spacing: 0.16em;
 }
 
-/* Afterparty info block — quieter, separated by a hairline; its event name
-   stays smaller than a primary event's so it still reads as secondary. */
-.rsvp-card .rsvp-card-afterparty {
-    margin-top: 0.7rem;
-    margin-bottom: 0.6rem;
-    padding-top: 0.6rem;
-    border-top: 1px solid rgba(26, 58, 46, 0.15);
-}
-
-body.dark-mode .rsvp-card .rsvp-card-afterparty {
-    border-top-color: rgba(241, 237, 234, 0.15);
-}
-
-.rsvp-card .rsvp-card-afterparty .weekend-event-name {
-    font-size: 0.85rem;
-    margin-top: 0;
-    margin-bottom: 0.3rem;
-}
-
-.rsvp-card .rsvp-card-afterparty .weekend-event-when {
-    margin-bottom: 0.25rem;
-}
-
-.rsvp-card .rsvp-card-afterparty .weekend-event-where {
-    margin-bottom: 0.4rem;
-}
-
+/* Afterparty is its own standalone card now (buildAfterpartyPanel), using
+   the same .rsvp-card-title/.weekend-event structure as every other card —
+   no embedded-block treatment needed. */
 .rsvp-card .weekend-event-note {
     margin-top: 0.35rem;
     margin-bottom: 0;
@@ -1223,6 +1248,17 @@ body.page-rsvp.rsvp-flow-active .rsvp-card-back {
 body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card-back,
 body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card-next {
     visibility: hidden;
+}
+
+/* Same problem, for a buried card's own CONTENT: .rsvp-card deliberately has
+   no overflow clipping (see its own comment) so overflow on the ACTIVE top
+   card stays an obvious, auditable problem rather than a silently-clipped
+   one — but that means a buried card whose content is taller than its box
+   (e.g. Saturday's meal/kosher choices) paints straight through underneath
+   whatever's on top of it. Clip it for [inert] cards only; the top card
+   keeps overflow: visible. */
+body.page-rsvp .rsvp-stack .paper-card--page[inert] .rsvp-card {
+    overflow: hidden;
 }
 
 /* Back — twin of the forward CTA, mirrored outside the card's left edge. */

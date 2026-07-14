@@ -6,18 +6,28 @@
    invitation" card peeks out from behind the invitation (offset lower-right,
    like the next card in a stack); the RSVP arrow appears at the same moment.
    Clicking either plays a file-to-back move: the invitation slides out and
-   files behind the lookup card, which becomes the new top ("Back" on the
-   lookup card reverses it). On a successful lookup both cards exit left and
-   the guest's personal stack deals in — one card per INVITED event
-   (EVENT_ORDER) plus a review card as the final sheet:
+   files behind the lookup card, which becomes the new top.
 
-     email lookup -> one card per INVITED event -> review & send -> thank-you
+   Every card in the flow — invitation, lookup, one per INVITED event, a
+   separate afterparty info card right after Saturday (if invited), review,
+   and thank-you — lives in ONE continuous stack array and moves through the
+   SAME fileForward/fileBackward choreography (see "stack engine" below).
+   Selecting an invitation doesn't jump to a different stack; it splices the
+   personal-stack cards in right behind lookup and plays a normal fileForward
+   move. That means Back is symmetric everywhere — from the first event card,
+   Back reveals lookup; from lookup, Back reveals the invitation; from the
+   invitation, the arrow/peek swaps forward again — all the way through:
+
+     invitation <-> lookup <-> one card per INVITED event
+       <-> afterparty (if Saturday invited) <-> review & send <-> thank-you
 
    Cards for non-invited events are never built; stack depth is entirely
-   data-driven (1 + invited.length + 1, thanks added only after submit
-   succeeds). Responses are per person (an invitation covers one or two named
-   people). The email autocomplete keeps the staging form's privacy rule: no
-   lookup until the guest has typed past the "@".
+   data-driven. Re-selecting (a different invite, or the same one again after
+   going back to lookup) tears down the previous personal-stack cards and
+   builds fresh ones — entered answers don't survive a trip back to lookup.
+   Responses are per person (an invitation covers one or two named people).
+   The email autocomplete keeps the staging form's privacy rule: no lookup
+   until the guest has typed past the "@".
 
    Two seams are the ONLY functions that touch the network (same contract as
    js/rsvp-form.js on the staging page):
@@ -57,7 +67,6 @@
     var LEG_SETTLE_MS = 400;
     var LEG_SETTLE_CURVE = 'cubic-bezier(.4,0,.2,1)';
     var STACK_MOVE_MS = LEG_EXIT_MS + LEG_SETTLE_MS; // total move time, for focus delays
-    var EXIT_STAGGER_MS = 70;   // lookup-success: invitation + lookup card exit, staggered
     var DEPTH_X = 7, DEPTH_Y = 8, DEPTH_ROTATE = 0.9; // px/px/deg per depth level
 
     var EVENT_DETAILS = {
@@ -74,7 +83,7 @@
             name: 'Wedding Ceremony and Reception',
             shortName: 'Ceremony and Reception',
             when: 'Saturday, October 17th · 5:30–11:00 PM',
-            venue: 'InterContinental Washington, DC — The Wharf',
+            venue: 'InterContinental — The Wharf',
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Black Tie Preferred',
@@ -83,7 +92,7 @@
         sunday: {
             name: 'Farewell Brunch',
             when: 'Sunday, October 18th · 9:00–11:00 AM',
-            venue: 'InterContinental Washington, DC — The Wharf',
+            venue: 'InterContinental — The Wharf',
             address: '801 Wharf Street SW',
             mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
             dress: 'Come as you are',
@@ -227,11 +236,22 @@
         }
     }
 
+    // "Friday, October 16th · 8:00–10:00 PM" -> two lines (date, then time),
+    // the middle-dot separator dropped since the line break now does that job.
+    function makeWhenLines(when) {
+        var p = el('p', 'weekend-event-when');
+        when.split(' · ').forEach(function (part, i) {
+            if (i > 0) { p.appendChild(document.createElement('br')); }
+            p.appendChild(document.createTextNode(part));
+        });
+        return p;
+    }
+
     // Condensed event header for a card: when / dress tag / venue + address link.
     function makeCardEventMeta(detail) {
         var wrap = el('div', 'weekend-event');
 
-        wrap.appendChild(el('p', 'weekend-event-when', detail.when));
+        wrap.appendChild(makeWhenLines(detail.when));
 
         if (detail.dress) {
             wrap.appendChild(makeDressTag(detail));
@@ -275,22 +295,33 @@
         });
 
         // ---- flow state ----
+        // ONE continuous stack spans the whole flow — invitation, lookup,
+        // one card per invited event (+ a separate afterparty info card
+        // after Saturday, if invited), review, and (once submitted) thanks.
+        // Selecting an invitation doesn't swap to a different stack, it
+        // files the personal-stack cards in right behind lookup and plays
+        // the SAME fileForward move every Next click uses — so Back is
+        // symmetric everywhere, all the way back to the lookup card and the
+        // invitation, and the choreography is identical throughout instead
+        // of a special-cased dual-exit.
         var invitation = null;        // the selected { email, invitedTo, people }
-        var preLookupStack = [invitationCardEl];  // [invitation] until the peek adds lookup
-        var personalStack = null;     // built after a successful lookup
-        var currentStack = preLookupStack;
+        var stack = [invitationCardEl];
+        // The cards selectInvitation() built and spliced into `stack` for the
+        // CURRENTLY selected invitation, tracked so a later re-selection (a
+        // different invite, or the same one retyped) can tear them out of
+        // both the array and the DOM before building fresh ones.
+        var personalCards = [];
         var submitted = false;
         var animLock = false;         // true while ANY stack move is in flight
 
         // ---- stack engine ----------------------------------------------------
-        // Generic file-to-back choreography, shared by the 2-card pre-lookup
-        // stack (invitation/lookup) and the N-card personal stack dealt in
-        // after a successful lookup. A "stack" is a plain array of card
-        // elements (each already .paper-card sized/positioned to the
-        // invitation's own rect — see .rsvp-stack in styles.css); index 0 is
-        // always the current top, increasing index = deeper/further in the
-        // future, with filed (past) cards rotated to the END of the array —
-        // most recently filed deepest, exactly as the spec describes.
+        // Generic file-to-back choreography for the one continuous `stack`
+        // array spanning the whole flow. Each element is a card already
+        // .paper-card sized/positioned to the invitation's own rect (see
+        // .rsvp-stack in styles.css); index 0 is always the current top,
+        // increasing index = deeper/further in the future, with filed (past)
+        // cards rotated to the END of the array — most recently filed
+        // deepest, exactly as the spec describes.
 
         function restingTransform(depth) {
             return 'translate(' + (depth * DEPTH_X) + 'px, ' + (depth * DEPTH_Y) + 'px) rotate(' + (depth * DEPTH_ROTATE) + 'deg)';
@@ -441,7 +472,7 @@
             // reflects the true baseline (everything except this spacer's
             // own contribution), then request only the actual deficit.
             scrollSpacerEl.style.height = '';
-            var top = currentStack[0];
+            var top = stack[0];
             var card = top && top.querySelector('.rsvp-card');
             if (!card) { return; }
             // .rsvp-card has no overflow:hidden (by design — see its own
@@ -469,7 +500,7 @@
         // doesn't wait for a move that didn't animate). Passed as the
         // onSettled callback to fileForward/fileBackward.
         function afterMove() {
-            var top = currentStack[0];
+            var top = stack[0];
             if (top && top.dataset.step === 'review') {
                 buildSummaryInto(reviewSummary, collectData());
             }
@@ -521,7 +552,7 @@
             return wrapper;
         }
 
-        // ---- email / lookup card (the pre-lookup stack's second card) ----
+        // ---- email / lookup card ----
 
         var emailInput, emailSuggestions;
         var debounceTimer = null;
@@ -532,16 +563,12 @@
             card.tabIndex = -1;
 
             card.appendChild(el('h1', 'rsvp-card-title', 'Rsvp'));
-            // Two-line request block, matching the printed reply card: a Sentient
-            // sentence-case line over an uppercased small-caps date line.
-            var request = el('p', 'rsvp-card-request');
-            request.appendChild(document.createTextNode('The favor of a reply is requested'));
-            request.appendChild(document.createElement('br'));
-            request.appendChild(el('span', 'rsvp-card-request-by', 'by ' + REPLY_BY));
-            card.appendChild(request);
+            // One flowing Sentient line — no separate PP Watch date treatment.
+            card.appendChild(el('p', 'rsvp-card-request',
+                'The favor of your reply is requested by ' + REPLY_BY + '.'));
 
             var group = el('div', 'form-group');
-            var label = el('label', null, 'Find your invitation');
+            var label = el('label', 'rsvp-lookup-label', 'Find your invitation');
             label.htmlFor = 'rsvpFlowEmail';
             group.appendChild(label);
 
@@ -573,7 +600,7 @@
             });
 
             lookupWrapper = makeStackCard(card, 'lookup');
-            preLookupStack.push(lookupWrapper);
+            stack.push(lookupWrapper);
             return lookupWrapper;
         }
 
@@ -617,87 +644,100 @@
         }
 
         // Selection advances — no separate Next button on the email card.
-        // Lookup success: both pre-lookup cards exit left (staggered), then
-        // the guest's personal stack deals in.
+        // Tears down any previously-built personal-stack cards (a different
+        // invitation, or the same one re-selected), builds fresh ones for
+        // this invitation, splices them into `stack` right behind lookup,
+        // and plays the SAME fileForward move every other Next click uses —
+        // so this transition is choreographed identically to the rest of
+        // the flow (no special-cased dual exit), and Back from the first
+        // card naturally reveals lookup again (fileBackward on a unified
+        // array — see the stack engine above).
         function selectInvitation(inv) {
             invitation = inv;
             emailInput.value = inv.email;
             hideSuggestions();
-            exitPreLookupStack(function () {
-                dealPersonalStack(inv);
-            });
+            removePersonalCards();
+            dealPersonalStack(inv);
+            fileForward(stack, afterMove);
         }
 
         // Editing the email away from a selected invitation, while the lookup
         // card is still the interactive top (see setInert above — once the
         // personal stack deals in, this input is inert and unreachable
-        // anyway), clears the selection so a later selectInvitation() starts
-        // clean.
+        // anyway), clears the selection AND tears down the stale personal
+        // stack so a later selectInvitation() starts clean.
         function clearSelection() {
             invitation = null;
+            removePersonalCards();
         }
 
-        // ---- pre-lookup stack: invitation <-> lookup card -----------------
-
-        // Both cards exit off-screen left with a small stagger, then hide —
-        // this stack is abandoned for the rest of the session (there is no
-        // way back to it from the personal stack, matching the spec).
-        function exitPreLookupStack(onDone) {
-            if (animLock) { return; }
-            animLock = true;
-            var cards = preLookupStack.slice();
-
-            if (prefersReduced) {
-                cards.forEach(function (elCard) {
-                    elCard.style.transition = 'none';
-                    elCard.style.visibility = 'hidden';
-                    elCard.style.pointerEvents = 'none';
-                    setInert(elCard, true);
-                });
-                animLock = false;
-                if (onDone) { onDone(); }
-                return;
-            }
-
-            var remaining = cards.length;
-            cards.forEach(function (elCard, i) {
-                setTimeout(function () {
-                    elCard.style.transition = 'transform ' + LEG_EXIT_MS + 'ms ' + LEG_EXIT_CURVE;
-                    elCard.style.zIndex = '1000';
-                    void elCard.offsetWidth;
-                    elCard.style.transform = 'translateX(-115%) rotate(-3deg)';
-                    setInert(elCard, true);
-                    onceTransition(elCard, 'transform', LEG_EXIT_MS, function () {
-                        elCard.style.visibility = 'hidden';
-                        elCard.style.pointerEvents = 'none';
-                        remaining--;
-                        if (remaining === 0) {
-                            animLock = false;
-                            if (onDone) { onDone(); }
-                        }
-                    });
-                }, i * EXIT_STAGGER_MS);
+        // Removes any cards selectInvitation() previously spliced into
+        // `stack` for a prior selection — from the array AND the DOM — so
+        // re-selecting (a different invite, or the same one again after
+        // going back to lookup) never leaves stale/duplicate cards behind.
+        function removePersonalCards() {
+            personalCards.forEach(function (card) {
+                var idx = stack.indexOf(card);
+                if (idx !== -1) { stack.splice(idx, 1); }
+                if (card.parentNode) { card.parentNode.removeChild(card); }
             });
+            personalCards = [];
         }
 
-        // ---- personal stack: one card per invited event + review ----------
+        // ---- personal stack: one card per invited event, afterparty, review ----
 
-        // Stack depth is entirely data-driven — invited.length event cards
-        // plus the review card (thanks is added later, only on submit
-        // success, so it's never visible at the stack edges before then).
+        // Stack depth is entirely data-driven — one card per invited event
+        // (Saturday's meal/kosher content is dense enough that it gets one
+        // card PER PERSON instead of a single shared one — see
+        // buildSaturdayPersonPanel), a separate info-only afterparty card
+        // right after Saturday's last person (if invited), and the review
+        // card (thanks is added later, only on submit success, so it's
+        // never visible at the stack edges before then). Builds the cards
+        // and splices them into `stack` right behind lookup; the caller
+        // (selectInvitation) plays the actual fileForward move so this uses
+        // the same choreography as every other Next.
         function dealPersonalStack(inv) {
-            personalStack = [];
             var invited = EVENT_ORDER.filter(function (key) {
                 return (inv.invitedTo || []).indexOf(key) !== -1;
             });
-            invited.forEach(function (key, i) {
-                buildEventPanel(inv, key, i === invited.length - 1);
+            // Ordered build list. isLast (and so the Next-button's "Review"
+            // label) is computed off this actual sequence, not EVENT_ORDER
+            // position, since afterparty, more Saturday people, or a later
+            // event may still follow.
+            var steps = [];
+            invited.forEach(function (key) {
+                if (key === 'saturday') {
+                    inv.people.forEach(function (name, personIdx) {
+                        steps.push({ type: 'saturday-person', personIdx: personIdx });
+                    });
+                    steps.push({ type: 'afterparty' });
+                } else {
+                    steps.push({ type: 'event', key: key });
+                }
             });
-            buildReviewPanel(inv);
+            steps.forEach(function (step, i) {
+                var isLast = i === steps.length - 1;
+                var built;
+                if (step.type === 'saturday-person') {
+                    built = buildSaturdayPersonPanel(inv, step.personIdx, isLast);
+                } else if (step.type === 'afterparty') {
+                    built = buildAfterpartyPanel(isLast);
+                } else {
+                    built = buildEventPanel(inv, step.key, isLast);
+                }
+                personalCards.push(built);
+            });
+            personalCards.push(buildReviewPanel(inv));
 
-            currentStack = personalStack;
-            personalStack.forEach(function (elCard, i) { applyRestingInstant(elCard, i); });
-            afterMove();
+            var lookupIdx = stack.indexOf(lookupWrapper);
+            var spliceArgs = [lookupIdx + 1, 0].concat(personalCards);
+            Array.prototype.splice.apply(stack, spliceArgs);
+            // Snap every card (existing ones — a harmless no-op re-apply —
+            // and the newly-spliced ones) to its CURRENT pre-move depth
+            // instantly, so the new cards have a defined starting
+            // position/z-index before the animated fileForward move
+            // (selectInvitation) picks them up.
+            stack.forEach(function (elCard, i) { applyRestingInstant(elCard, i); });
         }
 
         function backButton() {
@@ -709,7 +749,7 @@
             btn.appendChild(iconWrap.firstChild);
             btn.appendChild(el('span', null, 'Back'));
             btn.addEventListener('click', function () {
-                fileBackward(currentStack, afterMove);
+                fileBackward(stack, afterMove);
             });
             return btn;
         }
@@ -737,6 +777,10 @@
 
         // ---- event cards ----
 
+        // Friday/Sunday: one card per event, all invited people on it (they
+        // only carry an accept/decline each, light enough to share a card).
+        // Saturday is dense enough (meal + kosher per person) that it gets
+        // its own per-person function below instead.
         function buildEventPanel(inv, eventKey, isLast) {
             var detail = EVENT_DETAILS[eventKey];
             var card = el('div', 'rsvp-card');
@@ -746,24 +790,6 @@
             card.appendChild(el('h2', 'rsvp-card-title', detail.shortName || detail.name));
             card.appendChild(makeCardEventMeta(detail));
 
-            // Saturday: afterparty info (no RSVP) after the event details.
-            if (eventKey === 'saturday') {
-                var after = el('div', 'weekend-event rsvp-card-afterparty');
-                after.appendChild(el('h3', 'weekend-event-name', AFTERPARTY_DETAILS.name));
-                after.appendChild(el('p', 'weekend-event-when', AFTERPARTY_DETAILS.when));
-                var where = el('p', 'weekend-event-where');
-                where.appendChild(document.createTextNode(AFTERPARTY_DETAILS.venue));
-                where.appendChild(document.createElement('br'));
-                var a = el('a', 'schedule-link', AFTERPARTY_DETAILS.address);
-                a.href = AFTERPARTY_DETAILS.mapUrl;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                where.appendChild(a);
-                after.appendChild(where);
-                after.appendChild(el('p', 'weekend-event-note', AFTERPARTY_DETAILS.note));
-                card.appendChild(after);
-            }
-
             (inv.people || []).forEach(function (name, idx) {
                 var person = el('div', 'rsvp-card-person');
                 person.appendChild(el('p', 'rsvp-card-person-name', name));
@@ -772,16 +798,6 @@
                 choices.appendChild(radioLabel('fp' + idx + '_' + eventKey, 'yes', 'Accepts with pleasure'));
                 choices.appendChild(radioLabel('fp' + idx + '_' + eventKey, 'no', 'Declines with regret'));
                 person.appendChild(choices);
-
-                if (eventKey === 'saturday') {
-                    person.appendChild(buildMealSection(idx));
-                    // Declining Saturday collapses/disables that person's meal section.
-                    choices.querySelectorAll('input[type="radio"]').forEach(function (input) {
-                        input.addEventListener('change', function () {
-                            updateMealDisabled(card, idx);
-                        });
-                    });
-                }
 
                 card.appendChild(person);
             });
@@ -793,13 +809,78 @@
             card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
                 if (validateEventCard(card, eventKey)) {
                     error.classList.remove('show');
-                    fileForward(currentStack, afterMove);
+                    fileForward(stack, afterMove);
                 }
             })));
 
-            var wrapper = makeStackCard(card, eventKey);
-            personalStack.push(wrapper);
-            return wrapper;
+            return makeStackCard(card, eventKey);
+        }
+
+        // Saturday: one card PER PERSON, not one shared card — the
+        // meal/kosher content per person overflowed even a single
+        // already-slimmed-down shared card (see decisions.md). Same event
+        // meta as any other event card, just one person's accept/decline +
+        // dinner selection instead of a loop over everyone.
+        function buildSaturdayPersonPanel(inv, personIdx, isLast) {
+            var detail = EVENT_DETAILS.saturday;
+            var name = inv.people[personIdx];
+            var card = el('div', 'rsvp-card');
+            card.tabIndex = -1;
+            card.dataset.event = 'saturday';
+            card.dataset.person = personIdx;
+
+            card.appendChild(el('h2', 'rsvp-card-title', detail.shortName || detail.name));
+            card.appendChild(makeCardEventMeta(detail));
+
+            var person = el('div', 'rsvp-card-person');
+            person.appendChild(el('p', 'rsvp-card-person-name', name));
+
+            var choices = el('div', 'rsvp-card-choices');
+            choices.appendChild(radioLabel('fp' + personIdx + '_saturday', 'yes', 'Accepts with pleasure'));
+            choices.appendChild(radioLabel('fp' + personIdx + '_saturday', 'no', 'Declines with regret'));
+            person.appendChild(choices);
+
+            person.appendChild(buildMealSection(personIdx));
+            // Declining Saturday collapses/disables this person's meal section.
+            choices.querySelectorAll('input[type="radio"]').forEach(function (input) {
+                input.addEventListener('change', function () {
+                    updateMealDisabled(card, personIdx);
+                });
+            });
+
+            card.appendChild(person);
+
+            var error = el('p', 'rsvp-card-error');
+            error.setAttribute('role', 'alert');
+            card.appendChild(error);
+
+            card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
+                if (validateSaturdayPersonCard(card, personIdx)) {
+                    error.classList.remove('show');
+                    fileForward(stack, afterMove);
+                }
+            })));
+
+            return makeStackCard(card, 'saturday_' + personIdx);
+        }
+
+        // Info-only afterparty card — no accept/decline, just the details.
+        // Always immediately after Saturday's last person card when
+        // Saturday is invited (see dealPersonalStack's step list).
+        function buildAfterpartyPanel(isLast) {
+            var card = el('div', 'rsvp-card');
+            card.tabIndex = -1;
+            card.dataset.event = 'afterparty';
+
+            card.appendChild(el('h2', 'rsvp-card-title', AFTERPARTY_DETAILS.name));
+            card.appendChild(makeCardEventMeta(AFTERPARTY_DETAILS));
+            card.appendChild(el('p', 'weekend-event-note', AFTERPARTY_DETAILS.note));
+
+            card.appendChild(cardNav(nextButton(isLast ? 'Review' : 'Next', function () {
+                fileForward(stack, afterMove);
+            })));
+
+            return makeStackCard(card, 'afterparty');
         }
 
         function buildMealSection(personIdx) {
@@ -865,13 +946,25 @@
                     error.classList.add('show');
                     return false;
                 }
-                if (eventKey === 'saturday' && answer.value === 'yes') {
-                    var meal = card.querySelector('input[name="fp' + idx + '_meal"]:checked');
-                    if (!meal) {
-                        error.textContent = 'Please choose a dinner for ' + name + '.';
-                        error.classList.add('show');
-                        return false;
-                    }
+            }
+            return true;
+        }
+
+        function validateSaturdayPersonCard(card, personIdx) {
+            var error = card.querySelector('.rsvp-card-error');
+            var name = invitation.people[personIdx];
+            var answer = card.querySelector('input[name="fp' + personIdx + '_saturday"]:checked');
+            if (!answer) {
+                error.textContent = 'Please respond for ' + name + '.';
+                error.classList.add('show');
+                return false;
+            }
+            if (answer.value === 'yes') {
+                var meal = card.querySelector('input[name="fp' + personIdx + '_meal"]:checked');
+                if (!meal) {
+                    error.textContent = 'Please choose a dinner for ' + name + '.';
+                    error.classList.add('show');
+                    return false;
                 }
             }
             return true;
@@ -911,9 +1004,7 @@
             reviewSubmitBtn.addEventListener('click', onSubmit);
             card.appendChild(reviewSubmitBtn);
 
-            var wrapper = makeStackCard(card, 'review');
-            personalStack.push(wrapper);
-            return wrapper;
+            return makeStackCard(card, 'review');
         }
 
         function mealLabelFor(key) {
@@ -1015,7 +1106,7 @@
                     // it's added, then this fileForward reveals it.
                     buildThanksPanel();
                     buildSummaryInto(thanksSummary, data);
-                    fileForward(currentStack, function () {
+                    fileForward(stack, function () {
                         submitted = true;
                         afterMove();
                     });
@@ -1053,7 +1144,7 @@
             // top when it shifts the current top (review) out, so thanks
             // must be sitting right there for the reveal to land on it
             // rather than on the next already-filed event card.
-            personalStack.splice(1, 0, wrapper);
+            stack.splice(1, 0, wrapper);
             // Pre-position instantly at that slot the moment it's added —
             // never visible in an unset state before the fileForward call
             // (right after this) settles everyone and reveals it.
@@ -1136,10 +1227,10 @@
         // invitation (the lookup card's own Back button) and then swapping
         // forward again both work identically to the first time.
         function startFlow() {
-            if (preLookupStack[0] === lookupWrapper) { return; }
+            if (stack[0] === lookupWrapper) { return; }
             document.body.classList.add('rsvp-flow-active');
             window.scrollTo(0, 0);
-            fileForward(preLookupStack, afterMove);
+            fileForward(stack, afterMove);
         }
     });
 })();
