@@ -26,19 +26,45 @@
     // needs the exact name, so this uses the real one. If a future export renames
     // the timeline, update this one constant.
     var ANIMATION_NAME = 'Timeline 1';
-    var DURATION_S = 22.22;       // handoff moment — end of the in-Rive cream cover fade
-    var FADE_SYNC_START = 21.0;   // when the in-Rive cover fade begins (21.00 -> 22.22)
-    var FADE_SYNC_MS = 1220;      // letterbox fade duration, synced to the cover fade
+    var DURATION_S = 19.58;       // handoff moment — end of the in-Rive cream cover fade.
+                                   // The card comes to rest at 18.20s, before the cover
+                                   // starts; the cut fires here, at the cover's completion,
+                                   // not at the timeline's later end (~22.0s).
+    var FADE_SYNC_START = 18.75;  // when the in-Rive cover fade begins (18.75 -> 19.583)
+    var FADE_SYNC_MS = 833;       // letterbox fade duration, synced to the cover fade
     var STEP_HZ = 15;             // stepped cadence; set 0 for smooth playback
     var SETTLE_DELAY_MS = 150;    // pause on the matched frame before settling
     var SETTLE_MS = 450;          // settle transition length (0 = instant brand page)
     var COVER_CREAM = '#F1EDEA';  // matches the in-Rive cover rect exactly
     var SAFETY_MS = 26000;        // backstop only — DURATION_S plus margin
 
+    var queryParams = new URLSearchParams(location.search);
+
     // ?debug-registration — a dev-only verification mode (see debugRegistration()
     // below). Fully gated behind this flag; nothing it does can run without the
     // query param, so the normal playback path is unaffected.
-    var DEBUG_REGISTRATION = new URLSearchParams(location.search).has('debug-registration');
+    var DEBUG_REGISTRATION = queryParams.has('debug-registration');
+
+    // ?cut=/?fadestart=/?fadems= — dev-only overrides for the three timing
+    // constants above, so Andrew can find the right handoff moment live in the
+    // browser (watching for the exact frame the in-Rive cream cover reaches 100%)
+    // instead of re-exporting the .riv for every guess. Only active when a param
+    // is actually present — with none present these constants are used exactly
+    // as declared and nothing is logged, so the normal path is unaffected. Once
+    // the right numbers are found, hardcode them back into the constants above
+    // and drop the query params from the URL.
+    (function applyTimingOverrides() {
+        var hasOverride = queryParams.has('cut') || queryParams.has('fadestart') || queryParams.has('fadems');
+        if (!hasOverride) { return; }
+        var cut = parseFloat(queryParams.get('cut'));
+        var fadeStart = parseFloat(queryParams.get('fadestart'));
+        var fadeMs = parseFloat(queryParams.get('fadems'));
+        if (!isNaN(cut)) { DURATION_S = cut; }
+        if (!isNaN(fadeStart)) { FADE_SYNC_START = fadeStart; }
+        if (!isNaN(fadeMs)) { FADE_SYNC_MS = fadeMs; }
+        console.log('[rive-intro timing] DURATION_S=' + DURATION_S +
+            ' FADE_SYNC_START=' + FADE_SYNC_START + ' FADE_SYNC_MS=' + FADE_SYNC_MS);
+    })();
 
     var container = document.getElementById('rive-container');
     var canvas = document.getElementById('rive-canvas');
@@ -155,17 +181,39 @@
     // textured cream, nav/footer/replay fade in, card gains the illustration emboss.
     // All animation is CSS, driven by the class; JS only schedules it.
 
+    // addIntroComplete — flips the class that drives the settle. Body's own
+    // background-color/-image are ALWAYS hidden behind an opaque layer while
+    // `:not(.intro-complete))` is in effect — the password overlay, then the
+    // Rive canvas, then the opaque #invitation-endstate — so the green matte
+    // never has a reason to be visible when this class flips. The visible
+    // green -> cream fade the viewer sees is provided entirely by
+    // #invitation-endstate's own alpha fade (keyed to --settle-ms). Body's
+    // background nonetheless carries the SITE-WIDE dark-mode transition
+    // (color/background-color/text-shadow, hardcoded 400ms, unrelated to
+    // --settle-ms), so left alone it independently fades matte -> cream over
+    // that same 400ms — a transition with no visual purpose here, since it's
+    // always masked, but a real one: if anything ever fails to mask it (a
+    // throttled/backgrounded tab, a slow paint), the matte shows through as a
+    // green band until it catches up. Bypassing the transition for this one
+    // flip (matching how z-index already snaps rather than animates here)
+    // removes that window entirely; re-enabling immediately after keeps a
+    // later dark-mode toggle on the settled page fading normally.
+    function addIntroComplete() {
+        document.body.style.transition = 'none';
+        document.body.classList.add('intro-complete');
+        void document.body.offsetHeight;
+        document.body.style.transition = '';
+    }
+
     function settle() {
-        setTimeout(function () {
-            document.body.classList.add('intro-complete');
-        }, SETTLE_DELAY_MS);
+        setTimeout(addIntroComplete, SETTLE_DELAY_MS);
     }
 
     // settleInstant — bail paths (return visit, reduced motion, missing asset) must
     // land directly on the brand page: zero the transition length, then settle.
     function settleInstant() {
         document.body.style.setProperty('--settle-ms', '0ms');
-        document.body.classList.add('intro-complete');
+        addIntroComplete();
     }
 
     // completeIntro — the loop reached DURATION_S (end of the in-Rive cream fade).

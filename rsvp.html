@@ -73,6 +73,12 @@
             </div>
         </div>
 
+        <!-- Scroll room below the settled invitation (see .invitation-scroll-spacer
+             in styles.css) — lets the card scroll against the grain background
+             instead of staying pinned. Empty by design; body's own texture shows
+             through. -->
+        <div class="invitation-scroll-spacer" aria-hidden="true"></div>
+
         <!-- Card flow — the sequenced RSVP. Hidden until the arrow starts the flow
              (body.rsvp-flow-active). A fixed texture backdrop keeps the grain
              stationary while the card track slides/scrolls above it on its own
@@ -97,10 +103,10 @@
 
     <!-- Replay icon — fades in with the settle (body.intro-complete). Clears the
          once-per-session gate and reloads, re-entering the single playback pipeline.
-         Image is a placeholder (DC flag) using the standard light/dark swap. -->
+         Image is the Metro car line illustration, using the standard light/dark swap. -->
     <button id="replay-intro" class="replay-intro" aria-label="Replay intro animation">
-        <img src="assets/illustrations/flag-light.png" data-light="assets/illustrations/flag-light.png"
-            data-dark="assets/illustrations/flag-dark.png" alt="">
+        <img src="assets/illustrations/train-light.svg" data-light="assets/illustrations/train-light.svg"
+            data-dark="assets/illustrations/train-dark.svg" alt="">
     </button>
 
     <script>

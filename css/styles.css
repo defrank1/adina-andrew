@@ -916,20 +916,45 @@ body.dark-mode .paper-card--page {
    bail paths set it to 0ms so return visits land settled instantly).
    =========================== */
 
-/* Fixed one-viewport composition — nothing scrolls (the card is fixed, the footer is
-   pinned). Also load-bearing for registration: no scrollbars means the layout width
+/* Fixed one-viewport composition through the cut — nothing scrolls (the card is
+   fixed). Also load-bearing for registration: no scrollbars means the layout width
    always equals window.innerWidth, so the canvas box (sized from innerWidth/Height)
    and .invitation-field (sized from 100vw/100dvh) are the SAME box in every browser,
-   including classic-scrollbar ones. */
+   including classic-scrollbar ones. Scroll unlocks only once settled — see
+   body.page-rsvp.intro-complete below — so this registration guarantee holds for
+   the entire pre-settle chain (password gate, intro, and the flat cut frame). */
 body.page-rsvp {
     overflow: hidden;
+}
+
+/* .invitation-endstate's containing block for its post-settle position:absolute
+   (see below) — established explicitly rather than relying on the initial
+   containing block, so the scroll behavior is unambiguous. Doesn't affect layout
+   pre-settle (nothing inside is absolutely positioned against it until then). */
+body.page-rsvp #protected-content {
+    position: relative;
+}
+
+/* Settle unlocks scroll — the fixed one-viewport composition above is only a
+   pre-settle/registration constraint. Mirrors the existing
+   body.page-rsvp.rsvp-flow-active rule in rsvp-styles.css (same values); that
+   rule stays for when the flow is entered directly off a fast settle. */
+body.page-rsvp.intro-complete {
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Matte-green base until the settle, so the unlock -> first-frame gap and the cut
    both read as tunnel green, never a cream flash. The texture tile is opaque, so
    background-image must be cleared for the color to show. Once .intro-complete is
    present this rule stops matching and the GLOBAL body rules take over — standard
-   textured cream, and dark mode via the existing body.dark-mode mechanism. */
+   textured cream, and dark mode via the existing body.dark-mode mechanism. Body's
+   own matte->cream swap is always hidden behind an opaque layer (password overlay,
+   then canvas, then the opaque #invitation-endstate) — the visible fade the viewer
+   sees is #invitation-endstate's own alpha fade below. addIntroComplete() in
+   js/rive-intro.js bypasses the global 400ms body transition for this one flip so
+   it snaps in sync rather than riding that unrelated, purposeless transition (see
+   its comment — a masked-but-real green flash if a paint ever lands mid-transition). */
 body.page-rsvp:not(.intro-complete) {
     background-image: none;
     background-color: #183a2c;
@@ -961,10 +986,44 @@ body.page-rsvp .invitation-endstate {
 
 /* Settle: the flat cream fades out, revealing the textured brand page beneath.
    The layer drops below the nav/footer (z 1000+) so the chrome floats over the
-   card like on any other page. Explicit rgba (not `transparent`) keeps the hue. */
+   card like on any other page. Explicit rgba (not `transparent`) keeps the hue.
+   position also switches fixed -> absolute here, pinned to the same top-left
+   corner (identical rect at scrollY:0 — .invitation-field and .invitation-card's
+   own positioning, sized/centered relative to THIS box, are completely untouched)
+   but now scrolling with the document instead of staying pinned to the viewport,
+   so the card (and the arrow, positioned relative to the same field) travel with
+   the page over .invitation-scroll-spacer below. inset:0 is replaced with an
+   explicit height rather than a bottom edge, so growing the document (the
+   spacer) doesn't stretch this box or re-center the field within it. */
 body.page-rsvp.intro-complete .invitation-endstate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    height: 100dvh;
     background-color: rgba(241, 237, 234, 0);
     z-index: 1;
+}
+
+/* Scroll room below the settled card — plain paper (body's own grain shows
+   through; no background of its own), no new content. Collapsed to nothing
+   pre-settle so it can't affect the registration-critical pre-cut layout, and
+   again once the RSVP card flow is entered (rsvp-styles.css) so it doesn't push
+   the flow's first panel down. Height is 100vh (the settled card view the
+   endstate box occupies, which this in-flow spacer starts underneath at the
+   same document position) + 60vh of genuine extra: #protected-content's own
+   min-height:100vh floor would otherwise absorb a plain 60vh spacer via the
+   footer's margin-top:auto (same mechanism that pins a short page's footer to
+   the bottom on every other page) before the column ever grows past one
+   viewport, leaving nothing to scroll into. */
+.invitation-scroll-spacer {
+    display: none;
+}
+
+body.page-rsvp.intro-complete .invitation-scroll-spacer {
+    display: block;
+    height: calc(100vh + 60vh);
 }
 
 /* Hidden until the intro tears down (hard cut / skip / bail); prevents the
@@ -1064,20 +1123,29 @@ body.page-rsvp #footer-placeholder {
 }
 
 /* Replay icon — fixed bottom-left, icon-only. Hidden until the settle; fades in with
-   it. Asset is a placeholder (DC flag) with the standard data-light/data-dark swap —
-   keep the CSS asset-agnostic. z-index above the (settled) content, below the Rive
-   canvas (2000) while the intro plays. */
+   it. Asset is the Metro car line illustration (train-light.svg/train-dark.svg) with
+   the standard data-light/data-dark swap. z-index above the (settled) content, below
+   the Rive canvas (2000) while the intro plays.
+   Box is landscape (52x36) rather than the old flag's 44x44 square: the train's
+   native ~165x92 (~1.79:1) ratio, run through object-fit: contain at 44x44, rendered
+   far smaller than the old flag did (the flag's ~0.61:1 portrait ratio filled the
+   square's full height) — a thin, weak-looking icon. 52x36 was sized so the train
+   renders at roughly the same visual area the flag had (~46x26 within the old box),
+   flex-centered with a little breathing room rather than a hard-cropped fit. */
 .replay-intro {
     position: fixed;
     bottom: 20px;
     left: 20px;
     z-index: 1600;
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 36px;
     padding: 0;
     background: none;
     border: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--settle-ms, 450ms) ease;
@@ -1154,7 +1222,7 @@ body.page-rsvp-internal .registry-page {
     /* #F1EDEA at 40% */
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 12px;
+    font-size: 15px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     background: none;
@@ -2470,5 +2538,12 @@ body.dark-mode .travel-link:hover {
 
     .footer-line {
         display: block;
+    }
+
+    /* Skip button — pad up to a 44x44 minimum tap target rather than growing the
+       type further; bottom/right stay at 24px so the box's own corner (not the
+       text) is what's anchored, same as before. */
+    #skip-intro {
+        padding: 14px;
     }
 }

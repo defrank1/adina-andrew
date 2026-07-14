@@ -670,9 +670,10 @@ body.page-rsvp.rsvp-flow-active {
 }
 
 /* The invitation end-state slides off-screen left in the same motion as the
-   track sliding in — one continuous leftward shift. The end-state keeps its
-   registration-critical geometry (no re-parent, no restyle); it is only
-   translated. After its transition ends, JS adds .rsvp-offstage. */
+   track sliding in — one continuous leftward shift. By this point (rsvp-flow-active
+   only ever follows intro-complete) it's already the settled, scrollable
+   position:absolute box from styles.css — this rule adds only a transform on
+   top, same as it always has. After its transition ends, JS adds .rsvp-offstage. */
 body.page-rsvp.rsvp-flow-active .invitation-endstate {
     transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
     transform: translateX(-100vw);
@@ -680,6 +681,14 @@ body.page-rsvp.rsvp-flow-active .invitation-endstate {
 
 body.page-rsvp.rsvp-flow-active .invitation-endstate.rsvp-offstage {
     visibility: hidden;
+}
+
+/* Collapse the scroll spacer (styles.css) once the flow is entered — otherwise
+   it would still hold its settled-page height and push the flow's first panel
+   down by that much. js/rsvp-flow.js already resets scroll to 0 on entry, so
+   between that and this the flow always opens at a clean, un-offset top. */
+body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
+    display: none;
 }
 
 /* The footer (dark-mode toggle) sits after the flow in the flex column; lift
