@@ -582,13 +582,14 @@ body.page-rsvp .rsvp-arrow {
     left: calc(66.146% + 28px);
     top: 53.611%;
     transform: translateY(-50%);
-    /* Explicit, above every stack card (max z-index 500 — see depthZ in
-       js/rsvp-flow.js) rather than relying on implicit z-index:auto
-       ordering — that worked by chance against most cards but lost to the
-       lookup card specifically on mobile once this became position:fixed
-       (still a descendant of .invitation-field's stacking context even
-       though fixed positioning escapes its layout). */
-    z-index: 600;
+    /* Explicit, above every resting card (max z-index 500) AND above a card
+       actively in flight (Z_EXIT/Z_ENTER = 1000/1001 in js/rsvp-flow.js) —
+       Nav Unification (July 2026): the persistent pair is now the sole nav
+       at every viewport, and a traveling card crosses the ENTIRE screen
+       (mobile cards are near-full-width/height) including wherever these
+       buttons sit, so they need to stay above it, not just above the
+       resting stack. */
+    z-index: 1100;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -623,8 +624,8 @@ body.page-rsvp.rsvp-peek-visible .rsvp-arrow {
    no longer produces a visible fade for any stack card; it's harmless
    (every reply card is opaque by the time it could ever become visible) but
    kept rather than removed, since .rsvp-peek-visible still gates the RSVP
-   button's own fade-in (see .rsvp-arrow / .rsvp-card-nav-next.rsvp-arrow-breathe
-   above) and this selector shares that timing for free. */
+   button's own fade-in (see .rsvp-arrow above) and this selector shares
+   that timing for free. */
 body.page-rsvp .rsvp-stack .paper-card--page {
     opacity: 0;
     transition: opacity var(--settle-ms, 450ms) ease;
@@ -730,11 +731,12 @@ body.page-rsvp.rsvp-flow-active .rsvp-arrow.rsvp-arrow-breathe {
 /* Pre-cut, overflow: hidden on body.page-rsvp is load-bearing for pixel
    registration (styles.css). The flow can only start post-settle, where that
    constraint is over: allow vertical scrolling for cards taller than the
-   viewport; horizontal stays clipped. (body.page-rsvp.intro-complete already
-   unlocks this at the settle, before the flow starts — this duplicate rule is
-   a defensive no-op that stays correct even reached a different way.) */
+   viewport. (body.page-rsvp.intro-complete already unlocks this at the
+   settle, before the flow starts — this duplicate rule is a defensive no-op
+   that stays correct even reached a different way.) Horizontal stays clipped
+   by html,body's own overflow-x: clip (styles.css) at every stage, so this
+   rule no longer needs to restate it. */
 body.page-rsvp.rsvp-flow-active {
-    overflow-x: hidden;
     overflow-y: auto;
 }
 
@@ -798,10 +800,7 @@ body.page-rsvp.rsvp-flow-active .rsvp-flow-scroll-spacer {
     outline: none;
     /* No overflow:hidden — on mobile, leaving overflow visible means any
        content that doesn't fit the card is an obvious, catchable problem
-       during the content-budget audit rather than a silently-clipped one.
-       (Desktop's Back/Next controls, .rsvp-card-nav-back/-next, are wrapper
-       children positioned above the card's top edge — this element's own
-       overflow doesn't affect them either way.) */
+       during the content-budget audit rather than a silently-clipped one. */
 }
 
 /* Frame: a border-image 9-slice overlay, not a baked <img>, since the reply
@@ -1369,27 +1368,24 @@ body.dark-mode .kosher-label input[type="checkbox"]:focus-visible {
     outline-color: var(--color-soft-white);
 }
 
-/* ---- Stack navigation: mobile-only persistent Back/Next + inline errors --- */
+/* ---- Stack navigation: persistent Back/Next, one system at every viewport - */
 
 /* Back/Next used to be DOM children of each sliding card, positioned outside
    it — that meant they visibly slid with their card during the file-to-back
-   move, and (with the stack now up to 7-8 cards deep for a fully-invited
-   guest) got crowded by the growing peek depth to the point of reading as
-   cut off. Andrew's fix (July 11 2026): both became persistent, field-fixed
-   controls that never move — #rsvp-arrow (doubling as "Next"/"Review" once
-   the flow starts — see rsvp.html's comment and updateStackNav in
-   js/rsvp-flow.js) and #rsvp-stack-back here, its mirror image on the
-   card's other side.
+   move, and (with the stack up to 7-8 cards deep for a fully-invited guest)
+   got crowded by the growing peek depth to the point of reading as cut off.
+   Andrew's fix (July 11 2026): both became persistent, field-fixed controls
+   that never move — #rsvp-arrow (doubling as "Next"/"Review" once the flow
+   starts — see rsvp.html's comment and updateStackNav in js/rsvp-flow.js)
+   and #rsvp-stack-back here, its mirror image on the card's other side.
 
-   Item 2 (July 2026) supersedes this system ON DESKTOP ONLY, in favor of
-   per-card controls again — see "Per-card Back/Next controls" below for why
-   that's not simply repeating the July 11 mistake. #rsvp-arrow/
-   #rsvp-stack-back are kept, unchanged, as the MOBILE (≤900px) mechanism —
-   see the @media (min-width: 901px) rule below that hides them on desktop,
-   and MOBILE_BREAKPOINT/stackNavInfoFor/updateStackNav in js/rsvp-flow.js,
-   which still drive them. This is intentionally two nav systems, one per
-   breakpoint, transitional until a dedicated mobile nav pass unifies them
-   (see docs/decisions.md launch checklist).
+   A later round (July 2026) tried per-card controls again on desktop only,
+   splitting this into two parallel nav systems — one per breakpoint. Nav
+   Unification (July 2026) retires that split: this persistent pair is the
+   SOLE nav system at every viewport again. The base rule below (mobile's
+   own values) is unchanged; the @media (min-width: 901px) block further
+   down (replacing the old "hide these on desktop" rule) gives desktop its
+   own viewport-fixed, flanking-the-card-column treatment instead.
    Visibility/label/disabled state are all toggled by JS per current top
    card; there is deliberately no CSS here for per-card variants.
    right: calc(66.146% + 28px) is the exact mirror of .rsvp-arrow's
@@ -1402,7 +1398,7 @@ body.page-rsvp .rsvp-stack-back {
     top: 53.611%;
     transform: translateY(-50%);
     /* Explicit z-index — see the matching comment on .rsvp-arrow above. */
-    z-index: 600;
+    z-index: 1100;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -1458,129 +1454,57 @@ body.dark-mode.page-rsvp .rsvp-stack-back:focus-visible {
     outline-color: var(--color-soft-white);
 }
 
-/* Desktop only (>900px, matching MOBILE_BREAKPOINT in js/rsvp-flow.js and
-   the @media (max-width: 900px) block below) — hide the mobile persistent
-   nav in favor of the per-card controls just below. 901px, not 900px: using
-   900px here would show BOTH systems simultaneously at exactly that width. */
+/* Desktop (>900px, matching the @media (max-width: 900px) block further
+   down) — Nav Unification (July 2026): viewport-fixed, flanking the card
+   column horizontally instead of mobile's field-relative/bottom-pinned
+   values above. top: 50% + translateY(-50%) is the VIEWPORT's vertical
+   center (not the card's own midpoint within the field, unlike the base
+   rule's top: 53.611%) — deliberate, so the buttons stay on screen and
+   stationary even when a tall card (e.g. Saturday) has scrolled the page,
+   and never move between cards. --field-w mirrors .invitation-field's own
+   width formula (styles.css) — duplicated rather than shared via a
+   refactor, to avoid touching that registration-adjacent rule; 0.16146 is
+   the field-width fraction between the field's (and viewport's, since the
+   field is centered) horizontal middle and the card's near edge — the card
+   spans 33.854%-66.146% of the field (.invitation-card, styles.css), so
+   50%-33.854% = 66.146%-50% = 16.146%; if those fractions ever change,
+   update 0.16146 with them. No new :active rule needed — the existing
+   translateY(calc(-50% + 0.5px)) above/below already composes correctly,
+   since -50% in a transform is always relative to the element's own
+   height regardless of what top/position resolve against. */
 @media (min-width: 901px) {
     body.page-rsvp .rsvp-arrow,
     body.page-rsvp .rsvp-stack-back {
-        display: none;
+        --field-w: min(100vw, calc(100dvh * 16 / 9));
+        --card-nav-gap: 32px;
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    body.page-rsvp .rsvp-stack-back {
+        right: calc(50vw + var(--field-w) * 0.16146 + var(--card-nav-gap));
+    }
+
+    body.page-rsvp .rsvp-arrow {
+        left: calc(50vw + var(--field-w) * 0.16146 + var(--card-nav-gap));
     }
 }
 
-/* ---- Per-card Back/Next controls (desktop only, >900px) -------------------
-   Second redesign (July 2026 — supersedes the "above the top edge" per-card
-   design this same comment used to describe). Andrew's call: real site
-   buttons (.btn-priority for Next/RSVP, the primary action; .btn-normal for
-   Back, secondary), sized up for real presence, flanking the card at its
-   vertical midpoint — literally the site's own button classes, not a
-   bespoke text+arrow control. --card-nav-gap is a custom property so the
-   gap is easy to retune in DevTools; with the no-peek stack (Section A4)
-   nothing can overlap these buttons regardless, so the value is generous
-   rather than load-bearing. Visibility is gated on .rsvp-stack-top (set by
-   setStackTop in js/rsvp-flow.js) rather than [inert] directly — a separate
-   flag tracking depth only, applied to every stack member (invitation
-   included, since .invitation-card is .paper-card). Mobile keeps the
-   persistent #rsvp-arrow/#rsvp-stack-back system above — unifying the two
-   is a later, mobile-only pass (see docs/decisions.md). */
-.rsvp-card-nav-back,
-.rsvp-card-nav-next {
-    --card-nav-gap: 32px;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    white-space: nowrap;
-    font-size: 1rem;
-    padding: 1rem 2.2rem;
-    /* .rsvp-stack .paper-card--page (styles.css) already re-enables
-       pointer-events against #invitation-endstate's pointer-events:none, so
-       stack cards' nav buttons inherit auto correctly. .invitation-card
-       never needed that override before it had an interactive child of its
-       own (this button) — set explicitly here instead of touching
-       .invitation-card's registration-critical rule in styles.css. The
-       :not(.rsvp-stack-top) rule below overrides back to none when hidden. */
-    pointer-events: auto;
-    /* Hardcoded 400ms, NOT var(--settle-ms) — that custom property is the
-       ONE-TIME intro-settle duration (js/rive-intro.js) and is permanently
-       zeroed by settleInstant() on every bail path (return visit, reduced
-       motion, and "Edit your RSVP"/"Start Over" reloads) — using it here
-       would make this fade instant for most real sessions. Keep this
-       literal in sync with LEG_SETTLE_MS in js/rsvp-flow.js by hand (same
-       duplication pattern as the field fractions restated on
-       .invitation-card / .rsvp-stack .paper-card--page elsewhere in this
-       file). box-shadow/background-color/color/border-color transitions are
-       inherited from .btn-priority/.btn-normal — restated here only to add
-       opacity into the same list. */
-    transition: opacity 400ms ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 400ms ease, border-color 400ms ease;
-}
-
-.rsvp-card-nav-back { right: calc(100% + var(--card-nav-gap)); }
-.rsvp-card-nav-next { left: calc(100% + var(--card-nav-gap)); }
-
-.rsvp-card-nav-icon {
-    display: block;
-    flex: 0 0 auto;
-    width: 40px;
-    height: 18px;
-}
-
-.paper-card:not(.rsvp-stack-top) .rsvp-card-nav-back,
-.paper-card:not(.rsvp-stack-top) .rsvp-card-nav-next {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* .btn-priority/.btn-normal already provide hover/active deboss feedback
-   (box-shadow + background-color) — only focus-visible needs a rule here. */
-.rsvp-card-nav-back:focus-visible,
-.rsvp-card-nav-next:focus-visible {
-    outline: 2px solid var(--color-dark-green);
-    outline-offset: 3px;
-}
-
-body.dark-mode .rsvp-card-nav-back:focus-visible,
-body.dark-mode .rsvp-card-nav-next:focus-visible {
-    outline-color: var(--color-soft-white);
-}
-
-/* .btn-priority/.btn-normal's own :active rule sets `transform:
-   translateY(0.5px)`, which would clobber this element's centering
-   transform outright (translateY doesn't compose across separate
-   declarations) — restate the press offset combined with the centering
-   translate so the button presses down without losing its vertical
-   midpoint position. */
-.rsvp-card-nav-back:active,
-.rsvp-card-nav-next:active {
-    transform: translateY(calc(-50% + 0.5px));
-}
-
-/* The invitation card's own "RSVP" button reuses .rsvp-arrow-breathe's
-   glow — generalized here since .rsvp-arrow-breathe's own keyframe triggers
-   (rsvp-styles.css, "The RSVP arrow on the settled invitation page") are
-   scoped to .rsvp-arrow, not this class. */
-body.page-rsvp.intro-complete .rsvp-card-nav-next.rsvp-arrow-breathe {
-    animation: rsvp-arrow-glow 4s ease-in-out infinite;
-}
-
-body.page-rsvp.rsvp-flow-active .rsvp-card-nav-next.rsvp-arrow-breathe {
-    animation: none;
-}
-
-body.dark-mode.page-rsvp.intro-complete .rsvp-card-nav-next.rsvp-arrow-breathe {
-    animation: rsvp-arrow-glow-dark 4s ease-in-out infinite;
-}
-
-/* Mobile (≤900px) — hide the new desktop controls, matching the
-   @media (min-width: 901px) hide of the old system above. */
-@media (max-width: 900px) {
-    .rsvp-card-nav-back,
-    .rsvp-card-nav-next {
-        display: none;
-    }
+/* In-flight dim (Nav Unification, July 2026) — see setNavInFlight in
+   js/rsvp-flow.js. pointer-events: none needs !important specifically
+   because #rsvp-stack-back's enabled-state inline value is 'auto' (a real
+   value, not '') which would otherwise beat a plain class rule; opacity
+   needs no !important since updateStackNav's enabled-state inline value is
+   '' (empty, no override, so the class applies via normal cascade) and its
+   hidden-state inline value ('0') correctly beats the class either way —
+   exactly the wanted behavior, a card-type-hidden button doesn't become
+   semi-visible just because a move started. */
+body.page-rsvp .rsvp-arrow.rsvp-nav-inflight,
+body.page-rsvp .rsvp-stack-back.rsvp-nav-inflight {
+    opacity: 0.55;
+    pointer-events: none !important;
+    transition: opacity 150ms ease;
 }
 
 /* Buried [inert] cards' own content still can't clip-bleed through the

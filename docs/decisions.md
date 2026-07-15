@@ -1153,6 +1153,24 @@ A new opening beat (`SUITE_DEAL_ENABLED`, default on) deals four decorative, uni
 
 ---
 
+## RSVP Card Flow — Wide-Screen Clipping Fix + Nav Unification (July 2026)
+
+### Decision: Real px travel distance replaces percentage-of-own-width exits (July 2026)
+
+On wide/ultrawide monitors, exiting/entering cards were popping in/out at an interior vertical line instead of traveling to the true screen edge. Root cause, confirmed by measurement rather than assumed: `fileTransition`'s `translateX(±115%)` legs are percentages of the CARD's own width, not the viewport — and the field (`min(100vw, 100dvh*16/9)`) is height-capped on wide screens, far narrower than the viewport, so ±115% of a narrow card's own width never came close to clearing an actual 3440px-wide screen. `.invitation-field`/`#invitation-endstate` were already correctly `overflow: visible` in-flow at every width (the "was mobile-only" concern didn't hold up — both landed unconditional in earlier rounds); the bug was never an overflow-ancestor scoping problem.
+
+Fix: `leftClearDX`/`rightClearDX` (`js/rsvp-flow.js`, near `onceTransition`) compute the real px distance from `getBoundingClientRect()`, measured once per move (not per frame) — `EDGE_MARGIN_PX` (40) is the safety margin past the true edge. `fileTransition` and `playSuiteDeal` both use them now, so real cards and the suite-deal proxies clear the actual screen edge at any aspect ratio, by construction. Horizontal overflow clipping is also consolidated onto one unconditional `html, body { overflow-x: clip }` (`styles.css`) — `clip` rather than `hidden` so it never establishes its own scroll container; the three page-rsvp-scoped overflow rules (`body.page-rsvp`, `.intro-complete`, `.rsvp-flow-active`) now only manage the vertical axis. This consolidation is a defensive cleanup, not the actual fix — the travel-distance math above is.
+
+### Decision: Nav Unification — one persistent Back/Next system at every viewport (July 2026)
+
+Supersedes "Per-card Back/Next controls, desktop only" above and resolves Pending Launch Tasks item 4 (mobile nav pass) — removed from the pending list. The desktop per-card system (`makeCardNavButton`, DOM children of each card, plus the invitation's own attached `#invitation-nav-next`) is deleted entirely; `#rsvp-arrow`/`#rsvp-stack-back` (previously mobile-only) are un-scoped from the old `@media (min-width: 901px) { display: none }` rule and become the sole nav at every viewport. `setStackTop`/`.rsvp-stack-top` are deleted too — their only consumer was the per-card visibility rule.
+
+Desktop (>900px) gets a new treatment: `position: fixed; top: 50%; transform: translateY(-50%)` — literal viewport-vertical-center, not the card's own midpoint within the field, so the buttons stay on screen and stationary regardless of scroll position or card height, and never move between cards. Horizontal position derives from a locally-declared `--field-w` (mirroring `.invitation-field`'s own width formula) and the card's placement fractions (`0.16146` = half the field-width gap between the field's center and the card's near edge) — duplicated rather than refactored into a shared property, to avoid touching the registration-adjacent `.invitation-field` rule. Mobile (≤900px) is untouched — a true no-op, confirmed. `z-index` on both buttons goes from 600 to 1100, above `Z_ENTER` (1001): now that they're viewport-fixed and a traveling card crosses the whole screen (mobile cards are near-full-width/height too), the old value would let an in-flight card visually cover them.
+
+New in-flight behavior, not present before: `setNavInFlight` dims both buttons (~0.55 opacity, `pointer-events: none`, `aria-disabled`) for the duration of any move — `aria-disabled` rather than the native `disabled` attribute specifically so a focused button isn't auto-blurred mid-flight (actual queuing prevention was already guaranteed by `fileTransition`'s `animLock` guard; this is UX polish + correct ARIA semantics on top of it). `afterMove` also now preserves focus on the persistent button that triggered a move (skipping its usual `card.focus()` step when `document.activeElement` is already `arrowBtn`/`backBtn`), so repeated Enter walks the whole flow instead of losing focus to the new card every time — any other trigger (email suggestion click, review submit, Edit link) keeps the prior card-focusing behavior. Validation and labeling were already driven by a single `stackNavInfoFor`-based path (used for both the mobile arrow and, indirectly, the desktop per-card labels) — deleting the per-card system leaves that as the sole dispatch path with no new code needed.
+
+---
+
 ## Pending Launch Tasks
 
 Recorded, not yet acted on:
@@ -1160,4 +1178,3 @@ Recorded, not yet acted on:
 1. **`rsvp.html` password** is currently `beautifulsuperstar`/`rsvpUnlocked` (a dev gate) while every other page uses `october17`/`siteUnlocked`. Guests clicking RSVP from the nav hit a dead-end second password wall — must switch to the guest password at launch.
 2. **`APPS_SCRIPT_URL`** in `js/rsvp-flow.js` is empty (staging mode, placeholder invitations/responses + no-op submit). Deploy the Apps Script web app and paste the URL at launch — this also picks up the `?action=response` endpoint (Decision G above) and the meal-name/kosher-summary changes (Decision F) in the confirmation email, none of which are live yet.
 3. **Delete `rsvp-internal.html` and `js/rsvp-form.js`** from main at launch — GitHub Pages has no server-side auth, so deletion from the deployed branch is the only way to make the internal staging form non-public. Recoverable from git history.
-4. **Mobile RSVP flow nav pass** — unify the transitional two-system nav from the "Per-card Back/Next controls" decision above (per-card on desktop, persistent `#rsvp-arrow`/`#rsvp-stack-back` on mobile), and revisit mobile card positioning/scroll more broadly.

@@ -114,6 +114,23 @@
 }
 
 /* ===========================
+   Global horizontal-scroll guard
+   =========================== */
+
+/* Wide-screen clipping fix (July 2026): the RSVP card flow's off-screen exit/
+   enter transforms need a clean, unconditional horizontal clip at the true
+   document edges. `clip` (not `hidden`) so this never creates its own scroll
+   container — vertical scrolling and any fixed-position elements (nav,
+   footer, the RSVP grain backdrop) are unaffected. Site-wide rather than
+   RSVP-scoped since it's a pure safety net (nothing else on the site
+   intentionally bleeds past the viewport). The RSVP page's own overflow
+   rules below (body.page-rsvp and its .intro-complete/.rsvp-flow-active
+   variants) now only need to manage the vertical axis. */
+html, body {
+    overflow-x: clip;
+}
+
+/* ===========================
    Body & Dark Mode
    =========================== */
 
@@ -922,9 +939,11 @@ body.dark-mode .paper-card--page {
    and .invitation-field (sized from 100vw/100dvh) are the SAME box in every browser,
    including classic-scrollbar ones. Scroll unlocks only once settled — see
    body.page-rsvp.intro-complete below — so this registration guarantee holds for
-   the entire pre-settle chain (password gate, intro, and the flat cut frame). */
+   the entire pre-settle chain (password gate, intro, and the flat cut frame).
+   Horizontal axis only needs overflow-y here — html,body's own overflow-x: clip
+   (Global horizontal-scroll guard, above) covers X unconditionally at every stage. */
 body.page-rsvp {
-    overflow: hidden;
+    overflow-y: hidden;
 }
 
 /* .invitation-endstate's containing block for its post-settle position:absolute
@@ -935,12 +954,12 @@ body.page-rsvp #protected-content {
     position: relative;
 }
 
-/* Settle unlocks scroll — the fixed one-viewport composition above is only a
-   pre-settle/registration constraint. Mirrors the existing
-   body.page-rsvp.rsvp-flow-active rule in rsvp-styles.css (same values); that
-   rule stays for when the flow is entered directly off a fast settle. */
+/* Settle unlocks vertical scroll — the fixed one-viewport composition above is
+   only a pre-settle/registration constraint; X stays covered by the global
+   rule above. Mirrors the existing body.page-rsvp.rsvp-flow-active rule in
+   rsvp-styles.css (same value); that rule stays for when the flow is entered
+   directly off a fast settle. */
 body.page-rsvp.intro-complete {
-    overflow-x: hidden;
     overflow-y: auto;
 }
 

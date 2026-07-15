@@ -92,6 +92,16 @@
     var Z_EXIT = 1000;   // card actively exiting
     var Z_ENTER = 1001;  // card actively entering — always above Z_EXIT, so it wins if they visibly overlap
 
+    // Wide-screen clipping fix (July 2026): translateX(±115%) is relative to
+    // the CARD's own width, not the viewport — on wide/ultrawide screens the
+    // field (min(100vw, 100dvh*16/9)) is far narrower than the viewport, so a
+    // percentage-of-card-width exit never reached the true screen edge and
+    // the card just popped invisible mid-screen. leftClearDX/rightClearDX
+    // (near onceTransition) compute the real px distance from the card's
+    // actual on-screen rect instead. EDGE_MARGIN_PX is the safety margin past
+    // the true edge.
+    var EDGE_MARGIN_PX = 40;
+
     // ---- suite-deal opening beat (flair, togglable) --------------------------
     // Decorative theater only, layered in front of the real move — see
     // playSuiteDeal. Set SUITE_DEAL_ENABLED = false to cleanly disable the
@@ -402,6 +412,7 @@
         // both the array and the DOM before building fresh ones.
         var personalCards = [];
         var submitted = false;
+        var pendingFocusTimer = null; // see afterMove's card-focus scheduling
         var animLock = false;         // true while ANY stack move is in flight
 
         // ---- stack engine ----------------------------------------------------
@@ -436,18 +447,6 @@
             }
         }
 
-        // Gates the per-card Back/Next controls' visibility (see
-        // .rsvp-stack-top in rsvp-styles.css) — a separate flag from
-        // setInert, tracking depth alone. (Before Section A4's no-peek
-        // stack, this mattered because the peeking lookup card was depth 1
-        // but intentionally not inert; that exception is gone, but keeping
-        // a dedicated flag rather than gating directly on [inert] is still
-        // one less thing to reason about if a peek-style feature ever
-        // returns.)
-        function setStackTop(el, isTop) {
-            el.classList.toggle('rsvp-stack-top', isTop);
-        }
-
         // Places an element at rest with no transition — used for initial
         // placement, reduced-motion moves, and pre-positioning a card the
         // instant it's added to a stack (so it's never visible mid-transit or
@@ -462,7 +461,6 @@
             el.style.zIndex = String(isTop ? Z_TOP : Z_HIDDEN);
             el.style.transform = 'none';
             setInert(el, !isTop);
-            setStackTop(el, isTop);
             el.classList.toggle('rsvp-stack-hidden', !isTop);
         }
 
@@ -486,6 +484,17 @@
             setTimeout(finish, ms + 60);
         }
 
+        // Real px distance to clear the TRUE viewport edge from a given
+        // on-screen rect (getBoundingClientRect — viewport-relative
+        // regardless of the field's own, possibly much narrower, width) —
+        // see EDGE_MARGIN_PX's comment above for why this replaced a
+        // percentage-of-own-width transform. leftClearDX: how far to
+        // translateX so the rect's right edge clears the left screen edge.
+        // rightClearDX: how far so the rect's left edge clears the right
+        // screen edge. Shared by fileTransition and playSuiteDeal.
+        function leftClearDX(rect) { return -(rect.right + EDGE_MARGIN_PX); }
+        function rightClearDX(rect) { return (window.innerWidth + EDGE_MARGIN_PX) - rect.left; }
+
         // Shared choreography for every stack transition: `reorder()` (a pure
         // array mutation — safe to run immediately, before any animation)
         // tells us who's exiting and who's arriving, then two OVERLAPPING
@@ -505,6 +514,15 @@
         function fileTransition(reorder, direction, onSettled, cleanup) {
             if (animLock || submitted || stack.length < 2) { return; }
             animLock = true;
+            setNavInFlight(true);
+            // A still-pending focus shift scheduled by the PREVIOUS move's
+            // afterMove (see there) could otherwise fire mid-flight during
+            // THIS move — its delay runs from that move's settle, not from
+            // when this one starts, so it can outlast a fast subsequent move
+            // and steal focus onto a card that's already being set aside,
+            // right before it goes inert and blurs again. Cancel it the
+            // instant a new move begins, not just when this one settles.
+            if (pendingFocusTimer) { clearTimeout(pendingFocusTimer); pendingFocusTimer = null; }
             var outgoing = stack[0];
             reorder();
             var incoming = stack[0];
@@ -518,8 +536,12 @@
             }
 
             var forward = direction !== 'back';
-            var exitX = forward ? '-115%' : '115%';
-            var enterFromX = forward ? '115%' : '-115%';
+            // outgoing & incoming share the identical resting rect — both
+            // sit at transform:none at rest (see applyRestingInstant) — so
+            // one measurement covers both distances.
+            var slotRect = outgoing.getBoundingClientRect();
+            var exitDX = forward ? leftClearDX(slotRect) : rightClearDX(slotRect);
+            var enterFromDX = forward ? rightClearDX(slotRect) : leftClearDX(slotRect);
             var exitRotate = forward ? -EXIT_ROTATE : EXIT_ROTATE;
             var enterRotate = forward ? ENTER_ROTATE : -ENTER_ROTATE;
             var legsRemaining = 2;
@@ -534,14 +556,13 @@
             outgoing.style.transition = 'transform ' + EXIT_MS + 'ms ' + EXIT_CURVE;
             outgoing.style.zIndex = String(Z_EXIT);
             void outgoing.offsetWidth; // force reflow so the transition runs from the current position
-            outgoing.style.transform = 'translateX(' + exitX + ') rotate(' + exitRotate + 'deg)';
+            outgoing.style.transform = 'translateX(' + exitDX + 'px) rotate(' + exitRotate + 'deg)';
 
             onceTransition(outgoing, 'transform', EXIT_MS, function () {
                 outgoing.style.transition = 'none';
                 outgoing.style.transform = 'none';
                 outgoing.style.zIndex = String(Z_HIDDEN);
                 setInert(outgoing, true);
-                setStackTop(outgoing, false);
                 outgoing.classList.add('rsvp-stack-hidden');
                 if (cleanup) { cleanup(); }
                 legDone();
@@ -550,10 +571,9 @@
             setTimeout(function () {
                 incoming.style.transition = 'none';
                 incoming.style.zIndex = String(Z_ENTER);
-                incoming.style.transform = 'translateX(' + enterFromX + ') rotate(' + enterRotate + 'deg)';
+                incoming.style.transform = 'translateX(' + enterFromDX + 'px) rotate(' + enterRotate + 'deg)';
                 incoming.classList.remove('rsvp-stack-hidden');
                 setInert(incoming, false);
-                setStackTop(incoming, true);
                 void incoming.offsetWidth;
                 incoming.style.transition = 'transform ' + ENTER_MS + 'ms ' + ENTER_CURVE;
                 incoming.style.transform = 'none';
@@ -624,6 +644,10 @@
         var suiteDealPlayed = false;
 
         function playSuiteDeal(onDone) {
+            // Same wide-screen fix as fileTransition's exit/enter legs — see
+            // EDGE_MARGIN_PX/rightClearDX above. Measured once; inserting the
+            // proxies below doesn't move the invitation's own rect.
+            var flightDX = rightClearDX(invitationCardEl.getBoundingClientRect());
             var proxies = [];
             for (var i = 0; i < SUITE_DEAL_COUNT; i++) {
                 var proxy = document.createElement('div');
@@ -643,7 +667,7 @@
                 setTimeout(function () {
                     var extraRotate = 6 + Math.random() * 4; // +6..10deg, jittered
                     proxy.style.transition = 'transform ' + SUITE_DEAL_FLIGHT_MS + 'ms ' + EXIT_CURVE;
-                    proxy.style.transform = 'translateX(120%) rotate(' + extraRotate + 'deg)';
+                    proxy.style.transform = 'translateX(' + flightDX + 'px) rotate(' + extraRotate + 'deg)';
                     onceTransition(proxy, 'transform', SUITE_DEAL_FLIGHT_MS, function () {
                         proxy.style.willChange = '';
                         if (proxy.parentNode) { proxy.parentNode.removeChild(proxy); }
@@ -703,9 +727,16 @@
         // measurement below start from a predictable, known position —
         // matches advanceFrom's own unconditional reset on the way IN;
         // this covers Back moves and any settle that didn't go through
-        // advanceFrom), then focuses the new top card (delay = 0 under
-        // reduced motion so it doesn't wait for a move that didn't
-        // animate). Passed as the onSettled callback to
+        // advanceFrom), un-dims the persistent nav (see setNavInFlight),
+        // then focuses the new top card (delay = 0 under reduced motion so
+        // it doesn't wait for a move that didn't animate) — UNLESS focus is
+        // already on the persistent Next/Back button that triggered this
+        // move (Nav Unification, July 2026): keyboard/mouse activation of
+        // that button keeps focus there so Enter-Enter-Enter walks the
+        // whole flow, instead of it being stolen away to the new card every
+        // time. Any other trigger (email suggestion click, review submit,
+        // Edit link) still moves focus to the new card, unchanged. Passed
+        // as the onSettled callback to
         // fileForward/fileBackward/replacePersonalCards.
         function afterMove() {
             var top = stack[0];
@@ -713,11 +744,14 @@
                 buildSummaryInto(reviewSummary, collectData());
             }
             updateStackNav();
+            setNavInFlight(false);
             window.scrollTo(0, 0);
             ensureScrollRoom();
+            if (document.activeElement === arrowBtn || document.activeElement === backBtn) { return; }
             var card = top && top.querySelector('.rsvp-card');
             if (!card) { return; }
-            setTimeout(function () {
+            pendingFocusTimer = setTimeout(function () {
+                pendingFocusTimer = null;
                 card.focus({ preventScroll: true });
             }, prefersReduced ? 0 : STACK_MOVE_MS + 20);
         }
@@ -790,13 +824,29 @@
             backBtn.style.pointerEvents = info.back ? 'auto' : 'none';
         }
 
-        // Shared "advance" logic used by every forward control in the flow —
-        // the mobile persistent #rsvp-arrow (via onForwardClick below) and
-        // every desktop per-card Next button (see makeCardNavButton).
-        // fileForward already self-guards on stack.length < 2, so this only
-        // needs to additionally guard against a move already in flight or a
-        // completed submission, then run the card's own validation (if any)
-        // before actually filing forward.
+        // In-flight dim (Nav Unification, July 2026): the buttons stay
+        // visible and stationary during a move rather than vanishing, but
+        // get a subtle dim + pointer-events:none (see .rsvp-nav-inflight in
+        // rsvp-styles.css) so a double-click/double-Enter can't queue a
+        // second move — though animLock's own guard in fileTransition is
+        // what actually prevents that; this is UX polish + correct ARIA
+        // semantics on top of it. aria-disabled, not the native disabled
+        // attribute, specifically so a focused button isn't auto-blurred by
+        // the browser mid-flight (see afterMove's focus-preservation note).
+        function setNavInFlight(inFlight) {
+            [arrowBtn, backBtn].forEach(function (btn) {
+                btn.classList.toggle('rsvp-nav-inflight', inFlight);
+                btn.setAttribute('aria-disabled', inFlight ? 'true' : 'false');
+            });
+        }
+
+        // Shared "advance" logic used by the persistent #rsvp-arrow (the
+        // sole Next control at every viewport since Nav Unification, July
+        // 2026 — see onForwardClick below). fileForward already self-guards
+        // on stack.length < 2, so this only needs to additionally guard
+        // against a move already in flight or a completed submission, then
+        // run the card's own validation (if any) before actually filing
+        // forward.
         function advanceFrom(validate) {
             if (animLock || submitted) { return; }
             if (validate && !validate()) { return; }
@@ -805,13 +855,13 @@
             fileForward(afterMove);
         }
 
-        // The click handler for the mobile-only persistent #rsvp-arrow —
+        // The click handler for the persistent #rsvp-arrow — the sole
+        // forward control at every viewport (Nav Unification, July 2026) —
         // "Begin RSVP" on the invitation, "Next"/"Review" on every card
-        // after (desktop uses per-card Next buttons instead — see
-        // makeCardNavButton). Also reused as the peek's click handler (see
-        // revealPeek): stackNavInfoFor(lookup) always returns forward:false,
-        // so clicking the peek once lookup is already on top correctly
-        // no-ops here, with no separate "already swapped" guard needed.
+        // after. Also reused as the peek's click handler (see revealPeek):
+        // stackNavInfoFor(lookup) always returns forward:false, so clicking
+        // the peek once lookup is already on top correctly no-ops here,
+        // with no separate "already swapped" guard needed.
         function onForwardClick() {
             var info = stackNavInfoFor(stack[0]);
             if (!info.forward) { return; }
@@ -837,62 +887,15 @@
         // nothing further needs appending for it here. `stepKey` is tagged on
         // the wrapper (parallel to the old steps[] array) so code can recognize
         // a specific card — e.g. refreshing the review summary only when it
-        // becomes the top. `nav` — { back: boolean, next: { label, validate } |
-        // null } — appends this card's own desktop Back/Next controls (see
-        // makeCardNavButton).
-        function makeStackCard(card, stepKey, nav) {
+        // becomes the top. Cards carry no navigation of their own (Nav
+        // Unification, July 2026 — the persistent #rsvp-arrow/#rsvp-stack-back
+        // pair is the sole nav at every viewport) so they fly clean.
+        function makeStackCard(card, stepKey) {
             var wrapper = el('div', 'paper-card paper-card--page');
             if (stepKey) { wrapper.dataset.step = stepKey; }
             wrapper.appendChild(card);
-            nav = nav || {};
-            if (nav.back) { wrapper.appendChild(makeCardNavButton('back')); }
-            if (nav.next) { wrapper.appendChild(makeCardNavButton('next', nav.next.label, nav.next.validate)); }
             stackEl.appendChild(wrapper);
             return wrapper;
-        }
-
-        // Per-card Back/Next controls (desktop only, >900px — see the CSS
-        // media queries in rsvp-styles.css). Positioned above the card's
-        // top edge, clear of the down-right-fanning peek stack, and their
-        // opacity is gated on the wrapper's [inert] state so only the top
-        // card's controls are ever visible. Reuses the exact markup/child
-        // order and SVG paths of the mobile-only #rsvp-arrow (label then
-        // icon) / #rsvp-stack-back (icon then label).
-        function makeCardNavButton(direction, label, validate) {
-            var isNext = direction === 'next';
-            var btn = document.createElement('button');
-            btn.type = 'button';
-            // Reuses the site's own button classes (Next/RSVP = priority,
-            // the primary action; Back = normal, secondary) — real deboss
-            // pill buttons, not a bespoke text+arrow control.
-            btn.className = isNext ? 'rsvp-card-nav-next btn-priority' : 'rsvp-card-nav-back btn-normal';
-            if (isNext) {
-                btn.setAttribute('aria-label', label || 'Next');
-                btn.appendChild(el('span', 'rsvp-card-nav-label', label || 'Next'));
-                btn.appendChild(navArrowSvg('next'));
-                btn.addEventListener('click', function () { advanceFrom(validate); });
-            } else {
-                btn.setAttribute('aria-label', 'Back');
-                btn.appendChild(navArrowSvg('back'));
-                btn.appendChild(el('span', 'rsvp-card-nav-label', 'Back'));
-                btn.addEventListener('click', function () { fileBackward(afterMove); });
-            }
-            return btn;
-        }
-
-        // Same two fixed SVG shapes as the mobile #rsvp-arrow/#rsvp-stack-back
-        // icons — no user data ever passed in, so building via innerHTML is
-        // safe and avoids createElementNS boilerplate for two trusted, fixed
-        // markup strings.
-        function navArrowSvg(direction) {
-            var path = direction === 'next'
-                ? 'M1 8 H 31 M 24.5 1.5 L 31 8 L 24.5 14.5'
-                : 'M33 8 H 3 M 9.5 1.5 L 3 8 L 9.5 14.5';
-            var span = document.createElement('span');
-            span.innerHTML = '<svg class="rsvp-card-nav-icon" viewBox="0 0 34 16" width="34" height="16" ' +
-                'aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" ' +
-                'stroke-linecap="round" stroke-linejoin="round"><path d="' + path + '"/></svg>';
-            return span.firstChild;
         }
 
         // ---- email / lookup card ----
@@ -960,7 +963,7 @@
                 }
             });
 
-            lookupWrapper = makeStackCard(card, 'lookup', { back: true, next: null });
+            lookupWrapper = makeStackCard(card, 'lookup');
             stack.push(lookupWrapper);
             return lookupWrapper;
         }
@@ -1135,11 +1138,10 @@
             var invited = EVENT_ORDER.filter(function (key) {
                 return (inv.invitedTo || []).indexOf(key) !== -1;
             });
-            var cards = invited.map(function (key, i) {
-                var nextLabel = (i === invited.length - 1) ? 'Review' : 'Next';
+            var cards = invited.map(function (key) {
                 return key === 'saturday'
-                    ? buildSaturdayPanel(inv, nextLabel, savedData)
-                    : buildEventPanel(inv, key, nextLabel, savedData);
+                    ? buildSaturdayPanel(inv, savedData)
+                    : buildEventPanel(inv, key, savedData);
             });
             cards.push(buildReviewPanel(inv));
             return cards;
@@ -1183,7 +1185,7 @@
         // only carry an accept/decline each, light enough to share a card).
         // Saturday is dense enough (meal + kosher per person) that it gets
         // its own per-person function below instead.
-        function buildEventPanel(inv, eventKey, nextLabel, savedData) {
+        function buildEventPanel(inv, eventKey, savedData) {
             var detail = EVENT_DETAILS[eventKey];
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
@@ -1215,10 +1217,7 @@
             error.setAttribute('role', 'alert');
             card.appendChild(error);
 
-            return makeStackCard(card, eventKey, {
-                back: true,
-                next: { label: nextLabel, validate: function () { return validateEventCard(card, eventKey); } }
-            });
+            return makeStackCard(card, eventKey);
         }
 
         // Saturday: ONE card for the whole day, all invited people on it —
@@ -1227,7 +1226,7 @@
         // working around (see decisions.md). Same event meta as any other
         // event card, then a person block per invited person, then the
         // afterparty section once at the end (see buildAfterpartyInfo).
-        function buildSaturdayPanel(inv, nextLabel, savedData) {
+        function buildSaturdayPanel(inv, savedData) {
             var detail = EVENT_DETAILS.saturday;
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
@@ -1278,10 +1277,7 @@
             error.setAttribute('role', 'alert');
             card.appendChild(error);
 
-            return makeStackCard(card, 'saturday', {
-                back: true,
-                next: { label: nextLabel, validate: function () { return validateSaturdayCard(card, inv); } }
-            });
+            return makeStackCard(card, 'saturday');
         }
 
         // Afterparty as a full event section (Section E) — same visual
@@ -1454,7 +1450,7 @@
             reviewSubmitBtn.addEventListener('click', onSubmit);
             card.appendChild(reviewSubmitBtn);
 
-            return makeStackCard(card, 'review', { back: true, next: null });
+            return makeStackCard(card, 'review');
         }
 
         function mealLabelFor(key) {
@@ -1615,7 +1611,7 @@
             // No Back control (mirrors stackNavInfoFor's schedule branch) —
             // "Edit your RSVP" above is the only way back into the personal
             // stack (Section G3).
-            return makeStackCard(card, 'schedule', { back: false, next: null });
+            return makeStackCard(card, 'schedule');
         }
 
         // Per-person schedule: a declined event stays a plain accept/decline
@@ -1763,12 +1759,6 @@
                 if (!stackNavInfoFor(stack[0]).back) { return; }
                 fileBackward(afterMove);
             });
-            // Desktop's own per-card control on the invitation itself (see
-            // rsvp.html) — not built by makeStackCard since the invitation
-            // isn't a stack-built card. Reuses onForwardClick unchanged; it
-            // already correctly no-ops once the invitation isn't top.
-            var invitationNavNext = document.getElementById('invitation-nav-next');
-            if (invitationNavNext) { invitationNavNext.addEventListener('click', onForwardClick); }
         }
     });
 })();
