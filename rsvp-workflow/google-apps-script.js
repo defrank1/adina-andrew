@@ -32,12 +32,22 @@
 // 5. Deploy, copy the Web App URL, and paste it into APPS_SCRIPT_URL at the
 //    top of js/rsvp-flow.js
 //
+// ACTIONS (GET, ?action=...):
+//   lookup   ?q=<term>      substring match against Guests.Email — see
+//                           handleLookup
+//   response ?email=<email> the caller's LATEST submission (attendance +
+//                           meal, by exact email), for the returning-guest
+//                           fast path — see handleLatestResponse
+//
 // PRIVACY CAVEAT (accepted tradeoff, restated honestly): with access set to
-// "Anyone", the lookup endpoint can technically be queried by anyone who finds
-// the URL — so guest emails/names are only as private as that URL plus the
-// RSVP password gate on the site. The client only queries after the guest has
-// typed past the "@" of their own email, but the server itself does a plain
-// substring match. This is the same tradeoff as the original design.
+// "Anyone", both GET endpoints can technically be queried by anyone who finds
+// the URL — so guest emails/names/attendance/meals are only as private as
+// that URL plus the RSVP password gate on the site. The client only queries
+// lookup after the guest has typed past the "@" of their own email, but the
+// server itself does a plain substring match there; ?action=response does an
+// exact match instead, but is otherwise the same URL/password tradeoff. This
+// is the same tradeoff as the original lookup design, now extended to the
+// second endpoint — accepted by Andrew, July 2026.
 //
 // CORS NOTE: Apps Script web apps don't set CORS headers for JSON posts. The
 // front end therefore sends Content-Type: text/plain with a JSON string body
@@ -53,7 +63,16 @@ var EVENT_NAMES = {
   saturday: 'Ceremony and Reception (Saturday)',
   sunday: 'Farewell Brunch (Sunday)'
 };
+// Full display names (radio-equivalent) and short forms — mirrors
+// MEAL_OPTIONS in js/rsvp-flow.js. Keys are the values actually stored in
+// the Responses sheet (person.meal) and never change; only these display
+// strings do.
 var MEAL_NAMES = {
+  branzino: 'Pan-Seared Herb Branzino',
+  chicken: 'Lemon Thyme-Marinated Chicken',
+  cauliflower: 'Cauliflower Steak'
+};
+var MEAL_SHORT_NAMES = {
   branzino: 'Branzino',
   chicken: 'Chicken',
   cauliflower: 'Cauliflower Steak'
@@ -66,51 +85,117 @@ function jsonResponse(obj) {
 }
 
 // ============================================================================
-// GET  ?action=lookup&q=<term>
-// Case-insensitive substring match against Guests.Email. Returns
-// [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }]
-// (The client already enforces "typed past the @" before querying; the server
-// just matches.)
+// GET  ?action=lookup&q=<term>          -> handleLookup
+// GET  ?action=response&email=<email>   -> handleLatestResponse
+// doGet is just the dispatcher; each action has its own handler below.
 // ============================================================================
 function doGet(e) {
   try {
     var action = e && e.parameter && e.parameter.action;
-    if (action !== 'lookup') {
-      return jsonResponse({ status: 'error', message: 'Unknown action' });
-    }
-
-    var q = ((e.parameter.q || '') + '').trim().toLowerCase();
-    if (!q) { return jsonResponse([]); }
-
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(GUESTS_SHEET);
-    if (!sheet) {
-      return jsonResponse({ status: 'error', message: 'Guests sheet not found' });
-    }
-
-    var rows = sheet.getDataRange().getValues();
-    var results = [];
-
-    // Row 0 is the header (Email | Names | Friday | Saturday | Sunday).
-    for (var i = 1; i < rows.length; i++) {
-      var email = (rows[i][0] + '').trim();
-      if (!email || email.toLowerCase().indexOf(q) === -1) { continue; }
-
-      var people = (rows[i][1] + '').split(';')
-        .map(function (name) { return name.trim(); })
-        .filter(function (name) { return name.length > 0; });
-
-      var invitedTo = [];
-      for (var c = 0; c < EVENT_KEYS.length; c++) {
-        if (isInvited(rows[i][2 + c])) { invitedTo.push(EVENT_KEYS[c]); }
-      }
-
-      results.push({ email: email, invitedTo: invitedTo, people: people });
-    }
-
-    return jsonResponse(results);
+    if (action === 'lookup') { return handleLookup(e); }
+    if (action === 'response') { return handleLatestResponse(e); }
+    return jsonResponse({ status: 'error', message: 'Unknown action' });
   } catch (error) {
     return jsonResponse({ status: 'error', message: error.toString() });
   }
+}
+
+// Case-insensitive substring match against Guests.Email. Returns
+// [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }]
+// (The client already enforces "typed past the @" before querying; the server
+// just matches.)
+function handleLookup(e) {
+  var q = ((e.parameter.q || '') + '').trim().toLowerCase();
+  if (!q) { return jsonResponse([]); }
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(GUESTS_SHEET);
+  if (!sheet) {
+    return jsonResponse({ status: 'error', message: 'Guests sheet not found' });
+  }
+
+  var rows = sheet.getDataRange().getValues();
+  var results = [];
+
+  // Row 0 is the header (Email | Names | Friday | Saturday | Sunday).
+  for (var i = 1; i < rows.length; i++) {
+    var email = (rows[i][0] + '').trim();
+    if (!email || email.toLowerCase().indexOf(q) === -1) { continue; }
+
+    var people = (rows[i][1] + '').split(';')
+      .map(function (name) { return name.trim(); })
+      .filter(function (name) { return name.length > 0; });
+
+    var invitedTo = [];
+    for (var c = 0; c < EVENT_KEYS.length; c++) {
+      if (isInvited(rows[i][2 + c])) { invitedTo.push(EVENT_KEYS[c]); }
+    }
+
+    results.push({ email: email, invitedTo: invitedTo, people: people });
+  }
+
+  return jsonResponse(results);
+}
+
+// Returning-guest fast path (Section G3, July 2026): the guest's LATEST
+// submission for an exact (case-insensitive, NOT substring — unlike lookup)
+// email match against Responses. Groups by the most recent Timestamp for
+// that email (a submission writes one row per person, all sharing one
+// timestamp) and returns { people, message } in submission shape, or
+// { none: true } if the email has never submitted.
+//
+// PRIVACY NOTE: this exposes attendance + meal per email behind the same
+// URL/password tradeoff as ?action=lookup — accepted by Andrew, July 2026.
+// The deployed copy of this file must be redeployed once APPS_SCRIPT_URL
+// goes live to pick this action up (see js/rsvp-flow.js).
+function handleLatestResponse(e) {
+  var email = ((e.parameter.email || '') + '').trim().toLowerCase();
+  if (!email) { return jsonResponse({ none: true }); }
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(RESPONSES_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) { return jsonResponse({ none: true }); }
+
+  var rows = sheet.getDataRange().getValues();
+  var latestMs = null;
+  var latestRows = [];
+
+  // Row 0 is the header (Timestamp | Email | Name | Friday | Saturday |
+  // Sunday | Meal | Kosher | Message).
+  for (var i = 1; i < rows.length; i++) {
+    if ((rows[i][1] + '').trim().toLowerCase() !== email) { continue; }
+    var ts = rows[i][0];
+    var ms = ts instanceof Date ? ts.getTime() : new Date(ts).getTime();
+    if (latestMs === null || ms > latestMs) {
+      latestMs = ms;
+      latestRows = [rows[i]];
+    } else if (ms === latestMs) {
+      latestRows.push(rows[i]);
+    }
+  }
+
+  if (!latestRows.length) { return jsonResponse({ none: true }); }
+
+  var people = latestRows.map(function (row) {
+    return {
+      name: row[2] || '',
+      events: {
+        friday: normalizeEventCell(row[3]),
+        saturday: normalizeEventCell(row[4]),
+        sunday: normalizeEventCell(row[5])
+      },
+      meal: row[6] || '',
+      mealKosher: (row[7] + '').trim().toLowerCase() === 'yes'
+    };
+  });
+
+  return jsonResponse({ people: people, message: latestRows[0][8] || '' });
+}
+
+// Responses stores "not invited" for events outside that invitation — the
+// front end's events map only expects 'yes'/'no'/'' (see EVENT_DETAILS
+// usage in js/rsvp-flow.js), so anything else collapses to ''.
+function normalizeEventCell(value) {
+  var s = (value + '').trim().toLowerCase();
+  return (s === 'yes' || s === 'no') ? s : '';
 }
 
 // TRUE (checkbox), "TRUE", "yes", "x", "1" all count as invited; blank/FALSE don't.
@@ -227,12 +312,16 @@ function sendConfirmationEmail(email, people, message) {
       plainBody += '  ' + EVENT_NAMES[key] + ': ' + (attending ? 'Attending' : 'Not attending') + '\n';
 
       if (key === 'saturday' && attending && person.meal) {
-        // "Kosher " prefix, not "(Kosher)" suffix — matches the front end's
-        // plain-text "Kosher Branzino" style (js/rsvp-flow.js buildSummaryInto,
-        // July 2026). NOT deployed yet (APPS_SCRIPT_URL is empty in
+        // "Kosher " + SHORT name, not the full menu description — matches
+        // the front end's kosher-summary rule (js/rsvp-flow.js,
+        // mealShortLabelFor, Section F, July 2026): "Kosher Branzino," never
+        // "Kosher Pan-Seared Herb Branzino." Non-kosher selections still get
+        // the full name. NOT deployed yet (APPS_SCRIPT_URL is empty in
         // js/rsvp-flow.js) — the live copy must be manually redeployed to
-        // pick this up once it goes live.
-        var mealText = (person.mealKosher ? 'Kosher ' : '') + (MEAL_NAMES[person.meal] || person.meal);
+        // pick this up (and the meal-name change above) once it goes live.
+        var mealText = person.mealKosher
+          ? ('Kosher ' + (MEAL_SHORT_NAMES[person.meal] || person.meal))
+          : (MEAL_NAMES[person.meal] || person.meal);
         htmlBody += '<div class="event-item meal">Dinner: ' + escapeHtml(mealText) + '</div>';
         plainBody += '  Dinner: ' + mealText + '\n';
       }

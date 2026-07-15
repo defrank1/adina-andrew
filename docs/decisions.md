@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: July 14, 2026
+Last updated: July 15, 2026
 
 ---
 
@@ -1091,12 +1091,59 @@ Two bugs in the lookup card's email-suggestions dropdown. **Position:** `.guest-
 
 ---
 
+## RSVP Card Flow — Round 2 Revisions (July 2026)
+
+A second, more detailed pass over the card flow, building directly on the per-card-nav/afterparty-merge decisions above. Delivered as a lettered spec (A–G); one entry per letter below. Several items reverse decisions from the entries above — each says so explicitly.
+
+### Decision A: Variable-height reply cards — reverses "Saturday gets one card per person" (July 2026)
+
+Reply cards (`.paper-card--page` in `#rsvp-stack`) stop being fixed at the invitation's own 5:7 aspect ratio; `aspect-ratio: auto` + a `min-height` (340px desktop, 260px mobile) let content define the card's height, with the card growing downward from its fixed `top` anchor. This is the enabler for reversing the July 11 "Saturday gets one card per person" decision (recorded above, under "Card-flow polish round 2" and the per-person `buildSaturdayPersonPanel`): that split existed only because a shared card's meal/kosher content per person overflowed the OLD fixed box. With height variable, `buildSaturdayPersonPanel` is gone; `buildSaturdayPanel` puts every invited person — and the afterparty section (see Decision E) — on one shared Saturday card again. The invitation card itself is untouched (still fixed 5:7, still the baked ink PNG, registration chain unchanged).
+
+The baked `card-frame-light/dark.png` (1500×2100, stretched via `<img class="paper-card__frame">`) can't track a variable height, so the frame moved to a CSS `border-image` 9-slice on a `::after` pseudo-element instead — same two PNGs, `border: 14px solid transparent; border-image: url(...) 45 stretch;`, dark mode swapping only `border-image-source`. `themedImg()` (the old frame-`<img>` builder) and its one call site in `makeStackCard` are deleted.
+
+Variable height also means a taller buried card could show past a shorter top card at the same rest position — see Decision A's companion, no-peeking, below.
+
+### Decision A (cont'd): No-peeking — only the top card is ever visible (July 2026)
+
+The depth-fan peek (`DEPTH_X`/`DEPTH_Y`/`DEPTH_ROTATE` in `js/rsvp-flow.js`, and the lookup card's pre-flow peeking sliver behind the invitation) is retired. The constants are zeroed, not deleted, so a fan can come back if Andrew ever wants it. A new `rsvp-stack-hidden` class (`visibility: hidden`) hides every non-top card; it's toggled by JS, not a bare `[inert] { visibility: hidden }` CSS rule, specifically timed so a card exiting or rising through the settle leg of a move stays visible for that whole leg — it only flips at the transition's end, never mid-animation. Pre-flow, the lookup card is now built (same timing as before) but stays fully hidden; the invitation's own "RSVP" button is the sole entry affordance, and the lookup-sliver click handler is removed. `.rsvp-peek-visible` (class + timing) is kept — it still gates the RSVP button's own fade-in — with a comment noting it no longer produces a visible peek for the stack card itself.
+
+The desktop scroll-room system (`ensureScrollRoom`, generalized from mobile-only to all viewports back in the July per-card-nav round) needed no further changes — it was already unconditional and already measures true content height, which now matters for every card, not just the schedule one.
+
+### Decision B: Nav-control gap tunable, sizing kept (July 2026)
+
+The per-card Back/Next buttons' side gap became a `--card-nav-gap` (32px) custom property so it's DevTools-tunable; the icon/label gap tightened to 0.6rem and the arrow SVGs got an explicit CSS size (40×18) so they scale independently of their inline `width`/`height` attributes. Button font-size and padding were left at the larger values already set during the earlier casual "make it a lot bigger" pass (1rem / 1rem 2.2rem) rather than the round-2 spec's literal smaller numbers (0.9rem / 0.7rem 1.6rem) — the spec's baseline predated that pass, and the current size already reads as "obvious controls at arm's length." Flagged for Andrew to confirm or dial back.
+
+### Decision C: Lookup card — two-line copy breaks, wider input (July 2026)
+
+The reply line ("The favor of your reply is requested by the first of September.") and the hint line ("Type the email at which you received your invitation.") now render as two explicit lines each (`<br>`, not natural wrap) for visual balance at the card's width. The email input widened 200px→280px with a larger font (0.7rem→0.9rem) to match the card's other Sentient body text; the suggestions dropdown's `max-width` bumped 260px→300px so it isn't narrower than the wider input. The lookup title was already bumped to 4.2rem in the prior casual pass (past this round's 4rem target) — left as-is.
+
+### Decision D: Card titles move to PP Playground; names go bold (July 2026)
+
+Every reply-card title except the lookup card's own "Rsvp" (event names, "Your response," "Thank you") moves off the small PP Watch uppercase label treatment to a new `.rsvp-card-event-title` class — PP Playground, sentence case, ~1.9rem, centered — matching the site's actual title face instead of a structural label. Variable-height cards (Decision A) removed the "must fit on one line" constraint that kept the old titles small; a long title like "Ceremony and Reception" may now wrap to two lines. Person names (`.rsvp-card-person-name`, and `.rsvp-review-person-name` on the review/schedule cards, extended for consistency) go from PP Watch Medium (500) to Bold (700) at 0.85rem, matching the site's other bold PP Watch labels. Dress tags' explicit green color (`var(--color-dark-green)` light / `var(--color-soft-white)` dark, replacing an old opacity-based dim) had already landed in the prior casual pass — confirmed still correct here, including on `rsvp-internal.html`, which shares the base rule.
+
+### Decision E: Afterparty becomes a full event section (July 2026)
+
+The condensed 5-line afterparty FYI (added to every Saturday PERSON card in the July per-card-nav round) is rebuilt as a full, centered event section — title (same `.rsvp-card-event-title` treatment as a real event), time, venue + address map link, and the "All guests welcome" note on `.schedule-event-description` (Sentient body) instead of the old faded small-note treatment. It's appended once, after every person, on the single shared Saturday card (Decision A) — still purely informational, never tied to anyone's accept/decline.
+
+### Decision F: Meal names — full descriptive names on the radios, short forms in summaries (July 2026)
+
+`MEAL_OPTIONS` (`js/rsvp-flow.js`) and `MEAL_NAMES` (`rsvp-workflow/google-apps-script.js`) gained full descriptive names — Branzino → "Pan-Seared Herb Branzino," Chicken → "Lemon Thyme-Marinated Chicken," Cauliflower Steak unchanged — used on the meal radios themselves. Keys are unchanged (the Responses sheet still stores `branzino`/`chicken`/`cauliflower`). Wherever a kosher selection is summarized instead (review card, schedule card, confirmation email), a new `shortLabel`/`MEAL_SHORT_NAMES` pair keeps it to "Kosher Branzino," not "Kosher Pan-Seared Herb Branzino" — a non-kosher selection still summarizes with the full name. The meal radio row gained `flex`/`min-width` on its label so the longer names wrap instead of squeezing the "Kosher?" checkbox.
+
+### Decision G: Schedule/thank-you card — real returning-guest backend, replacing localStorage (July 2026)
+
+**Reverses** the localStorage-based returning-guest mechanism from the prior casual pass (`saveSubmission`/`loadSavedSubmission`/`submissionMatchesInvitation`, and a `location.reload()`-based "Start Over"). That mechanism only recognized a returning guest on the SAME browser; it's replaced with a real (if still staging-mocked) backend seam: `fetchLatestResponse(email)`, the third and final network function, resolving to the guest's latest submission or `null` — staging (`APPS_SCRIPT_URL` empty) serves it from a new `PLACEHOLDER_RESPONSES` map (`laura.nelson@example.com` has a canned response; everyone else, including `john.smith@example.com`, gets none, exercising the ordinary first-time path). The live path hits a new `?action=response&email=` on the Apps Script (`doGet` is now a small dispatcher over `handleLookup`/`handleLatestResponse`), which does an exact case-insensitive email match against Responses, groups by latest Timestamp, and returns `{ people, message }` or `{ none: true }` — same privacy tradeoff as `?action=lookup` (accepted). A failed or hung fetch (6s timeout) silently falls back to the normal first-time flow — this feature never blocks an RSVP.
+
+`selectInvitation` is now async around this fetch, guarded against a fast second selection racing it. `buildScheduleCard`'s title is always "Thank you"; the subtitle stays state-appropriate ("Your RSVP has been received..." right after a fresh submit, "Here's your RSVP — we can't wait to celebrate with you!" on the returning-guest path). Its schedule summary gained a per-accepted-Saturday afterparty entry (mirroring Decision E) and picked up Decision F's short-label fix. "Edit your RSVP" is no longer a page reload (a reload would loop straight back onto the fetched response) — it tears down and rebuilds the personal stack pre-filled from a `latestResponse` module variable (either a just-submitted response or a fetched one), the same pre-fill mechanism `buildEventPanel`/`buildSaturdayPanel`/`buildMealSection` already had. The schedule card's own Back control (both the desktop per-card button and the mobile persistent arrow's `stackNavInfoFor` branch) is disabled again — "Edit your RSVP" is the only way back into the personal stack, which was also a straight revert of an unintentional Phase-2 change that had made it reversible.
+
+This implements the "view your submitted schedule" launch-checklist item below — removed from the pending list.
+
+---
+
 ## Pending Launch Tasks
 
 Recorded, not yet acted on:
 
 1. **`rsvp.html` password** is currently `beautifulsuperstar`/`rsvpUnlocked` (a dev gate) while every other page uses `october17`/`siteUnlocked`. Guests clicking RSVP from the nav hit a dead-end second password wall — must switch to the guest password at launch.
-2. **`APPS_SCRIPT_URL`** in `js/rsvp-flow.js` is empty (staging mode, placeholder invitations + no-op submit). Deploy the Apps Script web app and paste the URL at launch.
+2. **`APPS_SCRIPT_URL`** in `js/rsvp-flow.js` is empty (staging mode, placeholder invitations/responses + no-op submit). Deploy the Apps Script web app and paste the URL at launch — this also picks up the `?action=response` endpoint (Decision G above) and the meal-name/kosher-summary changes (Decision F) in the confirmation email, none of which are live yet.
 3. **Delete `rsvp-internal.html` and `js/rsvp-form.js`** from main at launch — GitHub Pages has no server-side auth, so deletion from the deployed branch is the only way to make the internal staging form non-public. Recoverable from git history.
 4. **Mobile RSVP flow nav pass** — unify the transitional two-system nav from the "Per-card Back/Next controls" decision above (per-card on desktop, persistent `#rsvp-arrow`/`#rsvp-stack-back` on mobile), and revisit mobile card positioning/scroll more broadly.
-5. **"View your submitted schedule" feature** — returning guests see their latest response via the RSVP area (needs a new backend lookup action + front-end state). Replaces the retired schedule page.

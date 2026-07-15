@@ -1172,7 +1172,13 @@ body.page-rsvp .rsvp-stack .paper-card--page {
     width: 32.292%;
     top: 13.426%;
     height: auto;
-    /* aspect-ratio: 1500/2100 already set by the base .paper-card rule */
+    /* Reply cards are variable-height (content defines it) — this overrides
+       the base .paper-card rule's fixed aspect-ratio, which stays untouched
+       for .invitation-card (5:7, registration-critical, unaffected since
+       this selector only ever matches .rsvp-stack children). min-height
+       keeps short cards (lookup) from reading as a slip of paper. */
+    aspect-ratio: auto;
+    min-height: 340px;
     display: block;
     pointer-events: auto;
 }
