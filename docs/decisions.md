@@ -1139,6 +1139,20 @@ This implements the "view your submitted schedule" launch-checklist item below �
 
 ---
 
+## RSVP Card Flow — Motion Rework (July 2026)
+
+### Decision: Set-aside choreography replaces file-to-back — the fan restoration was evaluated and rejected (July 2026)
+
+Decision A (cont'd)'s no-peek stack fixed variable-height overlap but broke the motion story: cards "filed behind" an invisible depth stack, and the next card simply appeared with no sense of where it came from. A restoration of the depth-fan peek (`DEPTH_X=7, DEPTH_Y=8`) was built and evaluated locally — screenshots of the deepest scale-test party (`garcia.family@example.com`, 4-person/3-event) and the shallowest (`dpatel@example.com`, 1-person/2-event) at two `DEPTH_ROTATE` values — and rejected: a taller buried card peeking out past a shorter top card read as clutter, not a stationery suite, confirming Decision A's original reasoning rather than overturning it.
+
+Replacement: a linear set-aside metaphor. Cards you haven't answered wait off-screen right; cards you've finished are set aside off-screen left. Forward = exit left / enter right; Back = the exact mirror (exit right / enter left) — this is now a spatial invariant, not per-card logic. `replacePersonalCards` (submit-success, Edit re-deal) reorders like `fileForward` and always enters from the right, even when re-entering already-answered cards, because direction follows navigation semantics (Next vs. Back), never "seen it before" state.
+
+`DEPTH_X`/`DEPTH_Y`/`DEPTH_ROTATE`, `restingTransform`, and `depthZ` (`js/rsvp-flow.js`) are deleted, not zeroed — no per-depth position is needed anymore, since every non-top card is `.rsvp-stack-hidden` at rest regardless of which side it conceptually belongs to; only the two actively-transitioning cards ever have a meaningful transform. `LEG_EXIT_MS`/`LEG_SETTLE_MS` become `EXIT_MS` (420ms, ease-in) / `ENTER_MS` (480ms, ease-out), and the two legs now overlap (`ENTER_OVERLAP`, 60% of the exit leg) instead of running sequentially, so the screen is never fully empty between cards. `garcia.family@example.com` and `dpatel@example.com`, added as local fan-evaluation fixtures, are kept permanently in `PLACEHOLDER_INVITATIONS` as the deep/shallow scale-test parties.
+
+A new opening beat (`SUITE_DEAL_ENABLED`, default on) deals four decorative, uniform proxy cards off-screen right from behind the invitation the first time "RSVP" is clicked, establishing where the reply-card suite "lives" before the lookup card arrives — pure theater (the real card count isn't known until after email lookup), one-time only (a `suiteDealPlayed` flag, not "is the invitation currently on top," so a later Back-then-forward doesn't replay it), and fully inert when `SUITE_DEAL_ENABLED` is false or motion is reduced.
+
+---
+
 ## Pending Launch Tasks
 
 Recorded, not yet acted on:

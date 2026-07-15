@@ -1765,3 +1765,31 @@ body.dark-mode .rsvp-review-person {
         transform: translateY(0.5px);
     }
 }
+
+/* Suite-deal opening beat (Motion Rework, July 2026, flair) — decorative,
+   uniform 5:7 proxy cards dealt off-screen behind the invitation on the
+   first RSVP click only. Positioned exactly like .invitation-card (same
+   placement percentages) but fixed-ratio, never part of the settled
+   invitation composition — built and destroyed entirely by playSuiteDeal()
+   in js/rsvp-flow.js. */
+body.page-rsvp .rsvp-suite-proxy {
+    position: absolute;
+    left: 33.854%;
+    width: 32.292%;
+    top: 13.426%;
+    aspect-ratio: 1500 / 2100;
+    pointer-events: none;
+}
+
+body.page-rsvp .rsvp-suite-proxy::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border: 14px solid transparent;
+    border-image: url('../assets/invitation/card-frame-light.png') 45 stretch;
+}
+
+body.dark-mode.page-rsvp .rsvp-suite-proxy::after {
+    border-image-source: url('../assets/invitation/card-frame-dark.png');
+}

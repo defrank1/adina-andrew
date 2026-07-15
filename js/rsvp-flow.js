@@ -5,8 +5,9 @@
    the Metro intro settles, ~PEEK_DELAY_MS later the invitation's own "RSVP"
    button fades in — its sole entry affordance (no peek; only the current top
    card is ever visible, see .rsvp-stack-hidden / Section A4). Clicking it
-   plays a file-to-back move: the invitation slides out and files behind the
-   (until-now hidden) lookup card, which becomes the new top.
+   plays a set-aside move (Motion Rework, July 2026): the invitation exits
+   left (the first "finished" card) while the lookup card enters from the
+   right and becomes the new top — see the "stack engine" section below.
 
    Every card in the flow — invitation, lookup, one per INVITED event
    (Saturday is a single card covering every invited person, ending with the
@@ -70,19 +71,39 @@
     var REPLY_BY = 'the first of September'; // September 1, 2026 (confirmed)
 
     // ---- stack choreography timing -----------------------------------------
-    // Two-leg file-to-back move, transform-only. Andrew may retune these —
-    // keep them as the single source of truth (nothing else hardcodes them).
+    // Set-aside metaphor (Motion Rework, July 2026 — supersedes file-to-back):
+    // unanswered cards wait off-screen RIGHT, finished cards are set aside
+    // off-screen LEFT. Two OVERLAPPING legs, transform-only — the enter leg
+    // starts ENTER_OVERLAP of the way into the exit leg, so the screen is
+    // never fully empty between cards. Andrew may retune any of these — kept
+    // as the single source of truth (nothing else hardcodes them).
     var PEEK_DELAY_MS = 800;    // after the settle completes, before the peek + arrow appear
-    var LEG_EXIT_MS = 420;
-    var LEG_EXIT_CURVE = 'cubic-bezier(.45,.05,.3,1)';
-    var LEG_SETTLE_MS = 400;
-    var LEG_SETTLE_CURVE = 'cubic-bezier(.4,0,.2,1)';
-    var STACK_MOVE_MS = LEG_EXIT_MS + LEG_SETTLE_MS; // total move time, for focus delays
-    // Zeroed (Section A4, July 2026) — only the top card is ever visible now
-    // (see .rsvp-stack-hidden), so the fanned peek these produced is gone.
-    // Kept, not deleted: restingTransform/depthZ still read them, and
-    // they're the single source of truth if the fan ever comes back.
-    var DEPTH_X = 0, DEPTH_Y = 0, DEPTH_ROTATE = 0; // px/px/deg per depth level
+    var EXIT_MS = 420;
+    var EXIT_CURVE = 'cubic-bezier(.4, 0, 1, 1)';   // ease-in — accelerate off-screen
+    var ENTER_MS = 480;
+    var ENTER_CURVE = 'cubic-bezier(0, 0, .2, 1)';  // ease-out — decelerate to rest
+    var ENTER_OVERLAP = 0.6;    // enter leg starts this fraction into the exit leg
+    var EXIT_ROTATE = 3;        // deg magnitude; forward exits -3deg, backward exits +3deg
+    var ENTER_ROTATE = 3;       // deg magnitude; mirrors EXIT_ROTATE at the entering edge
+    var STACK_MOVE_MS = Math.round(EXIT_MS * ENTER_OVERLAP) + ENTER_MS; // total move time, for focus delays
+
+    var Z_HIDDEN = 490;  // resting, non-top cards (invisible via .rsvp-stack-hidden regardless)
+    var Z_TOP = 500;     // resting top card — matches .invitation-card.rsvp-stack-member's existing 500
+    var Z_EXIT = 1000;   // card actively exiting
+    var Z_ENTER = 1001;  // card actively entering — always above Z_EXIT, so it wins if they visibly overlap
+
+    // ---- suite-deal opening beat (flair, togglable) --------------------------
+    // Decorative theater only, layered in front of the real move — see
+    // playSuiteDeal. Set SUITE_DEAL_ENABLED = false to cleanly disable the
+    // whole beat (no proxies built, zero timing impact on the engine above).
+    var SUITE_DEAL_ENABLED = true;
+    var SUITE_DEAL_COUNT = 4;          // proxy cards — pure theater, not the real card count
+    var SUITE_DEAL_STAGGER_MS = 90;    // per-card launch offset
+    var SUITE_DEAL_FLIGHT_MS = 380;    // per-proxy flight duration off-screen
+    var SUITE_DEAL_ADVANCE_DELAY_MS = 0; // delay after the LAST proxy launches before the real advanceFrom fires
+    var SUITE_DEAL_OFFSET_PX = 2;      // per-level built-in stack offset (down-right)
+    var SUITE_DEAL_JITTER_DEG = 1.5;   // per-level resting rotation jitter
+    var Z_SUITE_DEAL_BASE = 100;       // proxies sit here downward — behind the invitation (500), clear of the backdrop (0)
 
     var EVENT_DETAILS = {
         friday: {
@@ -145,7 +166,13 @@
         { email: 'mchen@example.com', invitedTo: ['saturday'], people: ['Michael Chen'] },
         { email: 'the.johnsons@example.com', invitedTo: ['friday', 'saturday', 'sunday'], people: ['Robert Johnson', 'Patricia Johnson'] },
         { email: 'laura.nelson@example.com', invitedTo: ['friday', 'saturday', 'sunday'], people: ['Laura Nelson'] },
-        { email: 'williams.party@example.com', invitedTo: ['saturday', 'sunday'], people: ['Sarah Williams', 'Tom Williams'] }
+        { email: 'williams.party@example.com', invitedTo: ['saturday', 'sunday'], people: ['Sarah Williams', 'Tom Williams'] },
+        // Scale-test fixtures: deepest (4-person/3-event) and shallowest
+        // (1-person/2-event) realistic parties.
+        { email: 'garcia.family@example.com', invitedTo: ['friday', 'saturday', 'sunday'],
+          people: ['Elena Garcia', 'Marco Garcia', 'Sofia Garcia', 'Luis Garcia'] },
+        { email: 'dpatel@example.com', invitedTo: ['friday', 'saturday'],
+          people: ['Dev Patel'] }
     ];
 
     // Canned prior responses for the returning-guest fast path (Section G3,
@@ -378,21 +405,23 @@
         var animLock = false;         // true while ANY stack move is in flight
 
         // ---- stack engine ----------------------------------------------------
-        // Generic file-to-back choreography for the one continuous `stack`
-        // array spanning the whole flow. Each element is a card already
-        // .paper-card sized/positioned to the invitation's own rect (see
-        // .rsvp-stack in styles.css); index 0 is always the current top,
-        // increasing index = deeper/further in the future, with filed (past)
-        // cards rotated to the END of the array — most recently filed
-        // deepest, exactly as the spec describes.
+        // Set-aside choreography (Motion Rework, July 2026) for the one
+        // continuous `stack` array spanning the whole flow. Each element is a
+        // card already .paper-card sized/positioned to the invitation's own
+        // rect (see .rsvp-stack in styles.css); index 0 is always the current
+        // top. Direction is a spatial invariant with no exceptions: forward
+        // = current card exits off-screen LEFT (set aside, finished) / next
+        // card enters from off-screen RIGHT (still waiting); backward is the
+        // exact mirror. This follows navigation semantics (Next vs. Back),
+        // never "have I answered this card before" — replacePersonalCards
+        // (submit-success, Edit re-deal) always reorders like fileForward and
+        // always passes 'forward', even when re-entering already-answered
+        // cards. Every non-top card is simply .rsvp-stack-hidden at rest —
+        // there's no meaningful resting position for a card nobody can see,
+        // only the two actively-transitioning cards ever have a real
+        // transform (see fileTransition).
 
-        function restingTransform(depth) {
-            return 'translate(' + (depth * DEPTH_X) + 'px, ' + (depth * DEPTH_Y) + 'px) rotate(' + (depth * DEPTH_ROTATE) + 'deg)';
-        }
-
-        function depthZ(depth) { return 500 - depth; }
-
-        // Only the top card (depth 0) of any stack is interactive/readable —
+        // Only the top card of any stack is interactive/readable —
         // everything filed behind it is visual-only. Mirrors the old track's
         // inert+aria-hidden pairing on inactive panels, so a buried card's
         // inputs (e.g. the lookup card's email field once it's filed away)
@@ -419,21 +448,22 @@
             el.classList.toggle('rsvp-stack-top', isTop);
         }
 
-        // Places an element at its resting depth with no transition — used for
-        // initial placement, reduced-motion moves, and pre-positioning a card
-        // the instant it's added to a stack (so it's never visible mid-transit
-        // or at an unset position before an animated move picks it up). Also
-        // the reduced-motion path's ONLY visibility toggle (fileTransition's
-        // animated path handles it separately, timed to the settle leg — see
+        // Places an element at rest with no transition — used for initial
+        // placement, reduced-motion moves, and pre-positioning a card the
+        // instant it's added to a stack (so it's never visible mid-transit or
+        // at an unset position before an animated move picks it up). Also the
+        // reduced-motion path's ONLY visibility toggle (fileTransition's
+        // animated path handles it separately, timed to each leg — see
         // there) — instant, since there's no animation for it to pop mid-way
-        // through.
-        function applyRestingInstant(el, depth) {
+        // through. Every card at rest sits at the identity transform; only
+        // the top card is ever actually visible (see .rsvp-stack-hidden).
+        function applyRestingInstant(el, isTop) {
             el.style.transition = 'none';
-            el.style.zIndex = String(depthZ(depth));
-            el.style.transform = restingTransform(depth);
-            setInert(el, depth !== 0);
-            setStackTop(el, depth === 0);
-            el.classList.toggle('rsvp-stack-hidden', depth !== 0);
+            el.style.zIndex = String(isTop ? Z_TOP : Z_HIDDEN);
+            el.style.transform = 'none';
+            setInert(el, !isTop);
+            setStackTop(el, isTop);
+            el.classList.toggle('rsvp-stack-hidden', !isTop);
         }
 
         // Runs `fn` once, either on the next 'transitionend' matching
@@ -456,68 +486,97 @@
             setTimeout(finish, ms + 60);
         }
 
-        // Shared exit+settle choreography for every stack transition: the
-        // CURRENT top card exits left (elevated z-index), `reorder()` then
-        // mutates the `stack` array into its new order (same elements,
-        // rearranged — rotate-by-one for fileForward/fileBackward, or a full
-        // front-load for replacePersonalCards below), and every card settles
-        // to its new resting depth together. Reduced motion skips straight
-        // to the reordered resting state, no transition.
-        function fileTransition(reorder, onSettled) {
+        // Shared choreography for every stack transition: `reorder()` (a pure
+        // array mutation — safe to run immediately, before any animation)
+        // tells us who's exiting and who's arriving, then two OVERLAPPING
+        // legs run — the outgoing card exits toward its off-screen side while
+        // the incoming card, starting from its own off-screen side, enters
+        // ENTER_OVERLAP of the way into the exit leg — so the screen is never
+        // fully empty between cards. `direction` ('forward' or 'back') picks
+        // which side is which (see the stack-engine comment above). `cleanup`
+        // (only used by replacePersonalCards) removes now-superseded DOM
+        // nodes, but only once the outgoing card's exit leg has actually
+        // finished — removing it any earlier would cut its exit animation
+        // short. `legsRemaining` (not "whichever leg finishes last") clears
+        // animLock/fires onSettled once BOTH legs report done, so retuning
+        // EXIT_MS/ENTER_MS/ENTER_OVERLAP later can never leave animLock stuck
+        // or clear it early. Reduced motion skips straight to the reordered
+        // resting state, no transition.
+        function fileTransition(reorder, direction, onSettled, cleanup) {
             if (animLock || submitted || stack.length < 2) { return; }
             animLock = true;
-            var top = stack[0];
+            var outgoing = stack[0];
+            reorder();
+            var incoming = stack[0];
 
             if (prefersReduced) {
-                reorder();
-                stack.forEach(function (el, i) { applyRestingInstant(el, i); });
+                if (cleanup) { cleanup(); }
+                stack.forEach(function (el) { applyRestingInstant(el, el === incoming); });
                 animLock = false;
                 if (onSettled) { onSettled(); }
                 return;
             }
 
-            top.style.transition = 'transform ' + LEG_EXIT_MS + 'ms ' + LEG_EXIT_CURVE;
-            top.style.zIndex = '1000';
-            void top.offsetWidth; // force reflow so the transition runs from the current position
-            top.style.transform = 'translateX(-115%) rotate(-3deg)';
+            var forward = direction !== 'back';
+            var exitX = forward ? '-115%' : '115%';
+            var enterFromX = forward ? '115%' : '-115%';
+            var exitRotate = forward ? -EXIT_ROTATE : EXIT_ROTATE;
+            var enterRotate = forward ? ENTER_ROTATE : -ENTER_ROTATE;
+            var legsRemaining = 2;
 
-            onceTransition(top, 'transform', LEG_EXIT_MS, function () {
-                reorder();
-                stack.forEach(function (el, i) {
-                    el.style.transition = 'transform ' + LEG_SETTLE_MS + 'ms ' + LEG_SETTLE_CURVE;
-                    el.style.zIndex = String(depthZ(i));
-                    el.style.transform = restingTransform(i);
-                    setInert(el, i !== 0);
-                    setStackTop(el, i === 0);
-                    // The new top reveals immediately, so it's visible for
-                    // its own settle leg. Everyone else stays visible through
-                    // THEIR settle leg too (an exiting/rising card must not
-                    // pop invisible mid-animation) — hidden only below, once
-                    // that leg's transition actually ends.
-                    if (i === 0) { el.classList.remove('rsvp-stack-hidden'); }
-                });
-                onceTransition(top, 'transform', LEG_SETTLE_MS, function () {
-                    stack.forEach(function (el, i) {
-                        if (i !== 0) { el.classList.add('rsvp-stack-hidden'); }
-                    });
-                    animLock = false;
-                    if (onSettled) { onSettled(); }
-                });
+            function legDone() {
+                legsRemaining -= 1;
+                if (legsRemaining > 0) { return; }
+                animLock = false;
+                if (onSettled) { onSettled(); }
+            }
+
+            outgoing.style.transition = 'transform ' + EXIT_MS + 'ms ' + EXIT_CURVE;
+            outgoing.style.zIndex = String(Z_EXIT);
+            void outgoing.offsetWidth; // force reflow so the transition runs from the current position
+            outgoing.style.transform = 'translateX(' + exitX + ') rotate(' + exitRotate + 'deg)';
+
+            onceTransition(outgoing, 'transform', EXIT_MS, function () {
+                outgoing.style.transition = 'none';
+                outgoing.style.transform = 'none';
+                outgoing.style.zIndex = String(Z_HIDDEN);
+                setInert(outgoing, true);
+                setStackTop(outgoing, false);
+                outgoing.classList.add('rsvp-stack-hidden');
+                if (cleanup) { cleanup(); }
+                legDone();
             });
+
+            setTimeout(function () {
+                incoming.style.transition = 'none';
+                incoming.style.zIndex = String(Z_ENTER);
+                incoming.style.transform = 'translateX(' + enterFromX + ') rotate(' + enterRotate + 'deg)';
+                incoming.classList.remove('rsvp-stack-hidden');
+                setInert(incoming, false);
+                setStackTop(incoming, true);
+                void incoming.offsetWidth;
+                incoming.style.transition = 'transform ' + ENTER_MS + 'ms ' + ENTER_CURVE;
+                incoming.style.transform = 'none';
+
+                onceTransition(incoming, 'transform', ENTER_MS, function () {
+                    incoming.style.zIndex = String(Z_TOP);
+                    legDone();
+                });
+            }, Math.round(EXIT_MS * ENTER_OVERLAP));
         }
 
-        // fileForward — "Next": the top card exits left, then files into the
-        // deepest slot while the rest of the stack shifts up one depth. Also
-        // used for the initial invitation -> lookup swap.
+        // fileForward — "Next": the top card exits left (set aside, finished)
+        // while the next card enters from the right. Also used for the
+        // initial invitation -> lookup swap.
         function fileForward(onSettled) {
-            fileTransition(function () { stack.push(stack.shift()); }, onSettled);
+            fileTransition(function () { stack.push(stack.shift()); }, 'forward', onSettled);
         }
 
-        // fileBackward — "Back": the exact reverse. The deepest (most
-        // recently filed) card exits left from beneath, then rises onto the
-        // top while the rest of the stack shifts down one depth.
+        // fileBackward — "Back": the exact mirror. The most recently set-
+        // aside card exits right (back to the waiting pile) while the
+        // previous card enters from the left.
         function fileBackward(onSettled) {
-            fileTransition(function () { stack.unshift(stack.pop()); }, onSettled);
+            fileTransition(function () { stack.unshift(stack.pop()); }, 'back', onSettled);
         }
 
         // Swaps out the ENTIRE current personalCards sequence for `newCards`
@@ -526,22 +585,73 @@
         // fresh submit; or the schedule card, when editing), every other
         // surviving member of the old personalCards is pulled from wherever
         // it sits in `stack`, and `newCards` is unshifted to the front so
-        // newCards[0] becomes the new top. Used by onSubmit's success
-        // handler (blank flow -> schedule card) and enterEditFlow (schedule
-        // card -> pre-filled blank flow).
+        // newCards[0] becomes the new top. Always a FORWARD move — Edit and
+        // submit-success follow navigation semantics, not "seen this card
+        // before," so both enter from the right like any other Next. DOM
+        // removal of the superseded cards is deferred to fileTransition's
+        // cleanup hook (see there) so the exiting card's animation isn't cut
+        // short. Used by onSubmit's success handler (blank flow -> schedule
+        // card) and enterEditFlow (schedule card -> pre-filled blank flow).
         function replacePersonalCards(newCards, onSettled) {
+            var removed = [];
             fileTransition(function () {
-                var exiting = stack.shift();
-                if (exiting && exiting.parentNode) { exiting.parentNode.removeChild(exiting); }
+                removed.push(stack.shift());
                 personalCards.forEach(function (card) {
-                    if (card === exiting) { return; }
+                    if (removed.indexOf(card) !== -1) { return; }
                     var idx = stack.indexOf(card);
                     if (idx !== -1) { stack.splice(idx, 1); }
-                    if (card.parentNode) { card.parentNode.removeChild(card); }
+                    removed.push(card);
                 });
                 personalCards = newCards;
                 Array.prototype.unshift.apply(stack, newCards);
-            }, onSettled);
+            }, 'forward', onSettled, function () {
+                removed.forEach(function (card) {
+                    if (card && card.parentNode) { card.parentNode.removeChild(card); }
+                });
+            });
+        }
+
+        // ---- suite-deal opening beat (flair, togglable) -----------------------
+        // Decorative theater layered IN FRONT of the real move — the real
+        // advanceFrom/fileForward call fires unmodified once the beat
+        // finishes (see onForwardClick). SUITE_DEAL_COUNT is arbitrary and
+        // decorative — the real reply-card count isn't knowable until after
+        // email lookup/selection; four uniform cards dealing off a deck
+        // reads as "the rest of the suite" regardless of the guest's actual
+        // flow length. One-time only: gated by suiteDealPlayed (NOT "is the
+        // invitation currently top"), so a later Back-to-invitation-then-
+        // forward-again never replays it.
+        var suiteDealPlayed = false;
+
+        function playSuiteDeal(onDone) {
+            var proxies = [];
+            for (var i = 0; i < SUITE_DEAL_COUNT; i++) {
+                var proxy = document.createElement('div');
+                proxy.className = 'paper-card rsvp-suite-proxy';
+                proxy.setAttribute('aria-hidden', 'true');
+                var level = i + 1;
+                var jitter = (i % 2 === 0 ? 1 : -1) * SUITE_DEAL_JITTER_DEG;
+                proxy.style.willChange = 'transform';
+                proxy.style.zIndex = String(Z_SUITE_DEAL_BASE - i); // i=0 = top of the deck, frontmost
+                proxy.style.transform = 'translate(' + (level * SUITE_DEAL_OFFSET_PX) + 'px, ' +
+                    (level * SUITE_DEAL_OFFSET_PX) + 'px) rotate(' + jitter + 'deg)';
+                invitationCardEl.parentNode.insertBefore(proxy, invitationCardEl);
+                proxies.push(proxy);
+            }
+
+            proxies.forEach(function (proxy, i) {
+                setTimeout(function () {
+                    var extraRotate = 6 + Math.random() * 4; // +6..10deg, jittered
+                    proxy.style.transition = 'transform ' + SUITE_DEAL_FLIGHT_MS + 'ms ' + EXIT_CURVE;
+                    proxy.style.transform = 'translateX(120%) rotate(' + extraRotate + 'deg)';
+                    onceTransition(proxy, 'transform', SUITE_DEAL_FLIGHT_MS, function () {
+                        proxy.style.willChange = '';
+                        if (proxy.parentNode) { proxy.parentNode.removeChild(proxy); }
+                    });
+                }, i * SUITE_DEAL_STAGGER_MS);
+            });
+
+            setTimeout(onDone, (SUITE_DEAL_COUNT - 1) * SUITE_DEAL_STAGGER_MS + SUITE_DEAL_ADVANCE_DELAY_MS);
         }
 
         // The invitation's field/card sizing is built for a 16:9 registration
@@ -705,6 +815,13 @@
         function onForwardClick() {
             var info = stackNavInfoFor(stack[0]);
             if (!info.forward) { return; }
+            var isFirstRsvpClick = stack[0] === invitationCardEl && SUITE_DEAL_ENABLED &&
+                !suiteDealPlayed && !prefersReduced;
+            if (isFirstRsvpClick) {
+                suiteDealPlayed = true;
+                playSuiteDeal(function () { advanceFrom(info.validate); });
+                return;
+            }
             advanceFrom(info.validate);
         }
 
@@ -1041,11 +1158,11 @@
             var spliceArgs = [lookupIdx + 1, 0].concat(personalCards);
             Array.prototype.splice.apply(stack, spliceArgs);
             // Snap every card (existing ones — a harmless no-op re-apply —
-            // and the newly-spliced ones) to its CURRENT pre-move depth
-            // instantly, so the new cards have a defined starting
-            // position/z-index before the animated fileForward move
-            // (selectInvitation) picks them up.
-            stack.forEach(function (elCard, i) { applyRestingInstant(elCard, i); });
+            // and the newly-spliced ones) to a defined resting state
+            // instantly, so the new cards have a starting position/z-index
+            // before the animated fileForward move (selectInvitation) picks
+            // them up.
+            stack.forEach(function (elCard, i) { applyRestingInstant(elCard, i === 0); });
         }
 
         // Returning-guest counterpart to dealPersonalStack: instead of the
@@ -1057,7 +1174,7 @@
             var lookupIdx = stack.indexOf(lookupWrapper);
             var spliceArgs = [lookupIdx + 1, 0].concat(personalCards);
             Array.prototype.splice.apply(stack, spliceArgs);
-            stack.forEach(function (elCard, i) { applyRestingInstant(elCard, i); });
+            stack.forEach(function (elCard, i) { applyRestingInstant(elCard, i === 0); });
         }
 
         // ---- event cards ----
@@ -1625,8 +1742,8 @@
         function revealPeek() {
             buildEmailPanel();
             invitationCardEl.classList.add('rsvp-stack-member');
-            applyRestingInstant(invitationCardEl, 0);
-            applyRestingInstant(lookupWrapper, 1);
+            applyRestingInstant(invitationCardEl, true);
+            applyRestingInstant(lookupWrapper, false);
             // applyRestingInstant sets an inline transition:none (so the
             // transform lands instantly) — clear it so the CSS opacity
             // transition below (the RSVP button's fade-in) isn't blocked by
