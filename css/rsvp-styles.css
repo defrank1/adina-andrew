@@ -66,7 +66,17 @@
     display: none;
 }
 
+/* Real <button>s now (keyboard access, item 8, July 2026) — this reset is a
+   harmless no-op on rsvp-internal.html's own plain-div version (js/rsvp-form.js
+   builds it as a div; border:none/background:none/display:block are no-ops
+   there). border:none first so border-bottom below still wins. */
 .guest-suggestion-item {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    margin: 0;
+    text-align: left;
     padding: 1rem;
     cursor: pointer;
     font-family: var(--font-body);
@@ -87,6 +97,17 @@
 
 .guest-suggestion-item.selected {
     background-color: rgba(26, 58, 46, 0.1);
+}
+
+.guest-suggestion-item:focus-visible {
+    outline: 2px solid var(--color-dark-green);
+    outline-offset: -2px;
+    background-color: rgba(26, 58, 46, 0.08);
+}
+
+body.dark-mode .guest-suggestion-item:focus-visible {
+    outline-color: var(--color-soft-white);
+    background-color: rgba(241, 237, 234, 0.1);
 }
 
 .guest-suggestion-empty {
@@ -740,11 +761,12 @@ body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
     padding: 8% 10%;
     color: inherit;
     outline: none;
-    /* No overflow:hidden — Back/Next sit outside this box (calc(100% + 26px))
-       on desktop and would get clipped; on mobile, leaving overflow visible
-       means any content that doesn't fit the fixed 5:7 box is an obvious,
-       catchable problem during the content-budget audit rather than a
-       silently-clipped one. */
+    /* No overflow:hidden — on mobile, leaving overflow visible means any
+       content that doesn't fit the fixed 5:7 box is an obvious, catchable
+       problem during the content-budget audit rather than a silently-
+       clipped one. (Desktop's Back/Next controls, .rsvp-card-nav-back/-next,
+       are wrapper children positioned above the card's top edge — this
+       element's own overflow doesn't affect them either way.) */
 }
 
 /* Small-caps label title (was a PP Playground script headline) — "card
@@ -794,6 +816,15 @@ body.page-rsvp.rsvp-flow-active .invitation-scroll-spacer {
    centered block, matching the invitation card's own centered layout. */
 .paper-card--page[data-step="lookup"] .form-group {
     text-align: center;
+}
+
+/* Positioning anchor for the email input + its suggestions dropdown only
+   (label and hint stay direct .form-group children, outside this wrapper —
+   see js/rsvp-flow.js buildEmailPanel). inline-block so it hugs the input's
+   own width within the group's centered text-align. */
+.paper-card--page[data-step="lookup"] .rsvp-email-anchor {
+    position: relative;
+    display: inline-block;
 }
 
 .rsvp-lookup-label {
@@ -1082,9 +1113,8 @@ body.dark-mode .dress-popover::before {
     letter-spacing: 0.16em;
 }
 
-/* Afterparty is its own standalone card now (buildAfterpartyPanel), using
-   the same .rsvp-card-title/.weekend-event structure as every other card —
-   no embedded-block treatment needed. */
+/* The afterparty FYI's closing note line (buildAfterpartyInfo, appended to
+   every Saturday person card) reuses this class verbatim. */
 .rsvp-card .weekend-event-note {
     margin-top: 0.35rem;
     margin-bottom: 0;
@@ -1092,13 +1122,15 @@ body.dark-mode .dress-popover::before {
 
 /* ---- Per-person response block on event cards ----------------------------- */
 
-.rsvp-card-person {
+.rsvp-card-person,
+.rsvp-card-afterparty {
     margin-top: 0.7rem;
     padding-top: 0.7rem;
     border-top: 1px solid rgba(26, 58, 46, 0.15);
 }
 
-body.dark-mode .rsvp-card-person {
+body.dark-mode .rsvp-card-person,
+body.dark-mode .rsvp-card-afterparty {
     border-top-color: rgba(241, 237, 234, 0.15);
 }
 
@@ -1248,16 +1280,27 @@ body.dark-mode .kosher-label input[type="checkbox"]:focus-visible {
     outline-color: var(--color-soft-white);
 }
 
-/* ---- Stack navigation: persistent Back/Next + inline errors --------------- */
+/* ---- Stack navigation: mobile-only persistent Back/Next + inline errors --- */
 
 /* Back/Next used to be DOM children of each sliding card, positioned outside
    it — that meant they visibly slid with their card during the file-to-back
    move, and (with the stack now up to 7-8 cards deep for a fully-invited
    guest) got crowded by the growing peek depth to the point of reading as
-   cut off. Andrew's fix: both are persistent, field-fixed controls that
-   never move — #rsvp-arrow (doubling as "Next"/"Review" once the flow
-   starts — see rsvp.html's comment and updateStackNav in js/rsvp-flow.js)
-   and #rsvp-stack-back here, its mirror image on the card's other side.
+   cut off. Andrew's fix (July 11 2026): both became persistent, field-fixed
+   controls that never move — #rsvp-arrow (doubling as "Next"/"Review" once
+   the flow starts — see rsvp.html's comment and updateStackNav in
+   js/rsvp-flow.js) and #rsvp-stack-back here, its mirror image on the
+   card's other side.
+
+   Item 2 (July 2026) supersedes this system ON DESKTOP ONLY, in favor of
+   per-card controls again — see "Per-card Back/Next controls" below for why
+   that's not simply repeating the July 11 mistake. #rsvp-arrow/
+   #rsvp-stack-back are kept, unchanged, as the MOBILE (≤900px) mechanism —
+   see the @media (min-width: 901px) rule below that hides them on desktop,
+   and MOBILE_BREAKPOINT/stackNavInfoFor/updateStackNav in js/rsvp-flow.js,
+   which still drive them. This is intentionally two nav systems, one per
+   breakpoint, transitional until a dedicated mobile nav pass unifies them
+   (see docs/decisions.md launch checklist).
    Visibility/label/disabled state are all toggled by JS per current top
    card; there is deliberately no CSS here for per-card variants.
    right: calc(66.146% + 28px) is the exact mirror of .rsvp-arrow's
@@ -1326,6 +1369,151 @@ body.dark-mode.page-rsvp .rsvp-stack-back:focus-visible {
     outline-color: var(--color-soft-white);
 }
 
+/* Desktop only (>900px, matching MOBILE_BREAKPOINT in js/rsvp-flow.js and
+   the @media (max-width: 900px) block below) — hide the mobile persistent
+   nav in favor of the per-card controls just below. 901px, not 900px: using
+   900px here would show BOTH systems simultaneously at exactly that width. */
+@media (min-width: 901px) {
+    body.page-rsvp .rsvp-arrow,
+    body.page-rsvp .rsvp-stack-back {
+        display: none;
+    }
+}
+
+/* ---- Per-card Back/Next controls (desktop only, >900px) -------------------
+   An earlier per-card design (July 11 2026, "right-side Next") was replaced
+   by the persistent #rsvp-arrow/#rsvp-stack-back system above because those
+   buttons visibly slid with their card during the file-to-back move and got
+   crowded as the peek stack grew deeper. This redesign (item 2, July 2026)
+   avoids both problems differently: buttons sit ABOVE the card's top edge
+   only, never flanking it — always clear of the down-right-fanning peek
+   stack (see DEPTH_X/DEPTH_Y in js/rsvp-flow.js) — and their opacity is tied
+   to the wrapper's [inert] state, so only the current top card's controls
+   are ever visible regardless of stack depth. The exiting top card's
+   controls sliding off WITH it during the fast exit leg is deliberate here
+   (setInert doesn't flip until the settle leg begins), not a repeat of the
+   old bug. Mobile keeps the persistent system above for now — unifying the
+   two is a later, mobile-only pass (see docs/decisions.md). */
+.rsvp-card-nav-back,
+.rsvp-card-nav-next {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: none;
+    border: none;
+    padding: 0.5rem 0.6rem;
+    cursor: pointer;
+    /* .rsvp-stack .paper-card--page (styles.css) already re-enables
+       pointer-events against #invitation-endstate's pointer-events:none, so
+       stack cards' nav buttons inherit auto correctly. .invitation-card
+       never needed that override before it had an interactive child of its
+       own (this button) — set explicitly here instead of touching
+       .invitation-card's registration-critical rule in styles.css. The
+       :not(.rsvp-stack-top) rule below overrides back to none when hidden. */
+    pointer-events: auto;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-dark-green);
+    text-shadow: none;
+    /* Hardcoded 400ms, NOT var(--settle-ms) — that custom property is the
+       ONE-TIME intro-settle duration (js/rive-intro.js) and is permanently
+       zeroed by settleInstant() on every bail path (return visit, reduced
+       motion, and now "Start Over" reloads) — using it here would make this
+       fade instant for most real sessions. Keep this literal in sync with
+       LEG_SETTLE_MS in js/rsvp-flow.js by hand (same duplication pattern as
+       the field fractions restated on .invitation-card / .rsvp-stack
+       .paper-card--page elsewhere in this file). */
+    transition: opacity 400ms ease, color 0.2s ease;
+}
+
+.rsvp-card-nav-back { left: 0; }
+.rsvp-card-nav-next { right: 0; }
+
+.rsvp-card-nav-icon {
+    display: block;
+    flex: 0 0 auto;
+}
+
+/* Gated on .rsvp-stack-top (set by setStackTop in js/rsvp-flow.js), NOT
+   [inert] — the peeking lookup card is depth 1 but deliberately NOT inert
+   (its sliver is a click target, see revealPeek), so gating on [inert]
+   alone left its own Back button visibly opacity:1 the moment it was built,
+   ghosting beside the invitation's controls. .rsvp-stack-top tracks depth
+   only, independent of inert-ness, and is applied to every stack member
+   (invitation included, since .invitation-card is .paper-card). */
+.paper-card:not(.rsvp-stack-top) .rsvp-card-nav-back,
+.paper-card:not(.rsvp-stack-top) .rsvp-card-nav-next {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.page-rsvp.intro-complete .rsvp-card-nav-back:hover,
+body.page-rsvp.intro-complete .rsvp-card-nav-back:focus-visible,
+body.page-rsvp.intro-complete .rsvp-card-nav-next:hover,
+body.page-rsvp.intro-complete .rsvp-card-nav-next:focus-visible {
+    color: var(--color-accent);
+    filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4)) drop-shadow(0 0 16px rgba(45, 90, 74, 0.25));
+}
+
+.rsvp-card-nav-back:focus-visible,
+.rsvp-card-nav-next:focus-visible {
+    outline: 2px solid var(--color-dark-green);
+    outline-offset: 3px;
+}
+
+.rsvp-card-nav-back:active,
+.rsvp-card-nav-next:active {
+    transform: translateY(0.5px);
+}
+
+body.dark-mode.page-rsvp .rsvp-card-nav-back,
+body.dark-mode.page-rsvp .rsvp-card-nav-next {
+    color: var(--color-soft-white);
+}
+
+body.dark-mode.page-rsvp.intro-complete .rsvp-card-nav-back:hover,
+body.dark-mode.page-rsvp.intro-complete .rsvp-card-nav-back:focus-visible,
+body.dark-mode.page-rsvp.intro-complete .rsvp-card-nav-next:hover,
+body.dark-mode.page-rsvp.intro-complete .rsvp-card-nav-next:focus-visible {
+    color: var(--color-soft-white);
+    filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35)) drop-shadow(0 0 16px rgba(241, 237, 234, 0.2));
+}
+
+body.dark-mode.page-rsvp .rsvp-card-nav-back:focus-visible,
+body.dark-mode.page-rsvp .rsvp-card-nav-next:focus-visible {
+    outline-color: var(--color-soft-white);
+}
+
+/* The invitation card's own "RSVP" button reuses .rsvp-arrow-breathe's
+   glow — generalized here since .rsvp-arrow-breathe's own keyframe triggers
+   (rsvp-styles.css, "The RSVP arrow on the settled invitation page") are
+   scoped to .rsvp-arrow, not this class. */
+body.page-rsvp.intro-complete .rsvp-card-nav-next.rsvp-arrow-breathe {
+    animation: rsvp-arrow-glow 4s ease-in-out infinite;
+}
+
+body.page-rsvp.rsvp-flow-active .rsvp-card-nav-next.rsvp-arrow-breathe {
+    animation: none;
+}
+
+body.dark-mode.page-rsvp.intro-complete .rsvp-card-nav-next.rsvp-arrow-breathe {
+    animation: rsvp-arrow-glow-dark 4s ease-in-out infinite;
+}
+
+/* Mobile (≤900px) — hide the new desktop controls, matching the
+   @media (min-width: 901px) hide of the old system above. */
+@media (max-width: 900px) {
+    .rsvp-card-nav-back,
+    .rsvp-card-nav-next {
+        display: none;
+    }
+}
+
 /* Buried [inert] cards' own content still can't clip-bleed through the
    active top card. .rsvp-card deliberately has no overflow clipping of its
    own (see its own comment) so overflow on the ACTIVE top card stays an
@@ -1390,6 +1578,21 @@ body.dark-mode .rsvp-review-person {
     line-height: 1.6;
     text-align: center;
     margin-bottom: 0.4rem;
+}
+
+/* Thanks card's recovery path, not a CTA — reuses .schedule-link's text-link
+   treatment (Sentient, underline) with a plain button reset on top, since
+   it's a <button> (performs an action, reload) rather than an <a>. No
+   dark-mode override needed — .schedule-link is already fully covered. */
+.rsvp-start-over {
+    display: block;
+    width: max-content;
+    margin: 1.6rem auto 0;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
 }
 
 /* The optional note + Send RSVP inside the review card. */

@@ -64,6 +64,18 @@
                         data-light="assets/invitation/invitation-ink-light.png"
                         data-dark="assets/invitation/invitation-ink-dark.png"
                         alt="Adina Beth and Andrew Spencer — wedding invitation" />
+                    <!-- Desktop-only (>900px) per-card nav control, item 2 (July 2026):
+                         reuses .rsvp-card-nav-next's position/hover/dark styling (see
+                         css/rsvp-styles.css) plus the breathing-glow class. Wired in
+                         js/rsvp-flow.js's revealPeek(). Mobile keeps #rsvp-arrow below. -->
+                    <button id="invitation-nav-next" class="rsvp-card-nav-next rsvp-arrow-breathe" aria-label="Begin RSVP">
+                        <span class="rsvp-card-nav-label">RSVP</span>
+                        <svg class="rsvp-card-nav-icon" viewBox="0 0 34 16" width="34" height="16" aria-hidden="true"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <path d="M1 8 H 31 M 24.5 1.5 L 31 8 L 24.5 14.5" />
+                        </svg>
+                    </button>
                 </div>
                 <!-- RSVP arrow — the entry into the card flow, and (July 2026) the
                      PERSISTENT forward control for the whole stack, not just the

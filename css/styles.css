@@ -1050,22 +1050,27 @@ body.dark-mode.page-rsvp.intro-complete .rsvp-fixed-backdrop {
    through (no background of its own here), no new content. Collapsed to
    nothing pre-settle so it can't affect the registration-critical pre-cut
    layout, and again once the RSVP card flow is entered (rsvp-styles.css) so
-   it doesn't push the flow's first panel down. Height is 100vh (the settled
-   card view the endstate box occupies, which this in-flow spacer starts
-   underneath at the same document position) + 60vh of genuine extra:
-   #protected-content's own min-height:100vh floor would otherwise absorb a
-   plain 60vh spacer via the footer's margin-top:auto (same mechanism that
-   pins a short page's footer to the bottom on every other page) before the
-   column ever grows past one viewport, leaving nothing to scroll into. On
-   mobile, js/rsvp-flow.js grows this further to fit whatever the current
-   reply-card-stack card needs (see ensureMobileScrollRoom). */
+   it doesn't push the flow's first panel down. Height is exactly 100vh —
+   enough to clear #invitation-endstate's own absolutely-positioned
+   one-viewport box (this in-flow spacer starts underneath it at the same
+   document position), no further padding beyond that. #protected-content's
+   own min-height:100vh floor is already exceeded by spacer + footer at this
+   height, so the footer's margin-top:auto has no free space left to absorb
+   — it sits immediately after the spacer, and the settled page's scroll
+   range becomes exactly the footer's own natural height (a small "jiggle,"
+   not dead space to travel into). July 2026: was `100vh + 60vh` — the extra
+   60vh was unwanted dead space, not load-bearing for the margin-top:auto
+   mechanics described above (content already exceeded the min-height floor
+   at 160vh too). On mobile, js/rsvp-flow.js grows this further to fit
+   whatever the current reply-card-stack card needs (see
+   ensureMobileScrollRoom). */
 .invitation-scroll-spacer {
     display: none;
 }
 
 body.page-rsvp.intro-complete .invitation-scroll-spacer {
     display: block;
-    height: calc(100vh + 60vh);
+    height: 100vh;
 }
 
 /* Hidden until the intro tears down (hard cut / skip / bail); prevents the

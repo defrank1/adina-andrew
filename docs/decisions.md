@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: July 6, 2026
+Last updated: July 14, 2026
 
 ---
 
@@ -1046,3 +1046,57 @@ The invitation end-state's flat, pre-composited PNG (`invitation-light-new.png`/
 The footer toggle used to show `☀` in light mode and `⏾` in dark mode (the icon matched the *current* mode). Andrew flipped this: `⏾` (moon, 28px) now shows in light mode and the dark-mode glyph shows what a click switches *to*. The size pairing stayed attached to the glyph, not the mode, since that pairing was a visual-balance call, not a light/dark call — only the CSS `body.dark-mode .toggle-sym` / base `.toggle-sym` rules that carry the font-size swapped. Same change made in three places that must stay in sync: `includes/footer.html`'s hardcoded default glyph, `css/styles.css`'s `.toggle-sym`/`body.dark-mode .toggle-sym` font-sizes, and the two glyph/size pairs in `includes/site-init.js`'s `initTheme()`.
 
 The sun glyph itself (`☀`, U+2600) was separately flagged as looking "like clip art." A round-1 comparison (rendered against the real toggle styling — foil `background-clip: text`, drop-shadow, breathing aura) showed `☉` (sun-astro, U+2609), `⊙` (circled-dot, U+2299), and a glyph mislabeled "six-point star" that was actually `✹` TWELVE POINTED BLACK STAR (U+2739) — Andrew liked that one and `☉`, and asked for something "in between or adjacent" to the two. A workflow of four parallel research agents then swept Unicode (Dingbats, Miscellaneous Symbols, Miscellaneous Technical, Alchemical Symbols, Geometric Shapes) for star/sun-adjacent glyphs, surfacing 20 candidates including literal star-in-a-ring hybrids (`❂` U+2742, `⍟` U+235F — the latter notably lives in the same Miscellaneous Technical block as the existing moon glyph). Round 2's rendered comparison also corrected the round-1 mislabeling by showing the true six-point star (`✶` U+2736) next to the twelve-point glyph Andrew had actually seen. Rather than adopt one of the new hybrids, Andrew chose to keep `✹` TWELVE POINTED BLACK STAR (U+2739, 36px) — the glyph he'd already confirmed he liked. `includes/site-init.js`'s two `sym.childNodes[0].textContent` assignments (in `initTheme()`'s load-time sync and the click handler) now write `'✹'` instead of `'☀'`; the `body.dark-mode .toggle-sym` font-size stays 36px, unchanged from the sun glyph's sizing.
+
+---
+
+## RSVP Card Flow — July 2026 Revisions
+
+Eight fixes/polish items to the sequenced card-based RSVP flow (`rsvp.html` / `js/rsvp-flow.js` / `css/rsvp-styles.css`), plus three independent site-wide audit fixes, all specified by Andrew in one pass.
+
+### Decision: Kill the settled page's scroll dead space (July 2026)
+
+The settled desktop invitation page scrolled ~60vh into empty grain with nothing to reach. `.invitation-scroll-spacer`'s settled height (`css/styles.css`) changed from `calc(100vh + 60vh)` to `100vh`. The 100vh floor is still required — it clears `#invitation-endstate`'s own absolutely-positioned one-viewport box — but the extra 60vh was unwanted padding, not load-bearing for the `#protected-content` min-height/`margin-top: auto` mechanics the original comment worried about (content already exceeded the 100vh floor at 160vh too, so `margin-top: auto` never had free space to absorb either way). The page now scrolls only the footer's own natural in-flow height — a small bounce-back "jiggle," not a long trip into nothing.
+
+### Decision: Per-card Back/Next controls, desktop only — supersedes the July 11 persistent-nav decision on desktop (July 2026)
+
+Every card in the stack now gets its own Back/Next controls again, as DOM children of its `.paper-card--page` wrapper (or, for the invitation, added directly in `rsvp.html`), positioned **above** the card's top edge — Back top-left, Next top-right — rather than flanking it. This reintroduces a per-card design after the July 11 entry ("Card-flow polish round 2") specifically replaced one because those buttons visibly slid with their card and got crowded as the peek stack grew deeper. Two changes prevent a repeat: buttons only ever sit above the top edge, a region the down-right-fanning peek stack (`DEPTH_X`/`DEPTH_Y` in `js/rsvp-flow.js`) never reaches into regardless of depth; and visibility is hard-gated to the wrapper's `[inert]` state (`.paper-card[inert] .rsvp-card-nav-back/-next { opacity: 0 }`), so only the current top card's controls are ever visible.
+
+Labels ("Next" vs. "Review" on the last personal card) are computed once, statically, at build time in `dealPersonalStack`, now that the afterparty step's removal (see below) makes the personal-card list's last index unambiguous. A shared `advanceFrom(validate)` function replaces the guts of the old `onForwardClick`, used by every new per-card Next button and, unchanged, by the persistent mobile arrow.
+
+**Desktop only — mobile is explicitly deferred.** `#rsvp-arrow`/`#rsvp-stack-back` (the July 11 persistent system) are kept, unchanged, as the sole mobile (≤900px) mechanism, still driven by `stackNavInfoFor`/`updateStackNav`. This is intentionally two nav systems, one per breakpoint — see "Pending Launch Tasks" below for the mobile unification pass.
+
+### Decision: Remove the standalone afterparty card; inline FYI on every Saturday person card (July 2026)
+
+The afterparty's own stack card (`buildAfterpartyPanel`, a `data-step="afterparty"` info-only step right after Saturday's people) is gone. Its five lines (name, time, venue, address as a map link, and a "no need to RSVP" note) are now appended directly to every Saturday person card, below that person's meal section, separated by the same hairline divider `.rsvp-card-person` already used (extended to also cover the new `.rsvp-card-afterparty`). It's informational only — not tied to that person's accept/decline. This shrinks stack depth by one and removes an extra Back/Next hop for a card that never had a decision to make.
+
+### Decision: "Start Over" on the thank-you card (July 2026)
+
+A text link (`.schedule-link` treatment, not a `.btn-priority` — it's a correction path, not a CTA) on the thanks card calls `location.reload()`. Because the Metro intro is session-gated (`intro-seen`), a reload lands directly on the settled invitation with completely fresh flow state, no intro replay. Because the backend (`rsvp-workflow/google-apps-script.js`) is append-only with latest-timestamp-wins reconciliation (see "Backend rewrite" above), resubmitting is the designed correction path — no stack-teardown code was needed.
+
+### Decision: "Kosher Branzino" as plain text, not a capsule tag (July 2026)
+
+The review/thanks summary previously rendered a kosher meal as "Branzino" plus a separate `.weekend-event-dress`-styled "Kosher" capsule tag. It's now one plain Sentient string, e.g. "✓ Accepts — Ceremony and Reception · Kosher Branzino" — `buildSummaryInto` in `js/rsvp-flow.js` prefixes the meal label with "Kosher " instead of appending a tag. The (not-yet-deployed) confirmation-email builder in `rsvp-workflow/google-apps-script.js` was changed to match (`"Kosher " + mealName` instead of `mealName + " (Kosher)"`), with a comment flagging that the live copy needs manual redeploy once `APPS_SCRIPT_URL` goes live.
+
+### Decision: Dress code corrections — Saturday is Black Tie Preferred (July 2026)
+
+`EVENT_DETAILS.saturday.dress` was "Cocktail Attire" — incorrect; the wedding ceremony and reception is Black Tie Preferred, matching `faq.html`'s existing `#faq-black-tie` answer (now also verbatim-identical to the RSVP card's own popover text). Friday (Semi-Formal) and Sunday (Come as you are) were already correct.
+
+### Decision: Lookup dropdown — fix mispositioning, add keyboard access (July 2026)
+
+Two bugs in the lookup card's email-suggestions dropdown. **Position:** `.guest-suggestions` was positioned against `.form-group`, which also contains the label above and the hint text below the input — so it opened 11px below the whole group, far past the input itself. Fixed by wrapping just the input and the suggestions box in a new `.rsvp-email-anchor` (`position: relative`), so the dropdown's existing `top: calc(100% + 11px)` now resolves against the input alone; it's allowed to overlay the hint text beneath, matching the dress-popover's own behavior. Scoped to the lookup card's own selectors, so `rsvp-internal.html` (built by the separate `js/rsvp-form.js`) is unaffected. **Keyboard access:** suggestion items are now real `<button>`s (were click-only `<div>`s). `ArrowDown` from the input focuses the first suggestion; `ArrowDown`/`ArrowUp` move between suggestions (no wraparound; `ArrowUp` on the first item returns focus to the input); `Enter`/`Space` select via the button's native click; `Escape` closes the list and refocuses the input. The "no match" empty state stays a non-interactive `<div>`.
+
+### Decision: Retire schedule.html (July 2026)
+
+`schedule.html` was never linked from anywhere on the site (verified via full-repo grep) — it predates the RSVP card flow, which now carries each event's logistics on its own card. Replaced with the same redirect-stub pattern already used by `homepage.html`/`savethedate.html`, redirecting to `/`. A "view your submitted schedule" feature inside the RSVP area is the eventual planned replacement — not built, tracked as a launch-checklist item below.
+
+---
+
+## Pending Launch Tasks
+
+Recorded, not yet acted on:
+
+1. **`rsvp.html` password** is currently `beautifulsuperstar`/`rsvpUnlocked` (a dev gate) while every other page uses `october17`/`siteUnlocked`. Guests clicking RSVP from the nav hit a dead-end second password wall — must switch to the guest password at launch.
+2. **`APPS_SCRIPT_URL`** in `js/rsvp-flow.js` is empty (staging mode, placeholder invitations + no-op submit). Deploy the Apps Script web app and paste the URL at launch.
+3. **Delete `rsvp-internal.html` and `js/rsvp-form.js`** from main at launch — GitHub Pages has no server-side auth, so deletion from the deployed branch is the only way to make the internal staging form non-public. Recoverable from git history.
+4. **Mobile RSVP flow nav pass** — unify the transitional two-system nav from the "Per-card Back/Next controls" decision above (per-card on desktop, persistent `#rsvp-arrow`/`#rsvp-stack-back` on mobile), and revisit mobile card positioning/scroll more broadly.
+5. **"View your submitted schedule" feature** — returning guests see their latest response via the RSVP area (needs a new backend lookup action + front-end state). Replaces the retired schedule page.

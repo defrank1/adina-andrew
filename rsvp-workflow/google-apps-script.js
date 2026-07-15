@@ -227,8 +227,12 @@ function sendConfirmationEmail(email, people, message) {
       plainBody += '  ' + EVENT_NAMES[key] + ': ' + (attending ? 'Attending' : 'Not attending') + '\n';
 
       if (key === 'saturday' && attending && person.meal) {
-        var mealText = (MEAL_NAMES[person.meal] || person.meal) +
-          (person.mealKosher ? ' (Kosher)' : '');
+        // "Kosher " prefix, not "(Kosher)" suffix — matches the front end's
+        // plain-text "Kosher Branzino" style (js/rsvp-flow.js buildSummaryInto,
+        // July 2026). NOT deployed yet (APPS_SCRIPT_URL is empty in
+        // js/rsvp-flow.js) — the live copy must be manually redeployed to
+        // pick this up once it goes live.
+        var mealText = (person.mealKosher ? 'Kosher ' : '') + (MEAL_NAMES[person.meal] || person.meal);
         htmlBody += '<div class="event-item meal">Dinner: ' + escapeHtml(mealText) + '</div>';
         plainBody += '  Dinner: ' + mealText + '\n';
       }

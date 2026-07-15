@@ -5,154 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Adina and Andrew's wedding website.">
-    <title>Adina & Andrew - Schedule</title>
+    <title>Adina & Andrew</title>
     <link rel="icon" type="image/png" sizes="512x512" href="/assets/favicon/favicon.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/assets/favicon/favicon.png">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="preload" as="image" href="assets/textures/combined-light.png">
-    <link rel="preload" as="image" href="assets/textures/combined-dark.png">
+    <!-- Retired July 2026: never linked from anywhere on the site (superseded
+         by the RSVP card flow's own per-event logistics cards) — verified via
+         full-repo grep. A "view your submitted schedule" feature inside the
+         RSVP area is the planned eventual replacement, not built yet, tracked
+         separately. Redirects home, matching homepage.html's own stub. -->
+    <meta http-equiv="refresh" content="0; url=/">
+    <script>window.location.replace('/');</script>
 </head>
 
-<body class="page-schedule">
-    <!-- Password Protection Overlay -->
-    <div id="password-overlay">
-        <div class="password-container">
-            <h2>Invitation</h2>
-            <p>Please enter the password:</p>
-            <form id="password-form">
-                <input type="password" id="password-input" class="password-input" placeholder="Enter password"
-                    autocomplete="off">
-                <button type="submit" class="password-submit">Enter</button>
-                <p class="password-error" id="password-error">Incorrect password. Please try again.</p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Nav lives outside #protected-content so position: fixed isn't broken by parent stacking/blend contexts -->
-    <div id="nav-placeholder"></div>
-
-    <!-- Protected Content -->
-    <div id="protected-content">
-
-        <main class="registry-page">
-            <section class="registry-section">
-                <div class="content-wrapper">
-                    <h1 class="registry-title">Invitation</h1>
-                    <img src="assets/illustrations/rowhouse-light.png" alt="A DC rowhouse illustration" class="registry-illustration"
-                        id="schedule-illustration" data-light="assets/illustrations/rowhouse-light.png"
-                        data-dark="assets/illustrations/rowhouse-dark.png">
-
-                    <p class="page-intro">If you're seeing this, you've RSVP'd! Here is your weekend schedule.</p>
-
-                    <div class="schedule-event">
-                        <h2 class="schedule-event-name">Welcome Party</h2>
-                        <p class="schedule-event-detail">Friday, October 16th</p>
-                        <p class="schedule-event-detail">
-                            <a href="https://www.sonomadc.com" class="schedule-link" target="_blank"
-                                rel="noopener noreferrer">Sonoma Restaurant & Wine Bar</a><br>
-                            <a href="https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC"
-                                class="schedule-link" target="_blank" rel="noopener noreferrer">223 Pennsylvania Avenue
-                                SE</a>
-                        </p>
-                        <p class="schedule-event-description">Join us for wine and light bites in the heart of Capitol
-                            Hill. Please plan to eat dinner before.</p>
-                        <p class="schedule-event-detail">Semi-Formal</p>
-                        <p class="schedule-event-description">Sport coats and trousers, or dresses, jumpsuits, and
-                            blouses</p>
-                    </div>
-
-                    <div class="schedule-event">
-                        <h2 class="schedule-event-name">Ceremony and Reception</h2>
-                        <p class="schedule-event-detail">Saturday, October 17th</p>
-                        <p class="schedule-event-detail">
-                            InterContinental Washington, DC — The Wharf<br>
-                            <a href="https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC" class="schedule-link"
-                                target="_blank" rel="noopener noreferrer">801 Wharf Street SW</a>
-                        </p>
-                        <p class="schedule-event-detail">Black Tie Preferred</p>
-                    </div>
-
-                    <div class="schedule-event">
-                        <h2 class="schedule-event-name">After Party</h2>
-                        <p class="schedule-event-detail">Saturday, October 17th · 11:00 PM — 1:00 AM</p>
-                        <p class="schedule-event-detail">
-                            Kirwan's on the Wharf<br>
-                            <a href="https://maps.google.com/?q=749+Wharf+Street+SW+Washington+DC" class="schedule-link"
-                                target="_blank" rel="noopener noreferrer">749 Wharf Street SW, Second Floor</a>
-                        </p>
-                        <p class="schedule-event-description">Let's keep the night going! Meet us down the block for
-                            drinks and
-                            late-night food.</p>
-                    </div>
-
-                    <div class="schedule-event">
-                        <h2 class="schedule-event-name">Farewell Brunch</h2>
-                        <p class="schedule-event-detail">Sunday, October 18th</p>
-                        <p class="schedule-event-description">Details coming soon.</p>
-                    </div>
-
-                    <div class="registry-cta">
-                        <a href="/rsvp" class="btn-priority">RSVP</a>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <div id="footer-placeholder"></div>
-
-    </div>
-
-    <script>
-        // Apply dark mode immediately to prevent flash
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.documentElement.classList.add('dark-mode');
-            document.body.classList.add('dark-mode');
-        }
-
-        // ===========================
-        // Password Protection
-        // ===========================
-        if (location.hash.includes('figmacapture=')) {
-            sessionStorage.setItem('siteUnlocked', 'true');
-        }
-        const correctPassword = 'october17';
-        const passwordOverlay = document.getElementById('password-overlay');
-        const protectedContent = document.getElementById('protected-content');
-        const passwordForm = document.getElementById('password-form');
-        const passwordInput = document.getElementById('password-input');
-        const passwordError = document.getElementById('password-error');
-
-        if (sessionStorage.getItem('siteUnlocked') === 'true') {
-            unlockContent();
-        }
-
-        passwordForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('siteUnlocked', 'true');
-                unlockContent();
-            } else {
-                passwordError.classList.add('show');
-                passwordInput.value = '';
-                passwordInput.focus();
-            }
-        });
-
-        function unlockContent() {
-            passwordOverlay.classList.add('hidden');
-            protectedContent.classList.add('unlocked');
-            document.body.classList.remove('locked');
-        }
-
-        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
-            document.body.classList.add('locked');
-        }
-
-        passwordInput.addEventListener('input', function () {
-            passwordError.classList.remove('show');
-        });
-    </script>
-    <script src="includes/site-init.js"></script>
-</body>
+<body></body>
 
 </html>
