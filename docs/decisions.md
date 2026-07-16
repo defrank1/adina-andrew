@@ -1252,6 +1252,32 @@ Fix: after unshifting `newCards` in `replacePersonalCards`'s reorder callback, e
 
 ---
 
+## RSVP Card Flow — Flyover Layering, Ghost Input, Review→Thank-You Flash (July 16, 2026)
+
+Three more issues from Andrew, with screenshots.
+
+### Decision L: The email field could be left behind as a "ghost" during the lookup → first-event transition
+
+Reported: transitioning off the lookup card left the styled email-input pill floating on screen after the rest of the card had visibly exited. The email input is the one element on this page using an unusual rendering path — `-webkit-background-clip: text` / `-webkit-text-fill-color: transparent` for its gradient text fill (matching the password box) — and browsers can rasterize that kind of effect on its own compositing layer that doesn't always get promoted/repainted in lockstep with an ancestor's CSS `transform` starting mid-flight, especially for a still-focused control. `fileTransition` never set `will-change` on the animating cards and never blurred whatever had focus before starting a leg, so the browser had no advance signal to promote the whole card as one GPU layer.
+
+Fix: `fileTransition` now sets `will-change: transform` on both `outgoing` and `incoming` right before each leg's transform starts (clearing it once that leg's `onceTransition` fires — the same set/clear-on-completion pattern the retired suite-deal proxies used), and blurs `document.activeElement` up front if it's inside `outgoing`. Between the two, the whole card (ordinary content and the one exotic-CSS input alike) is forced onto a single layer before any transform begins, and nothing stays focused into a leg it's about to leave. Verified end-to-end (no console errors, clean settle) — the underlying rendering glitch itself is a browser compositing quirk under CSS transform, not something DOM/state inspection can directly assert, so this is a best-practice mitigation rather than something reproduced and re-checked pixel-for-pixel in the test harness.
+
+### Decision M: Persistent nav buttons now render *behind* traveling cards, and no longer dim in flight
+
+Andrew's framing: the reply cards are physical paper floating above the page; the Back/Next buttons read as inset into that base surface, not a separate floating layer of their own. So a traveling card should visually sweep *over* a button, never duck beneath it — and dimming the buttons while a card flies over them fights that same model (a card doesn't dim what's under it as it slides across).
+
+`#rsvp-arrow`/`#rsvp-stack-back` were `z-index: 1100`, explicitly *above* `Z_EXIT`/`Z_ENTER` (1000/1001) — added during Nav Unification specifically so a traveling card could never cover the sole nav controls. Lowered to `z-index: 400`, below every card state (`Z_HIDDEN` 490, `Z_TOP` 500, `Z_EXIT`/`Z_ENTER` 1000/1001) — since the buttons sit outside the card/field's own horizontal bounds at rest by construction (the `left`/`right: calc(66.146% + 28px)` formulas), this never actually hides them; it only changes who's on top during the sweep, which is now always the card. Separately, dropped `opacity: 0.55` from `.rsvp-nav-inflight` (rsvp-styles.css) — the in-flight state still sets `pointer-events: none` and `aria-disabled` (so a double-click/double-Enter still can't queue a second move), it just no longer visually dims. Verified: computed `z-index` on the buttons reads `400` and `opacity` reads `1` with `.rsvp-nav-inflight` applied mid-move, immediately after triggering a transition.
+
+### Decision N: Refines Decision K — `replacePersonalCards` must pre-hide *every* new card, including the one becoming `incoming`
+
+Reported: after Send RSVP, the thank-you card was visibly present underneath the review card *before* the transition played, unlike every ordinary card-to-card move (Welcome Party → Ceremony, say).
+
+Decision K fixed the *other* new cards in `replacePersonalCards` (Saturday/Sunday/review, when editing) but deliberately left `newCards[0]` alone, reasoning that `fileTransition`'s own enter-leg logic would fully initialize it. That's true — but only once its *deferred* `setTimeout` fires, `Math.round(EXIT_MS * ENTER_OVERLAP)` (~357ms) after the move starts. `newCards[0]` is a brand-new DOM node with no inline styles at all from the instant it's appended (`makeStackCard`, called synchronously — for the submit path, inside `buildScheduleCard`, itself called synchronously before `replacePersonalCards` even starts) — so for that whole ~357ms window it sits fully visible at the same rect as the outgoing card, which is exactly "already visible underneath." A normal `fileForward`/`fileBackward` move never shows this because its `incoming` is always a *pre-existing* card that was already `.rsvp-stack-hidden` from an earlier settle; `replacePersonalCards`'s new cards have no such prior state to fall back on.
+
+Fix: the `i === 0` exception in the `newCards.forEach` loop is gone — every element of `newCards`, including the one about to become `incoming`, now gets `applyRestingInstant(card, false)` immediately after unshifting. `fileTransition`'s enter-leg logic still fully re-initializes whichever one becomes `incoming` a moment later (transform, z-index, `rsvp-stack-hidden` removal, inert), so pre-hiding it here doesn't conflict — it just closes the gap before that logic runs. Verified with a `MutationObserver` watching `#rsvp-stack` for the schedule card's insertion: captured immediately at append time (post-fix), it already reports `rsvp-stack-hidden: true`, `inert: true`, computed `visibility: hidden` — no window where an observer (or the browser's paint pipeline) could catch it any other way. Re-checked the Edit path from Decision K afterward to confirm no regression there.
+
+---
+
 ## Pending Launch Tasks
 
 Recorded, not yet acted on:

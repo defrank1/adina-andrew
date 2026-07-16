@@ -587,14 +587,17 @@ body.page-rsvp .rsvp-arrow {
     left: calc(66.146% + 28px);
     top: 53.611%;
     transform: translateY(-50%);
-    /* Explicit, above every resting card (max z-index 500) AND above a card
-       actively in flight (Z_EXIT/Z_ENTER = 1000/1001 in js/rsvp-flow.js) —
-       Nav Unification (July 2026): the persistent pair is now the sole nav
-       at every viewport, and a traveling card crosses the ENTIRE screen
-       (mobile cards are near-full-width/height) including wherever these
-       buttons sit, so they need to stay above it, not just above the
-       resting stack. */
-    z-index: 1100;
+    /* Below every card, resting or traveling (Z_HIDDEN/Z_TOP/Z_EXIT/Z_ENTER =
+       490/500/1000/1001 in js/rsvp-flow.js) — these buttons read as inset
+       into the base paper surface, while the reply cards are physical sheets
+       floating above that surface, so a traveling card must sweep OVER a
+       button, never duck underneath it. Was 1100 (above everything) under
+       the older "nav must never be covered" reading; superseded now that
+       the paper-above-inset-controls model is the intended one. Buttons sit
+       outside the card/field bounds at rest by construction (see the
+       left/right formulas), so this never actually hides them — it only
+       matters during the sweep. */
+    z-index: 400;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -1415,8 +1418,8 @@ body.page-rsvp .rsvp-stack-back {
     right: calc(66.146% + 28px);
     top: 53.611%;
     transform: translateY(-50%);
-    /* Explicit z-index — see the matching comment on .rsvp-arrow above. */
-    z-index: 1100;
+    /* z-index — see the matching comment on .rsvp-arrow above. */
+    z-index: 400;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -1506,9 +1509,7 @@ body.dark-mode.page-rsvp .rsvp-stack-back:focus-visible {
    semi-visible just because a move started. */
 body.page-rsvp .rsvp-arrow.rsvp-nav-inflight,
 body.page-rsvp .rsvp-stack-back.rsvp-nav-inflight {
-    opacity: 0.55;
     pointer-events: none !important;
-    transition: opacity 150ms ease;
 }
 
 /* Buried [inert] cards' own content still can't clip-bleed through the

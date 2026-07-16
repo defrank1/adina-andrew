@@ -548,6 +548,23 @@
                 if (onSettled) { onSettled(); }
             }
 
+            // A focused control (the email field is the practical case —
+            // its gradient-clipped text fill, -webkit-background-clip:
+            // text, is the one exotic bit of render on this page) can be
+            // left behind as a static "ghost" by some browsers' compositing
+            // when its ancestor starts a transform while it still holds
+            // focus, instead of traveling with the rest of the card.
+            // Blurring before the transform starts avoids the whole class
+            // of problem; will-change below additionally promotes the
+            // WHOLE card to its own layer up front so every descendant —
+            // ordinary or exotic — composites and travels as one unit
+            // rather than the browser deciding mid-animation.
+            if (document.activeElement && outgoing.contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
+            outgoing.style.willChange = 'transform';
+            incoming.style.willChange = 'transform';
+
             outgoing.style.transition = 'transform ' + EXIT_MS + 'ms ' + EXIT_CURVE;
             outgoing.style.zIndex = String(Z_EXIT);
             void outgoing.offsetWidth; // force reflow so the transition runs from the current position
@@ -557,6 +574,7 @@
                 outgoing.style.transition = 'none';
                 outgoing.style.transform = 'none';
                 outgoing.style.zIndex = String(Z_HIDDEN);
+                outgoing.style.willChange = '';
                 setInert(outgoing, true);
                 outgoing.classList.add('rsvp-stack-hidden');
                 if (cleanup) { cleanup(); }
@@ -575,6 +593,7 @@
 
                 onceTransition(incoming, 'transform', ENTER_MS, function () {
                     incoming.style.zIndex = String(Z_TOP);
+                    incoming.style.willChange = '';
                     legDone();
                 });
             }, Math.round(EXIT_MS * ENTER_OVERLAP));
@@ -619,19 +638,27 @@
                 });
                 personalCards = newCards;
                 Array.prototype.unshift.apply(stack, newCards);
-                // newCards[0] becomes `incoming` below — fileTransition's
-                // own enter-leg logic fully initializes its transform/
-                // z-index/hidden state before animating it in. Everything
-                // else in newCards (e.g. Edit's freshly-rebuilt Saturday/
-                // Sunday/review cards) is a brand-new DOM node that's never
-                // been through applyRestingInstant, unlike dealPersonalStack
-                // — left alone, a taller buried card (Saturday) sits fully
-                // visible at the same absolute rect as the shorter incoming
-                // card (Friday) and its extra height bleeds out beneath it.
-                // Snap them to the same defined non-top resting state
-                // dealPersonalStack already gives its own new cards.
-                newCards.forEach(function (card, i) {
-                    if (i === 0) { return; }
+                // Every element of newCards is a brand-new DOM node,
+                // appended (by makeStackCard, when it was built) with no
+                // inline styles at all — unlike dealPersonalStack's own new
+                // cards, which all get applyRestingInstant right after
+                // splicing. Left alone, ALL of them — including
+                // newCards[0], which is about to become `incoming` — sit
+                // fully visible at the same absolute rect as the outgoing
+                // card from the instant they're appended, well before
+                // fileTransition's own (deferred, ENTER_OVERLAP-delayed)
+                // enter-leg logic ever touches newCards[0]. That gap is
+                // exactly "the next card is already visible underneath" —
+                // most visible submit -> schedule/thank-you (a much taller
+                // card, built and appended synchronously inside onSubmit
+                // before this reorder even runs) and Edit's taller buried
+                // cards (Saturday) bleeding past a shorter one on top.
+                // Snap every one of them to the same defined non-top
+                // resting state dealPersonalStack already gives its own new
+                // cards; fileTransition's enter-leg logic fully re-
+                // initializes whichever one becomes `incoming` a moment
+                // later, so pre-hiding it here doesn't conflict.
+                newCards.forEach(function (card) {
                     applyRestingInstant(card, false);
                 });
             }, 'forward', onSettled, function () {
@@ -723,7 +750,7 @@
         // measurement below start from a predictable, known position —
         // matches advanceFrom's own unconditional reset on the way IN;
         // this covers Back moves and any settle that didn't go through
-        // advanceFrom), un-dims the persistent nav (see setNavInFlight),
+        // advanceFrom), releases the persistent nav's in-flight lock (see setNavInFlight),
         // then focuses the new top card (delay = 0 under reduced motion so
         // it doesn't wait for a move that didn't animate) — UNLESS focus is
         // already on the persistent Next/Back button that triggered this
@@ -845,15 +872,18 @@
             backBtn.style.pointerEvents = info.back ? 'auto' : 'none';
         }
 
-        // In-flight dim (Nav Unification, July 2026): the buttons stay
-        // visible and stationary during a move rather than vanishing, but
-        // get a subtle dim + pointer-events:none (see .rsvp-nav-inflight in
+        // In-flight lock (Nav Unification, July 2026): the buttons stay
+        // visible and stationary during a move rather than vanishing, and
+        // get pointer-events:none (see .rsvp-nav-inflight in
         // rsvp-styles.css) so a double-click/double-Enter can't queue a
         // second move — though animLock's own guard in fileTransition is
         // what actually prevents that; this is UX polish + correct ARIA
-        // semantics on top of it. aria-disabled, not the native disabled
-        // attribute, specifically so a focused button isn't auto-blurred by
-        // the browser mid-flight (see afterMove's focus-preservation note).
+        // semantics on top of it. No visual dimming (buttons read as inset
+        // into the page, cards float above them — dimming the buttons
+        // during the card's own flyover fought that model; dropped July
+        // 2026). aria-disabled, not the native disabled attribute,
+        // specifically so a focused button isn't auto-blurred by the
+        // browser mid-flight (see afterMove's focus-preservation note).
         function setNavInFlight(inFlight) {
             [arrowBtn, backBtn].forEach(function (btn) {
                 btn.classList.toggle('rsvp-nav-inflight', inFlight);
