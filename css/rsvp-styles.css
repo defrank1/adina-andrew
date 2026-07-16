@@ -134,6 +134,18 @@ body.dark-mode .guest-suggestion-item:focus-visible {
     background-color: var(--color-soft-white);
     border: 2px solid rgba(26, 58, 46, 0.2);
     border-radius: 25px;
+    /* Strip native platform widget rendering — same reasoning as the
+       custom radio/kosher-checkbox controls elsewhere in this file. Without
+       this, the browser's own native text-field rendering path for the
+       email input (the one field that also rides a card through a CSS
+       transform, on the lookup -> first-event move) doesn't reliably
+       recomposite in lockstep with its transformed ancestor in Chrome —
+       the field visibly gets left behind mid-transition while the rest of
+       the card moves. will-change/blur (js/rsvp-flow.js fileTransition)
+       target a different, GPU-layer-promotion cause and weren't sufficient
+       on their own; this addresses the native-widget path directly. */
+    appearance: none;
+    -webkit-appearance: none;
     transition: border-color 0.3s ease;
 }
 
