@@ -619,6 +619,21 @@
                 });
                 personalCards = newCards;
                 Array.prototype.unshift.apply(stack, newCards);
+                // newCards[0] becomes `incoming` below — fileTransition's
+                // own enter-leg logic fully initializes its transform/
+                // z-index/hidden state before animating it in. Everything
+                // else in newCards (e.g. Edit's freshly-rebuilt Saturday/
+                // Sunday/review cards) is a brand-new DOM node that's never
+                // been through applyRestingInstant, unlike dealPersonalStack
+                // — left alone, a taller buried card (Saturday) sits fully
+                // visible at the same absolute rect as the shorter incoming
+                // card (Friday) and its extra height bleeds out beneath it.
+                // Snap them to the same defined non-top resting state
+                // dealPersonalStack already gives its own new cards.
+                newCards.forEach(function (card, i) {
+                    if (i === 0) { return; }
+                    applyRestingInstant(card, false);
+                });
             }, 'forward', onSettled, function () {
                 removed.forEach(function (card) {
                     if (card && card.parentNode) { card.parentNode.removeChild(card); }
