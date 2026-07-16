@@ -771,6 +771,26 @@ body.page-rsvp.rsvp-flow-active .rsvp-flow-scroll-spacer {
    move's end state with no transition at all — there's nothing for CSS to
    override. */
 
+/* ---- Footer toggle stays viewport-fixed during the flow ------------------- */
+
+/* body.page-rsvp #footer-placeholder { margin-top: auto } (styles.css) only
+   pins the footer to the VIEWPORT bottom while #protected-content is exactly
+   one viewport tall (the settled invitation). A long card grows that flex
+   column, so the footer settles at the DOCUMENT bottom instead and scrolls
+   away with the stack. Once the flow is active, take it out of flow and fix
+   it to the viewport corner, mirroring .replay-intro's own treatment
+   (styles.css) — right:0 (not a hardcoded inset) so .footer-content's own
+   existing padding supplies the corner inset, at every width. */
+body.page-rsvp.rsvp-flow-active .site-footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    width: auto;
+    margin: 0;
+    z-index: 1600;
+}
+
 /* ---- The reply card ------------------------------------------------------- */
 
 /* Paper-suite reskin: each stack card is `.paper-card.paper-card--page` (grain
@@ -843,7 +863,7 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     font-weight: 400;
     text-transform: none;
     letter-spacing: normal;
-    font-size: 1.9rem;
+    font-size: 2.9rem;
     line-height: 1.1;
     text-align: center;
     margin-bottom: 0.9rem;
@@ -1207,6 +1227,14 @@ body.dark-mode .rsvp-card-afterparty {
     text-align: center;
 }
 
+/* .schedule-event-description (the closing "All guests welcome" note) is
+   globally text-align: left (styles.css, shared with rsvp-internal.html's
+   reference block) — that explicit value wins over the inherited center
+   above, so it needs its own scoped override here rather than a global one. */
+body.page-rsvp .rsvp-card-afterparty .schedule-event-description {
+    text-align: center;
+}
+
 .rsvp-card-person-name {
     font-family: var(--font-heading);
     font-weight: 700;
@@ -1530,6 +1558,24 @@ body.dark-mode .rsvp-review-person {
     margin-bottom: 0.5rem;
 }
 
+/* Schedule/thank-you card only (Section E) — demoted from an event-title
+   peer to a quiet label introducing that person's block, now that the event
+   titles below it carry the real weight (.rsvp-schedule-event-name). Scoped
+   off the shared class above so the pre-submit review card, which doesn't
+   have the same competing-headline problem, is untouched. Extra top space
+   on the block itself (below) helps the two-person case read as distinct
+   groups. */
+.paper-card--page[data-step="schedule"] .rsvp-review-person-name {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+}
+
+.paper-card--page[data-step="schedule"] .rsvp-review-person {
+    margin-top: 2rem;
+    padding-top: 2rem;
+}
+
 .rsvp-review-line {
     font-family: var(--font-body);
     font-size: 0.95rem;
@@ -1545,39 +1591,33 @@ body.dark-mode .rsvp-review-person {
     margin-bottom: 0.4rem;
 }
 
-/* Schedule/thank-you card's "Edit your RSVP" link — a correction path, not
-   a CTA, so it reuses .schedule-link's text-link treatment (Sentient,
-   underline) with a plain button reset on top, since it's a <button>
-   (re-enters the flow via enterEditFlow — see js/rsvp-flow.js — rather than
-   navigating anywhere) rather than an <a>. No dark-mode override needed —
-   .schedule-link is already fully covered. */
+/* Schedule/thank-you card's "Edit your RSVP" — a secondary/utility action
+   (correct a submission), not the primary CTA, so it's .btn-normal (outlined
+   pill) rather than .btn-priority; that class supplies the full letterpress
+   treatment (light/dark included). Only centering is needed on top — no
+   text-link resets, since it's a real button now, not a link. Behavior
+   (re-enters the flow via enterEditFlow, js/rsvp-flow.js) is unchanged. */
 .rsvp-edit-link {
     display: block;
     width: max-content;
-    margin: 1.6rem auto 0;
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
+    margin: 1.8rem auto 0;
 }
 
 /* Schedule card's per-event blocks (buildScheduleSummaryInto) — event name
-   at the same small-caps scale as .rsvp-card-meal-label, then the shared
-   .weekend-event-when/-where rendering (already scoped for card use via
-   .rsvp-card .weekend-event-when/-where below). */
+   is now the same PP Playground .rsvp-card-event-title face used everywhere
+   else on the card (Section E), so this is the anchor of the block instead
+   of a small-caps label; more vertical room to let it breathe against the
+   when/where lines below it. */
 .rsvp-schedule-event {
-    margin: 0.5rem 0 0.9rem;
+    margin: 0.9rem 0 1.3rem;
 }
 
+/* Delta on top of .rsvp-card-event-title (font/size/line-height/color come
+   from there) — left-aligned within the per-person list instead of that
+   class's card-wide centered treatment, with its own tighter margin. */
 .rsvp-schedule-event-name {
-    font-family: var(--font-heading);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    font-size: 0.72rem;
-    opacity: 0.85;
-    margin-bottom: 0.25rem;
+    text-align: left;
+    margin-bottom: 0.35rem;
 }
 
 /* The optional note + Send RSVP inside the review card. */
@@ -1596,6 +1636,12 @@ body.dark-mode .rsvp-review-person {
 /* ---- Mobile (≤900px) ------------------------------------------------------- */
 
 @media (max-width: 900px) {
+
+    /* Step down with the card width, mirroring the Travel page's
+       3.2rem -> 2.3rem ratio for .travel-section-title. */
+    .rsvp-card-event-title {
+        font-size: 2.1rem;
+    }
 
     /* No room to the card's right — arrow + label sit below the card,
        centered, still pointing right. Card bottom = 13.426% + 80.37% ≈
@@ -1641,12 +1687,16 @@ body.dark-mode .rsvp-review-person {
        equivalent of "stay in place while the pages move." Bottom corners,
        mirroring the desktop flanking layout (Back left, Next right).
        .replay-intro normally lives at this same bottom-left corner — see
-       its own rule for why it's hidden once the flow starts. */
+       its own rule for why it's hidden once the flow starts. Bottom offset
+       is raised from the site-wide 20px to leave room for the dark-mode
+       toggle stacked directly below Next (see .site-footer below) — Back
+       shifts up in lockstep purely to stay level with Next, even though
+       nothing sits under it. */
     body.page-rsvp.rsvp-flow-active .rsvp-arrow,
     body.page-rsvp.rsvp-flow-active .rsvp-stack-back {
         position: fixed;
         top: auto;
-        bottom: 20px;
+        bottom: 84px;
         transform: none;
     }
 
@@ -1664,32 +1714,12 @@ body.dark-mode .rsvp-review-person {
     body.page-rsvp.rsvp-flow-active .rsvp-stack-back:active {
         transform: translateY(0.5px);
     }
+
+    /* Toggle drops into the slot Next just vacated (.replay-intro's old
+       20px inset) — stacked directly under the Next arrow, same right
+       edge, rather than colliding with it in the same corner. */
+    body.page-rsvp.rsvp-flow-active .site-footer {
+        bottom: 20px;
+    }
 }
 
-/* Suite-deal opening beat (Motion Rework, July 2026, flair) — decorative,
-   uniform 5:7 proxy cards dealt off-screen behind the invitation on the
-   first RSVP click only. Positioned exactly like .invitation-card (same
-   placement percentages) but fixed-ratio, never part of the settled
-   invitation composition — built and destroyed entirely by playSuiteDeal()
-   in js/rsvp-flow.js. */
-body.page-rsvp .rsvp-suite-proxy {
-    position: absolute;
-    left: 33.854%;
-    width: 32.292%;
-    top: 13.426%;
-    aspect-ratio: 1500 / 2100;
-    pointer-events: none;
-}
-
-body.page-rsvp .rsvp-suite-proxy::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border: 14px solid transparent;
-    border-image: url('../assets/invitation/card-frame-light.png') 45 stretch;
-}
-
-body.dark-mode.page-rsvp .rsvp-suite-proxy::after {
-    border-image-source: url('../assets/invitation/card-frame-dark.png');
-}

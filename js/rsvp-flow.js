@@ -82,7 +82,15 @@
     var EXIT_CURVE = 'cubic-bezier(.4, 0, 1, 1)';   // ease-in — accelerate off-screen
     var ENTER_MS = 480;
     var ENTER_CURVE = 'cubic-bezier(0, 0, .2, 1)';  // ease-out — decelerate to rest
-    var ENTER_OVERLAP = 0.6;    // enter leg starts this fraction into the exit leg
+    // 0.6 (of EXIT_MS's TIME) reads as a collision, not a conveyor: EXIT_CURVE
+    // is effectively ease-in (heavily back-loaded), so at 60% time elapsed the
+    // outgoing card has covered only roughly a third of its actual travel
+    // DISTANCE — the incoming card (front-loaded ENTER_CURVE) then starts
+    // moving fast while the outgoing card is still mostly on-screen. Raised so
+    // the enter leg only starts once the outgoing card has cleared most of the
+    // screen under its own curve, while still overlapping enough that the
+    // screen is never fully empty.
+    var ENTER_OVERLAP = 0.85;   // enter leg starts this fraction into the exit leg
     var EXIT_ROTATE = 3;        // deg magnitude; forward exits -3deg, backward exits +3deg
     var ENTER_ROTATE = 3;       // deg magnitude; mirrors EXIT_ROTATE at the entering edge
     var STACK_MOVE_MS = Math.round(EXIT_MS * ENTER_OVERLAP) + ENTER_MS; // total move time, for focus delays
@@ -101,19 +109,6 @@
     // actual on-screen rect instead. EDGE_MARGIN_PX is the safety margin past
     // the true edge.
     var EDGE_MARGIN_PX = 40;
-
-    // ---- suite-deal opening beat (flair, togglable) --------------------------
-    // Decorative theater only, layered in front of the real move — see
-    // playSuiteDeal. Set SUITE_DEAL_ENABLED = false to cleanly disable the
-    // whole beat (no proxies built, zero timing impact on the engine above).
-    var SUITE_DEAL_ENABLED = true;
-    var SUITE_DEAL_COUNT = 4;          // proxy cards — pure theater, not the real card count
-    var SUITE_DEAL_STAGGER_MS = 90;    // per-card launch offset
-    var SUITE_DEAL_FLIGHT_MS = 380;    // per-proxy flight duration off-screen
-    var SUITE_DEAL_ADVANCE_DELAY_MS = 0; // delay after the LAST proxy launches before the real advanceFrom fires
-    var SUITE_DEAL_OFFSET_PX = 2;      // per-level built-in stack offset (down-right)
-    var SUITE_DEAL_JITTER_DEG = 1.5;   // per-level resting rotation jitter
-    var Z_SUITE_DEAL_BASE = 100;       // proxies sit here downward — behind the invitation (500), clear of the backdrop (0)
 
     var EVENT_DETAILS = {
         friday: {
@@ -149,7 +144,7 @@
     // Info-only block appended to every Saturday person card (no
     // accept/decline of its own — see buildAfterpartyInfo).
     var AFTERPARTY_DETAILS = {
-        name: 'Wedding Afterparty',
+        name: 'Afterparty',
         time: '11:00 PM – 1:00 AM',
         venue: "Kirwan's on the Wharf",
         address: '749 Wharf Street SW, Second Floor',
@@ -491,7 +486,7 @@
         // percentage-of-own-width transform. leftClearDX: how far to
         // translateX so the rect's right edge clears the left screen edge.
         // rightClearDX: how far so the rect's left edge clears the right
-        // screen edge. Shared by fileTransition and playSuiteDeal.
+        // screen edge. Used by fileTransition.
         function leftClearDX(rect) { return -(rect.right + EDGE_MARGIN_PX); }
         function rightClearDX(rect) { return (window.innerWidth + EDGE_MARGIN_PX) - rect.left; }
 
@@ -631,53 +626,6 @@
             });
         }
 
-        // ---- suite-deal opening beat (flair, togglable) -----------------------
-        // Decorative theater layered IN FRONT of the real move — the real
-        // advanceFrom/fileForward call fires unmodified once the beat
-        // finishes (see onForwardClick). SUITE_DEAL_COUNT is arbitrary and
-        // decorative — the real reply-card count isn't knowable until after
-        // email lookup/selection; four uniform cards dealing off a deck
-        // reads as "the rest of the suite" regardless of the guest's actual
-        // flow length. One-time only: gated by suiteDealPlayed (NOT "is the
-        // invitation currently top"), so a later Back-to-invitation-then-
-        // forward-again never replays it.
-        var suiteDealPlayed = false;
-
-        function playSuiteDeal(onDone) {
-            // Same wide-screen fix as fileTransition's exit/enter legs — see
-            // EDGE_MARGIN_PX/rightClearDX above. Measured once; inserting the
-            // proxies below doesn't move the invitation's own rect.
-            var flightDX = rightClearDX(invitationCardEl.getBoundingClientRect());
-            var proxies = [];
-            for (var i = 0; i < SUITE_DEAL_COUNT; i++) {
-                var proxy = document.createElement('div');
-                proxy.className = 'paper-card rsvp-suite-proxy';
-                proxy.setAttribute('aria-hidden', 'true');
-                var level = i + 1;
-                var jitter = (i % 2 === 0 ? 1 : -1) * SUITE_DEAL_JITTER_DEG;
-                proxy.style.willChange = 'transform';
-                proxy.style.zIndex = String(Z_SUITE_DEAL_BASE - i); // i=0 = top of the deck, frontmost
-                proxy.style.transform = 'translate(' + (level * SUITE_DEAL_OFFSET_PX) + 'px, ' +
-                    (level * SUITE_DEAL_OFFSET_PX) + 'px) rotate(' + jitter + 'deg)';
-                invitationCardEl.parentNode.insertBefore(proxy, invitationCardEl);
-                proxies.push(proxy);
-            }
-
-            proxies.forEach(function (proxy, i) {
-                setTimeout(function () {
-                    var extraRotate = 6 + Math.random() * 4; // +6..10deg, jittered
-                    proxy.style.transition = 'transform ' + SUITE_DEAL_FLIGHT_MS + 'ms ' + EXIT_CURVE;
-                    proxy.style.transform = 'translateX(' + flightDX + 'px) rotate(' + extraRotate + 'deg)';
-                    onceTransition(proxy, 'transform', SUITE_DEAL_FLIGHT_MS, function () {
-                        proxy.style.willChange = '';
-                        if (proxy.parentNode) { proxy.parentNode.removeChild(proxy); }
-                    });
-                }, i * SUITE_DEAL_STAGGER_MS);
-            });
-
-            setTimeout(onDone, (SUITE_DEAL_COUNT - 1) * SUITE_DEAL_STAGGER_MS + SUITE_DEAL_ADVANCE_DELAY_MS);
-        }
-
         // The invitation's field/card sizing is built for a 16:9 registration
         // box; on mobile portrait that box is short (~200px), far shorter
         // than the reply-card stack's actual content, so mobile always
@@ -747,6 +695,19 @@
             setNavInFlight(false);
             window.scrollTo(0, 0);
             ensureScrollRoom();
+            // Belt-and-braces re-measure once webfonts finish swapping in.
+            // Discovered on the schedule card's deepest fixture (4 people ×
+            // 3 events): its first-ever paint of the larger PP Playground
+            // .rsvp-card-event-title (Section B/E) can settle its true text
+            // metrics slightly AFTER this synchronous measurement, leaving
+            // the spacer undersized by however much the font swap grows the
+            // card — enough, on that fixture, to strand the bottom of the
+            // card (including "Edit your RSVP") below the reachable scroll
+            // range. document.fonts.ready resolves immediately if fonts were
+            // already loaded, so this is a harmless no-op in the common case.
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(ensureScrollRoom);
+            }
             if (document.activeElement === arrowBtn || document.activeElement === backBtn) { return; }
             var card = top && top.querySelector('.rsvp-card');
             if (!card) { return; }
@@ -865,13 +826,6 @@
         function onForwardClick() {
             var info = stackNavInfoFor(stack[0]);
             if (!info.forward) { return; }
-            var isFirstRsvpClick = stack[0] === invitationCardEl && SUITE_DEAL_ENABLED &&
-                !suiteDealPlayed && !prefersReduced;
-            if (isFirstRsvpClick) {
-                suiteDealPlayed = true;
-                playSuiteDeal(function () { advanceFrom(info.validate); });
-                return;
-            }
             advanceFrom(info.validate);
         }
 
@@ -1603,7 +1557,7 @@
             buildScheduleSummaryInto(summary, data);
             card.appendChild(summary);
 
-            var editBtn = el('button', 'schedule-link rsvp-edit-link', 'Edit your RSVP');
+            var editBtn = el('button', 'btn-normal rsvp-edit-link', 'Edit your RSVP');
             editBtn.type = 'button';
             editBtn.addEventListener('click', enterEditFlow);
             card.appendChild(editBtn);
@@ -1639,7 +1593,7 @@
                     }
 
                     var eventBlock = el('div', 'rsvp-schedule-event');
-                    eventBlock.appendChild(el('p', 'rsvp-schedule-event-name', detail.shortName || detail.name));
+                    eventBlock.appendChild(el('p', 'rsvp-schedule-event-name rsvp-card-event-title', detail.shortName || detail.name));
                     eventBlock.appendChild(makeWhenLines(detail.when));
 
                     var where = el('p', 'weekend-event-where');
@@ -1663,7 +1617,7 @@
 
                     if (key === 'saturday') {
                         var apBlock = el('div', 'rsvp-schedule-event');
-                        apBlock.appendChild(el('p', 'rsvp-schedule-event-name', AFTERPARTY_DETAILS.name));
+                        apBlock.appendChild(el('p', 'rsvp-schedule-event-name rsvp-card-event-title', AFTERPARTY_DETAILS.name));
                         apBlock.appendChild(el('p', 'weekend-event-when', AFTERPARTY_DETAILS.time));
 
                         var apWhere = el('p', 'weekend-event-where');
