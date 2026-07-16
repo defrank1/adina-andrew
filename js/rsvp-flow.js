@@ -668,6 +668,25 @@
 
         window.addEventListener('resize', ensureScrollRoom);
 
+        // window.scrollTo(0, 0) alone can leave a stale scroll position
+        // behind: this page's overflow chain sets overflow-y on BOTH <html>
+        // (via body.page-rsvp.intro-complete, styles.css) and <body>
+        // (.rsvp-flow-active, rsvp-styles.css), and in practice a guest who
+        // scrolls deep into a tall card (Saturday) can leave <body> itself
+        // holding a residual scroll offset that window.scrollTo never
+        // touches. Left alone, the NEXT (often shorter) card inherits that
+        // offset — the fixed nav/footer/Back/Next stay put (they're
+        // genuinely viewport-fixed) while the card content underneath is
+        // still scrolled away, reading as "stuck" with the nav overlapping
+        // the card. Resetting both axes is the standard cross-browser-safe
+        // "scroll to top" — cheap and correct even where only one axis is
+        // ever actually in play. Used by both advanceFrom (on the way in)
+        // and afterMove (as a final safety once a move settles).
+        function resetScroll() {
+            window.scrollTo(0, 0);
+            document.body.scrollTop = 0;
+        }
+
         // Runs after any stack move settles: refreshes the review summary from
         // the live radios if review just became the top card (matching the
         // old goToStep's "steps[i] === 'review'" rebuild-on-arrival), resets
@@ -693,7 +712,7 @@
             }
             updateStackNav();
             setNavInFlight(false);
-            window.scrollTo(0, 0);
+            resetScroll();
             ensureScrollRoom();
             // Belt-and-braces re-measure once webfonts finish swapping in.
             // Discovered on the schedule card's deepest fixture (4 people ×
@@ -812,7 +831,7 @@
             if (animLock || submitted) { return; }
             if (validate && !validate()) { return; }
             document.body.classList.add('rsvp-flow-active');
-            window.scrollTo(0, 0);
+            resetScroll();
             fileForward(afterMove);
         }
 
