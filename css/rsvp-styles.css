@@ -1558,17 +1558,27 @@ body.dark-mode .rsvp-review-person {
     margin-bottom: 0.5rem;
 }
 
-/* Schedule/thank-you card only (Section E) — demoted from an event-title
-   peer to a quiet label introducing that person's block, now that the event
-   titles below it carry the real weight (.rsvp-schedule-event-name). Scoped
-   off the shared class above so the pre-submit review card, which doesn't
-   have the same competing-headline problem, is untouched. Extra top space
-   on the block itself (below) helps the two-person case read as distinct
-   groups. */
+/* Schedule/thank-you card only — reworked to match the DC Guide page's own
+   hierarchy: a person's name plays the role of a DC Guide neighborhood
+   heading ("The Wharf" — .travel-section-title, PP Playground), and each
+   event below it plays the role of "Where to Eat"/"What to Do"
+   (.rsvp-schedule-event-name, a .label-heading). Scoped off the shared
+   .rsvp-review-person-name class above so the pre-submit review card, which
+   doesn't share this per-person structure, is untouched. Restates
+   .rsvp-card-event-title's font/size/line-height rather than relying on that
+   class's own (centered, unscoped) rule, since this selector needs to win at
+   a different alignment. Extra top space on the block itself (below) helps
+   the two-person case read as distinct groups, matching DC Guide's spacing
+   between neighborhood sections. */
 .paper-card--page[data-step="schedule"] .rsvp-review-person-name {
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    opacity: 0.6;
+    font-family: var(--font-title);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 2.9rem;
+    line-height: 1.1;
+    text-align: left;
+    margin-bottom: 0.9rem;
 }
 
 .paper-card--page[data-step="schedule"] .rsvp-review-person {
@@ -1603,21 +1613,32 @@ body.dark-mode .rsvp-review-person {
     margin: 1.8rem auto 0;
 }
 
-/* Schedule card's per-event blocks (buildScheduleSummaryInto) — event name
-   is now the same PP Playground .rsvp-card-event-title face used everywhere
-   else on the card (Section E), so this is the anchor of the block instead
-   of a small-caps label; more vertical room to let it breathe against the
-   when/where lines below it. */
+/* Schedule card's per-event blocks (buildScheduleSummaryInto) — the event
+   name is now a .label-heading (the same small PP Watch caps DC Guide uses
+   for "Where to Eat"/"What to Do"), so it's a quiet label under the big
+   person-name heading rather than an anchor in its own right; compact
+   spacing to match. */
 .rsvp-schedule-event {
-    margin: 0.9rem 0 1.3rem;
+    margin: 1rem 0 0.5rem;
 }
 
-/* Delta on top of .rsvp-card-event-title (font/size/line-height/color come
-   from there) — left-aligned within the per-person list instead of that
-   class's card-wide centered treatment, with its own tighter margin. */
-.rsvp-schedule-event-name {
-    text-align: left;
-    margin-bottom: 0.35rem;
+/* .label-heading (styles.css) already supplies font/size/tracking/margin —
+   nothing further needed; kept as a hook selector in case the schedule
+   card ever needs its own delta. */
+
+/* Date/time line — "everything else" reads as Sentient body text on this
+   card now (matching venue/meal/declined lines, which were already
+   .rsvp-review-line/.weekend-event-where), not the small-caps PP Watch
+   treatment .weekend-event-when carries everywhere else it's used. Scoped
+   to the schedule card only. */
+.paper-card--page[data-step="schedule"] .weekend-event-when {
+    font-family: var(--font-body);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 0.2rem;
 }
 
 /* The optional note + Send RSVP inside the review card. */
@@ -1640,6 +1661,14 @@ body.dark-mode .rsvp-review-person {
     /* Step down with the card width, mirroring the Travel page's
        3.2rem -> 2.3rem ratio for .travel-section-title. */
     .rsvp-card-event-title {
+        font-size: 2.1rem;
+    }
+
+    /* Same step-down for the schedule card's person-name heading — it
+       restates .rsvp-card-event-title's size directly (see its own
+       comment) rather than inheriting from the class, so it needs its
+       own mobile override too. */
+    .paper-card--page[data-step="schedule"] .rsvp-review-person-name {
         font-size: 2.1rem;
     }
 

@@ -647,7 +647,7 @@
             // height doesn't simply ADD to the existing scrollable area, it
             // OVERLAPS the front of it. Reset first so scrollHeight below
             // reflects the true baseline (everything except this spacer's
-            // own contribution), then request only the actual deficit.
+            // own contribution).
             scrollSpacerEl.style.height = '';
             var top = stack[0];
             var card = top && top.querySelector('.rsvp-card');
@@ -662,8 +662,22 @@
             var trueBottom = card.getBoundingClientRect().top + window.scrollY + card.scrollHeight;
             var neededDocHeight = trueBottom + 40;
             var baselineDocHeight = document.documentElement.scrollHeight;
-            var deficit = neededDocHeight - baselineDocHeight;
-            scrollSpacerEl.style.height = deficit > 0 ? Math.ceil(deficit) + 'px' : '';
+            // baselineDocHeight (spacer reset to '') is #protected-content's
+            // min-height: 100vh FLOOR, not real stacked content underneath
+            // the spacer — once the flow is active the footer is
+            // position: fixed (Section A) and #invitation-endstate is
+            // absolute, so the spacer is the ONLY normal-flow content left
+            // to establish height. That floor DISAPPEARS the moment the
+            // spacer exceeds it — it doesn't stack — so the spacer must be
+            // set to the full neededDocHeight, not to a "deficit" added on
+            // top of a baseline that's about to stop applying. The old
+            // deficit math (neededDocHeight - baselineDocHeight) silently
+            // undersized the spacer by ~baselineDocHeight (a full viewport
+            // height) on every card that actually needed one — small enough
+            // to go unnoticed on shorter cards, but enough on the deepest
+            // fixture (Section E) to strand roughly the bottom third of the
+            // card, reading as "scrolling stops halfway."
+            scrollSpacerEl.style.height = neededDocHeight > baselineDocHeight ? Math.ceil(neededDocHeight) + 'px' : '';
         }
 
         window.addEventListener('resize', ensureScrollRoom);
@@ -1399,7 +1413,7 @@
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
 
-            card.appendChild(el('h2', 'rsvp-card-event-title', 'Your response'));
+            card.appendChild(el('h2', 'rsvp-card-event-title', 'Review Rsvp'));
 
             reviewSummary = el('div', 'rsvp-review-summary');
             card.appendChild(reviewSummary);
@@ -1600,7 +1614,7 @@
             container.innerHTML = '';
             data.people.forEach(function (person) {
                 var block = el('div', 'rsvp-review-person');
-                block.appendChild(el('p', 'rsvp-review-person-name', person.name));
+                block.appendChild(el('p', 'rsvp-review-person-name rsvp-card-event-title', person.name));
 
                 EVENT_ORDER.forEach(function (key) {
                     if (!(key in person.events)) { return; }
@@ -1612,7 +1626,7 @@
                     }
 
                     var eventBlock = el('div', 'rsvp-schedule-event');
-                    eventBlock.appendChild(el('p', 'rsvp-schedule-event-name rsvp-card-event-title', detail.shortName || detail.name));
+                    eventBlock.appendChild(el('p', 'rsvp-schedule-event-name label-heading', detail.shortName || detail.name));
                     eventBlock.appendChild(makeWhenLines(detail.when));
 
                     var where = el('p', 'weekend-event-where');
@@ -1636,7 +1650,7 @@
 
                     if (key === 'saturday') {
                         var apBlock = el('div', 'rsvp-schedule-event');
-                        apBlock.appendChild(el('p', 'rsvp-schedule-event-name rsvp-card-event-title', AFTERPARTY_DETAILS.name));
+                        apBlock.appendChild(el('p', 'rsvp-schedule-event-name label-heading', AFTERPARTY_DETAILS.name));
                         apBlock.appendChild(el('p', 'weekend-event-when', AFTERPARTY_DETAILS.time));
 
                         var apWhere = el('p', 'weekend-event-where');
