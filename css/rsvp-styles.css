@@ -576,7 +576,12 @@ body.dark-mode .confirmation-message {
    field-height terms = 32.292% (a field-WIDTH fraction) × 16/9 (axis
    conversion) ≈ 80.37%, so the center sits at ≈ 53.611% of field height. If
    the card's placement fractions change, update these two derived numbers
-   with them. */
+   with them. Nav Unification (July 2026): the .btn-priority class (rsvp.html)
+   gives this the same filled-pill treatment the desktop-only per-card Next
+   button used to have, at 1rem/1rem 2.2rem (the per-card size, not
+   .btn-priority's smaller default) — every property .btn-priority itself
+   already supplies (background, border, border-radius, box-shadow, hover/
+   active deboss, dark mode) is deliberately NOT restated here. */
 body.page-rsvp .rsvp-arrow {
     position: absolute;
     left: calc(66.146% + 28px);
@@ -593,23 +598,19 @@ body.page-rsvp .rsvp-arrow {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: none;
-    border: none;
-    padding: 0.5rem 0.6rem;
-    cursor: pointer;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-dark-green);
-    text-shadow: none;
+    font-size: 1rem;
+    padding: 1rem 2.2rem;
+    /* box-shadow/transform/background-color/color/border-color are
+       .btn-priority's own transitioned properties — restated here only to
+       add opacity (this element's pre-flow fade-in) into the same list;
+       overriding `transition` wholesale would otherwise silently drop
+       .btn-priority's hover/active feedback animation. */
+    transition: opacity var(--settle-ms, 450ms) ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 400ms ease, border-color 400ms ease;
     /* Invisible + inert until the peek — fades in WITH the peeking lookup
        card (js/rsvp-flow.js adds .rsvp-peek-visible to <body> ~800ms after
        the settle completes), not at the settle itself like nav/footer/replay. */
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--settle-ms, 450ms) ease, color 0.2s ease;
 }
 
 body.page-rsvp.rsvp-peek-visible .rsvp-arrow {
@@ -648,29 +649,35 @@ body.page-rsvp .invitation-field .paper-card.rsvp-stack-hidden {
 .rsvp-arrow-icon {
     display: block;
     flex: 0 0 auto;
+    width: 40px;
+    height: 18px;
 }
 
-/* Hover: the standard nav-hover glow at ~75% intensity + accent shift.
-   filter (not text-shadow) so the hairline SVG glows with the label. */
-body.page-rsvp.intro-complete .rsvp-arrow:hover,
-body.page-rsvp.intro-complete .rsvp-arrow:focus-visible {
-    color: var(--color-accent);
-    animation: none;
-    filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4)) drop-shadow(0 0 16px rgba(45, 90, 74, 0.25));
-}
-
+/* .btn-priority already provides hover/active deboss feedback (box-shadow +
+   background-color) and its own dark-mode colors — only focus-visible needs
+   a rule here (same reasoning the desktop per-card buttons used before Nav
+   Unification). The custom drop-shadow hover glow this element used to have
+   as a bare hairline link is gone now that it's a filled pill. */
 .rsvp-arrow:focus-visible {
     outline: 2px solid var(--color-dark-green);
     outline-offset: 3px;
 }
 
+body.dark-mode.page-rsvp .rsvp-arrow:focus-visible {
+    outline-color: var(--color-soft-white);
+}
+
+/* .btn-priority's own :active rule sets `transform: translateY(0.5px)`,
+   which would clobber this element's centering transform outright — restate
+   the press offset combined with the centering translate. */
 .rsvp-arrow:active {
     transform: translateY(calc(-50% + 0.5px));
 }
 
 /* Optional breathing glow (the arrow is literally the RSVP call to action, so
-   it inherits the nav RSVP link's breathing treatment). Kill it by deleting
-   the .rsvp-arrow-breathe class from the button in rsvp.html. */
+   it inherits the nav RSVP link's breathing treatment) — decorates the pill
+   rather than bare text now, same keyframes. Kill it by deleting the
+   .rsvp-arrow-breathe class from the button in rsvp.html. */
 body.page-rsvp.intro-complete .rsvp-arrow.rsvp-arrow-breathe {
     animation: rsvp-arrow-glow 4s ease-in-out infinite;
 }
@@ -682,23 +689,6 @@ body.page-rsvp.intro-complete .rsvp-arrow.rsvp-arrow-breathe {
     50% {
         filter: drop-shadow(0 0 5px rgba(45, 90, 74, 0.3)) drop-shadow(0 0 14px rgba(45, 90, 74, 0.18));
     }
-}
-
-/* Dark mode (reachable via the footer toggle after the settle): cream arrow,
-   cream glow — mirroring the nav-link dark hover values. */
-body.dark-mode.page-rsvp .rsvp-arrow {
-    color: var(--color-soft-white);
-}
-
-body.dark-mode.page-rsvp.intro-complete .rsvp-arrow:hover,
-body.dark-mode.page-rsvp.intro-complete .rsvp-arrow:focus-visible {
-    color: var(--color-soft-white);
-    animation: none;
-    filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35)) drop-shadow(0 0 16px rgba(241, 237, 234, 0.2));
-}
-
-body.dark-mode.page-rsvp .rsvp-arrow:focus-visible {
-    outline-color: var(--color-soft-white);
 }
 
 body.dark-mode.page-rsvp.intro-complete .rsvp-arrow.rsvp-arrow-breathe {
@@ -1402,56 +1392,42 @@ body.page-rsvp .rsvp-stack-back {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: none;
-    border: none;
-    padding: 0.5rem 0.6rem;
-    cursor: pointer;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-dark-green);
-    text-shadow: none;
+    font-size: 1rem;
+    padding: 1rem 2.2rem;
+    /* .btn-normal's own transitioned properties, restated here only to add
+       opacity (this element's enabled/disabled fade) into the same list —
+       see the matching comment on .rsvp-arrow above. */
+    transition: opacity 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease, color 400ms ease, border-color 400ms ease;
     /* Hidden until JS enables it (updateStackNav) — nothing to go back to
        before the flow starts. */
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .rsvp-stack-back-icon {
     display: block;
     flex: 0 0 auto;
+    width: 40px;
+    height: 18px;
 }
 
-body.page-rsvp.intro-complete .rsvp-stack-back:hover,
-body.page-rsvp.intro-complete .rsvp-stack-back:focus-visible {
-    color: var(--color-accent);
-    filter: drop-shadow(0 0 6px rgba(45, 90, 74, 0.4)) drop-shadow(0 0 16px rgba(45, 90, 74, 0.25));
-}
-
+/* .btn-normal already provides hover/active deboss feedback and its own
+   dark-mode colors — only focus-visible needs a rule here (see the matching
+   comment on .rsvp-arrow above). */
 .rsvp-stack-back:focus-visible {
     outline: 2px solid var(--color-dark-green);
     outline-offset: 3px;
 }
 
-.rsvp-stack-back:active {
-    transform: translateY(calc(-50% + 0.5px));
-}
-
-body.dark-mode.page-rsvp .rsvp-stack-back {
-    color: var(--color-soft-white);
-}
-
-body.dark-mode.page-rsvp.intro-complete .rsvp-stack-back:hover,
-body.dark-mode.page-rsvp.intro-complete .rsvp-stack-back:focus-visible {
-    color: var(--color-soft-white);
-    filter: drop-shadow(0 0 6px rgba(241, 237, 234, 0.35)) drop-shadow(0 0 16px rgba(241, 237, 234, 0.2));
-}
-
 body.dark-mode.page-rsvp .rsvp-stack-back:focus-visible {
     outline-color: var(--color-soft-white);
+}
+
+/* .btn-normal's own :active rule sets `transform: translateY(0.5px)`, which
+   would clobber this element's centering transform outright — restate the
+   press offset combined with the centering translate. */
+.rsvp-stack-back:active {
+    transform: translateY(calc(-50% + 0.5px));
 }
 
 /* Desktop (>900px, matching the @media (max-width: 900px) block further
