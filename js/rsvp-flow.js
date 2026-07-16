@@ -746,7 +746,19 @@
             if (!card) { return; }
             pendingFocusTimer = setTimeout(function () {
                 pendingFocusTimer = null;
-                card.focus({ preventScroll: true });
+                // The guest may have already clicked into something on the
+                // card (the email field is the common case) during this
+                // delay — nothing else cancels this timer just because
+                // focus moved, only a brand-new fileTransition does (see
+                // there). Blindly calling card.focus() here would silently
+                // steal focus back out of whatever they clicked into,
+                // discarding the keystrokes that follow with no visible
+                // error — this is the "click once, nothing happens, click
+                // twice" bug. Only take focus if the guest hasn't already
+                // put it somewhere inside the card themselves.
+                if (!card.contains(document.activeElement)) {
+                    card.focus({ preventScroll: true });
+                }
             }, prefersReduced ? 0 : STACK_MOVE_MS + 20);
         }
 

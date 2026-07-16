@@ -1232,6 +1232,18 @@ Three changes from Andrew in one pass.
 
 ---
 
+### Decision J: The delayed post-move `card.focus()` could steal focus out of a field the guest had already clicked into (July 16, 2026)
+
+Reported by Andrew: clicking the email field and typing immediately did nothing — the first click/keystrokes were silently lost, and a second click was needed before typing worked. He pointed at the password-gate field (which never has this problem) as the reference for "whatever works there."
+
+Root cause: `afterMove` (`js/rsvp-flow.js`) schedules `card.focus({ preventScroll: true })` on a `setTimeout` (`STACK_MOVE_MS + 20`, ~857ms) after a card settles, so keyboard/screen-reader users landing on a new card get it focused/announced. Nothing cancels this timer if the guest interacts with the card in the meantime — only a brand-new `fileTransition` clears `pendingFocusTimer`, per its own comment. So a guest who clicks the email input and starts typing within that ~857ms window gets their focus silently yanked back to the card container the moment the timer fires, discarding wherever they'd clicked — the first attempt reads as "nothing happened"; a second click succeeds only because the one-time timer has already fired by then. The password gate has no equivalent delayed-focus mechanism at all (it's a static field, nothing ever competes with a click on it), which is why Andrew's comparison point never shows the bug.
+
+Fix: the timer callback now checks `!card.contains(document.activeElement)` before taking focus — it only moves focus to the card if the guest hasn't already put it somewhere inside the card themselves. Purely additive guard on an existing unconditional action; can't regress the accessibility-focus behavior for guests who haven't yet interacted with the card, and closes the window where a real click's focus was getting silently reclaimed.
+
+**Verification note:** confirmed the mechanism via code reading and confirmed end-to-end (real click into the email field immediately followed by typing) that the full value lands with focus retained. Could not reliably pin the exact sub-second race in the browser preview tool itself — it consistently reports the tab as backgrounded (`document.hidden`) during scripted interaction sequences, making sub-second timing tests against it unreliable — but the fix is a pure safety check on an existing action, so it can only prevent the steal, never introduce a new failure mode.
+
+---
+
 ## Pending Launch Tasks
 
 Recorded, not yet acted on:
