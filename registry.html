@@ -66,9 +66,6 @@
         // ===========================
         // Password Protection
         // ===========================
-        if (location.hash.includes('figmacapture=')) {
-            sessionStorage.setItem('siteUnlocked', 'true');
-        }
         const correctPassword = 'october17';
         const passwordOverlay = document.getElementById('password-overlay');
         const protectedContent = document.getElementById('protected-content');
