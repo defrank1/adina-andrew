@@ -340,12 +340,31 @@ function eventCell(value) {
 // intended serif copy rendered in Gmail's own sans-serif — every element
 // below sets its OWN font-family instead; (2) Outlook desktop strips a
 // <style> block entirely, which would leave the whole email unstyled — so
-// there is no <style> block and no classes anywhere here, only inline
-// style="" attributes. A third constraint: flexbox/grid do not render in
-// email clients, so the label/status event rows use bulletproof two-cell
-// <table>s (buildEmailEventRowHtml) instead. rgba() is avoided throughout in
-// favor of pre-flattened hex, since rgba() support is inconsistent across
-// clients.
+// every COLOR here is still set via an inline style="" attribute as the
+// base/fallback value, and Outlook (which doesn't support email dark mode at
+// all) just renders that fallback, unaffected by anything below. A third
+// constraint: flexbox/grid do not render in email clients, so the
+// label/status event rows use bulletproof two-cell <table>s
+// (buildEmailEventRowHtml) instead. rgba() is avoided throughout in favor of
+// pre-flattened hex, since rgba() support is inconsistent across clients.
+//
+// DARK MODE (July 2026): without any dark-mode handling, phones running dark
+// mode (Gmail app, Apple Mail) were auto-inverting the light cream design
+// themselves — legible, but not the site's actual brand colors. A
+// <head><style> block with @media (prefers-color-scheme: dark) was added
+// back in specifically to override that with the SAME dark green/cream
+// pairing the website itself uses (#122a20 background, #F1EDEA text). This
+// does not reintroduce the Gmail bug above — that bug was specifically
+// `body { font-family }`; every element here still carries its own inline
+// font-family regardless of mode, and the new block only touches
+// color/background/border/display. Every element that needs a different
+// color in dark mode carries BOTH its inline style (the light-mode/Outlook
+// value) AND a class the media query overrides with `!important` — a plain
+// inline style loses to an `!important` rule in an embedded stylesheet,
+// which is exactly what makes the override work. The monogram swaps files
+// entirely in dark mode (mirrors the site's own light/dark image-swap
+// convention) via two stacked <img>s toggled with display:none/block,
+// since mail clients can't reliably swap an <img> src="" live.
 // ============================================================================
 
 // One event row inside the reply card: label left, status right, as a
@@ -355,11 +374,12 @@ function eventCell(value) {
 function buildEmailEventRowHtml(key, attending) {
   var statusColor = attending ? '#2d5a4a' : '#97A29B';
   var statusWeight = attending ? 'bold' : '500';
+  var statusClass = attending ? 'em-status-yes' : 'em-status-no';
   return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;">' +
     '<tr>' +
-    '<td style="padding:5px 0;font-size:14px;color:#415A50;font-family:Georgia,\'Times New Roman\',serif;text-align:left;vertical-align:top;">' +
+    '<td class="em-label" style="padding:5px 0;font-size:14px;color:#415A50;font-family:Georgia,\'Times New Roman\',serif;text-align:left;vertical-align:top;">' +
     EMAIL_EVENT_LABELS[key] + '</td>' +
-    '<td style="padding:5px 0;font-size:12px;letter-spacing:.06em;font-weight:' + statusWeight + ';' +
+    '<td class="' + statusClass + '" style="padding:5px 0;font-size:12px;letter-spacing:.06em;font-weight:' + statusWeight + ';' +
     'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;text-align:right;white-space:nowrap;vertical-align:top;color:' + statusColor + ';">' +
     (attending ? 'Attending' : 'Not attending') + '</td>' +
     '</tr></table>';
@@ -370,13 +390,14 @@ function buildEmailEventRowHtml(key, attending) {
 // neither 'yes' nor 'no' — are skipped entirely, matching the sheet's "not
 // invited" convention), then the italic dinner line directly under Saturday
 // when that person is attending Saturday and has a meal selected. `isFirst`
-// drops the divider/spacing the 2nd-and-later people get (border-top +
-// padding/margin) — see the Design spec's per-person divider rule.
+// drops the divider/spacing (and the em-divider dark-mode class) the
+// 2nd-and-later people get — see the Design spec's per-person divider rule.
 function buildEmailPersonHtml(person, isFirst) {
   var events = person.events || {};
+  var wrapClass = isFirst ? '' : 'em-divider';
   var wrapStyle = isFirst ? '' : 'border-top:1px solid #CFD0CC;padding-top:18px;margin-top:18px;';
-  var html = '<div style="' + wrapStyle + '">' +
-    '<div style="font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:bold;color:#1a3a2e;' +
+  var html = '<div class="' + wrapClass + '" style="' + wrapStyle + '">' +
+    '<div class="em-ink" style="font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:bold;color:#1a3a2e;' +
     'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0 0 10px;">' +
     escapeHtml(person.name || '') + '</div>';
 
@@ -394,7 +415,7 @@ function buildEmailPersonHtml(person, isFirst) {
       var mealText = person.mealKosher
         ? ('Kosher ' + (MEAL_SHORT_NAMES[person.meal] || person.meal))
         : (MEAL_NAMES[person.meal] || person.meal);
-      html += '<div style="font-size:13px;font-style:italic;color:#708279;margin:0 0 4px;' +
+      html += '<div class="em-dinner" style="font-size:13px;font-style:italic;color:#708279;margin:0 0 4px;' +
         'font-family:Georgia,\'Times New Roman\',serif;">Dinner Choice: ' + escapeHtml(mealText) + '</div>';
     }
   });
@@ -408,39 +429,71 @@ function sendConfirmationEmail(email, people, message) {
   }).join('');
 
   if (message) {
-    cardHtml += '<div style="border-top:1px solid #CFD0CC;padding-top:16px;margin-top:20px;">' +
-      '<div style="font-size:9px;text-transform:uppercase;letter-spacing:.18em;font-weight:bold;color:#86948C;' +
+    cardHtml += '<div class="em-divider" style="border-top:1px solid #CFD0CC;padding-top:16px;margin-top:20px;">' +
+      '<div class="em-note-label" style="font-size:9px;text-transform:uppercase;letter-spacing:.18em;font-weight:bold;color:#86948C;' +
       'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0 0 6px;">Your note</div>' +
-      '<div style="font-size:14px;color:#3A554A;font-family:Georgia,\'Times New Roman\',serif;line-height:1.6;">' +
+      '<div class="em-note-body" style="font-size:14px;color:#3A554A;font-family:Georgia,\'Times New Roman\',serif;line-height:1.6;">' +
       escapeHtml(message) + '</div></div>';
   }
 
-  var htmlBody = '<html><body style="margin:0;padding:0;background-color:#F1EDEA;">' +
-    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1EDEA;">' +
+  // Dark-mode overrides only — every selector here also has an inline
+  // fallback value above, so a client that strips this block (Outlook
+  // desktop) or doesn't support prefers-color-scheme just keeps the light
+  // design. Colors match the website's own dark mode (#122a20 background,
+  // #F1EDEA "ink" text); the accent green (#2d5a4a in light mode) is
+  // lightened to #66B295 for dark mode specifically, since the site's literal
+  // accent hex reads too close to #122a20 to work as standalone status text
+  // (unlike its brief use as a nav-hover color on the site).
+  var darkModeCss = '@media (prefers-color-scheme: dark) {' +
+    '.em-bg{background-color:#122a20!important;}' +
+    '.em-card{background-color:#122a20!important;border-color:#77827B!important;}' +
+    '.em-hairline{border-color:#506058!important;}' +
+    '.em-divider{border-color:#354940!important;}' +
+    '.em-ink{color:#F1EDEA!important;}' +
+    '.em-body{color:#D2D2CE!important;}' +
+    '.em-label{color:#C9CAC5!important;}' +
+    '.em-status-yes{color:#66B295!important;}' +
+    '.em-status-no{color:#6F7C75!important;}' +
+    '.em-dinner{color:#989F99!important;}' +
+    '.em-note-label{color:#818B85!important;}' +
+    '.em-note-body{color:#D0D0CC!important;}' +
+    '.em-link{color:#66B295!important;}' +
+    '.em-mono-light{display:none!important;}' +
+    '.em-mono-dark{display:block!important;}' +
+    '}';
+
+  var htmlBody = '<html><head>' +
+    '<meta name="color-scheme" content="light dark">' +
+    '<meta name="supported-color-schemes" content="light dark">' +
+    '<style>' + darkModeCss + '</style>' +
+    '</head><body class="em-bg" style="margin:0;padding:0;background-color:#F1EDEA;">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="em-bg" style="background-color:#F1EDEA;">' +
     '<tr><td align="center">' +
     '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">' +
     '<tr><td style="padding:40px 42px 34px;">' +
 
-    '<img src="https://www.adinaandrew2026.com/assets/monogram/monogram-green.png" alt="Adina &amp; Andrew" width="74" ' +
+    '<img class="em-mono-light" src="https://www.adinaandrew2026.com/assets/monogram/monogram-green.png" alt="Adina &amp; Andrew" width="74" ' +
     'style="display:block;margin:0 auto;width:74px;height:auto;border:0;">' +
-    '<div style="border-top:1px solid #B5BBB5;margin-top:26px;font-size:0;line-height:0;">&nbsp;</div>' +
+    '<img class="em-mono-dark" src="https://www.adinaandrew2026.com/assets/monogram/monogram-white.png" alt="Adina &amp; Andrew" width="74" ' +
+    'style="display:none;margin:0 auto;width:74px;height:auto;border:0;">' +
+    '<div class="em-hairline" style="border-top:1px solid #B5BBB5;margin-top:26px;font-size:0;line-height:0;">&nbsp;</div>' +
 
-    '<p style="margin:30px 0 0;font-size:17px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;">' +
+    '<p class="em-ink" style="margin:30px 0 0;font-size:17px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;">' +
     'Dear ' + escapeHtml(peopleNames(people)) + ',</p>' +
-    '<p style="margin:12px 0 0;font-size:15px;color:#385348;font-family:Georgia,\'Times New Roman\',serif;line-height:1.65;">' +
+    '<p class="em-body" style="margin:12px 0 0;font-size:15px;color:#385348;font-family:Georgia,\'Times New Roman\',serif;line-height:1.65;">' +
     'Your RSVP is in — thank you. Here are your responses:</p>' +
 
-    '<div style="margin-top:24px;background-color:#F1EDEA;border:1px solid #909C95;padding:24px 24px 20px;">' +
+    '<div class="em-card" style="margin-top:24px;background-color:#F1EDEA;border:1px solid #909C95;padding:24px 24px 20px;">' +
     cardHtml + '</div>' +
 
-    '<p style="margin:26px 0 0;font-size:14px;color:#385348;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
+    '<p class="em-body" style="margin:26px 0 0;font-size:14px;color:#385348;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
     'If you need to change or update anything, just go back to the ' +
-    '<a href="https://www.adinaandrew2026.com/rsvp" style="color:#2d5a4a;text-decoration:underline;">RSVP page</a>, ' +
+    '<a class="em-link" href="https://www.adinaandrew2026.com/rsvp" style="color:#2d5a4a;text-decoration:underline;">RSVP page</a>, ' +
     'enter your email, and press &ldquo;Edit Your RSVP&rdquo; at the bottom of the page.</p>' +
 
-    '<p style="margin:18px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;">' +
+    '<p class="em-ink" style="margin:18px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;">' +
     'We can&rsquo;t wait to celebrate with you!</p>' +
-    '<p style="margin:20px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
+    '<p class="em-ink" style="margin:20px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
     'With love,<br>Adina &amp; Andrew</p>' +
 
     '</td></tr></table>' +
