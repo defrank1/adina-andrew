@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 201 69" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="BLEED">
+        <path d="M0,17.008C0,7.58 7.58,0 17.008,0L183.402,0C192.829,0 200.409,7.58 200.409,17.008L200.409,51.024C200.409,60.451 192.829,68.031 183.402,68.031L17.008,68.031C7.58,68.031 0,60.451 0,51.024L0,17.008Z" style="fill:rgb(135,205,250);fill-rule:nonzero;"/>
+    </g>
+    <g id="TRIM">
+        <path d="M4.252,21.26C4.252,11.832 11.832,4.252 21.26,4.252L179.15,4.252C188.577,4.252 196.157,11.832 196.157,21.26L196.157,46.772C196.157,56.199 188.577,63.78 179.15,63.78L21.26,63.78C11.832,63.78 4.252,56.199 4.252,46.772L4.252,21.26Z" style="fill:none;fill-rule:nonzero;"/>
+    </g>
+    <g id="SAFE">
+        <path d="M8.504,25.512C8.504,16.084 16.084,8.504 25.512,8.504L174.898,8.504C184.325,8.504 191.906,16.084 191.906,25.512L191.906,42.52C191.906,51.947 184.325,59.528 174.898,59.528L25.512,59.528C16.084,59.528 8.504,51.947 8.504,42.52L8.504,25.512Z" style="fill:white;fill-rule:nonzero;"/>
+        <path d="M8.504,25.512C8.504,16.084 16.084,8.504 25.512,8.504L174.898,8.504C184.325,8.504 191.906,16.084 191.906,25.512L191.906,42.52C191.906,51.947 184.325,59.528 174.898,59.528L25.512,59.528C16.084,59.528 8.504,51.947 8.504,42.52L8.504,25.512ZM10.504,25.512L10.504,42.52C10.504,50.839 17.193,57.528 25.512,57.528L174.898,57.528C183.217,57.528 189.906,50.839 189.906,42.52L189.906,25.512C189.906,17.193 183.217,10.504 174.898,10.504L25.512,10.504C17.193,10.504 10.504,17.193 10.504,25.512Z" style="fill:rgb(18,58,39);"/>
+    </g>
+    <g transform="matrix(0.527229,0,0,0.527229,-13.300805,3.025787)">
+        <text x="59.977px" y="38.259px" style="font-family:'PPWatch-Bold', 'PP Watch';font-weight:700;font-stretch:expanded;font-size:12px;fill:rgb(19,58,39);">ADINA NELSON &amp; ANDREW DEFRANK</text>
+        <text x="108.727px" y="54.099px" style="font-family:'PPWatch-Bold', 'PP Watch';font-weight:700;font-stretch:expanded;font-size:12px;fill:rgb(19,58,39);">175<tspan x="136.231px " y="54.099px ">1</tspan> CHURCH S<tspan x="232.999px " y="54.099px ">T</tspan>REET NW</text>
+        <text x="189.547px" y="69.939px" style="font-family:'PPWatch-Bold', 'PP Watch';font-weight:700;font-stretch:expanded;font-size:12px;fill:rgb(19,58,39);">APT<tspan x="222.523px " y="69.939px ">.</tspan> 2</text>
+        <g transform="matrix(12,0,0,12,318.894878,85.778917)">
+        </g>
+        <text x="111.679px" y="85.779px" style="font-family:'PPWatch-Bold', 'PP Watch';font-weight:700;font-stretch:expanded;font-size:12px;fill:rgb(19,58,39);">W<tspan x="128.563px " y="85.779px ">A</tspan>SHING<tspan x="192.691px 203.143px " y="85.779px 85.779px ">TO</tspan>N, DC 20036</text>
+    </g>
+</svg>
