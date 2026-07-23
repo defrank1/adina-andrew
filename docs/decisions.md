@@ -1381,6 +1381,24 @@ Verified with a Node harness that reconstructs both the current markup and a tru
 
 ---
 
+### Decision W: Two new FAQ entries, a page-title fix, and per-event dress codes in the confirmation email
+
+Three independent, unrelated changes landed together: two FAQ additions, a `<title>` correction, and dress codes added to the confirmation email.
+
+**FAQ:** "What time should I arrive?" (inserted after "How do I get to the venue?") and "Is there an afterparty?" (appended at the end, after "Will the wedding be outdoors?") were added to `faq.html`, following the existing `faq-item`/`label-heading`/`faq-answer` markup exactly, with no `id` attribute (only `faq-black-tie` carries one, since it's a deep-link target from the RSVP dress-tag popover). Andrew's dictated afterparty copy was normalized in two small ways for consistency with the rest of the site, deliberately, not by mistake: "Kirwan's **on** the Wharf" with a lowercase "on" (matching `AFTERPARTY_DETAILS` in `js/rsvp-flow.js`), and "11:00 PM to 1:00 AM" instead of "11pm to 1am" (matching the time format used on every other event on the site). Verified the seven existing items are byte-identical (a plain diff shows pure insertions, nothing else touched) and that all nine now render in the intended order with no stray `id`.
+
+**Page title:** `dc-guide.html`'s `<title>` changed from "D.C. Guide" to "DC Guide" — the site convention (no periods) applies wherever the text renders in browser chrome. The other two "D.C. Guide" instances (the password-overlay `<h2>` and the page's own `<h1 class="registry-title">`) were deliberately left alone: both render in PP Playground via `var(--font-title)`, where the periods are an intentional typographic choice specific to that display font, not a convention violation. Diffed the file to confirm only the `<title>` line changed.
+
+**Confirmation email dress codes:** the FAQ defines Black Tie Preferred only, and this is a real constraint, not an oversight — publishing Friday's Semi-Formal or Sunday's Come-as-you-are on the public FAQ would tell every guest, including ones only invited to Saturday, that Friday and Sunday events exist at all, which is itself information those guests weren't meant to have. **The confirmation email doesn't have that problem: it's per-guest and already lists only the events that specific person accepted**, so adding the dress code there tells each guest what to wear without disclosing anything about events they weren't invited to. This is a pattern worth remembering for any *other* per-event detail that would otherwise need to stay off the public FAQ for the same reason — the confirmation email is the right channel for it.
+
+Implementation: a new `EMAIL_EVENT_DRESS` constant (Semi-Formal / Black Tie Preferred / Come as you are) was added alongside `EMAIL_EVENT_LABELS`, duplicated from `EVENT_DETAILS.dress` in `js/rsvp-flow.js` with a comment flagging that the two must be kept in sync if the site copy ever changes — `EVENT_DETAILS` itself wasn't touched. For every event a person is **attending** (never a declined one), an italic "Dress: ⟨code⟩" line now renders directly under that event's row, reusing the dinner line's exact styling (`dm-meal` class, identical inline `style=""` string) so the two read as a visually matched pair; on Saturday acceptances, dress renders before dinner. `plainBody` mirrors the same structure and ordering.
+
+Verified with a Node harness: a full-weekend acceptance produces exactly three dress lines, with Saturday's dress line appearing before its dinner line; a declined event shows no dress line for that event while an attending one in the same response still shows its own; a Saturday-only acceptance produces exactly one dress line; a full decline produces zero; the dress line's `style=""` attribute is byte-identical to the dinner line's; `plainBody` matches the specified format exactly; and — the one that matters most for a change like this — stripping every newly-added dress-line `<div>` out of the generated HTML reproduces the pre-change output byte-for-byte, confirming nothing else in the light-mode markup drifted.
+
+**Deploy caveat:** items 1 and 2 (the FAQ entries and the title fix) are live on push, same as any other site HTML/CSS change. **Item 3 is not** — `rsvp-workflow/google-apps-script.js` is repo-only until Andrew pastes it into the Apps Script editor, saves, and redeploys via **Manage deployments → pencil → Version: New version → Deploy**. The file to copy is `rsvp-workflow/google-apps-script.js` (596 lines, starting with `// Google Apps Script for the Wedding RSVP card flow`) — not `js/rsvp-flow.js`, the browser file, which will throw `ReferenceError: document is not defined` if pasted into Apps Script by mistake.
+
+---
+
 ## Pending Launch Tasks
 
 Recorded, not yet acted on:
