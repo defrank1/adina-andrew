@@ -443,10 +443,6 @@ function sendConfirmationEmail(email, people, message) {
     '<p style="margin:20px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
     'With love,<br>Adina &amp; Andrew</p>' +
 
-    '<div style="margin-top:34px;padding-top:16px;border-top:1px solid #C6C9C4;text-align:center;font-size:10px;' +
-    'text-transform:uppercase;letter-spacing:.16em;font-weight:bold;color:#97A29B;' +
-    'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">Reply by the first of September</div>' +
-
     '</td></tr></table>' +
     '</td></tr></table>' +
     '</body></html>';
@@ -478,8 +474,7 @@ function sendConfirmationEmail(email, people, message) {
     '(https://www.adinaandrew2026.com/rsvp), enter your email, and press "Edit\n' +
     'Your RSVP" at the bottom of the page.\n\n' +
     "We can't wait to celebrate with you!\n\n" +
-    'With love,\nAdina & Andrew\n\n' +
-    'Reply by the first of September';
+    'With love,\nAdina & Andrew';
 
   MailApp.sendEmail({
     to: email,
