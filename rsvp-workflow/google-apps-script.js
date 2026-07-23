@@ -89,6 +89,14 @@ var MEAL_SHORT_NAMES = {
   chicken: 'Chicken',
   cauliflower: 'Cauliflower Steak'
 };
+// Event labels for the confirmation email ONLY — these include the date,
+// which EVENT_NAMES (used elsewhere) does not. Kept as a separate constant
+// rather than changing EVENT_NAMES's format.
+var EMAIL_EVENT_LABELS = {
+  friday: 'Welcome Party · Friday, October 16',
+  saturday: 'Ceremony & Reception · Saturday, October 17',
+  sunday: 'Farewell Brunch · Sunday, October 18'
+};
 
 function jsonResponse(obj) {
   return ContentService
@@ -327,80 +335,156 @@ function eventCell(value) {
 
 // ============================================================================
 // Confirmation email — per-person event lines; meal + kosher for Saturday
-// acceptances.
+// acceptances. Rewritten July 2026 after a real Gmail render turned up two
+// failures: (1) Gmail overrides a `font-family` set on `body`, so the
+// intended serif copy rendered in Gmail's own sans-serif — every element
+// below sets its OWN font-family instead; (2) Outlook desktop strips a
+// <style> block entirely, which would leave the whole email unstyled — so
+// there is no <style> block and no classes anywhere here, only inline
+// style="" attributes. A third constraint: flexbox/grid do not render in
+// email clients, so the label/status event rows use bulletproof two-cell
+// <table>s (buildEmailEventRowHtml) instead. rgba() is avoided throughout in
+// favor of pre-flattened hex, since rgba() support is inconsistent across
+// clients.
 // ============================================================================
-function sendConfirmationEmail(email, people, message) {
-  var htmlBody = '<html><head><style>' +
-    "body { font-family: 'Sentient', Georgia, 'Baskerville', serif; color: #1a3a2e; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; }" +
-    '.header { text-align: center; padding: 30px 0; border-bottom: 2px solid #1a3a2e; }' +
-    ".header h1 { font-family: 'PP Playground', 'Brush Script MT', cursive; font-size: 32px; margin: 0; color: #1a3a2e; }" +
-    '.content { background-color: #faf9f6; padding: 25px; border-left: 4px solid #1a3a2e; margin: 20px 0; }' +
-    ".person-name { font-family: 'PP Watch', 'Helvetica Neue', Arial, sans-serif; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin: 18px 0 8px; color: #1a3a2e; }" +
-    '.person-name:first-child { margin-top: 0; }' +
-    '.event-item { padding: 5px 0; }' +
-    '.attending { color: #2d5a4a; font-weight: bold; }' +
-    '.not-attending { color: #888; }' +
-    '.meal { color: #1a3a2e; }' +
-    '.footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #1a3a2e; text-align: center; color: #666; font-size: 14px; }' +
-    '</style></head><body>' +
-    '<div class="header"><h1>Adina &amp; Andrew</h1>' +
-    "<p style=\"margin: 10px 0 0; font-size: 14px; letter-spacing: 2px; font-family: 'PP Watch', 'Helvetica Neue', Arial, sans-serif;\">October 17, 2026 &bull; Washington, DC</p></div>" +
-    '<p style="margin: 30px 0 20px; font-size: 18px;">Dear ' + escapeHtml(peopleNames(people)) + ',</p>' +
-    "<p>Thank you for submitting your RSVP! We're so excited to celebrate with you.</p>" +
-    '<div class="content">';
 
-  var plainBody = 'Dear ' + peopleNames(people) + ',\n\n' +
-    "Thank you for submitting your RSVP for Adina & Andrew's wedding on October 17, 2026 in Washington, DC!\n\n" +
-    "Here's a summary of your response:\n";
+// One event row inside the reply card: label left, status right, as a
+// two-cell table (see the function-level comment above for why a table and
+// not flex). EMAIL_EVENT_LABELS (not EVENT_NAMES) supplies the label text —
+// it includes the date, which EVENT_NAMES does not.
+function buildEmailEventRowHtml(key, attending) {
+  var statusColor = attending ? '#2d5a4a' : '#97A29B';
+  var statusWeight = attending ? 'bold' : '500';
+  return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;">' +
+    '<tr>' +
+    '<td style="padding:5px 0;font-size:14px;color:#415A50;font-family:Georgia,\'Times New Roman\',serif;text-align:left;vertical-align:top;">' +
+    EMAIL_EVENT_LABELS[key] + '</td>' +
+    '<td style="padding:5px 0;font-size:12px;letter-spacing:.06em;font-weight:' + statusWeight + ';' +
+    'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;text-align:right;white-space:nowrap;vertical-align:top;color:' + statusColor + ';">' +
+    (attending ? 'Attending' : 'Not attending') + '</td>' +
+    '</tr></table>';
+}
+
+// One person's block inside the reply card: uppercase name header, one
+// two-cell row per INVITED event (events absent from `events` — value
+// neither 'yes' nor 'no' — are skipped entirely, matching the sheet's "not
+// invited" convention), then the italic dinner line directly under Saturday
+// when that person is attending Saturday and has a meal selected. `isFirst`
+// drops the divider/spacing the 2nd-and-later people get (border-top +
+// padding/margin) — see the Design spec's per-person divider rule.
+function buildEmailPersonHtml(person, isFirst) {
+  var events = person.events || {};
+  var wrapStyle = isFirst ? '' : 'border-top:1px solid #CFD0CC;padding-top:18px;margin-top:18px;';
+  var html = '<div style="' + wrapStyle + '">' +
+    '<div style="font-size:12px;text-transform:uppercase;letter-spacing:.14em;font-weight:bold;color:#1a3a2e;' +
+    'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0 0 10px;">' +
+    escapeHtml(person.name || '') + '</div>';
+
+  EVENT_KEYS.forEach(function (key) {
+    if (events[key] !== 'yes' && events[key] !== 'no') { return; } // not invited
+    var attending = events[key] === 'yes';
+    html += buildEmailEventRowHtml(key, attending);
+
+    if (key === 'saturday' && attending && person.meal) {
+      // "Kosher " + SHORT name, not the full menu description — matches the
+      // front end's kosher-summary rule (js/rsvp-flow.js, mealShortLabelFor,
+      // Section F, July 2026): "Kosher Branzino," never "Kosher Pan-Seared
+      // Herb Branzino." Non-kosher selections get the full name. MEAL_NAMES
+      // and MEAL_SHORT_NAMES are unchanged by this rewrite.
+      var mealText = person.mealKosher
+        ? ('Kosher ' + (MEAL_SHORT_NAMES[person.meal] || person.meal))
+        : (MEAL_NAMES[person.meal] || person.meal);
+      html += '<div style="font-size:13px;font-style:italic;color:#708279;margin:0 0 4px;' +
+        'font-family:Georgia,\'Times New Roman\',serif;">Dinner Choice: ' + escapeHtml(mealText) + '</div>';
+    }
+  });
+
+  return html + '</div>';
+}
+
+function sendConfirmationEmail(email, people, message) {
+  var cardHtml = people.map(function (person, idx) {
+    return buildEmailPersonHtml(person, idx === 0);
+  }).join('');
+
+  if (message) {
+    cardHtml += '<div style="border-top:1px solid #CFD0CC;padding-top:16px;margin-top:20px;">' +
+      '<div style="font-size:9px;text-transform:uppercase;letter-spacing:.18em;font-weight:bold;color:#86948C;' +
+      'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;margin:0 0 6px;">Your note</div>' +
+      '<div style="font-size:14px;color:#3A554A;font-family:Georgia,\'Times New Roman\',serif;line-height:1.6;">' +
+      escapeHtml(message) + '</div></div>';
+  }
+
+  var htmlBody = '<html><body style="margin:0;padding:0;background-color:#F1EDEA;">' +
+    '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F1EDEA;">' +
+    '<tr><td align="center">' +
+    '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">' +
+    '<tr><td style="padding:40px 42px 34px;">' +
+
+    '<img src="https://www.adinaandrew2026.com/assets/monogram/monogram-green.png" alt="Adina &amp; Andrew" width="74" ' +
+    'style="display:block;margin:0 auto;width:74px;height:auto;border:0;">' +
+    '<div style="border-top:1px solid #B5BBB5;margin-top:26px;font-size:0;line-height:0;">&nbsp;</div>' +
+
+    '<p style="margin:30px 0 0;font-size:17px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;">' +
+    'Dear ' + escapeHtml(peopleNames(people)) + ',</p>' +
+    '<p style="margin:12px 0 0;font-size:15px;color:#385348;font-family:Georgia,\'Times New Roman\',serif;line-height:1.65;">' +
+    'Your RSVP is in — thank you. Here are your responses:</p>' +
+
+    '<div style="margin-top:24px;background-color:#F1EDEA;border:1px solid #909C95;padding:24px 24px 20px;">' +
+    cardHtml + '</div>' +
+
+    '<p style="margin:26px 0 0;font-size:14px;color:#385348;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
+    'If you need to change or update anything, just go back to the ' +
+    '<a href="https://www.adinaandrew2026.com/rsvp" style="color:#2d5a4a;text-decoration:underline;">RSVP page</a>, ' +
+    'enter your email, and press &ldquo;Edit Your RSVP&rdquo; at the bottom of the page.</p>' +
+
+    '<p style="margin:18px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;">' +
+    'We can&rsquo;t wait to celebrate with you!</p>' +
+    '<p style="margin:20px 0 0;font-size:15px;color:#1a3a2e;font-family:Georgia,\'Times New Roman\',serif;line-height:1.7;">' +
+    'With love,<br>Adina &amp; Andrew</p>' +
+
+    '<div style="margin-top:34px;padding-top:16px;border-top:1px solid #C6C9C4;text-align:center;font-size:10px;' +
+    'text-transform:uppercase;letter-spacing:.16em;font-weight:bold;color:#97A29B;' +
+    'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;">Reply by the first of September</div>' +
+
+    '</td></tr></table>' +
+    '</td></tr></table>' +
+    '</body></html>';
+
+  var plainBody = 'Dear ' + peopleNames(people) + ',\n' +
+    'Your RSVP is in — thank you. Here are your responses:\n';
 
   people.forEach(function (person) {
     var events = person.events || {};
-    htmlBody += '<div class="person-name">' + escapeHtml(person.name || '') + '</div>';
     plainBody += '\n' + (person.name || '') + '\n';
-
     EVENT_KEYS.forEach(function (key) {
       if (events[key] !== 'yes' && events[key] !== 'no') { return; } // not invited
       var attending = events[key] === 'yes';
-      htmlBody += '<div class="event-item">' + EVENT_NAMES[key] + ': ' +
-        '<span class="' + (attending ? 'attending' : 'not-attending') + '">' +
-        (attending ? '&#10003; Attending' : 'Not attending') + '</span></div>';
-      plainBody += '  ' + EVENT_NAMES[key] + ': ' + (attending ? 'Attending' : 'Not attending') + '\n';
-
+      plainBody += '  ' + EMAIL_EVENT_LABELS[key] + ': ' + (attending ? 'Attending' : 'Not attending') + '\n';
       if (key === 'saturday' && attending && person.meal) {
-        // "Kosher " + SHORT name, not the full menu description — matches
-        // the front end's kosher-summary rule (js/rsvp-flow.js,
-        // mealShortLabelFor, Section F, July 2026): "Kosher Branzino," never
-        // "Kosher Pan-Seared Herb Branzino." Non-kosher selections still get
-        // the full name. NOT deployed yet (APPS_SCRIPT_URL is empty in
-        // js/rsvp-flow.js) — the live copy must be manually redeployed to
-        // pick this up (and the meal-name change above) once it goes live.
         var mealText = person.mealKosher
           ? ('Kosher ' + (MEAL_SHORT_NAMES[person.meal] || person.meal))
           : (MEAL_NAMES[person.meal] || person.meal);
-        htmlBody += '<div class="event-item meal">Dinner: ' + escapeHtml(mealText) + '</div>';
-        plainBody += '  Dinner: ' + mealText + '\n';
+        plainBody += '    Dinner Choice: ' + mealText + '\n';
       }
     });
   });
 
   if (message) {
-    htmlBody += '<div style="margin-top: 20px;"><strong>Your note:</strong>' +
-      '<div style="margin-top: 8px;">' + escapeHtml(message) + '</div></div>';
     plainBody += '\nYour note: ' + message + '\n';
   }
 
-  htmlBody += '</div>' +
-    '<p>If you need to make any changes to your RSVP, just submit it again — or contact us directly.</p>' +
-    "<p style=\"margin-top: 30px;\">We can't wait to celebrate with you!<br><br>Love,<br>Adina &amp; Andrew</p>" +
-    '<div class="footer">This is an automated confirmation email for your RSVP.</div>' +
-    '</body></html>';
-
-  plainBody += '\nIf you need to make any changes to your RSVP, just submit it again — or contact us directly.\n\n' +
-    "We can't wait to celebrate with you!\n\nLove,\nAdina & Andrew";
+  plainBody += '\nIf you need to change or update anything, just go back to the RSVP page\n' +
+    '(https://www.adinaandrew2026.com/rsvp), enter your email, and press "Edit\n' +
+    'Your RSVP" at the bottom of the page.\n\n' +
+    "We can't wait to celebrate with you!\n\n" +
+    'With love,\nAdina & Andrew\n\n' +
+    'Reply by the first of September';
 
   MailApp.sendEmail({
     to: email,
-    subject: "RSVP Confirmation - Adina & Andrew's Wedding",
+    name: 'Adina & Andrew',
+    subject: 'Your RSVP — Adina & Andrew',
     body: plainBody,
     htmlBody: htmlBody
   });
