@@ -97,6 +97,18 @@ var EMAIL_EVENT_LABELS = {
   saturday: 'Ceremony & Reception · Saturday, October 17',
   sunday: 'Farewell Brunch · Sunday, October 18'
 };
+// Dress codes shown in the confirmation email for events the guest is
+// ATTENDING only (never a declined event). Duplicated from the `dress` field
+// of EVENT_DETAILS in js/rsvp-flow.js — keep these two in sync if the site
+// copy ever changes. Deliberately NOT on the public FAQ: Friday/Sunday dress
+// codes would reveal those events exist to guests not invited to them; the
+// email is per-guest and already lists only accepted events, so it has no
+// such disclosure problem.
+var EMAIL_EVENT_DRESS = {
+  friday: 'Semi-Formal',
+  saturday: 'Black Tie Preferred',
+  sunday: 'Come as you are'
+};
 
 function jsonResponse(obj) {
   return ContentService
@@ -397,10 +409,12 @@ function buildEmailEventRowHtml(key, attending) {
 // One person's block inside the reply card: uppercase name header, one
 // two-cell row per INVITED event (events absent from `events` — value
 // neither 'yes' nor 'no' — are skipped entirely, matching the sheet's "not
-// invited" convention), then the italic dinner line directly under Saturday
-// when that person is attending Saturday and has a meal selected. `isFirst`
-// drops the divider/spacing (and the dm-divider dark-mode class) the
-// 2nd-and-later people get — see the Design spec's per-person divider rule.
+// invited" convention), then for each ATTENDING event an italic dress-code
+// line (EMAIL_EVENT_DRESS — never shown for a declined event) followed, on
+// Saturday acceptances only, by the italic dinner line — dress before
+// dinner, per the Design spec. `isFirst` drops the divider/spacing (and the
+// dm-divider dark-mode class) the 2nd-and-later people get — see the Design
+// spec's per-person divider rule.
 function buildEmailPersonHtml(person, isFirst) {
   var events = person.events || {};
   var wrapClass = isFirst ? '' : 'dm-divider';
@@ -414,6 +428,11 @@ function buildEmailPersonHtml(person, isFirst) {
     if (events[key] !== 'yes' && events[key] !== 'no') { return; } // not invited
     var attending = events[key] === 'yes';
     html += buildEmailEventRowHtml(key, attending);
+
+    if (attending) {
+      html += '<div class="dm-meal" style="font-size:13px;font-style:italic;color:#708279;margin:0 0 4px;' +
+        'font-family:Georgia,\'Times New Roman\',serif;">Dress: ' + EMAIL_EVENT_DRESS[key] + '</div>';
+    }
 
     if (key === 'saturday' && attending && person.meal) {
       // "Kosher " + SHORT name, not the full menu description — matches the
@@ -525,6 +544,9 @@ function sendConfirmationEmail(email, people, message) {
       if (events[key] !== 'yes' && events[key] !== 'no') { return; } // not invited
       var attending = events[key] === 'yes';
       plainBody += '  ' + EMAIL_EVENT_LABELS[key] + ': ' + (attending ? 'Attending' : 'Not attending') + '\n';
+      if (attending) {
+        plainBody += '    Dress: ' + EMAIL_EVENT_DRESS[key] + '\n';
+      }
       if (key === 'saturday' && attending && person.meal) {
         var mealText = person.mealKosher
           ? ('Kosher ' + (MEAL_SHORT_NAMES[person.meal] || person.meal))
