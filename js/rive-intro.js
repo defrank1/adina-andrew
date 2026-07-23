@@ -37,6 +37,7 @@
     var SETTLE_MS = 450;          // settle transition length (0 = instant brand page)
     var COVER_CREAM = '#F1EDEA';  // matches the in-Rive cover rect exactly
     var SAFETY_MS = 26000;        // backstop only — DURATION_S plus margin
+    var RUNTIME_LOAD_TIMEOUT_MS = 8000; // cellular stall guard — see loadRuntime
 
     var queryParams = new URLSearchParams(location.search);
 
@@ -275,11 +276,32 @@
     function loadRuntime() {
         return new Promise(function (resolve, reject) {
             if (window.rive) { resolve(); return; }
+            var settled = false;
             var s = document.createElement('script');
             s.src = RIVE_RUNTIME;
             s.async = true;
-            s.onload = function () { resolve(); };
-            s.onerror = function () { reject(new Error('Rive runtime failed to load')); };
+            // Cellular stall guard: a stalled request never fires onload or onerror,
+            // so without this the promise hangs forever and initRive (and its
+            // SAFETY_MS backstop) never gets a chance to run. On timeout, reject with
+            // the same error path as onerror so the existing .catch(skipIntro) at the
+            // call site handles it — no new bail path.
+            var loadTimer = setTimeout(function () {
+                settled = true;
+                if (s.parentNode) { s.parentNode.removeChild(s); }
+                reject(new Error('Rive runtime load timed out'));
+            }, RUNTIME_LOAD_TIMEOUT_MS);
+            s.onload = function () {
+                if (settled) { return; }
+                settled = true;
+                clearTimeout(loadTimer);
+                resolve();
+            };
+            s.onerror = function () {
+                if (settled) { return; }
+                settled = true;
+                clearTimeout(loadTimer);
+                reject(new Error('Rive runtime failed to load'));
+            };
             document.head.appendChild(s);
         });
     }
