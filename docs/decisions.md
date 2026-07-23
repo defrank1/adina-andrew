@@ -1346,6 +1346,8 @@ Verified with a standalone Node harness extracting the pure HTML-building functi
 
 **Deploy caveat:** editing the repo file changes nothing in production by itself, same as the last two Apps Script changes. Andrew must paste the updated file into the Apps Script editor and redeploy via **Manage deployments → edit** (preserves the existing URL), not **New deployment**. He should send himself one test RSVP afterward and check it on a phone — the 74px monogram and its hairlines are a known weak point at small sizes, and that's not something a Node harness against generated HTML strings can verify.
 
+**Follow-up (July 2026): the footer line ("Reply by the first of September") was removed** from both bodies — the RSVP-by date is already communicated in the invitation email and on the site, so the line was redundant. The closing signature ("With love, / Adina & Andrew") is now the last visible content in both the HTML and plain-text bodies.
+
 ---
 
 ## Pending Launch Tasks
