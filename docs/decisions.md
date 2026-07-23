@@ -1286,4 +1286,3 @@ Recorded, not yet acted on:
 
 1. **`rsvp.html` password** is currently `beautifulsuperstar`/`rsvpUnlocked` (a dev gate) while every other page uses `october17`/`siteUnlocked`. Guests clicking RSVP from the nav hit a dead-end second password wall — must switch to the guest password at launch.
 2. **`APPS_SCRIPT_URL`** in `js/rsvp-flow.js` is empty (staging mode, placeholder invitations/responses + no-op submit). Deploy the Apps Script web app and paste the URL at launch — this also picks up the `?action=response` endpoint (Decision G above) and the meal-name/kosher-summary changes (Decision F) in the confirmation email, none of which are live yet.
-3. **Delete `rsvp-internal.html` and `js/rsvp-form.js`** from main at launch — GitHub Pages has no server-side auth, so deletion from the deployed branch is the only way to make the internal staging form non-public. Recoverable from git history.
