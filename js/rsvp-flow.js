@@ -65,7 +65,7 @@
     // ---- CONFIG ------------------------------------------------------------
 
     // Paste the deployed Apps Script web-app URL here to go live. Empty = staging.
-    var APPS_SCRIPT_URL = '';
+    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywSDY5TFjzhHsGgj-G_PZFm_hGR-ot7AJWK_Ul4d9PK6_toReBo2XmIEDEshv1PpGU/exec';
 
     var DEBOUNCE_MS = 180;
     var REPLY_BY = 'the first of September'; // September 1, 2026 (confirmed)
@@ -174,10 +174,14 @@
         { email: 'williams.party@example.com', invitedTo: ['saturday', 'sunday'], people: ['Sarah Williams', 'Tom Williams'] },
         // Scale-test fixtures: deepest (4-person/3-event) and shallowest
         // (1-person/2-event) realistic parties.
-        { email: 'garcia.family@example.com', invitedTo: ['friday', 'saturday', 'sunday'],
-          people: ['Elena Garcia', 'Marco Garcia', 'Sofia Garcia', 'Luis Garcia'] },
-        { email: 'dpatel@example.com', invitedTo: ['friday', 'saturday'],
-          people: ['Dev Patel'] }
+        {
+            email: 'garcia.family@example.com', invitedTo: ['friday', 'saturday', 'sunday'],
+            people: ['Elena Garcia', 'Marco Garcia', 'Sofia Garcia', 'Luis Garcia']
+        },
+        {
+            email: 'dpatel@example.com', invitedTo: ['friday', 'saturday'],
+            people: ['Dev Patel']
+        }
     ];
 
     // Canned prior responses for the returning-guest fast path (Section G3,
@@ -398,8 +402,8 @@
         // of a special-cased dual-exit.
         var invitation = null;        // the selected { email, invitedTo, people }
         var latestResponse = null;    // the guest's latest known submission — a
-                                       // fresh send's own data, or a fetched
-                                       // prior response (see fetchLatestResponse)
+        // fresh send's own data, or a fetched
+        // prior response (see fetchLatestResponse)
         var stack = [invitationCardEl];
         // The cards selectInvitation() built and spliced into `stack` for the
         // CURRENTLY selected invitation, tracked so a later re-selection (a
