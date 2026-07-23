@@ -65,7 +65,7 @@
     // ---- CONFIG ------------------------------------------------------------
 
     // Paste the deployed Apps Script web-app URL here to go live. Empty = staging.
-    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywSDY5TFjzhHsGgj-G_PZFm_hGR-ot7AJWK_Ul4d9PK6_toReBo2XmIEDEshv1PpGU/exec';
+    var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSYsZ1gjjfP0NvCMaY5ywWk-NZheGAn0AukbZgSeYnyvWw6GugxHPzzJdXvuXQi7rD8g/exec';
 
     var DEBOUNCE_MS = 180;
     // Gates the lookup (July 2026 — was "typed past the @"): only query once
