@@ -270,6 +270,15 @@
         return Promise.race([live, timeout]);
     }
 
+    // A successful lookup means the server matched this address EXACTLY against
+    // the Guests sheet — a stronger proof of invitation than the shared
+    // `october17` password, which anyone can forward. So it unlocks the rest of
+    // the site (Travel, FAQ, DC Guide, Our Story, Registry all read the same
+    // `siteUnlocked` key) and the guest never sees a password prompt.
+    function unlockSite() {
+        try { localStorage.setItem('siteUnlocked', 'true'); } catch (e) { /* private mode */ }
+    }
+
     // ---- DOM HELPERS ---------------------------------------------------------
 
     function el(tag, className, text) {
@@ -1150,6 +1159,7 @@
         // on a unified array — see the stack engine above).
         function selectInvitation(inv) {
             invitation = inv;
+            unlockSite();
             emailInput.value = inv.email;
             hideSuggestions();
             removePersonalCards();
