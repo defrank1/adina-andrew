@@ -1,0 +1,18 @@
+# GitHub Pages builds this site with Jekyll (no .nojekyll present). Jekyll
+# already excludes dotfiles and underscore-prefixed paths (.claude/, _source/)
+# from the build regardless of this file — that filtering is separate from
+# the `exclude` key below.
+#
+# Declaring `exclude` here REPLACES Jekyll's own default exclude list rather
+# than adding to it, so those defaults are restated explicitly alongside the
+# paths this site needs kept off the live URL: internal docs, the Apps
+# Script source, and the design-spec file. None of these are moved or
+# renamed — they stay in the repo, just out of the built site.
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/
+  - docs/
+  - rsvp-workflow/
+  - CLAUDE.md
