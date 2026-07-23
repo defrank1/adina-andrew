@@ -43,21 +43,23 @@
 //    top of js/rsvp-flow.js
 //
 // ACTIONS (GET, ?action=...):
-//   lookup   ?q=<term>      substring match against Guests.Email — see
-//                           handleLookup
+//   lookup   ?q=<term>      exact, case-insensitive match against
+//                           Guests.Email — see handleLookup
 //   response ?email=<email> the caller's LATEST submission (attendance +
 //                           meal, by exact email), for the returning-guest
 //                           fast path — see handleLatestResponse
 //
-// PRIVACY CAVEAT (accepted tradeoff, restated honestly): with access set to
-// "Anyone", both GET endpoints can technically be queried by anyone who finds
-// the URL — so guest emails/names/attendance/meals are only as private as
-// that URL plus the RSVP password gate on the site. The client only queries
-// lookup after the guest has typed past the "@" of their own email, but the
-// server itself does a plain substring match there; ?action=response does an
-// exact match instead, but is otherwise the same URL/password tradeoff. This
-// is the same tradeoff as the original lookup design, now extended to the
-// second endpoint — accepted by Andrew, July 2026.
+// PRIVACY CAVEAT (accepted tradeoff, restated honestly — updated July 2026,
+// supersedes the earlier substring-match version of this note): with access
+// set to "Anyone", both GET endpoints remain publicly queryable by anyone who
+// finds the URL. As of July 2026, ?action=lookup requires an exact email
+// match rather than a substring — a caller can no longer enumerate the guest
+// list from a partial string like "gmail.com"; ?action=response already
+// required an exact match. The residual exposure on both endpoints is
+// confirm/deny for a SPECIFIC, already-guessed address: a correct guess
+// returns that invitation's names, invited events, and (via ?action=response)
+// prior submission. That residual is accepted by Andrew, July 2026, as the
+// cost of a web app callable without credentials.
 //
 // CORS NOTE: Apps Script web apps don't set CORS headers for JSON posts. The
 // front end therefore sends Content-Type: text/plain with a JSON string body
@@ -130,10 +132,12 @@ function findEventColumns(headerRow) {
   return map;
 }
 
-// Case-insensitive substring match against Guests.Email. Returns
-// [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }]
-// (The client already enforces "typed past the @" before querying; the server
-// just matches.)
+// Exact, case-insensitive match against Guests.Email (July 2026 — was a
+// substring match; see the PRIVACY CAVEAT above for why). Returns zero or one
+// invitation: [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }].
+// The client now gates on a complete-address shape before ever calling this
+// (see EMAIL_SHAPE in js/rsvp-flow.js), so in practice q already looks like a
+// full email — the server enforces the exact match regardless.
 function handleLookup(e) {
   var q = ((e.parameter.q || '') + '').trim().toLowerCase();
   if (!q) { return jsonResponse([]); }
@@ -166,7 +170,7 @@ function handleLookup(e) {
   // Row 0 is the header.
   for (var i = 1; i < rows.length; i++) {
     var email = (rows[i][0] + '').trim();
-    if (!email || email.toLowerCase().indexOf(q) === -1) { continue; }
+    if (!email || email.toLowerCase() !== q) { continue; }
 
     var people = [];
     for (var n = 1; n < firstEventCol; n++) {

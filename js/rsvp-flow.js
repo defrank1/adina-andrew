@@ -68,6 +68,13 @@
     var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywSDY5TFjzhHsGgj-G_PZFm_hGR-ot7AJWK_Ul4d9PK6_toReBo2XmIEDEshv1PpGU/exec';
 
     var DEBOUNCE_MS = 180;
+    // Gates the lookup (July 2026 — was "typed past the @"): only query once
+    // `term` looks like a COMPLETE email address. The server now requires an
+    // exact match (see handleLookup in rsvp-workflow/google-apps-script.js),
+    // so a partial string could never return anything there anyway — this
+    // just keeps the client from firing a request on every keystroke of an
+    // address that isn't finished yet.
+    var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     var REPLY_BY = 'the first of September'; // September 1, 2026 (confirmed)
 
     // ---- stack choreography timing -----------------------------------------
@@ -208,7 +215,7 @@
         var q = query.trim().toLowerCase();
         if (!APPS_SCRIPT_URL) {
             return Promise.resolve(PLACEHOLDER_INVITATIONS.filter(function (inv) {
-                return inv.email.toLowerCase().indexOf(q) !== -1;
+                return inv.email.toLowerCase() === q;
             }));
         }
         return fetch(APPS_SCRIPT_URL + '?action=lookup&q=' + encodeURIComponent(q))
@@ -978,7 +985,7 @@
             emailInput.id = 'rsvpFlowEmail';
             emailInput.autocomplete = 'off';
             emailInput.inputMode = 'email';
-            emailInput.placeholder = 'Start typing your email…';
+            emailInput.placeholder = 'Enter your email address';
 
             emailSuggestions = el('div', 'guest-suggestions');
             emailSuggestions.id = 'rsvpFlowSuggestions';
@@ -1021,15 +1028,43 @@
             // Editing away from a selected invitation resets the whole step list.
             if (invitation && term !== invitation.email) { clearSelection(); }
             if (debounceTimer) { clearTimeout(debounceTimer); }
-            // Privacy rule: only query once the guest has typed past the "@" —
-            // you can't fish for other people's emails from a few letters.
-            var at = term.indexOf('@');
-            if (at === -1 || term.length <= at + 1) { hideSuggestions(); return; }
+            // The privacy rule this used to enforce ("typed past the @") now
+            // lives on the server as an exact-match requirement (handleLookup,
+            // July 2026) — a partial string can't return anything there
+            // either way. This gate just keeps a lookup from firing before
+            // the guest has finished typing a complete address; DEBOUNCE_MS
+            // below still matters on top of it (e.g. ".co" then ".com" would
+            // otherwise fire two requests).
+            if (!EMAIL_SHAPE.test(term)) { hideSuggestions(); return; }
             debounceTimer = setTimeout(function () {
-                searchInvitations(term).then(displaySuggestions).catch(function () {
+                showLookupLoading();
+                searchInvitations(term).then(function (invitations) {
+                    // The guest kept typing (or cleared the field) while this
+                    // was in flight — a newer input event already owns the
+                    // dropdown. Same discard-if-superseded shape as
+                    // selectInvitation's own guard on fetchLatestResponse.
+                    if (emailInput.value.trim() !== term) { return; }
+                    displaySuggestions(invitations);
+                }).catch(function () {
+                    if (emailInput.value.trim() !== term) { return; }
                     displaySuggestions(null, 'Something went wrong — please try again.');
                 });
             }, DEBOUNCE_MS);
+        }
+
+        // Single non-interactive "Looking…" row shown the instant the one
+        // debounced request fires. An exact-match server lookup measures
+        // 1.5-6.7s live, and with the client now sending exactly one request
+        // per completed address (not one per keystroke), the guest needs
+        // some feedback in that gap rather than an unchanged, apparently
+        // inert dropdown. Reuses .guest-suggestion-empty — the same
+        // non-interactive styling as the "no match" state — rather than
+        // adding new CSS.
+        function showLookupLoading() {
+            emailSuggestions.innerHTML = '';
+            emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty', 'Looking…'));
+            emailSuggestions.style.display = 'block';
+            emailInput.classList.add('suggestions-open');
         }
 
         function displaySuggestions(invitations, errorText) {
