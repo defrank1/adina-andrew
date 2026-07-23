@@ -4,13 +4,23 @@
 // SPREADSHEET LAYOUT (create these two tabs in one Google Sheet)
 // ============================================================================
 //
-// Tab "Guests" — the invitation list, filled in manually by Andrew:
-//   Email | Names | Friday | Saturday | Sunday
-//   - Email:  the address the invitation was sent to (one row per invitation)
-//   - Names:  ";"-separated names covered by that invitation (1–2 people),
-//             e.g.  "Robert Johnson; Patricia Johnson"
+// Tab "Guests" — the invitation list, filled in manually by Andrew (one row
+// per invitation; one PERSON per column rather than a ";"-separated cell,
+// since discrete cells are far less error-prone to hand-enter and audit):
+//   Email | Name 1 | Name 2 | Name 3 | Name 4 | Name 5 | Name 6 | Friday | Saturday | Sunday
+//   - Email:   the address the invitation was sent to
+//   - Name 1..Name 6:  one person per column, left to right; blanks are
+//             skipped, so a 2-person invitation just leaves Name 3-6 empty
 //   - Friday / Saturday / Sunday:  TRUE/FALSE (checkboxes work) or "yes"/blank
-//             for whether that invitation includes the event
+//             for whether that invitation includes the event. These three
+//             columns are located by their HEADER TEXT (must be spelled
+//             exactly "Friday", "Saturday", "Sunday"), not by fixed index —
+//             see findEventColumns / handleLookup. Column ORDER among the
+//             name columns and event columns is otherwise flexible.
+//   - Any scratch/notes column must go to the RIGHT of Friday/Saturday/Sunday.
+//             Everything between Email and the first event column is read as
+//             a person's name, so a notes column placed among the names would
+//             be picked up as a phantom guest.
 //
 // Tab "Responses" — written by this script, one row PER PERSON per submission:
 //   Timestamp | Email | Name | Friday | Saturday | Sunday | Meal | Kosher | Message
@@ -100,6 +110,26 @@ function doGet(e) {
   }
 }
 
+// Locates the Friday/Saturday/Sunday columns by HEADER TEXT in row 1 rather
+// than by fixed index (July 2026 schema change). With one column per person,
+// the number of name columns can change; deriving the event columns from the
+// headers means inserting or removing a name column can never silently shift
+// which cell is read as "Saturday". Returns a { friday, saturday, sunday } map
+// of 0-based column indices, or null if any header is missing.
+function findEventColumns(headerRow) {
+  var map = {};
+  for (var c = 0; c < headerRow.length; c++) {
+    var label = (headerRow[c] + '').trim().toLowerCase();
+    for (var k = 0; k < EVENT_KEYS.length; k++) {
+      if (label === EVENT_KEYS[k]) { map[EVENT_KEYS[k]] = c; }
+    }
+  }
+  for (var j = 0; j < EVENT_KEYS.length; j++) {
+    if (typeof map[EVENT_KEYS[j]] !== 'number') { return null; }
+  }
+  return map;
+}
+
 // Case-insensitive substring match against Guests.Email. Returns
 // [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }]
 // (The client already enforces "typed past the @" before querying; the server
@@ -114,20 +144,41 @@ function handleLookup(e) {
   }
 
   var rows = sheet.getDataRange().getValues();
+  if (rows.length < 2) { return jsonResponse([]); }
+
+  var eventCols = findEventColumns(rows[0]);
+  if (!eventCols) {
+    return jsonResponse({
+      status: 'error',
+      message: 'Guests sheet header row must contain columns named Friday, Saturday, and Sunday'
+    });
+  }
+
+  // Name columns are every column between Email (0) and the first event
+  // column. Derived, not hardcoded — with the July 2026 layout that is B..G
+  // (Name 1..Name 6), but adding a Name 7 requires no code change.
+  var firstEventCol = Math.min(
+    eventCols.friday, eventCols.saturday, eventCols.sunday
+  );
+
   var results = [];
 
-  // Row 0 is the header (Email | Names | Friday | Saturday | Sunday).
+  // Row 0 is the header.
   for (var i = 1; i < rows.length; i++) {
     var email = (rows[i][0] + '').trim();
     if (!email || email.toLowerCase().indexOf(q) === -1) { continue; }
 
-    var people = (rows[i][1] + '').split(';')
-      .map(function (name) { return name.trim(); })
-      .filter(function (name) { return name.length > 0; });
+    var people = [];
+    for (var n = 1; n < firstEventCol; n++) {
+      var name = (rows[i][n] + '').trim();
+      if (name) { people.push(name); }
+    }
 
     var invitedTo = [];
     for (var c = 0; c < EVENT_KEYS.length; c++) {
-      if (isInvited(rows[i][2 + c])) { invitedTo.push(EVENT_KEYS[c]); }
+      if (isInvited(rows[i][eventCols[EVENT_KEYS[c]]])) {
+        invitedTo.push(EVENT_KEYS[c]);
+      }
     }
 
     results.push({ email: email, invitedTo: invitedTo, people: people });
