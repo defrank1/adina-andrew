@@ -150,14 +150,17 @@
         const passwordInput = document.getElementById('password-input');
         const passwordError = document.getElementById('password-error');
 
-        if (sessionStorage.getItem('siteUnlocked') === 'true') {
+        // localStorage, not sessionStorage (July 2026): a guest who RSVPs on
+        // Monday and returns Friday for the hotel block would otherwise be
+        // walled again, possibly without the invitation email to hand.
+        if (localStorage.getItem('siteUnlocked') === 'true') {
             unlockContent();
         }
 
         passwordForm.addEventListener('submit', function (e) {
             e.preventDefault();
             if (passwordInput.value === correctPassword) {
-                sessionStorage.setItem('siteUnlocked', 'true');
+                localStorage.setItem('siteUnlocked', 'true');
                 unlockContent();
             } else {
                 passwordError.classList.add('show');
@@ -172,7 +175,7 @@
             document.body.classList.remove('locked');
         }
 
-        if (sessionStorage.getItem('siteUnlocked') !== 'true') {
+        if (localStorage.getItem('siteUnlocked') !== 'true') {
             document.body.classList.add('locked');
         }
 
