@@ -1433,7 +1433,7 @@ A real tester typed his full email into the lookup card, saw his address appear 
 
 Verified in the browser (light and dark mode): a matching email shows the cue line above a row with a visible resting fill and chevron; the `Looking…` and no-match states show neither; clicking or tapping the row still calls `selectInvitation` and advances exactly as before; ArrowDown from the email input still focuses the row directly (skipping the cue, which isn't a `<button>`) and Enter still selects it; the `:focus-visible` outline still renders uninterrupted by the chevron; and no other element on the lookup card (input, hint text, card title) moved or restyled.
 
-**Deploy caveat:** both files are site files — this is live on push, no Apps Script step. The original complaint was specifically from a phone; Andrew still needs to confirm on a real device that the row now reads as tappable, since that judgment can't be fully made from a desktop browser.
+**Deploy caveat:** both files are site files — this is live on push, no Apps Script step. This wasn't a mobile-specific concern — the row read as passive body text on desktop too, with only a faint `:hover` tint as any signal, which is exactly what the chevron/fill/cue fix targets at every viewport (the CSS carries no media query). Andrew should sanity-check the row on both a desktop browser and a real phone before considering this closed.
 
 ---
 
