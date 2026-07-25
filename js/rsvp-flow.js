@@ -1084,6 +1084,17 @@
                     errorText || 'No match found — check the email on your invitation.');
                 emailSuggestions.appendChild(empty);
             } else {
+                // A real tester typed his full address and didn't realize the
+                // row itself was the action — there's no separate Next button
+                // on this card, selecting the suggestion IS the advance. This
+                // cue states that plainly. Reuses the empty-state styling (muted,
+                // non-interactive) rather than the button treatment below it, and
+                // rides along for free in focusableSuggestions' existing
+                // :not(.guest-suggestion-empty) filter — no separate exclusion
+                // needed. Shown only here, never during Looking… or no-match.
+                var cue = el('div', 'guest-suggestion-item guest-suggestion-empty',
+                    'Select your invitation to continue');
+                emailSuggestions.appendChild(cue);
                 invitations.forEach(function (inv) {
                     var btn = el('button', 'guest-suggestion-item', inv.email);
                     btn.type = 'button';

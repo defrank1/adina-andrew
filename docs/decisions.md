@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: July 16, 2026
+Last updated: July 25, 2026
 
 ---
 
@@ -1414,6 +1414,26 @@ A guest arriving from the invitation email hit two gates for one person: the `be
 **Findings reported, not acted on (per scope):** grepping the repo for `rsvpUnlocked` after deletion turned up nothing outside documentation (`CLAUDE.md`, this file) — no code references remain. One orphaned CSS rule was found and deliberately left in place: `body.page-rsvp.locked .main-nav` (`css/styles.css`, ~line 374) can now never match, since `rsvp.html`'s `body` never gets `.locked` again — it was kept per instruction not to delete CSS in this task. `js/rive-intro.js`'s `sessionStorage` use for `intro-seen` is unrelated (the once-per-session intro-replay gate) and was correctly left on `sessionStorage`. `savethedate.html` has no `saveTheDateUnlocked` key in the current codebase at all — it's already a retired redirect stub with no password logic — so the "don't touch it" instruction was moot for the live tree, though stale copies of that key do exist in gitignored `.claude/worktrees/` leftovers from unrelated prior sessions, well outside this task's scope.
 
 Verified end-to-end in the browser with all storage cleared: `/rsvp` loads straight into the Metro intro with no password prompt; the intro, hard cut, and settled invitation card behave identically to before; `/travel` visited directly still prompts for `october17`; visiting `/rsvp` without entering an email and then clicking Travel in the nav still prompts; entering a non-matching email leaves `siteUnlocked` unset; entering a valid guest email and selecting the suggestion sets `localStorage.siteUnlocked` immediately, and Travel then loads with no prompt; opening a brand-new browser tab (confirmed via an empty `sessionStorage` in that tab, proving it's a genuinely fresh session context) still shows Travel unlocked, confirming the persistence is real `localStorage` behavior and not a same-tab artifact; and `body.dark-mode` is applied to both `<html>` and `<body>` before first paint on `rsvp.html` with dark mode enabled, with `body.locked` never present, confirming the flash-prevention block survived intact.
+
+---
+
+### Decision Y: The email-lookup suggestion didn't read as tappable — strengthened with a chevron, resting fill, and cue line
+
+A real tester typed his full email into the lookup card, saw his address appear in the dropdown, and stopped — he didn't realize the row itself was the action. On this card, selecting the suggestion *is* the advance (there's no separate Next button on the lookup card the way every other card in the flow has one), but the row was styled as plain body text with only a faint hover tint, giving no signal that it was a control at all.
+
+**Two alternatives were considered and rejected.** Labeling the row "Next" was rejected because the persistent `#rsvp-arrow` Next control (Decision: Nav Unification, July 2026) already owns that word on every other card in the flow — reusing it here would read as a second, competing Next control, and would wrongly imply a select-then-advance two-step ("pick the row, then press Next") when actually selecting the row *is* the whole action. Auto-advancing on a match (skipping the tap entirely) was also rejected — the tap-to-confirm beat is deliberate: the guest should see their own name matched and choose it, not have the flow silently jump forward the instant a debounced network request resolves.
+
+**What shipped instead:** the fix leaves the tap-to-confirm interaction untouched and only strengthens how obviously the row reads as a target.
+
+- **Chevron affordance** — `css/rsvp-styles.css`. The real (selectable) suggestion, `.guest-suggestion-item:not(.guest-suggestion-empty)` scoped to the lookup card, gets a trailing `::after { content: "\203A" }` (no SVG, no image asset), laid out via `display: flex; justify-content: space-between` so the email sits left and the chevron sits right, vertically centered.
+- **Resting fill** — the row now carries a light fill at rest (`rgba(26,58,46,0.05)` light / `rgba(241,237,234,0.08)` dark — the same rgba families already used throughout this file, no new colors), so it reads as pressable before the pointer ever reaches it, with hover (`0.14`/`0.16`) and active (`0.2`/`0.22`) strengthened further above that baseline.
+- **`:focus-visible` preserved exactly** — the base rule's outline (`2px solid`, `outline-offset: -2px`) was left untouched; a scoped override restates the *same* focus background value (`0.08` light / `0.1` dark) the base rule already used, purely to stop the new resting-fill rule's higher specificity from quietly changing it. The chevron sits inside the row's own padding via `flex-shrink: 0`, so it doesn't overlap or get clipped by the inset outline.
+- **Cue line** — `js/rsvp-flow.js`, `displaySuggestions`' real-match branch only. A line reading "Select your invitation to continue" renders directly above the button, reusing the existing `.guest-suggestion-empty` (muted, non-interactive) treatment rather than new CSS. Wording was chosen to work regardless of pointer type, since the front end can't reliably tell mouse from touch — "Tap to continue" was considered and dropped for that reason.
+- **Scope held tight**: the `Looking…` state and the "No match found" message (`showLookupLoading` and the empty/error branch of `displaySuggestions`) were not touched — both still carry `guest-suggestion-empty` and stay plain. Because the cue line reuses that same class, it rides along for free in `focusableSuggestions`' existing `:not(.guest-suggestion-empty)` filter — no separate exclusion code was needed, and arrow-key navigation (`onEmailInputKeydown`, `onSuggestionsKeydown`) required no changes at all.
+
+Verified in the browser (light and dark mode): a matching email shows the cue line above a row with a visible resting fill and chevron; the `Looking…` and no-match states show neither; clicking or tapping the row still calls `selectInvitation` and advances exactly as before; ArrowDown from the email input still focuses the row directly (skipping the cue, which isn't a `<button>`) and Enter still selects it; the `:focus-visible` outline still renders uninterrupted by the chevron; and no other element on the lookup card (input, hint text, card title) moved or restyled.
+
+**Deploy caveat:** both files are site files — this is live on push, no Apps Script step. The original complaint was specifically from a phone; Andrew still needs to confirm on a real device that the row now reads as tappable, since that judgment can't be fully made from a desktop browser.
 
 ---
 

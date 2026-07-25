@@ -1025,6 +1025,44 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     border-radius: 0;
 }
 
+/* The real (selectable) suggestion is the advance on this card — there's no
+   separate Next button here, so it needs to read as a tappable action, not a
+   passive line. Chevron + resting fill give it that at rest, before any
+   hover. Explicitly excludes .guest-suggestion-empty (Looking… / no-match),
+   which stays a plain passive line — see js/rsvp-flow.js. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    background-color: rgba(26, 58, 46, 0.05);
+}
+
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty)::after {
+    content: "\203A";
+    flex-shrink: 0;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--color-dark-green);
+    opacity: 0.55;
+}
+
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):hover {
+    background-color: rgba(26, 58, 46, 0.14);
+}
+
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):active {
+    background-color: rgba(26, 58, 46, 0.2);
+}
+
+/* Restates the base :focus-visible background at the same value (see
+   .guest-suggestion-item:focus-visible above) so the new resting fill's
+   higher specificity doesn't quietly change it — the outline itself is
+   untouched here and keeps coming from that base rule. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):focus-visible {
+    background-color: rgba(26, 58, 46, 0.08);
+}
+
 body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestions {
     background-color: #0e2319;
     border-color: var(--color-soft-white);
@@ -1038,6 +1076,27 @@ body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestions::before 
 
 body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item {
     border-bottom-color: rgba(241, 237, 234, 0.14);
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty) {
+    background-color: rgba(241, 237, 234, 0.08);
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty)::after {
+    color: var(--color-soft-white);
+    opacity: 0.55;
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):hover {
+    background-color: rgba(241, 237, 234, 0.16);
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):active {
+    background-color: rgba(241, 237, 234, 0.22);
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):focus-visible {
+    background-color: rgba(241, 237, 234, 0.1);
 }
 
 body.dark-mode .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
