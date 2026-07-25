@@ -877,7 +877,19 @@
         // (not a CSS class) so this always wins regardless of any other
         // opacity rule, and `disabled` so a hidden control is also out of
         // the tab order and unclickable, not just invisible.
+        //
+        // Also toggles `rsvp-invitation-top` on <body> — whether the
+        // invitation card itself is currently the visible top card, as
+        // opposed to any card in the lookup/personal/review/schedule
+        // sequence. `.replay-intro` (styles.css) reads this to decide
+        // whether it should be showing: `rsvp-flow-active` (set once,
+        // never unset — see advanceFrom) only tells you the flow was
+        // EVER entered, not whether you're currently looking at the
+        // invitation again after pressing Back all the way out. Recomputed
+        // on every settle so arriving fresh and returning via Back behave
+        // identically.
         function updateStackNav() {
+            document.body.classList.toggle('rsvp-invitation-top', stack[0] === invitationCardEl);
             var info = stackNavInfoFor(stack[0]);
             var arrowLabel = arrowBtn.querySelector('.rsvp-arrow-label');
             if (info.forward) {

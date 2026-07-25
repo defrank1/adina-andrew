@@ -1437,6 +1437,20 @@ Verified in the browser (light and dark mode): a matching email shows the cue li
 
 ---
 
+### Decision Z: The replay-intro train icon stayed hidden forever after the first "Begin RSVP" click, even after Back returned to the invitation card
+
+Andrew reported: pressing Back from the RSVP flow all the way out to the invitation card should always show the bottom-left train (replay-intro) icon, the same as on first arrival — but it stayed gone.
+
+**Root cause.** `.replay-intro`'s hide rule (`css/styles.css`) was keyed on `body.page-rsvp.rsvp-flow-active`, and `rsvp-flow-active` is a **one-way flag** — `advanceFrom` in `js/rsvp-flow.js` adds it the moment the flow is first entered and nothing ever removes it, by design (it also gates several permanent layout invariants — overflow behavior, footer pinning, the flow's scroll-spacer math — that must NOT revert just because the guest stepped back onto an earlier card; see the `.rsvp-flow-active`-scoped rules throughout `rsvp-styles.css`). The icon's own hide rule piggybacked on that same permanent flag, so once set it stayed hidden for the rest of the page's life — including every later trip back to the invitation card, not just while genuinely inside the lookup/personal/review/schedule sequence the original comment was actually trying to cover.
+
+**Fix:** a new `rsvp-invitation-top` class on `<body>`, toggled in `updateStackNav()` (`js/rsvp-flow.js`) on every stack-nav update — `stack[0] === invitationCardEl` — rather than a one-way flag. `updateStackNav` already runs after every settled move (`afterMove`'s callback for `fileForward`/`fileBackward`/`replacePersonalCards`), so this recomputes on arrival, on every Next, and on every Back with no new call sites needed. `css/styles.css` gained an override rule, `body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro`, restoring the same opacity/`pointer-events`/hover values the pre-flow state uses, layered on top of (not replacing) the existing `rsvp-flow-active` hide rule — so the icon is hidden by default once the flow starts, but this more-specific override wins back visibility specifically when the invitation is the current top card again. `rsvp-flow-active` itself, and everything else keyed on it, is untouched.
+
+**Not scoped to mobile.** The original hide-rule comment mentioned the mobile persistent Back button pinning to the same corner, but the CSS selector itself carries no media query and always hid the icon at every width once the flow started — the fix restores it at every width too, matching how Andrew described the bug (general, not "on my phone").
+
+Verified in the browser: the icon is visible on first arrival at the settled invitation card; clicking "Begin RSVP" hides it on the lookup card; pressing Back returns to the invitation card and the icon reappears, fully interactive (hover jiggle confirmed); no console errors during the round trip. Not re-verified against `prefers-reduced-motion` specifically, but that path is unaffected — the existing `@media (prefers-reduced-motion: reduce) { .replay-intro { display: none; } }` rule still wins regardless of any class state, since `display: none` overrides opacity/pointer-events outright.
+
+---
+
 ## Pending Launch Tasks
 
 None currently recorded — the last two open items (`rsvp.html`'s dev password, and `APPS_SCRIPT_URL` being empty/staging) are both resolved as of this entry: `rsvp.html` no longer has a password gate at all (Decision X above), and `APPS_SCRIPT_URL` in `js/rsvp-flow.js` has pointed at a live Apps Script deployment since an earlier session (confirmed directly in the file while verifying Decision X, rather than assumed from this stale note) — it is no longer empty/staging-mode. Reminder for whoever deploys future `rsvp-workflow/google-apps-script.js` changes: `APPS_SCRIPT_URL`'s value is not itself evidence that the *deployed* Apps Script code is current — see each Apps Script decision's own deploy caveat for what still needs to be pasted in and redeployed.

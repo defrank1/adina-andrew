@@ -1282,13 +1282,30 @@ body.intro-complete .replay-intro:focus-visible {
     opacity: 1;
 }
 
-/* Once inside the RSVP card flow (mobile), the persistent stack-nav Back
-   button pins to this exact bottom-left corner (rsvp-styles.css) — and
+/* Once inside the RSVP card flow, the persistent stack-nav Back button can
+   pin to this exact bottom-left corner on mobile (rsvp-styles.css) — and
    replaying the intro mid-form doesn't make sense anyway, so it's hidden
-   rather than overlapping. */
+   rather than overlapping. `rsvp-flow-active` itself is a one-way flag (set
+   once the flow is first entered, never unset — see advanceFrom in
+   js/rsvp-flow.js), so this alone would keep the icon hidden forever after
+   the first "Begin RSVP" click, even once Back navigates all the way out
+   to the invitation card again. `rsvp-invitation-top` (toggled on every
+   stack-nav update — see updateStackNav) tracks that finer-grained state,
+   so this override restores the icon whenever the invitation is actually
+   the visible top card, on arrival or on return. */
 body.page-rsvp.rsvp-flow-active .replay-intro {
     opacity: 0;
     pointer-events: none;
+}
+
+body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro {
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro:hover,
+body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro:focus-visible {
+    opacity: 1;
 }
 
 /* Hover/focus jiggle — the train rocks in place, as if idling on its track. Small
