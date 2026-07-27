@@ -1746,7 +1746,17 @@ body.dark-mode .rsvp-review-person {
 
     /* No room to the card's right — arrow + label sit below the card,
        centered, still pointing right. Card bottom = 13.426% + 80.37% ≈
-       93.796% of field height. */
+       93.796% of field height. This fixed-percentage formula is only ever
+       correct for the field-fraction card position .invitation-card keeps
+       at this width — true today for EVERY ≤900px viewport, but as of the
+       Mobile RSVP fix (July 2026) portrait viewports give the invitation a
+       different mobile rect (see the shared-card-rect block at the end of
+       this file) with its own recalculated arrow position. That later,
+       portrait-scoped block uses this exact same selector and sits after
+       this one in the file, so cascade order lets it win there (equal
+       specificity); this rule keeps applying as-is for landscape phones
+       ≤900px, whose card position is untouched and still matches this
+       formula — do not delete it. */
     body.page-rsvp .rsvp-arrow {
         left: 50%;
         top: calc(93.796% + 10px);
@@ -1821,6 +1831,120 @@ body.dark-mode .rsvp-review-person {
        edge, rather than colliding with it in the same corner. */
     body.page-rsvp.rsvp-flow-active .site-footer {
         bottom: 20px;
+    }
+
+    /* iOS auto-zoom fix (Mobile RSVP fix, July 2026). The lookup input's own
+       password-box selector (.paper-card--page[data-step="lookup"]
+       .form-group input[type="text"], further up this file) is MORE
+       specific than the generic .form-group input[type="text"] 16px rule
+       above — its own comment says so — so it wins regardless of source
+       order and its 0.9rem (14.4px) font-size survives into mobile
+       viewports, triggering iOS Safari's auto-zoom on focus. Restating the
+       exact same selector here, at equal specificity, lets cascade order
+       (this rule is later in the file) win at ≤900px instead. Width,
+       padding, and the gradient text-fill treatment are untouched — only
+       font-size is restated. */
+    .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
+        font-size: 16px;
+    }
+}
+
+/* ===========================================================================
+   Mobile portrait: shared settled-card rect (Mobile RSVP fix, July 2026)
+   ---------------------------------------------------------------------------
+   The desktop registration system (.invitation-field = min(100vw, 100dvh ×
+   16/9), see styles.css) degenerates on portrait phones: the field becomes
+   width-limited (100vw), so its height collapses to 56.25vw — a short strip
+   vertically centered in the viewport. .invitation-card and every
+   .rsvp-stack card inherit that strip's field-fraction placement, so on a
+   393px-wide phone the settled invitation renders ~127px wide, floating
+   mid-screen, and every reply card opens ~40% down the viewport with the
+   top half empty.
+
+   Landscape phones ≤900px are deliberately EXCLUDED (orientation: portrait
+   below) — there the field is height-limited instead, closer to the
+   desktop-shaped box already, and keep their current behavior untouched;
+   see the plain ≤900px block above, which still applies unchanged there.
+
+   Field-local coordinates: a viewport-space top target has to subtract the
+   field's own vertical offset within the viewport, (100dvh - 56.25vw) / 2,
+   to convert into the field-local coordinate every .invitation-field
+   descendant (.invitation-card, .rsvp-stack cards, .rsvp-arrow) positions
+   against — that conversion is --rsvp-m-card-top below.
+   =========================================================================== */
+@media (max-width: 900px) and (orientation: portrait) {
+
+    body.page-rsvp {
+        /* Desired viewport top for the shared card rect; clears the Menu
+           pill (~60px bottom edge). */
+        --rsvp-m-card-top-vp: 104px;
+        --rsvp-m-card-top: calc(var(--rsvp-m-card-top-vp) - (100dvh - 56.25vw) / 2);
+
+        /* Gap + arrow pill + breathing room reserved below the card. */
+        --rsvp-m-arrow-room: 130px;
+        --rsvp-m-inv-cap: 330px;
+
+        /* Invitation width: full stack width, hard cap, AND a height-aware
+           cap so card + arrow always fit inside the 100dvh endstate box
+           (overflow: hidden pre-flow — a clipped arrow would be
+           unreachable). Card is 5:7 (width:height), so a height budget
+           converts to a width cap via × 5/7. */
+        --rsvp-m-inv-w: min(
+            calc(100vw - 3rem),
+            var(--rsvp-m-inv-cap),
+            calc((100dvh - var(--rsvp-m-card-top-vp) - var(--rsvp-m-arrow-room)) * 5 / 7)
+        );
+    }
+
+    /* Settle-grow. Gated on .intro-complete (NOT .rsvp-flow-active), so the
+       card sits at the Rive-registered rect through the hard cut — briefly
+       tiny, unavoidable, since Rive's own final frame IS tiny on portrait —
+       then grows/rises to the mobile rect as the grain and shadow fade in
+       over the same settle. One motion, no crossfade, no js/rive-intro.js
+       changes. `left` is centered via calc, NOT a transform:
+       js/rsvp-flow.js sets inline transforms on this element during stack
+       travel (see fileTransition) and a centering translate would collide
+       with those. The base pre-settle rule in styles.css
+       (13.426%/33.854%/32.292%, registration-critical) is untouched — this
+       only ever matches once .intro-complete is present, so ?debug-
+       registration (which never reaches .intro-complete) is unaffected.
+       The dark-mode `.intro-complete .invitation-card` rule in styles.css
+       only sets box-shadow — deliberately not duplicated here. Skip/bail
+       paths set --settle-ms to 0, so this transition collapses to an
+       instant landing at the mobile rect with no JS involvement. */
+    body.page-rsvp.intro-complete .invitation-card {
+        left: calc(50% - var(--rsvp-m-inv-w) / 2);
+        width: var(--rsvp-m-inv-w);
+        top: var(--rsvp-m-card-top);
+        transition: box-shadow var(--settle-ms, 450ms) ease,
+                    left var(--settle-ms, 450ms) ease,
+                    top var(--settle-ms, 450ms) ease,
+                    width var(--settle-ms, 450ms) ease;
+    }
+
+    /* Reply-stack cards share the invitation's new top anchor. left/width
+       stay exactly as set by the plain ≤900px rule above (1.5rem / calc(
+       100vw - 3rem)) — full stack width is a locked prior decision, not
+       restated here. */
+    body.page-rsvp .rsvp-stack .paper-card--page {
+        top: var(--rsvp-m-card-top);
+    }
+
+    /* Pre-flow arrow: below the enlarged card, centered — recalculated from
+       the shared card rect instead of the fixed-percentage formula above.
+       Same selector as the plain ≤900px block's rule, later in the file, so
+       cascade order wins here at equal specificity (that rule keeps
+       applying, unchanged, for landscape). Card height = width × 7/5. In-
+       flow positioning (.rsvp-flow-active's fixed bottom corners, in the
+       plain ≤900px block) is untouched. */
+    body.page-rsvp .rsvp-arrow {
+        left: 50%;
+        top: calc(var(--rsvp-m-card-top) + var(--rsvp-m-inv-w) * 7 / 5 + 24px);
+        transform: translateX(-50%);
+    }
+
+    body.page-rsvp .rsvp-arrow:active {
+        transform: translateX(-50%) translateY(0.5px);
     }
 }
 
