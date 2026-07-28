@@ -1946,5 +1946,35 @@ body.dark-mode .rsvp-review-person {
     body.page-rsvp .rsvp-arrow:active {
         transform: translateX(-50%) translateY(0.5px);
     }
+
+    /* Dark-mode toggle visible without scrolling (Mobile RSVP fix follow-up,
+       July 2026). The general spacer rule (styles.css) is a flat 100vh, and
+       the footer's own natural height (~64px, measured — .footer-content's
+       padding + the 48px toggle) always sits right after it, so the toggle
+       is always ~64px past the first screen — a small "jiggle" scroll,
+       accepted as harmless dead space on a long content page, but this
+       page is meant to read as complete within one screen (like the
+       homepage), so in practice the toggle reads as simply missing on a
+       phone: nothing on screen suggests there's more below.
+       max() picks whichever is taller: shrinking the spacer by the
+       footer's height (so the toggle lands right at the first screen's
+       edge) UNLESS that would cut into the reserved card+arrow zone —
+       reusing the exact same quantity --rsvp-m-inv-w's own height-aware
+       term already keeps ≤ 100dvh, so this can only match or improve on
+       the original 100vh, never regress into an overlap. On typical phone
+       heights the first term wins (toggle fully visible, no scroll); on
+       the very shortest phones (where the card is already at its
+       height-aware minimum) the second term wins and this is a no-op —
+       same small scroll as before, never worse. Desktop and landscape
+       mobile are untouched; their arrow sits well clear of any reasonable
+       .invitation-scroll-spacer reduction, but that's a separate change
+       this fix deliberately doesn't make — scoped to the literal "missing
+       on mobile" report. */
+    body.page-rsvp.intro-complete .invitation-scroll-spacer {
+        height: max(
+            calc(100vh - 64px),
+            calc(var(--rsvp-m-card-top-vp) + var(--rsvp-m-inv-w) * 7 / 5 + var(--rsvp-m-arrow-room))
+        );
+    }
 }
 
