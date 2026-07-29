@@ -982,6 +982,46 @@
         var debounceTimer = null;
         var lookupWrapper = null; // the .paper-card wrapper, once built
 
+        // Same arrow asset/markup as .rsvp-arrow's own icon (rsvp.html) —
+        // just built here since the suggestion pill is constructed at
+        // runtime. Sized down for this smaller pill via the scoped
+        // .guest-suggestion-icon CSS rule, not a new path.
+        var SVG_NS = 'http://www.w3.org/2000/svg';
+        function buildSuggestionIcon() {
+            var svg = document.createElementNS(SVG_NS, 'svg');
+            svg.setAttribute('class', 'guest-suggestion-icon');
+            svg.setAttribute('viewBox', '0 0 34 16');
+            svg.setAttribute('width', '34');
+            svg.setAttribute('height', '16');
+            svg.setAttribute('aria-hidden', 'true');
+            svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor');
+            svg.setAttribute('stroke-width', '1.5');
+            svg.setAttribute('stroke-linecap', 'round');
+            svg.setAttribute('stroke-linejoin', 'round');
+            var path = document.createElementNS(SVG_NS, 'path');
+            path.setAttribute('d', 'M1 8 H 31 M 24.5 1.5 L 31 8 L 24.5 14.5');
+            svg.appendChild(path);
+            return svg;
+        }
+
+        // Replays the CSS entrance transition (.guest-suggestions ->
+        // .is-open, rsvp-styles.css) every time the dropdown's content
+        // changes, even if it's already open — showLookupLoading runs
+        // before displaySuggestions, so without removing the class first the
+        // pill would appear already-settled instead of rising into place.
+        // Double rAF (not one) so the removal is guaranteed to paint before
+        // the class is re-added, which is what makes the transition replay
+        // rather than no-op.
+        function openSuggestions() {
+            emailSuggestions.classList.remove('is-open');
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    emailSuggestions.classList.add('is-open');
+                });
+            });
+        }
+
         function buildEmailPanel() {
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
@@ -1088,6 +1128,7 @@
             emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty', 'Looking…'));
             emailSuggestions.style.display = 'block';
             emailInput.classList.add('suggestions-open');
+            openSuggestions();
         }
 
         function displaySuggestions(invitations, errorText) {
@@ -1098,30 +1139,45 @@
                     errorText || 'No match found — check the email on your invitation.');
                 emailSuggestions.appendChild(empty);
             } else {
-                // A real tester typed his full address and didn't realize the
-                // row itself was the action — there's no separate Next button
-                // on this card, selecting the suggestion IS the advance. This
-                // cue states that plainly. Reuses the empty-state styling (muted,
-                // non-interactive) rather than the button treatment below it, and
-                // rides along for free in focusableSuggestions' existing
-                // :not(.guest-suggestion-empty) filter — no separate exclusion
-                // needed. Shown only here, never during Looking… or no-match.
-                var cue = el('div', 'guest-suggestion-item guest-suggestion-empty',
-                    'Select your invitation to continue');
-                emailSuggestions.appendChild(cue);
+                // The real (selectable) suggestion — a filled pill, the site's
+                // .btn-priority variant, since there's no separate Next button
+                // on this card: selecting the pill IS the advance. Email text
+                // lives in its own span (see .guest-suggestion-email,
+                // rsvp-styles.css) so it keeps the body font instead of
+                // .btn-priority's uppercase heading type, and so the flex gap
+                // to the icon has something to apply between.
                 invitations.forEach(function (inv) {
-                    var btn = el('button', 'guest-suggestion-item', inv.email);
+                    var btn = el('button', 'guest-suggestion-item btn-priority');
                     btn.type = 'button';
+                    btn.appendChild(el('span', 'guest-suggestion-email', inv.email));
+                    btn.appendChild(buildSuggestionIcon());
                     btn.addEventListener('click', function () { selectInvitation(inv); });
                     emailSuggestions.appendChild(btn);
                 });
+                // A real tester typed his full address and didn't realize the
+                // pill itself was the action — there's no separate Next button
+                // on this card, selecting the suggestion IS the advance. This
+                // cue states that plainly. Sits BELOW the pill (moved here from
+                // above it when the suggestion became an obvious filled
+                // button — above the pill it read as a redundant heading;
+                // beneath it, a quiet footnote). Reuses the empty-state styling
+                // (muted, non-interactive) rather than the pill treatment above
+                // it, and rides along for free in focusableSuggestions'
+                // existing :not(.guest-suggestion-empty) filter — no separate
+                // exclusion needed. Shown only here, never during Looking… or
+                // no-match.
+                var cue = el('div', 'guest-suggestion-item guest-suggestion-empty',
+                    'Select your email to continue');
+                emailSuggestions.appendChild(cue);
             }
             emailSuggestions.style.display = 'block';
             emailInput.classList.add('suggestions-open');
+            openSuggestions();
         }
 
         function hideSuggestions() {
             emailSuggestions.style.display = 'none';
+            emailSuggestions.classList.remove('is-open');
             emailSuggestions.innerHTML = '';
             emailInput.classList.remove('suggestions-open');
         }

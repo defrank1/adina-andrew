@@ -980,126 +980,159 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
    flush edge to flatten — the input keeps its full pill shape regardless
    of suggestions-open state. */
 
-/* Restyled to match the dress-code popover (.dress-popover below) — small,
-   centered under the input with a gap and an upward caret, not a full-width
-   list flush against it. The old full-width treatment sized for the card's
-   ~330px content area no longer matched the input once it shrank to the
-   200px password-box width; this is what Andrew pointed to as "one that
-   works well." */
+/* July 2026 — replaced the .dress-popover-style panel (flat fill, 1px rule,
+   square corners, a typed "›") with a single filled pill button. That panel
+   language fits an informational tooltip, but this card has no separate
+   Next button — selecting the suggestion IS the advance, so the primary
+   control needs to read as one, matching the RSVP button's own filled-pill
+   language. Lookup is also an exact-match, so there is only ever one result
+   or none; a scrollable multi-select dropdown was solving a problem that no
+   longer exists — what the guest needs here is confirmation, not selection.
+   This wrapper is now just a transparent positioning/flex container; the
+   pill and the cue beneath it supply their own surfaces. flex-column + gap
+   so a pill and the cue stack cleanly (and, in the rare case of a
+   duplicate-address data error, multiple pills stack rather than
+   colliding). The entrance (opacity + a 4px rise via .is-open, added by
+   js/rsvp-flow.js a frame after display:block) is the one thing the old
+   panel provided that still matters — it's how the guest sees that typing
+   did something — so it's kept, timed and eased the same as
+   .dress-popover's own reveal. */
 .paper-card--page[data-step="lookup"] .guest-suggestions {
     position: absolute;
     top: calc(100% + 11px);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(4px);
     width: max-content;
-    min-width: 220px;
-    max-width: 300px;
+    max-width: 100%;
     max-height: none;
     overflow-y: visible;
-    padding: 0.3rem 0;
-    background-color: #EBE7E3;
-    border: 1px solid var(--color-dark-green);
-    border-radius: 0;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-}
-
-.paper-card--page[data-step="lookup"] .guest-suggestions::before {
-    content: "";
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translate(-50%, 50%) rotate(45deg);
-    width: 9px;
-    height: 9px;
-    background-color: #EBE7E3;
-    border-left: 1px solid var(--color-dark-green);
-    border-top: 1px solid var(--color-dark-green);
-}
-
-.paper-card--page[data-step="lookup"] .guest-suggestion-item {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.82rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(26, 58, 46, 0.12);
-}
-
-.paper-card--page[data-step="lookup"] .guest-suggestion-item:last-child {
-    border-bottom: none;
-    border-radius: 0;
-}
-
-/* The real (selectable) suggestion is the advance on this card — there's no
-   separate Next button here, so it needs to read as a tappable action, not a
-   passive line. Chevron + resting fill give it that at rest, before any
-   hover. Explicitly excludes .guest-suggestion-empty (Looking… / no-match),
-   which stays a plain passive line — see js/rsvp-flow.js. */
-.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty) {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.6rem;
-    background-color: rgba(26, 58, 46, 0.05);
+    gap: 0.55rem;
+    opacity: 0;
+    transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty)::after {
-    content: "\203A";
-    flex-shrink: 0;
-    font-size: 1.05rem;
-    line-height: 1;
-    color: var(--color-dark-green);
-    opacity: 0.55;
+.paper-card--page[data-step="lookup"] .guest-suggestions.is-open {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .paper-card--page[data-step="lookup"] .guest-suggestions {
+        transition: none;
+    }
+}
+
+/* The real (selectable) suggestion is the site's filled/priority button
+   (.btn-priority, applied alongside this class in js/rsvp-flow.js) — not a
+   list row. .btn-priority supplies box-shadow and the hover/active deboss
+   feedback for free (restated below only where the unscoped
+   .guest-suggestion-item rule, shared with the base rules above, would
+   otherwise beat it — see next). Layout is restated here, the same
+   minimal-restatement pattern .rsvp-arrow uses over the same class.
+   background-color/color/border/:hover ARE fully restated (not left to
+   .btn-priority alone): .guest-suggestion-item and .btn-priority are both a
+   single class selector, so it comes down to source order between the two
+   files — .guest-suggestion-item (rsvp-styles.css, loaded second) was
+   winning over .btn-priority (styles.css, loaded first) for background
+   (background: none), color, border (border: none, then border-bottom
+   restated), and :hover (a much lighter translucent hover than the deboss
+   darkening .btn-priority actually wants). Restating them here, at this
+   selector's higher specificity, settles the cascade in .btn-priority's
+   favor regardless of file order — this is reasserting the shared class's
+   own treatment, not inventing a new one. border-color also intentionally
+   matches the fill (rather than .btn-priority's own near-black), so the
+   border reads as one clean solid pill, not a ring. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.6rem 1.15rem;
+    border-radius: 999px;
+    border: 2px solid var(--color-dark-green);
+    background-color: var(--color-dark-green);
+    color: var(--color-soft-white);
 }
 
 .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):hover {
-    background-color: rgba(26, 58, 46, 0.14);
-}
-
-.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):active {
-    background-color: rgba(26, 58, 46, 0.2);
-}
-
-/* Restates the base :focus-visible background at the same value (see
-   .guest-suggestion-item:focus-visible above) so the new resting fill's
-   higher specificity doesn't quietly change it — the outline itself is
-   untouched here and keeps coming from that base rule. */
-.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):focus-visible {
-    background-color: rgba(26, 58, 46, 0.08);
-}
-
-body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestions {
-    background-color: #0e2319;
-    border-color: var(--color-soft-white);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestions::before {
-    background-color: #0e2319;
-    border-color: var(--color-soft-white);
-}
-
-body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item {
-    border-bottom-color: rgba(241, 237, 234, 0.14);
+    background-color: #17352a;
 }
 
 body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty) {
-    background-color: rgba(241, 237, 234, 0.08);
-}
-
-body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty)::after {
-    color: var(--color-soft-white);
-    opacity: 0.55;
+    border-color: var(--color-soft-white);
+    background-color: var(--color-soft-white);
+    color: var(--color-dark-green);
 }
 
 body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):hover {
-    background-color: rgba(241, 237, 234, 0.16);
+    background-color: #ece7e3;
 }
 
-body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):active {
-    background-color: rgba(241, 237, 234, 0.22);
+/* The email itself stays in the body font, normal case — .btn-priority's own
+   type (PP Watch, uppercase, tracked) suits a UI label like "RSVP" but would
+   turn an email address into "ADINABNELSON@GMAIL.COM", harder to recognise
+   at a glance, which defeats the point of showing it back to the guest. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-email {
+    font-family: var(--font-body);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.85rem;
+}
+
+/* Same arrow asset/markup as .rsvp-arrow-icon (js/rsvp-flow.js builds it the
+   same way), just scaled down to suit this smaller pill. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-icon {
+    display: block;
+    flex: 0 0 auto;
+    width: 24px;
+    height: 11px;
+}
+
+/* The base :focus-visible rule's translucent background-shift (tuned for an
+   inset list row) is meaningless layered on an already-solid filled pill —
+   reset it back to the plain fill, at equal (restated) specificity, and move
+   the ring outside the pill (positive offset) rather than inset, matching
+   how .rsvp-arrow:focus-visible treats its own filled pill. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):focus-visible {
+    outline: 2px solid var(--color-dark-green);
+    outline-offset: 3px;
+    background-color: var(--color-dark-green);
 }
 
 body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item:not(.guest-suggestion-empty):focus-visible {
-    background-color: rgba(241, 237, 234, 0.1);
+    outline-color: var(--color-soft-white);
+    background-color: var(--color-soft-white);
+}
+
+/* Keyboard-highlight state (currently unreachable — no JS in this file
+   toggles .selected — kept for parity with the base rule and any future
+   multi-result case). The base rule's translucent overlay doesn't read on a
+   filled pill, so this borrows .btn-priority's own hover-darkened fill
+   instead, reading as "engaged" rather than lightened. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-item.selected {
+    background-color: #17352a;
+}
+
+body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item.selected {
+    background-color: #ece7e3;
+}
+
+/* Looking…, the no-match message, and the "select to continue" cue are all
+   plain helper text now — no fill, no border, no separator, no chevron,
+   matching the microcopy already on this card ("Type the email at which you
+   received your invitation."). border:none clears the unscoped
+   .guest-suggestion-item rule's border-bottom for the same reason noted on
+   the pill above. */
+.paper-card--page[data-step="lookup"] .guest-suggestion-empty {
+    padding: 0;
+    border: none;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: center;
+    max-width: 26ch;
 }
 
 body.dark-mode .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
