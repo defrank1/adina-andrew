@@ -786,29 +786,6 @@ body.page-rsvp.rsvp-flow-active .rsvp-flow-scroll-spacer {
    move's end state with no transition at all — there's nothing for CSS to
    override. */
 
-/* ---- Footer toggle stays viewport-fixed during the flow ------------------- */
-
-/* body.page-rsvp #footer-placeholder { margin-top: auto } (styles.css) only
-   pins the footer to the VIEWPORT bottom while #protected-content is exactly
-   one viewport tall (the settled invitation). A long card grows that flex
-   column, so the footer settles at the DOCUMENT bottom instead and scrolls
-   away with the stack. Once the flow is active, take it out of flow and fix
-   it to the viewport corner — right:0 (not a hardcoded inset) so
-   .footer-content's own existing padding supplies the corner inset, at every
-   width. .replay-intro (styles.css) needs no equivalent override here: it's
-   hidden outright once the flow starts (a one-way control, not repositioned
-   — see its own comment), so there's no "stays reachable during a long card"
-   case for it to solve. */
-body.page-rsvp.rsvp-flow-active .site-footer {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    left: auto;
-    width: auto;
-    margin: 0;
-    z-index: 1600;
-}
-
 /* ---- The reply card ------------------------------------------------------- */
 
 /* Paper-suite reskin: each stack card is `.paper-card.paper-card--page` (grain
@@ -1012,6 +989,23 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     gap: 0.55rem;
     opacity: 0;
     transition: opacity 0.18s ease, transform 0.18s ease;
+    /* RESETS of the base .guest-suggestions panel (background-color, border,
+       border-radius — plus box-shadow/padding it doesn't set but a future
+       edit here might), not new styling — do not "clean up" as redundant.
+       The base rule and this one are both a single class + one attribute
+       selector's worth of specificity apart (same trap already hit on
+       .btn-priority below), so without an explicit reset the base rule's
+       soft-white fill, 2px border, and rounded bottom corners keep
+       rendering behind the pill regardless of this rule's own declarations
+       — the base rule wins because THIS rule stays silent on those
+       properties, not because it's weaker. Verify by computed style
+       (background-color/border-width/border-radius on .guest-suggestions
+       in DevTools), not by eye. */
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
 }
 
 .paper-card--page[data-step="lookup"] .guest-suggestions.is-open {
@@ -1021,6 +1015,29 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
 
 @media (prefers-reduced-motion: reduce) {
     .paper-card--page[data-step="lookup"] .guest-suggestions {
+        transition: none;
+    }
+}
+
+/* .guest-suggestions is absolutely positioned (see above), so once it's open
+   it sits directly on top of .form-hint below it in the DOM — the old opaque
+   panel hid that collision by accident; with the panel correctly transparent
+   (see the reset above), the hint would otherwise show through behind and
+   around the pill. Fades it out instead of `display: none` so its space
+   stays reserved and nothing reflows when the box opens/closes. Covers all
+   three open states (Looking…/match/no-match) uniformly, since each is just
+   .guest-suggestions.is-open with different content — the cue or message
+   inside the box replaces the hint's job while it's up. */
+.paper-card--page[data-step="lookup"] .form-hint {
+    transition: opacity 0.18s ease;
+}
+
+.paper-card--page[data-step="lookup"] .form-group:has(.guest-suggestions.is-open) .form-hint {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .paper-card--page[data-step="lookup"] .form-hint {
         transition: none;
     }
 }

@@ -1268,33 +1268,61 @@ body.page-rsvp.intro-complete .site-footer {
     pointer-events: auto;
 }
 
-/* Pin the footer (the only in-flow content — the endstate is fixed) to the bottom
-   of the viewport, like the site's other single-viewport pages. */
+/* min-height: 100vh (unchanged) is what makes the settled page have its
+   ~60-80px of residual scroll on iOS in the first place — #protected-content
+   is sized to the LAYOUT viewport (min-height: 100vh) while #invitation-
+   endstate, the fixed backdrop the guest actually sees, is sized to the
+   VISUAL viewport (height: 100dvh); the gap between the two is the browser
+   toolbar. The scroll extent must stay exactly what it is today — do not
+   expand or remove this. It no longer needs to reach the footer via flex/
+   margin-auto, though: both .site-footer and .replay-intro are
+   position: fixed below, pinned to the viewport rather than riding that
+   scroll with the document. #footer-placeholder's own margin-top: auto
+   (previously load-bearing here, pinning the in-flow footer to the bottom
+   of this flex column) is removed as dead weight now that the footer it
+   wrapped is out of flow — it does nothing. */
 body.page-rsvp #protected-content.unlocked {
     min-height: 100vh;
 }
 
-body.page-rsvp #footer-placeholder {
-    margin-top: auto;
+/* Both the train and the footer's dark-mode toggle are pinned to the
+   VIEWPORT (not the document) so they hold still against the settled page's
+   residual scroll instead of traveling with the card through it — the same
+   reference frame the fixed nav already uses. bottom:0/right:0 match
+   .footer-content's own padding for the corner inset; z-index carries over
+   from the flow-active-only rule this replaces (see .replay-intro's own
+   comment and the collapsed rule below — both this and that one used to be
+   two different rules for two different states, now one rule each covers
+   both). */
+body.page-rsvp .site-footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: auto;
+    width: auto;
+    margin: 0;
+    z-index: 1600;
 }
 
 /* Replay icon — bottom-left, icon-only. Hidden until the settle; fades in with it.
    Asset is the Metro car line illustration (train-light.svg/train-dark.svg) with the
    standard data-light/data-dark swap. z-index above the (settled) content, below the
    Rive canvas (2000) while the intro plays.
-   position: absolute (July 2026 — was fixed), anchored to #protected-content
-   (body.page-rsvp #protected-content { position: relative } in the Rive intro block
-   above) — the same containing block the footer sits inside. It now lives inside
-   #protected-content in the markup (rsvp.html), immediately before
-   #footer-placeholder, instead of beside #rive-container outside it. This fixes an
-   asymmetry: the footer already scrolled with the document pre-flow while the train
-   stayed pinned to the viewport, so a rubber-band scroll visibly separated them. With
-   #protected-content pinned to exactly one viewport (see .invitation-scroll-spacer
-   above) bottom/left:20px still lands in the same screen corner today, but the train
-   now travels with the document exactly like the footer's toggle. No
-   .rsvp-flow-active override is needed here (unlike the footer's fixed/absolute
-   switch) — see the flow-entered rule further down, which hides this control for
-   good rather than repositioning it.
+   position: fixed (July 2026 — reverted from a brief absolute stint the same
+   month). #protected-content is min-height: 100vh while the fixed backdrop the
+   guest actually sees (#invitation-endstate) is height: 100dvh — on iOS those
+   differ by the browser toolbar, so the document runs ~60-80px taller than the
+   visible viewport and the settled page has that much real scroll. Anchoring
+   this to the document (position: absolute, briefly) meant it traveled through
+   that scroll with the card while the footer's toggle — fixed to the viewport —
+   held still, so a rubber-band pull visibly separated the two again, just with
+   the roles reversed from the original complaint. Both this and the footer
+   (see body.page-rsvp .site-footer above) now pin to the viewport instead: the
+   card scrolls the ~60-80px underneath them, they don't move. bottom/left:20px
+   land in the same screen corner either way. No .rsvp-flow-active override is
+   needed here (unlike the footer's own in-flow/fixed switch) — see the
+   flow-entered rule further down, which hides this control for good rather
+   than repositioning it.
    Box is landscape (70x48, ~1.79:1) rather than the old flag's 44x44 square — the
    train's native ~165x92 ratio would render small and thin inside a square built
    for the flag's tall ~0.61:1 portrait shape. 70x48 is the box first sized to the
@@ -1304,7 +1332,7 @@ body.page-rsvp #footer-placeholder {
    hard-cropped fit. bottom/left stay at 20px — same corner, box grows up/right
    from that anchor. */
 .replay-intro {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 20px;
     z-index: 1600;
