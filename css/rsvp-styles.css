@@ -1866,12 +1866,18 @@ body.dark-mode .rsvp-review-person {
        viewport. At the desktop font-size/padding/gap plus a 40px icon, each
        button runs ~160-190px wide — two of them plus the 1.5rem side insets
        above come to ~370-400px, which touches on a 393px phone and overlaps
-       on a 375px one. Scoped to .rsvp-flow-active only: the pre-flow RSVP
-       button on the settled invitation page is alone on screen and stays at
-       full size. Horizontal padding shrinks, not vertical — vertical is what
-       keeps the tap target ≥44px tall. */
-    body.page-rsvp.rsvp-flow-active .rsvp-arrow,
-    body.page-rsvp.rsvp-flow-active .rsvp-stack-back {
+       on a 375px one. NOT scoped to .rsvp-flow-active (July 2026 — was):
+       the pre-flow RSVP arrow on the settled invitation card is the same
+       fixed-size pill wherever it renders, so sizing it only in-flow made it
+       resize the moment the flow opened — a jump with no purpose, since
+       nothing about the settled card needs a LARGER button. The smaller size
+       is correct in both states; .rsvp-stack-back is included here too even
+       though it only ever renders in-flow (kept unscoped so the pair stays
+       one rule rather than splitting for no visual difference). Horizontal
+       padding shrinks, not vertical — vertical is what keeps the tap target
+       ≥44px tall. */
+    body.page-rsvp .rsvp-arrow,
+    body.page-rsvp .rsvp-stack-back {
         font-size: 0.8rem;
         padding: 0.75rem 1.15rem;
         gap: 0.4rem;
@@ -1880,8 +1886,8 @@ body.dark-mode .rsvp-review-person {
     /* Icons scale down with their buttons, proportionally (40x18 native —
        24px wide keeps the same ~2.22:1 ratio at ~11px tall) rather than
        leaving the height at 18 and looking squashed. */
-    body.page-rsvp.rsvp-flow-active .rsvp-stack-back .rsvp-stack-back-icon,
-    body.page-rsvp.rsvp-flow-active .rsvp-arrow .rsvp-arrow-icon {
+    body.page-rsvp .rsvp-stack-back .rsvp-stack-back-icon,
+    body.page-rsvp .rsvp-arrow .rsvp-arrow-icon {
         width: 24px;
         height: 11px;
     }
@@ -1962,28 +1968,40 @@ body.dark-mode .rsvp-review-person {
         --rsvp-m-grow-ms: 220ms;
     }
 
-    /* Settle-grow. Gated on .intro-complete (NOT .rsvp-flow-active), so the
-       card sits at the Rive-registered rect through the hard cut — briefly
-       tiny, unavoidable, since Rive's own final frame IS tiny on portrait —
-       then grows/rises to the mobile rect as the grain and shadow fade in
-       over the same settle. One motion, no crossfade, no js/rive-intro.js
-       changes. `left` is centered via calc, NOT a transform:
-       js/rsvp-flow.js sets inline transforms on this element during stack
-       travel (see fileTransition) and a centering translate would collide
-       with those. The base pre-settle rule in styles.css
-       (13.426%/33.854%/32.292%, registration-critical) is untouched — this
-       only ever matches once .intro-complete is present, so ?debug-
-       registration (which never reaches .intro-complete) is unaffected.
+    /* Settle-grow. Gated on .card-grown (July 2026 — was .intro-complete),
+       a class js/rive-intro.js adds GROW_DELAY_MS (250ms) after the hard
+       cut, deliberately BEFORE .intro-complete (which lands SETTLE_DELAY_MS
+       — 1200ms — after the cut and drives the dissolve). The two used to
+       fire together: the card sat at the Rive-registered rect through the
+       cut, then grew AND dissolved into the textured page in the same
+       motion. That made the grow invisible — 220ms of resize lost inside a
+       full-viewport green-to-cream change competing for the eye. Now the
+       grow is a discrete beat against the still (undissolved) scene, and
+       finishes well before the dissolve even begins. `left` is centered via
+       calc, NOT a transform: js/rsvp-flow.js sets inline transforms on this
+       element during stack travel (see fileTransition) and a centering
+       translate would collide with those. The base pre-settle rule in
+       styles.css (13.426%/33.854%/32.292%, registration-critical) is
+       untouched — this only ever matches once .card-grown is present, and
+       registration only has to hold at the INSTANT of the cut, a beat
+       before this class exists, so ?debug-registration (which never calls
+       hardCut(), and so never reaches .card-grown either) is unaffected.
        The dark-mode `.intro-complete .invitation-card` rule in styles.css
-       only sets box-shadow — deliberately not duplicated here. Skip/bail
-       paths zero both --settle-ms AND --rsvp-m-grow-ms (js/rive-intro.js,
-       settleInstant), so this transition collapses to an instant landing at
-       the mobile rect. Geometry (left/top/width) rides its own
-       --rsvp-m-grow-ms, NOT --settle-ms — the card's resize should read as a
-       quick snap, not an animated beat, independent of how slow the dissolve
-       (box-shadow, which stays on --settle-ms; grain/shadow should still
-       arrive together with the dissolve) is tuned to be. */
-    body.page-rsvp.intro-complete .invitation-card {
+       only sets box-shadow, keyed to --settle-ms as before — deliberately
+       not duplicated here, and unaffected by the .card-grown rename since
+       it still arrives on schedule once .intro-complete lands; this rule
+       only needs its transition property in place before then, which
+       .card-grown landing first guarantees. Skip/bail paths reach the
+       mobile rect through settleInstant() (js/rive-intro.js), which now
+       adds .card-grown directly (not just .intro-complete) — without that,
+       those paths would never pick up the class at all and the card would
+       be stranded at its tiny Rive-registered rect forever. --rsvp-m-grow-ms
+       is zeroed there too, so the transition still collapses to an instant
+       landing; NOT --settle-ms, which stays independent, so the card's
+       resize reads as a quick snap regardless of how slow the dissolve
+       (box-shadow, still on --settle-ms; grain/shadow still arrive with the
+       dissolve) is tuned to be. */
+    body.page-rsvp.card-grown .invitation-card {
         left: calc(50% - var(--rsvp-m-inv-w) / 2);
         width: var(--rsvp-m-inv-w);
         top: var(--rsvp-m-card-top);

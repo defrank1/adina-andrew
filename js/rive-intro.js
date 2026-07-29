@@ -32,6 +32,9 @@
                                    // #invitation-endstate takes over from this exact
                                    // frame, so no in-Rive cream-cover beat is needed.
     var STEP_HZ = 15;             // stepped cadence; set 0 for smooth playback
+    var GROW_DELAY_MS = 250;      // beat after the cut before the mobile card grows,
+                                   // so the resize reads as its own moment instead of
+                                   // competing with the dissolve for attention
     var SETTLE_DELAY_MS = 1200;   // hold on the matched frame before the dissolve begins
     var SETTLE_MS = 1000;         // settle transition length (0 = instant brand page)
     var SCENE_GREEN = '#183A2B';  // exact background hex of the baked end-frame PNG
@@ -162,6 +165,11 @@
         revealEndState();
         container.style.display = 'none';
         if (skipBtn) { skipBtn.classList.add('hidden'); }
+        // Mobile portrait card grow — a discrete beat, not tied to the settle
+        // (see addCardGrown's own comment for why). Fires GROW_DELAY_MS after
+        // the cut regardless of path; settleInstant() (bail/Skip) adds the
+        // class directly instead, since those paths land immediately.
+        setTimeout(addCardGrown, GROW_DELAY_MS);
         setTimeout(destroyIntro, SETTLE_DELAY_MS + SETTLE_MS + 100);
     }
 
@@ -215,6 +223,20 @@
         document.body.style.transition = '';
     }
 
+    // addCardGrown — releases the mobile portrait card from its Rive-registered
+    // rect to the full mobile rect (rsvp-styles.css). Deliberately NOT tied to
+    // .intro-complete: the grow should land well before the dissolve begins so
+    // it reads as a discrete beat, not compete with a full-viewport green-to-
+    // cream change for attention (they were previously simultaneous, and the
+    // 220ms resize was imperceptible against the dissolve). Registration is
+    // unaffected — the card only has to match Rive's final frame at the
+    // INSTANT of the cut, and this fires a beat later. No-op on desktop and
+    // landscape (nothing keys off the class there), so no viewport branching
+    // is needed here.
+    function addCardGrown() {
+        document.body.classList.add('card-grown');
+    }
+
     function settle() {
         setTimeout(addIntroComplete, SETTLE_DELAY_MS);
     }
@@ -231,6 +253,14 @@
         // skipIntro -> settleInstant) land the mobile card at its final rect
         // with no visible grow, matching the settle's own instant landing.
         document.body.style.setProperty('--rsvp-m-grow-ms', '0ms');
+        // Geometry now lives on .card-grown (hardCut schedules it separately,
+        // GROW_DELAY_MS after the cut) rather than .intro-complete. These
+        // paths reach the mobile rect through settleInstant alone — they
+        // never go through hardCut's own setTimeout(addCardGrown, ...), so
+        // without this the card would be stranded at its tiny Rive-registered
+        // rect forever. --rsvp-m-grow-ms is already zeroed above, so this
+        // still lands instantly, with no visible grow.
+        addCardGrown();
         addIntroComplete();
     }
 
