@@ -67,7 +67,9 @@
     var canvas = document.getElementById('rive-canvas');
     var skipBtn = document.getElementById('skip-intro');
     // The static invitation that the intro hard-cuts to. It sits beneath the canvas
-    // (same matte + final frame) and is revealed at teardown so the swap is invisible.
+    // (same matte + final frame) and is revealed early — one rAF after the canvas
+    // goes up, fully occluded behind it — so the swap at the cut is invisible AND
+    // cheap (see revealCanvas()).
     var endState = document.getElementById('invitation-endstate');
 
     // SETTLE_MS is the single source of truth for the settle length — the CSS
@@ -151,8 +153,12 @@
         if (!container.classList.contains('hidden')) { resetThemeToLight(); }
         // The container never changes color during the intro — it's SCENE_GREEN the
         // whole time (see its CSS), matching the baked end-frame layer beneath it —
-        // so there's nothing to force here anymore. Reveal that layer, then hide the
-        // canvas in this same frame.
+        // so there's nothing to force here anymore. revealEndState() here is
+        // normally a no-op now — revealCanvas() already revealed it one rAF after
+        // the canvas went up, occluded, so its layout/paint/raster/layer allocation
+        // happened during playback, not in this frame (see its own comment). This
+        // call stays as an idempotent (classList.remove) safety net for any path
+        // that reaches hardCut() without revealCanvas() having run first.
         revealEndState();
         container.style.display = 'none';
         if (skipBtn) { skipBtn.classList.add('hidden'); }
@@ -284,6 +290,19 @@
         var inkImg = new Image();
         inkImg.src = 'assets/invitation/invitation-ink-light.png';
         inkDecoded = inkImg.decode ? inkImg.decode().catch(function () {}) : Promise.resolve();
+
+        // Render the end state now, occluded behind the opaque canvas (z-index 2000
+        // over #invitation-endstate's 1500), so its first layout, first paint, image
+        // raster (metro-endframe.png at full viewport resolution) and composited-
+        // layer allocation all happen during the ~18s of tunnel playback instead of
+        // landing in the cut frame. hardCut() then only has to hide the canvas — a
+        // single cheap operation — which is what makes the swap actually land in one
+        // frame instead of dropping one. One rAF of delay so the canvas has
+        // definitely painted fully opaque first: before container.classList.remove
+        // ('hidden') the container is opacity: 0 (.hidden fades opacity, it does NOT
+        // use display), so revealing any earlier would let the invitation show
+        // through that transparent window — the entire reason .pre-reveal exists.
+        requestAnimationFrame(function () { revealEndState(); });
     }
 
     // whenInkReady — resolves once the ink decode above has settled. `raceTimeout`
