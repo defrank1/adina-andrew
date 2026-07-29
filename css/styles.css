@@ -1113,27 +1113,27 @@ body.dark-mode.page-rsvp.intro-complete .rsvp-fixed-backdrop {
    through (no background of its own here), no new content. Collapsed to
    nothing pre-settle so it can't affect the registration-critical pre-cut
    layout, and again once the RSVP card flow is entered (rsvp-styles.css) so
-   it doesn't push the flow's first panel down. Height is exactly 100vh —
-   enough to clear #invitation-endstate's own absolutely-positioned
-   one-viewport box (this in-flow spacer starts underneath it at the same
-   document position), no further padding beyond that. #protected-content's
-   own min-height:100vh floor is already exceeded by spacer + footer at this
-   height, so the footer's margin-top:auto has no free space left to absorb
-   — it sits immediately after the spacer, and the settled page's scroll
-   range becomes exactly the footer's own natural height (a small "jiggle,"
-   not dead space to travel into). July 2026: was `100vh + 60vh` — the extra
-   60vh was unwanted dead space, not load-bearing for the margin-top:auto
-   mechanics described above (content already exceeded the min-height floor
-   at 160vh too). On mobile, js/rsvp-flow.js grows this further to fit
+   it doesn't push the flow's first panel down. Height is 0 on the settled
+   page too (July 2026 — was 100vh, before that `100vh + 60vh`): the settled
+   page is meant to read as exactly one viewport, like the homepage, with
+   nothing to scroll past. With this at 0, the footer is the ONLY in-flow
+   content inside #protected-content; #protected-content.unlocked's own
+   min-height:100vh floor holds the box open, and body.page-rsvp
+   #footer-placeholder { margin-top:auto } pins the footer to the bottom of
+   that exact one-viewport box — no magic `calc(100vh - footerHeight)`
+   needed, the auto margin already does it. Document height lands at exactly
+   100vh: no scroll target, so a trackpad/rubber-band pull snaps back with
+   nowhere to go. On mobile, js/rsvp-flow.js grows this further to fit
    whatever the current reply-card-stack card needs (see
-   ensureMobileScrollRoom). */
+   ensureMobileScrollRoom) — unaffected, since the flow-active state below
+   already collapses this rule regardless of its settled-page value. */
 .invitation-scroll-spacer {
     display: none;
 }
 
 body.page-rsvp.intro-complete .invitation-scroll-spacer {
     display: block;
-    height: 100vh;
+    height: 0;
 }
 
 /* Hidden until the intro tears down (hard cut / skip / bail); prevents the
@@ -1278,10 +1278,23 @@ body.page-rsvp #footer-placeholder {
     margin-top: auto;
 }
 
-/* Replay icon — fixed bottom-left, icon-only. Hidden until the settle; fades in with
-   it. Asset is the Metro car line illustration (train-light.svg/train-dark.svg) with
-   the standard data-light/data-dark swap. z-index above the (settled) content, below
-   the Rive canvas (2000) while the intro plays.
+/* Replay icon — bottom-left, icon-only. Hidden until the settle; fades in with it.
+   Asset is the Metro car line illustration (train-light.svg/train-dark.svg) with the
+   standard data-light/data-dark swap. z-index above the (settled) content, below the
+   Rive canvas (2000) while the intro plays.
+   position: absolute (July 2026 — was fixed), anchored to #protected-content
+   (body.page-rsvp #protected-content { position: relative } in the Rive intro block
+   above) — the same containing block the footer sits inside. It now lives inside
+   #protected-content in the markup (rsvp.html), immediately before
+   #footer-placeholder, instead of beside #rive-container outside it. This fixes an
+   asymmetry: the footer already scrolled with the document pre-flow while the train
+   stayed pinned to the viewport, so a rubber-band scroll visibly separated them. With
+   #protected-content pinned to exactly one viewport (see .invitation-scroll-spacer
+   above) bottom/left:20px still lands in the same screen corner today, but the train
+   now travels with the document exactly like the footer's toggle. No
+   .rsvp-flow-active override is needed here (unlike the footer's fixed/absolute
+   switch) — see the flow-entered rule further down, which hides this control for
+   good rather than repositioning it.
    Box is landscape (70x48, ~1.79:1) rather than the old flag's 44x44 square — the
    train's native ~165x92 ratio would render small and thin inside a square built
    for the flag's tall ~0.61:1 portrait shape. 70x48 is the box first sized to the
@@ -1291,7 +1304,7 @@ body.page-rsvp #footer-placeholder {
    hard-cropped fit. bottom/left stay at 20px — same corner, box grows up/right
    from that anchor. */
 .replay-intro {
-    position: fixed;
+    position: absolute;
     bottom: 20px;
     left: 20px;
     z-index: 1600;
@@ -1326,30 +1339,33 @@ body.intro-complete .replay-intro:focus-visible {
     opacity: 1;
 }
 
-/* Once inside the RSVP card flow, the persistent stack-nav Back button can
-   pin to this exact bottom-left corner on mobile (rsvp-styles.css) — and
-   replaying the intro mid-form doesn't make sense anyway, so it's hidden
-   rather than overlapping. `rsvp-flow-active` itself is a one-way flag (set
-   once the flow is first entered, never unset — see advanceFrom in
-   js/rsvp-flow.js), so this alone would keep the icon hidden forever after
-   the first "Begin RSVP" click, even once Back navigates all the way out
-   to the invitation card again. `rsvp-invitation-top` (toggled on every
-   stack-nav update — see updateStackNav) tracks that finer-grained state,
-   so this override restores the icon whenever the invitation is actually
-   the visible top card, on arrival or on return. */
+/* Once inside the RSVP card flow, replay is a one-way control: entering the
+   flow hides it for the rest of the page load, full stop — including after
+   Back navigates all the way out to the invitation card again. There is no
+   answer persistence (the page's only localStorage write is `siteUnlocked`),
+   and replay clears sessionStorage's `intro-seen` and reloads — so pressing
+   it mid-form, or after filling out cards and backing out, would silently
+   throw away everything the guest entered. An earlier version restored the
+   icon whenever the invitation card was the visible top card again (tracked
+   via `rsvp-invitation-top`, toggled on every stack-nav update — see
+   updateStackNav in js/rsvp-flow.js), on the theory that "back at the
+   invitation" meant "safe to replay." It wasn't: a guest can back out to the
+   invitation with a full set of answers already entered on cards further
+   in. `rsvp-flow-active` itself is already a one-way flag (set once, never
+   unset — see advanceFrom in js/rsvp-flow.js), so a plain hide here is
+   permanent for the rest of the load without needing that finer-grained
+   class at all; a guest who entered by accident can still re-enter the flow
+   with the RSVP button. `visibility: hidden`, added on a delay equal to the
+   opacity fade, takes the button out of the tab order once it's fully
+   invisible — opacity/pointer-events alone still leave a hidden button
+   focusable, so a keyboard user tabbing through the form could land on it
+   and press Enter, which is exactly the data loss this closes. */
 body.page-rsvp.rsvp-flow-active .replay-intro {
     opacity: 0;
     pointer-events: none;
-}
-
-body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro {
-    opacity: 0.7;
-    pointer-events: auto;
-}
-
-body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro:hover,
-body.page-rsvp.rsvp-flow-active.rsvp-invitation-top .replay-intro:focus-visible {
-    opacity: 1;
+    visibility: hidden;
+    transition: opacity var(--settle-ms, 450ms) ease,
+                visibility 0s linear var(--settle-ms, 450ms);
 }
 
 /* Hover/focus jiggle — the train rocks in place, as if idling on its track. Small

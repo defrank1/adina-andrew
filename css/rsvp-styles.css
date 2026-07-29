@@ -793,9 +793,12 @@ body.page-rsvp.rsvp-flow-active .rsvp-flow-scroll-spacer {
    one viewport tall (the settled invitation). A long card grows that flex
    column, so the footer settles at the DOCUMENT bottom instead and scrolls
    away with the stack. Once the flow is active, take it out of flow and fix
-   it to the viewport corner, mirroring .replay-intro's own treatment
-   (styles.css) — right:0 (not a hardcoded inset) so .footer-content's own
-   existing padding supplies the corner inset, at every width. */
+   it to the viewport corner — right:0 (not a hardcoded inset) so
+   .footer-content's own existing padding supplies the corner inset, at every
+   width. .replay-intro (styles.css) needs no equivalent override here: it's
+   hidden outright once the flow starts (a one-way control, not repositioned
+   — see its own comment), so there's no "stays reachable during a long card"
+   case for it to solve. */
 body.page-rsvp.rsvp-flow-active .site-footer {
     position: fixed;
     bottom: 0;
