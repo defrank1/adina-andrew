@@ -26,17 +26,19 @@
     // needs the exact name, so this uses the real one. If a future export renames
     // the timeline, update this one constant.
     var ANIMATION_NAME = 'Timeline 1';
-    var DURATION_S = 19.58;       // handoff moment — end of the in-Rive cream cover fade.
-                                   // The card comes to rest at 18.20s, before the cover
-                                   // starts; the cut fires here, at the cover's completion,
-                                   // not at the timeline's later end (~22.0s).
-    var FADE_SYNC_START = 18.75;  // when the in-Rive cover fade begins (18.75 -> 19.583)
-    var FADE_SYNC_MS = 833;       // letterbox fade duration, synced to the cover fade
+    var DURATION_S = 18.41;       // handoff moment — the last-motion frame (train
+                                   // settled, envelope gone, no card). The cut fires
+                                   // here; the baked end-frame layer beneath
+                                   // #invitation-endstate takes over from this exact
+                                   // frame, so no in-Rive cream-cover beat is needed.
     var STEP_HZ = 15;             // stepped cadence; set 0 for smooth playback
-    var SETTLE_DELAY_MS = 150;    // pause on the matched frame before settling
+    var SETTLE_DELAY_MS = 600;    // hold on the matched frame before the dissolve begins
     var SETTLE_MS = 450;          // settle transition length (0 = instant brand page)
-    var COVER_CREAM = '#F1EDEA';  // matches the in-Rive cover rect exactly
-    var SAFETY_MS = 26000;        // backstop only — DURATION_S plus margin
+    var SCENE_GREEN = '#183A2B';  // exact background hex of the baked end-frame PNG
+                                   // (assets/rive/metro-endframe.png) — used for the
+                                   // letterbox and endstate so field and bars are
+                                   // pixel-identical, no seam
+    var SAFETY_MS = 21000;        // backstop only — DURATION_S plus margin
     var RUNTIME_LOAD_TIMEOUT_MS = 8000; // cellular stall guard — see loadRuntime
 
     var queryParams = new URLSearchParams(location.search);
@@ -46,25 +48,17 @@
     // query param, so the normal playback path is unaffected.
     var DEBUG_REGISTRATION = queryParams.has('debug-registration');
 
-    // ?cut=/?fadestart=/?fadems= — dev-only overrides for the three timing
-    // constants above, so Andrew can find the right handoff moment live in the
-    // browser (watching for the exact frame the in-Rive cream cover reaches 100%)
-    // instead of re-exporting the .riv for every guess. Only active when a param
-    // is actually present — with none present these constants are used exactly
-    // as declared and nothing is logged, so the normal path is unaffected. Once
-    // the right numbers are found, hardcode them back into the constants above
-    // and drop the query params from the URL.
+    // ?cut= — dev-only override for DURATION_S, so Andrew can find the right
+    // handoff moment live in the browser instead of re-exporting the .riv for
+    // every guess. Only active when the param is actually present — with none
+    // present the constant is used exactly as declared and nothing is logged,
+    // so the normal path is unaffected. Once the right number is found,
+    // hardcode it back into DURATION_S above and drop the query param.
     (function applyTimingOverrides() {
-        var hasOverride = queryParams.has('cut') || queryParams.has('fadestart') || queryParams.has('fadems');
-        if (!hasOverride) { return; }
+        if (!queryParams.has('cut')) { return; }
         var cut = parseFloat(queryParams.get('cut'));
-        var fadeStart = parseFloat(queryParams.get('fadestart'));
-        var fadeMs = parseFloat(queryParams.get('fadems'));
         if (!isNaN(cut)) { DURATION_S = cut; }
-        if (!isNaN(fadeStart)) { FADE_SYNC_START = fadeStart; }
-        if (!isNaN(fadeMs)) { FADE_SYNC_MS = fadeMs; }
-        console.log('[rive-intro timing] DURATION_S=' + DURATION_S +
-            ' FADE_SYNC_START=' + FADE_SYNC_START + ' FADE_SYNC_MS=' + FADE_SYNC_MS);
+        console.log('[rive-intro timing] DURATION_S=' + DURATION_S);
     })();
 
     var container = document.getElementById('rive-container');
@@ -99,15 +93,16 @@
     var elapsed = 0;            // accumulated play time (seconds), from RAF deltas
     var lastTs = null;          // previous RAF timestamp; null resets the delta
     var lastScrubT = -1;        // last quantized time actually scrubbed (dedup)
-    var fadeSynced = false;     // letterbox fade fired once at FADE_SYNC_START
 
     // ---- teardown helpers --------------------------------------------------
 
     function revealEndState() {
-        // Show the static invitation sitting beneath the canvas. It's flat cream
-        // (#F1EDEA) and reproduces the final frame, matching what hardCut() has just
-        // forced #rive-container's own letterbox to, so revealing it under the canvas
-        // and then removing the canvas is a seamless swap.
+        // Show the static end-frame layer sitting beneath the canvas. It's the baked
+        // last-motion frame (green field + tunnel + train, SCENE_GREEN, no card) and
+        // matches #rive-container's own background exactly — both are the same scene
+        // green for the whole intro, so revealing it under the canvas and then
+        // removing the canvas is a seamless swap. The dissolve into textured paper
+        // happens entirely in CSS, on the settle.
         if (endState) { endState.classList.remove('pre-reveal'); }
     }
 
@@ -151,18 +146,10 @@
         // post-reveal Rive error. Bail paths (return visit / reduced-motion / missing
         // asset) never reveal the canvas and land settled with the user's theme intact.
         if (!container.classList.contains('hidden')) { resetThemeToLight(); }
-        // Force the container's letterbox to its final cream instantly, regardless of
-        // whether the FADE_SYNC_MS transition (kicked off in tick() at FADE_SYNC_START)
-        // has had its full real-time duration to visually finish by now. The gap
-        // between the fade's nominal end and DURATION_S is only ~20-30ms, easily eaten
-        // by an unlucky frame, a GC pause, or (worst case, observed under a throttled
-        // tab) elapsed jumping past both marks in a single tick — any of which leaves
-        // the transition mid-flight, still tinted green, for the frame(s) right before
-        // the cut. Removing the transition and snapping the color guarantees the
-        // container can never be the thing rendering non-cream at the moment of the
-        // swap, independent of how much real time the fade actually got.
-        container.style.transition = 'none';
-        container.style.backgroundColor = COVER_CREAM;
+        // The container never changes color during the intro — it's SCENE_GREEN the
+        // whole time (see its CSS), matching the baked end-frame layer beneath it —
+        // so there's nothing to force here anymore. Reveal that layer, then hide the
+        // canvas in this same frame.
         revealEndState();
         container.style.display = 'none';
         if (skipBtn) { skipBtn.classList.add('hidden'); }
@@ -230,9 +217,10 @@
         addIntroComplete();
     }
 
-    // completeIntro — the loop reached DURATION_S (end of the in-Rive cream fade).
-    // Hard cut in the same frame — no hold timer (the old stacked timeouts caused a
-    // measured ~3.6s frozen stall) — then the settle after SETTLE_DELAY_MS.
+    // completeIntro — the loop reached DURATION_S (the last-motion frame). Hard cut
+    // in the same frame — no hold timer at the cut itself (the old stacked timeouts
+    // caused a measured ~3.6s frozen stall) — then a SETTLE_DELAY_MS hold on the
+    // matched frame before the settle dissolves it into the textured page.
     function completeIntro() { markSeen(); hardCut(); settle(); }
 
     // skipIntro — user pressed Skip, or Rive errored after the canvas was shown.
@@ -317,16 +305,6 @@
         if (lastTs === null) { lastTs = ts; }
         elapsed += (ts - lastTs) / 1000;
         lastTs = ts;
-
-        // Synced letterbox fade: the in-Rive cream cover only fills the 16:9 artboard;
-        // the container background (the letterbox bars on non-16:9 viewports) fades
-        // green -> cream in step with it, so by DURATION_S the whole viewport is flat
-        // #F1EDEA at any window shape. Fires exactly once.
-        if (!fadeSynced && elapsed >= FADE_SYNC_START) {
-            fadeSynced = true;
-            container.style.transition = 'background-color ' + FADE_SYNC_MS + 'ms ease-in-out';
-            container.style.backgroundColor = COVER_CREAM;
-        }
 
         var t = (STEP_HZ === 0)
             ? elapsed
