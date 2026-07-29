@@ -1019,6 +1019,18 @@ body.page-rsvp .invitation-endstate {
 body.page-rsvp .endstate-endframe {
     position: absolute;
     inset: 0;
+    /* Fills the pillarbox/letterbox regions outside the contained 16:9 art (any
+       viewport that isn't exactly 16:9 has some) with the SAME green as the art's
+       own field, so the whole layer is one uniform green surface with the scene
+       drawn in its center — not two different stacks (art-over-green in the
+       center, bare green at the sides) fading on either side of a seam. Without
+       this, the center fades art+green together while the sides fade only the
+       green beneath (this element itself was transparent there), which read as
+       faint vertical bars on wide viewports during the dissolve (horizontal bars
+       on tall/portrait ones). The .invitation-endstate green fill one layer down
+       becomes redundant for this specific seam but stays — it's still the
+       letterbox-match safety for the moment before this layer has painted. */
+    background-color: #183A2B;
     background-image: url('../assets/rive/metro-endframe.png');
     background-size: contain;
     background-position: center;

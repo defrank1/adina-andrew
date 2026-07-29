@@ -32,14 +32,16 @@
                                    // #invitation-endstate takes over from this exact
                                    // frame, so no in-Rive cream-cover beat is needed.
     var STEP_HZ = 15;             // stepped cadence; set 0 for smooth playback
-    var SETTLE_DELAY_MS = 600;    // hold on the matched frame before the dissolve begins
-    var SETTLE_MS = 450;          // settle transition length (0 = instant brand page)
+    var SETTLE_DELAY_MS = 1200;   // hold on the matched frame before the dissolve begins
+    var SETTLE_MS = 1000;         // settle transition length (0 = instant brand page)
     var SCENE_GREEN = '#183A2B';  // exact background hex of the baked end-frame PNG
                                    // (assets/rive/metro-endframe.png) — used for the
                                    // letterbox and endstate so field and bars are
                                    // pixel-identical, no seam
     var SAFETY_MS = 21000;        // backstop only — DURATION_S plus margin
     var RUNTIME_LOAD_TIMEOUT_MS = 8000; // cellular stall guard — see loadRuntime
+    var SKIP_INK_TIMEOUT_MS = 150; // Promise.race bound so an early Skip can't hang
+                                    // on the ink-decode gate — see whenInkReady
 
     var queryParams = new URLSearchParams(location.search);
 
@@ -93,6 +95,7 @@
     var elapsed = 0;            // accumulated play time (seconds), from RAF deltas
     var lastTs = null;          // previous RAF timestamp; null resets the delta
     var lastScrubT = -1;        // last quantized time actually scrubbed (dedup)
+    var inkDecoded = null;      // Promise kicked off by revealCanvas() — see whenInkReady
 
     // ---- teardown helpers --------------------------------------------------
 
@@ -217,15 +220,25 @@
         addIntroComplete();
     }
 
-    // completeIntro — the loop reached DURATION_S (the last-motion frame). Hard cut
-    // in the same frame — no hold timer at the cut itself (the old stacked timeouts
-    // caused a measured ~3.6s frozen stall) — then a SETTLE_DELAY_MS hold on the
-    // matched frame before the settle dissolves it into the textured page.
-    function completeIntro() { markSeen(); hardCut(); settle(); }
+    // completeIntro — the loop reached DURATION_S (the last-motion frame). Waits for
+    // the ink decode (see whenInkReady) so the DOM card never flashes blank, then
+    // hard-cuts — no hold timer at the cut itself (the old stacked timeouts caused a
+    // measured ~3.6s frozen stall) — then a SETTLE_DELAY_MS hold on the matched
+    // frame before the settle dissolves it into the textured page. The canvas sits
+    // frozen on its last-scrubbed (already-final) frame for this brief gate — in
+    // practice near-instant, since decode has had the whole ~18s runway by now.
+    function completeIntro() {
+        markSeen();
+        whenInkReady(false).then(function () { hardCut(); settle(); });
+    }
 
     // skipIntro — user pressed Skip, or Rive errored after the canvas was shown.
-    // Lands DIRECTLY on the settled state (no transition).
-    function skipIntro() { markSeen(); hardCut(); settleInstant(); }
+    // Lands DIRECTLY on the settled state (no transition). Gates on the same ink
+    // decode, but bounded (see whenInkReady) so an early Skip can't hang.
+    function skipIntro() {
+        markSeen();
+        whenInkReady(true).then(function () { hardCut(); settleInstant(); });
+    }
 
     // bailSilently — never showed the canvas (reduced motion, return visit, missing
     // asset); land settled immediately and tear down now (double-destroy is safe).
@@ -257,6 +270,38 @@
         // Force reflow, then restore the transition so the later fade-out animates.
         void container.offsetHeight;
         container.style.transition = '';
+
+        // Kick off decoding the DOM card's ink PNG now, using the ~18s of runway
+        // before the cut. Rive draws the card WITH its text on the canvas; the DOM
+        // card underneath (#invitation-endstate) starts blank until its own ink PNG
+        // has decoded. Without this, hardCut() reveals the DOM card the same frame
+        // the canvas hides, and the ink hasn't painted yet — a one-frame blank-cream
+        // blip (no text). whenInkReady() gates the cut on this promise. The
+        // animation always exits to LIGHT mode (resetThemeToLight), so only the
+        // light ink needs preloading — same URL string as the DOM
+        // <img class="paper-card__ink"> so this decode warms the exact resource the
+        // browser paints from (a cache hit, not a separate fetch).
+        var inkImg = new Image();
+        inkImg.src = 'assets/invitation/invitation-ink-light.png';
+        inkDecoded = inkImg.decode ? inkImg.decode().catch(function () {}) : Promise.resolve();
+    }
+
+    // whenInkReady — resolves once the ink decode above has settled. `raceTimeout`
+    // (Skip only) bounds the wait with SKIP_INK_TIMEOUT_MS so an early Skip stays
+    // responsive instead of blocking on a decode that hasn't had its usual ~18s of
+    // runway; a brief blip on an early skip is acceptable, a hang is not. Natural
+    // completion (DURATION_S) has had that full runway, so it waits unbounded —
+    // inkDecoded always resolves (errors are caught), so this can't hang in
+    // practice. If revealCanvas() never ran (bail paths), inkDecoded is still null
+    // and there's nothing to gate — those paths never showed a canvas painting a
+    // different card, so there's no swap to blip.
+    function whenInkReady(raceTimeout) {
+        if (!inkDecoded) { return Promise.resolve(); }
+        if (!raceTimeout) { return inkDecoded; }
+        return Promise.race([
+            inkDecoded,
+            new Promise(function (resolve) { setTimeout(resolve, SKIP_INK_TIMEOUT_MS); })
+        ]);
     }
 
     // ---- Rive runtime loading + init --------------------------------------
