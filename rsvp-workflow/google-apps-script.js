@@ -6,21 +6,34 @@
 //
 // Tab "Guests" — the invitation list, filled in manually by Andrew (one row
 // per invitation; one PERSON per column rather than a ";"-separated cell,
-// since discrete cells are far less error-prone to hand-enter and audit):
-//   Email | Name 1 | Name 2 | Name 3 | Name 4 | Name 5 | Name 6 | Friday | Saturday | Sunday
-//   - Email:   the address the invitation was sent to
-//   - Name 1..Name 6:  one person per column, left to right; blanks are
-//             skipped, so a 2-person invitation just leaves Name 3-6 empty
+// since discrete cells are far less error-prone to hand-enter and audit).
+// Current header row: Email 1 | Email 2 | Greeting | Name 1..Name 6 | Friday
+// | Saturday | Sunday — but column ORDER is not load-bearing for any of
+// these groups (July 2026 — see findNameColumns/findEmailColumns below for
+// why). Every group is located by HEADER TEXT, not position:
+//   - Email 1 / Email 2 (or a bare "Email"):  address(es) the invitation can
+//             be looked up from. A guest may have one or two on file; either
+//             matches — see findEmailColumns / handleLookup. The row's FIRST
+//             non-empty address is the canonical key returned to the client
+//             and later stored in Responses, regardless of which one the
+//             guest actually typed.
+//   - Greeting:  free text, display-only — read by nothing in this script.
+//             (Before July 2026, this column and Email 2 were swept into
+//             `people` as phantom guests by a position-based "everything
+//             between Email and the first event column" rule; that's why it
+//             matters that Greeting is simply ignored now rather than
+//             merely "kept to the right.")
+//   - Name 1..Name 6 (or however many "Name N" columns exist):  one person
+//             per column; blanks are skipped, so a 2-person invitation just
+//             leaves the later Name columns empty. Located by header text
+//             matching /^name\s*\d*$/i — see findNameColumns / handleLookup.
 //   - Friday / Saturday / Sunday:  TRUE/FALSE (checkboxes work) or "yes"/blank
-//             for whether that invitation includes the event. These three
-//             columns are located by their HEADER TEXT (must be spelled
-//             exactly "Friday", "Saturday", "Sunday"), not by fixed index —
-//             see findEventColumns / handleLookup. Column ORDER among the
-//             name columns and event columns is otherwise flexible.
-//   - Any scratch/notes column must go to the RIGHT of Friday/Saturday/Sunday.
-//             Everything between Email and the first event column is read as
-//             a person's name, so a notes column placed among the names would
-//             be picked up as a phantom guest.
+//             for whether that invitation includes the event. Located by
+//             HEADER TEXT (must be spelled exactly "Friday", "Saturday",
+//             "Sunday") — see findEventColumns / handleLookup.
+//   - Any other column (notes, etc.) is ignored no matter where it sits, as
+//             long as its header doesn't happen to match one of the patterns
+//             above.
 //
 // Tab "Responses" — written by this script, one row PER PERSON per submission:
 //   Timestamp | Email | Name | Friday | Saturday | Sunday | Meal | Kosher | Message
@@ -43,11 +56,15 @@
 //    top of js/rsvp-flow.js
 //
 // ACTIONS (GET, ?action=...):
-//   lookup   ?q=<term>      exact, case-insensitive match against
-//                           Guests.Email — see handleLookup
+//   lookup   ?q=<term>      exact, case-insensitive match against ANY Guests
+//                           email column (Email 1, Email 2, ...) — see
+//                           handleLookup. Returns the row's canonical
+//                           (first non-empty) address, not necessarily q.
 //   response ?email=<email> the caller's LATEST submission (attendance +
-//                           meal, by exact email), for the returning-guest
-//                           fast path — see handleLatestResponse
+//                           meal), for the returning-guest fast path — see
+//                           handleLatestResponse. Resolves q through Guests
+//                           to that same canonical address first, so either
+//                           email column finds the same submission.
 //
 // PRIVACY CAVEAT (accepted tradeoff, restated honestly — updated July 2026,
 // supersedes the earlier substring-match version of this note): with access
@@ -152,9 +169,36 @@ function findEventColumns(headerRow) {
   return map;
 }
 
-// Exact, case-insensitive match against Guests.Email (July 2026 — was a
-// substring match; see the PRIVACY CAVEAT above for why). Returns zero or one
-// invitation: [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }].
+// Name columns are located by HEADER TEXT, not by position — same principle as
+// findEventColumns above. Headers are "Name 1".."Name 6"; anything else in the
+// row (Email 1, Email 2, Greeting, or any future notes column) is ignored no
+// matter where it sits. Adding a "Name 7" requires no code change; adding
+// another non-name column can no longer create phantom guests.
+// Returns an array of 0-based indices in sheet order.
+function findNameColumns(headerRow) {
+  var cols = [];
+  for (var c = 0; c < headerRow.length; c++) {
+    if (/^name\s*\d*$/i.test((headerRow[c] + '').trim())) { cols.push(c); }
+  }
+  return cols;
+}
+
+// Email columns, located by header text ("Email 1", "Email 2", or a bare
+// "Email"). A guest may look up using any address on their row.
+// Returns an array of 0-based indices in sheet order.
+function findEmailColumns(headerRow) {
+  var cols = [];
+  for (var c = 0; c < headerRow.length; c++) {
+    if (/^email\s*\d*$/i.test((headerRow[c] + '').trim())) { cols.push(c); }
+  }
+  return cols;
+}
+
+// Exact, case-insensitive match against any Guests email column (July 2026 —
+// was a single Email column and a substring match; see the PRIVACY CAVEAT
+// above for the substring history). Returns zero or one invitation:
+// [{ email, invitedTo: ['friday', ...], people: ['Name', ...] }] — `email` is
+// the row's canonical (first non-empty) address, not necessarily q itself.
 // The client now gates on a complete-address shape before ever calling this
 // (see EMAIL_SHAPE in js/rsvp-flow.js), so in practice q already looks like a
 // full email — the server enforces the exact match regardless.
@@ -178,23 +222,43 @@ function handleLookup(e) {
     });
   }
 
-  // Name columns are every column between Email (0) and the first event
-  // column. Derived, not hardcoded — with the July 2026 layout that is B..G
-  // (Name 1..Name 6), but adding a Name 7 requires no code change.
-  var firstEventCol = Math.min(
-    eventCols.friday, eventCols.saturday, eventCols.sunday
-  );
+  var nameCols = findNameColumns(rows[0]);
+  if (!nameCols.length) {
+    return jsonResponse({
+      status: 'error',
+      message: 'Guests sheet header row must contain at least one column named "Name 1", "Name 2", etc.'
+    });
+  }
+
+  var emailCols = findEmailColumns(rows[0]);
+  if (!emailCols.length) {
+    return jsonResponse({
+      status: 'error',
+      message: 'Guests sheet header row must contain at least one column named "Email", "Email 1", etc.'
+    });
+  }
 
   var results = [];
 
   // Row 0 is the header.
   for (var i = 1; i < rows.length; i++) {
-    var email = (rows[i][0] + '').trim();
-    if (!email || email.toLowerCase() !== q) { continue; }
+    // A guest may look up using any address on the row (Email 1 or Email 2);
+    // the FIRST non-empty one is the canonical key returned below and later
+    // stored in Responses, so every submission for one invitation is keyed
+    // to the same address regardless of which one was used to log in.
+    var canonical = '';
+    var matched = false;
+    for (var k = 0; k < emailCols.length; k++) {
+      var addr = (rows[i][emailCols[k]] + '').trim();
+      if (!addr) { continue; }
+      if (!canonical) { canonical = addr; }
+      if (addr.toLowerCase() === q) { matched = true; }
+    }
+    if (!matched) { continue; }
 
     var people = [];
-    for (var n = 1; n < firstEventCol; n++) {
-      var name = (rows[i][n] + '').trim();
+    for (var n = 0; n < nameCols.length; n++) {
+      var name = (rows[i][nameCols[n]] + '').trim();
       if (name) { people.push(name); }
     }
 
@@ -205,7 +269,7 @@ function handleLookup(e) {
       }
     }
 
-    results.push({ email: email, invitedTo: invitedTo, people: people });
+    results.push({ email: canonical, invitedTo: invitedTo, people: people });
   }
 
   return jsonResponse(results);
@@ -226,6 +290,16 @@ function handleLatestResponse(e) {
   var email = ((e.parameter.email || '') + '').trim().toLowerCase();
   if (!email) { return jsonResponse({ none: true }); }
 
+  // Resolve through Guests first: with canonical keying (see handleLookup), a
+  // submission is stored under the row's FIRST non-empty email column, which
+  // may not be the address this guest is querying with (they could have
+  // looked up via Email 2). Match Responses on the canonical address instead
+  // so either email column finds the same submission. Falls back to the raw
+  // query if it doesn't resolve to a Guests row at all — e.g. a Responses row
+  // from before canonical keying, or a guest since removed from Guests.
+  var canonical = resolveCanonicalEmail(email);
+  var matchEmail = canonical ? canonical.toLowerCase() : email;
+
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(RESPONSES_SHEET);
   if (!sheet || sheet.getLastRow() < 2) { return jsonResponse({ none: true }); }
 
@@ -236,7 +310,7 @@ function handleLatestResponse(e) {
   // Row 0 is the header (Timestamp | Email | Name | Friday | Saturday |
   // Sunday | Meal | Kosher | Message).
   for (var i = 1; i < rows.length; i++) {
-    if ((rows[i][1] + '').trim().toLowerCase() !== email) { continue; }
+    if ((rows[i][1] + '').trim().toLowerCase() !== matchEmail) { continue; }
     var ts = rows[i][0];
     var ms = ts instanceof Date ? ts.getTime() : new Date(ts).getTime();
     if (latestMs === null || ms > latestMs) {
@@ -263,6 +337,33 @@ function handleLatestResponse(e) {
   });
 
   return jsonResponse({ people: people, message: latestRows[0][8] || '' });
+}
+
+// Resolves a query email to its Guests-sheet canonical address (the row's
+// first non-empty email column — see findEmailColumns / handleLookup), so
+// handleLatestResponse can match Responses on the same key handleLookup
+// returns regardless of which email column the guest queried with. Returns
+// '' if no Guests row matches (caller falls back to the raw query).
+function resolveCanonicalEmail(query) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(GUESTS_SHEET);
+  if (!sheet) { return ''; }
+
+  var rows = sheet.getDataRange().getValues();
+  if (rows.length < 2) { return ''; }
+
+  var emailCols = findEmailColumns(rows[0]);
+  if (!emailCols.length) { return ''; }
+
+  for (var i = 1; i < rows.length; i++) {
+    var canonical = '';
+    for (var k = 0; k < emailCols.length; k++) {
+      var addr = (rows[i][emailCols[k]] + '').trim();
+      if (!addr) { continue; }
+      if (!canonical) { canonical = addr; }
+      if (addr.toLowerCase() === query) { return canonical; }
+    }
+  }
+  return '';
 }
 
 // Responses stores "not invited" for events outside that invitation — the

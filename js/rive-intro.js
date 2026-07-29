@@ -223,6 +223,14 @@
     // land directly on the brand page: zero the transition length, then settle.
     function settleInstant() {
         document.body.style.setProperty('--settle-ms', '0ms');
+        // --rsvp-m-grow-ms (mobile portrait card grow, rsvp-styles.css) is
+        // deliberately a SEPARATE property from --settle-ms — the dissolve
+        // wants to be slow and watchable, the card's resize wants to be
+        // nearly imperceptible — so it doesn't collapse to 0 just because
+        // --settle-ms did. Zeroed here too so instant paths (and Skip, via
+        // skipIntro -> settleInstant) land the mobile card at its final rect
+        // with no visible grow, matching the settle's own instant landing.
+        document.body.style.setProperty('--rsvp-m-grow-ms', '0ms');
         addIntroComplete();
     }
 

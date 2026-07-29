@@ -1829,6 +1829,30 @@ body.dark-mode .rsvp-review-person {
         transform: translateY(0.5px);
     }
 
+    /* Both controls otherwise inherit their desktop sizing at every
+       viewport. At the desktop font-size/padding/gap plus a 40px icon, each
+       button runs ~160-190px wide — two of them plus the 1.5rem side insets
+       above come to ~370-400px, which touches on a 393px phone and overlaps
+       on a 375px one. Scoped to .rsvp-flow-active only: the pre-flow RSVP
+       button on the settled invitation page is alone on screen and stays at
+       full size. Horizontal padding shrinks, not vertical — vertical is what
+       keeps the tap target ≥44px tall. */
+    body.page-rsvp.rsvp-flow-active .rsvp-arrow,
+    body.page-rsvp.rsvp-flow-active .rsvp-stack-back {
+        font-size: 0.8rem;
+        padding: 0.75rem 1.15rem;
+        gap: 0.4rem;
+    }
+
+    /* Icons scale down with their buttons, proportionally (40x18 native —
+       24px wide keeps the same ~2.22:1 ratio at ~11px tall) rather than
+       leaving the height at 18 and looking squashed. */
+    body.page-rsvp.rsvp-flow-active .rsvp-stack-back .rsvp-stack-back-icon,
+    body.page-rsvp.rsvp-flow-active .rsvp-arrow .rsvp-arrow-icon {
+        width: 24px;
+        height: 11px;
+    }
+
     /* Toggle drops into the slot Next just vacated (.replay-intro's old
        20px inset) — stacked directly under the Next arrow, same right
        edge, rather than colliding with it in the same corner. */
@@ -1897,6 +1921,12 @@ body.dark-mode .rsvp-review-person {
             var(--rsvp-m-inv-cap),
             calc((100dvh - var(--rsvp-m-card-top-vp) - var(--rsvp-m-arrow-room)) * 5 / 7)
         );
+
+        /* The card's travel from its tiny Rive-registered rect to the mobile rect.
+           Deliberately NOT --settle-ms: the dissolve wants a slow, watchable melt,
+           but the card's resize wants to be nearly imperceptible. Kept as its own
+           property so it can be tuned in DevTools independently. */
+        --rsvp-m-grow-ms: 220ms;
     }
 
     /* Settle-grow. Gated on .intro-complete (NOT .rsvp-flow-active), so the
@@ -1913,16 +1943,21 @@ body.dark-mode .rsvp-review-person {
        registration (which never reaches .intro-complete) is unaffected.
        The dark-mode `.intro-complete .invitation-card` rule in styles.css
        only sets box-shadow — deliberately not duplicated here. Skip/bail
-       paths set --settle-ms to 0, so this transition collapses to an
-       instant landing at the mobile rect with no JS involvement. */
+       paths zero both --settle-ms AND --rsvp-m-grow-ms (js/rive-intro.js,
+       settleInstant), so this transition collapses to an instant landing at
+       the mobile rect. Geometry (left/top/width) rides its own
+       --rsvp-m-grow-ms, NOT --settle-ms — the card's resize should read as a
+       quick snap, not an animated beat, independent of how slow the dissolve
+       (box-shadow, which stays on --settle-ms; grain/shadow should still
+       arrive together with the dissolve) is tuned to be. */
     body.page-rsvp.intro-complete .invitation-card {
         left: calc(50% - var(--rsvp-m-inv-w) / 2);
         width: var(--rsvp-m-inv-w);
         top: var(--rsvp-m-card-top);
         transition: box-shadow var(--settle-ms, 450ms) ease,
-                    left var(--settle-ms, 450ms) ease,
-                    top var(--settle-ms, 450ms) ease,
-                    width var(--settle-ms, 450ms) ease;
+                    left var(--rsvp-m-grow-ms, 220ms) ease,
+                    top var(--rsvp-m-grow-ms, 220ms) ease,
+                    width var(--rsvp-m-grow-ms, 220ms) ease;
     }
 
     /* Reply-stack cards share the invitation's new top anchor. left/width
