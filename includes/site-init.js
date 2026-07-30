@@ -28,16 +28,26 @@ function updateImages(isDark) {
     });
 }
 
+// Canonical toggle glyph/size mapping. Sun (\u2739) in dark mode, moon
+// (\u23FE) in light \u2014 the icon shows the mode you're IN. Sizes differ because
+// the two glyphs have different optical weights at the same point size.
+// Exposed globally (like updateImages) so js/rive-intro.js's light-mode reset
+// can reuse it instead of keeping its own copy, which had drifted to the wrong
+// glyph AND the wrong size.
+function setToggleSymbol(isDark) {
+    var sym = document.getElementById('toggle-sym');
+    if (!sym || !sym.childNodes[0]) { return; }
+    sym.childNodes[0].textContent = isDark ? '\u2739' : '\u23FE';
+    sym.style.fontSize = isDark ? '36px' : '28px';
+}
+
 function initTheme() {
     const isDark = localStorage.getItem('darkMode') === 'enabled';
     if (isDark) updateImages(true);
 
-    // Set initial toggle symbol
-    var sym = document.getElementById('toggle-sym');
-    if (sym && isDark) {
-        sym.childNodes[0].textContent = '\u2739';
-        sym.style.fontSize = '36px';
-    }
+    // Set initial toggle symbol \u2014 only for dark; the light case is already
+    // correct from the HTML's static default glyph (includes/footer.html).
+    if (isDark) setToggleSymbol(true);
 
     const darkModeBtn = document.getElementById('dark-mode-toggle');
     if (!darkModeBtn) return;
@@ -48,16 +58,7 @@ function initTheme() {
         const isDarkNow = document.body.classList.contains('dark-mode');
         localStorage.setItem('darkMode', isDarkNow ? 'enabled' : 'disabled');
         updateImages(isDarkNow);
-        var sym = document.getElementById('toggle-sym');
-        if (sym) {
-            if (isDarkNow) {
-                sym.childNodes[0].textContent = '\u2739';
-                sym.style.fontSize = '36px';
-            } else {
-                sym.childNodes[0].textContent = '\u23FE';
-                sym.style.fontSize = '28px';
-            }
-        }
+        setToggleSymbol(isDarkNow);
     });
 }
 

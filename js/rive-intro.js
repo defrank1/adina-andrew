@@ -32,11 +32,11 @@
                                    // #invitation-endstate takes over from this exact
                                    // frame, so no in-Rive cream-cover beat is needed.
     var STEP_HZ = 15;             // stepped cadence; set 0 for smooth playback
-    var GROW_DELAY_MS = 250;      // beat after the cut before the mobile card grows,
+    var GROW_DELAY_MS = 700;      // beat after the cut before the mobile card grows,
                                    // so the resize reads as its own moment instead of
                                    // competing with the dissolve for attention
-    var SETTLE_DELAY_MS = 1200;   // hold on the matched frame before the dissolve begins
-    var SETTLE_MS = 1000;         // settle transition length (0 = instant brand page)
+    var SETTLE_DELAY_MS = 2600;   // hold on the matched frame before the dissolve begins
+    var SETTLE_MS = 1200;         // settle transition length (0 = instant brand page)
     var SCENE_GREEN = '#183A2B';  // exact background hex of the baked end-frame PNG
                                    // (assets/rive/metro-endframe.png) — used for the
                                    // letterbox and endstate so field and bars are
@@ -59,11 +59,59 @@
     // present the constant is used exactly as declared and nothing is logged,
     // so the normal path is unaffected. Once the right number is found,
     // hardcode it back into DURATION_S above and drop the query param.
+    //
+    // ?growms=NNN / ?growdelay=NNN — dev-only overrides for tuning the mobile
+    // portrait card grow on a real device without a debugger attached. growms sets
+    // --rsvp-m-grow-ms (the resize duration); growdelay sets GROW_DELAY_MS (the beat
+    // between the hard cut and the resize starting). Pair either with ?cut=1 to skip
+    // most of the timeline: the cut itself will look wrong at that point (the baked
+    // end-frame won't match Rive's actual frame) but the card's starting rect comes
+    // from CSS and is identical at any cut time, so the grow is faithful.
     (function applyTimingOverrides() {
-        if (!queryParams.has('cut')) { return; }
+        var hasOverride = queryParams.has('cut') || queryParams.has('growms') || queryParams.has('growdelay');
+        if (!hasOverride) { return; }
         var cut = parseFloat(queryParams.get('cut'));
         if (!isNaN(cut)) { DURATION_S = cut; }
-        console.log('[rive-intro timing] DURATION_S=' + DURATION_S);
+
+        // Both validated the same way: parse, ignore if NaN or negative, clamp
+        // the upper end to something sane — a bad value here must never break
+        // the intro.
+        var growMs = parseFloat(queryParams.get('growms'));
+        if (!isNaN(growMs) && growMs >= 0) {
+            growMs = Math.min(growMs, 5000);
+            // Set on body, not documentElement. body.page-rsvp declares
+            // --rsvp-m-grow-ms directly (rsvp-styles.css) — an element's own
+            // declared value for a property ALWAYS wins over one inherited
+            // from an ancestor, regardless of whether the ancestor's was
+            // inline, so an html-level override here would be silently
+            // ignored by body's own rule (confirmed empirically: it was — the
+            // computed value on body stayed at the CSS default with an
+            // html-level override in place, and a self-referencing
+            // var(--rsvp-m-grow-ms, 500ms) fallback on body's own rule was
+            // tried and rejected too — browsers treat that as a genuine
+            // cyclic reference, not an inherit-then-fallback lookup, and
+            // resolve it to the guaranteed-invalid value instead). Setting
+            // it directly on body works, and still composes correctly with
+            // Skip/bail: this IIFE runs at parse time, before startIntro()
+            // ever calls hardCut(); settleInstant() — reached only via
+            // Skip/bail — runs LATER and calls the identical
+            // body.style.setProperty('--rsvp-m-grow-ms', ...) with '0ms',
+            // which simply overwrites this earlier value on the same
+            // element/property. Last write wins, so Skip/bail still lands
+            // instantly regardless of this override; natural completion
+            // never touches the property again after this, so the override
+            // value survives untouched through to the transition.
+            document.body.style.setProperty('--rsvp-m-grow-ms', growMs + 'ms');
+        }
+
+        var growDelay = parseFloat(queryParams.get('growdelay'));
+        if (!isNaN(growDelay) && growDelay >= 0) {
+            GROW_DELAY_MS = Math.min(growDelay, 5000);
+        }
+
+        console.log('[rive-intro timing] DURATION_S=' + DURATION_S +
+            ' GROW_DELAY_MS=' + GROW_DELAY_MS +
+            ' growMsOverride=' + (isNaN(growMs) ? '(none)' : growMs + 'ms'));
     })();
 
     var container = document.getElementById('rive-container');
@@ -132,10 +180,23 @@
                 img.src = img.dataset.light;
             });
         }
-        var sym = document.getElementById('toggle-sym');
-        if (sym && sym.childNodes[0]) {
-            sym.childNodes[0].textContent = '☀';
-            sym.style.fontSize = '36px';
+        // setToggleSymbol (site-init.js) is the canonical glyph/size mapping —
+        // sun/36px for dark, moon/28px for light. This used to keep its own
+        // inline copy here, and it drifted to the DARK-mode treatment (a third,
+        // non-canonical sun glyph) despite forcing LIGHT mode — reusing the
+        // shared function instead of a local copy is what keeps this from
+        // silently drifting again. site-init.js loads before this file (see
+        // rsvp.html's <script> order), so the primary branch always runs; the
+        // fallback exists only as a defensive mirror of how updateImages above
+        // is handled, and must use the LIGHT pair if it's ever actually hit.
+        if (typeof setToggleSymbol === 'function') {
+            setToggleSymbol(false);
+        } else {
+            var sym = document.getElementById('toggle-sym');
+            if (sym && sym.childNodes[0]) {
+                sym.childNodes[0].textContent = '⏾';
+                sym.style.fontSize = '28px';
+            }
         }
     }
 

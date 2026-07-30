@@ -1980,52 +1980,65 @@ body.dark-mode .rsvp-review-person {
 
         /* The card's travel from its tiny Rive-registered rect to the mobile rect.
            Deliberately NOT --settle-ms: the dissolve wants a slow, watchable melt,
-           but the card's resize wants to be nearly imperceptible. Kept as its own
-           property so it can be tuned in DevTools independently. */
-        --rsvp-m-grow-ms: 220ms;
+           but the card's resize should read as its own beat, not be instantaneous.
+           Kept as its own property so it can be tuned in DevTools (or live on
+           device via ?growms=, js/rive-intro.js — set on body directly, not
+           documentElement; see that override's own comment for why)
+           independently. 1300ms (July 2026 — was 500ms, before that 220ms,
+           which read as imperceptible on device) is Andrew's picked value from
+           an interactive tuner reproducing the real mobile geometry and
+           sequencing — paired with `linear` easing on the geometry properties
+           below, not the site's usual `ease`, a constant-speed resize was the
+           chosen feel. */
+        --rsvp-m-grow-ms: 1300ms;
     }
 
     /* Settle-grow. Gated on .card-grown (July 2026 — was .intro-complete),
-       a class js/rive-intro.js adds GROW_DELAY_MS (250ms) after the hard
+       a class js/rive-intro.js adds GROW_DELAY_MS (700ms) after the hard
        cut, deliberately BEFORE .intro-complete (which lands SETTLE_DELAY_MS
-       — 1200ms — after the cut and drives the dissolve). The two used to
-       fire together: the card sat at the Rive-registered rect through the
-       cut, then grew AND dissolved into the textured page in the same
-       motion. That made the grow invisible — 220ms of resize lost inside a
+       — 2600ms — after the cut and drives the dissolve). Tuned sequence:
+       700ms still, then a 1300ms grow finishing at 2000ms, then ~600ms of
+       clear air before the 2600ms dissolve begins. The two used to fire
+       together: the card sat at the Rive-registered rect through the cut,
+       then grew AND dissolved into the textured page in the same motion.
+       That made the grow invisible — a short resize lost inside a
        full-viewport green-to-cream change competing for the eye. Now the
        grow is a discrete beat against the still (undissolved) scene, and
-       finishes well before the dissolve even begins. `left` is centered via
-       calc, NOT a transform: js/rsvp-flow.js sets inline transforms on this
-       element during stack travel (see fileTransition) and a centering
-       translate would collide with those. The base pre-settle rule in
-       styles.css (13.426%/33.854%/32.292%, registration-critical) is
-       untouched — this only ever matches once .card-grown is present, and
-       registration only has to hold at the INSTANT of the cut, a beat
-       before this class exists, so ?debug-registration (which never calls
-       hardCut(), and so never reaches .card-grown either) is unaffected.
-       The dark-mode `.intro-complete .invitation-card` rule in styles.css
-       only sets box-shadow, keyed to --settle-ms as before — deliberately
-       not duplicated here, and unaffected by the .card-grown rename since
-       it still arrives on schedule once .intro-complete lands; this rule
-       only needs its transition property in place before then, which
+       finishes well clear of the dissolve. The three geometry properties
+       (left/top/width) use `linear` easing, not the site's usual `ease` —
+       Andrew's pick from the same tuner pass, a constant-speed resize read
+       better than an eased one here; box-shadow keeps `ease` on
+       --settle-ms, an unrelated choice. `left` is centered via calc, NOT a
+       transform: js/rsvp-flow.js sets inline transforms on this element
+       during stack travel (see fileTransition) and a centering translate
+       would collide with those. The base pre-settle rule in styles.css
+       (13.426%/33.854%/32.292%, registration-critical) is untouched — this
+       only ever matches once .card-grown is present, and registration only
+       has to hold at the INSTANT of the cut, a beat before this class
+       exists, so ?debug-registration (which never calls hardCut(), and so
+       never reaches .card-grown either) is unaffected. The dark-mode
+       `.intro-complete .invitation-card` rule in styles.css only sets
+       box-shadow, keyed to --settle-ms as before — deliberately not
+       duplicated here, and unaffected by the .card-grown rename since it
+       still arrives on schedule once .intro-complete lands; this rule only
+       needs its transition property in place before then, which
        .card-grown landing first guarantees. Skip/bail paths reach the
        mobile rect through settleInstant() (js/rive-intro.js), which now
        adds .card-grown directly (not just .intro-complete) — without that,
        those paths would never pick up the class at all and the card would
        be stranded at its tiny Rive-registered rect forever. --rsvp-m-grow-ms
        is zeroed there too, so the transition still collapses to an instant
-       landing; NOT --settle-ms, which stays independent, so the card's
-       resize reads as a quick snap regardless of how slow the dissolve
-       (box-shadow, still on --settle-ms; grain/shadow still arrive with the
-       dissolve) is tuned to be. */
+       landing regardless of how long it's tuned to be; NOT --settle-ms,
+       which stays independent, so the grow and the dissolve can each be
+       tuned (length, easing) without affecting the other. */
     body.page-rsvp.card-grown .invitation-card {
         left: calc(50% - var(--rsvp-m-inv-w) / 2);
         width: var(--rsvp-m-inv-w);
         top: var(--rsvp-m-card-top);
         transition: box-shadow var(--settle-ms, 450ms) ease,
-                    left var(--rsvp-m-grow-ms, 220ms) ease,
-                    top var(--rsvp-m-grow-ms, 220ms) ease,
-                    width var(--rsvp-m-grow-ms, 220ms) ease;
+                    left var(--rsvp-m-grow-ms, 1300ms) linear,
+                    top var(--rsvp-m-grow-ms, 1300ms) linear,
+                    width var(--rsvp-m-grow-ms, 1300ms) linear;
     }
 
     /* Reply-stack cards share the invitation's new top anchor. left/width
