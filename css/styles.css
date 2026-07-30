@@ -886,12 +886,30 @@ body.page-home .registry-section {
 }
 
 body.dark-mode .paper-card {
-    background-color: #0e2319;
+    /* Tile-load-failure fallback only — the tile is fully opaque, so it alone
+       determines the rendered colour whenever it's loaded; this hex is what
+       renders approximately if the tile 404s. Approximate by nature and will
+       drift if --card-dark-tint below is retuned — that's acceptable. */
+    background-color: #132C22;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .paper-card::before {
-    background-image: url('../assets/textures/combined-card-dark.png');
+    /* The card now shares the BODY's grain tile (combined-dark.png) rather than
+       its own darker combined-card-dark.png, which rendered at luminance 29.6 —
+       ~11 below the body surface and ~4 below the nav, reading as too dark.
+       These tiles are fully opaque, so the tile alone determines the surface
+       colour; .paper-card's background-color above is a load-failure fallback,
+       not a contributor.
+       --card-dark-tint drops the card a couple of luminance points under the
+       body so it still reads as a distinct sheet. 1.0 = identical to the body;
+       useful range ~0.90–1.00. Tunable in DevTools; once the value is settled it
+       should be baked into a re-exported tile (see decisions.md) so the surface
+       goes back to being purely a baked asset. combined-card-dark.png is now
+       unreferenced anywhere — kept in the repo as the starting point if the
+       darker treatment is ever wanted back. */
+    background-image: url('../assets/textures/combined-dark.png');
+    filter: brightness(var(--card-dark-tint, 0.94));
 }
 
 .paper-card__ink,
