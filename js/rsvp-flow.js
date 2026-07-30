@@ -1075,8 +1075,19 @@
             emailInput.addEventListener('input', onEmailInput);
             emailInput.addEventListener('keydown', onEmailInputKeydown);
             emailSuggestions.addEventListener('keydown', onSuggestionsKeydown);
+            // Uses composedPath(), not a live emailSuggestions.contains(e.target)
+            // check, because a suggestion button's own click handler
+            // (selectInvitation -> showSelectionLoading) rebuilds
+            // emailSuggestions' contents synchronously, in the same click
+            // dispatch, before this bubble-phase listener runs — that
+            // detaches e.target from the document, so .contains() would
+            // always report false and this handler would immediately undo
+            // the loading state on the very click that triggered it.
+            // composedPath() is captured at dispatch time, so it still
+            // reflects the original (pre-rebuild) ancestor chain.
             document.addEventListener('click', function (e) {
-                if (!emailInput.contains(e.target) && !emailSuggestions.contains(e.target)) {
+                var path = e.composedPath ? e.composedPath() : [e.target];
+                if (path.indexOf(emailInput) === -1 && path.indexOf(emailSuggestions) === -1) {
                     hideSuggestions();
                 }
             });
@@ -1128,6 +1139,19 @@
             emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty', 'Looking…'));
             emailSuggestions.style.display = 'block';
             emailInput.classList.add('suggestions-open');
+            openSuggestions();
+        }
+
+        // Post-selection loading state. Distinct from showLookupLoading()'s
+        // "Looking…" (which runs while SEARCHING as the guest types) — this
+        // covers the fetchLatestResponse round trip AFTER a pill is pressed,
+        // which is a couple of seconds. Without it, hideSuggestions() would
+        // un-fade .form-hint and the card would sit showing "Type the
+        // email…" as if nothing happened.
+        function showSelectionLoading() {
+            emailSuggestions.innerHTML = '';
+            emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty', 'Loading your invitation…'));
+            emailSuggestions.style.display = 'block';
             openSuggestions();
         }
 
@@ -1242,7 +1266,7 @@
             invitation = inv;
             unlockSite();
             emailInput.value = inv.email;
-            hideSuggestions();
+            showSelectionLoading();
             removePersonalCards();
             latestResponse = null;
             fetchLatestResponse(inv.email)
@@ -1257,11 +1281,13 @@
                     } else {
                         dealPersonalStack(inv, null);
                     }
+                    hideSuggestions();
                     fileForward(afterMove);
                 })
                 .catch(function () {
                     if (invitation !== inv) { return; }
                     dealPersonalStack(inv, null);
+                    hideSuggestions();
                     fileForward(afterMove);
                 });
         }

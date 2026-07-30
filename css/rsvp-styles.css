@@ -925,11 +925,20 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     margin-bottom: 0.6rem;
 }
 
-/* Matches .password-input (styles.css) exactly — same gradient foil
-   text-fill, border, padding, radius — per Andrew's "should match the
-   password boxes in style 100%". More specific than the generic
-   .form-group input[type="text"] rule below so it wins regardless of
-   source order. */
+/* Matches .password-input (styles.css) for border, padding, radius — per
+   Andrew's original "should match the password boxes in style 100%". The
+   gradient foil text-fill (-webkit-background-clip: text /
+   -webkit-text-fill-color: transparent) that used to match it exactly was
+   removed (July 2026, Decision L follow-up): it was the actual, documented
+   cause of the lookup card's transform-ghosting bug (this input left behind
+   while the rest of the card animated out) — browsers can rasterize that
+   fill on its own compositing layer that doesn't always recomposite in
+   lockstep with an ancestor's CSS transform. will-change/blur and
+   appearance: none were both added earlier to chase the same symptom and
+   are real, worthwhile mitigations, but neither removes the underlying
+   cause — do not reintroduce the gradient fill here. More specific than the
+   generic .form-group input[type="text"] rule below so it wins regardless
+   of source order. */
 .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
     width: 280px;
     max-width: 100%;
@@ -938,13 +947,11 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     font-family: var(--font-body);
     font-size: 0.9rem;
     border: 2px solid var(--color-dark-green);
-    background: linear-gradient(135deg, var(--color-dark-green) 0%, var(--color-accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: none;
+    color: var(--color-dark-green);
     text-align: center;
     border-radius: 25px;
-    transition: all 0.3s ease;
+    transition: border-color 0.3s ease;
 }
 
 .paper-card--page[data-step="lookup"] .form-group input[type="text"]:focus {
@@ -986,7 +993,7 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.8rem;
     opacity: 0;
     transition: opacity 0.18s ease, transform 0.18s ease;
     /* RESETS of the base .guest-suggestions panel (background-color, border,
@@ -1152,12 +1159,12 @@ body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item.sele
     max-width: 26ch;
 }
 
+/* Gradient text-fill removed here too — see the light-mode rule above for
+   why; do not reintroduce it. */
 body.dark-mode .paper-card--page[data-step="lookup"] .form-group input[type="text"] {
     border-color: var(--color-soft-white);
-    background: linear-gradient(135deg, var(--color-soft-white) 0%, #d4cfc8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: none;
+    color: var(--color-soft-white);
 }
 
 /* Event logistics on a card: the weekend-event vocabulary, condensed and
