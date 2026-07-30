@@ -993,7 +993,7 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1.15rem;
     opacity: 0;
     transition: opacity 0.18s ease, transform 0.18s ease;
     /* RESETS of the base .guest-suggestions panel (background-color, border,
@@ -1034,8 +1034,14 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
    stays reserved and nothing reflows when the box opens/closes. Covers all
    three open states (Looking…/match/no-match) uniformly, since each is just
    .guest-suggestions.is-open with different content — the cue or message
-   inside the box replaces the hint's job while it's up. */
+   inside the box replaces the hint's job while it's up.
+   The lower half of this card reads tight against the generous spacing
+   above it, and the absolutely-positioned suggestions box overlays this
+   hint's reserved space — so this margin is what gives BOTH states room.
+   Raising it grows the card slightly, which the variable-height stack
+   already accommodates. */
 .paper-card--page[data-step="lookup"] .form-hint {
+    margin-top: 1.1rem;
     transition: opacity 0.18s ease;
 }
 
