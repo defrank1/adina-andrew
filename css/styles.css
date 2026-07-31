@@ -1847,24 +1847,38 @@ body.page-schedule .registry-cta {
     margin-bottom: 0.5rem;
 }
 
+/* Underline written as longhands with -webkit- prefixed twins, and with NO
+   transition on text-decoration-color (July 2026): the shorthand
+   `text-decoration` resets color and thickness, and an active transition on
+   the decoration color is the leading suspect for iOS Safari refusing to
+   paint the underline at all. Alpha raised 0.55 -> 0.9 in the same pass —
+   at 0.55 inside a paragraph that is itself opacity: 0.85, the effective
+   alpha was ~0.47, which read as a smudge rather than a link even where it
+   did render. */
 .schedule-link {
     color: inherit;
-    text-decoration: underline;
-    text-decoration-color: rgba(26, 58, 46, 0.55);
+    -webkit-text-decoration-line: underline;
+    -webkit-text-decoration-color: rgba(26, 58, 46, 0.9);
+    text-decoration-line: underline;
+    text-decoration-color: rgba(26, 58, 46, 0.9);
+    -webkit-text-decoration-thickness: 1px;
+    text-decoration-thickness: 1px;
     text-underline-offset: 3px;
-    transition: text-decoration-color 0.2s ease;
 }
 
 .schedule-link:hover {
+    -webkit-text-decoration-color: var(--color-accent);
     text-decoration-color: var(--color-accent);
 }
 
 body.dark-mode .schedule-link {
-    text-decoration-color: rgba(241, 237, 234, 0.55);
+    -webkit-text-decoration-color: rgba(241, 237, 234, 0.85);
+    text-decoration-color: rgba(241, 237, 234, 0.85);
 }
 
 body.dark-mode .schedule-link:hover {
-    text-decoration-color: rgba(241, 237, 234, 0.7);
+    -webkit-text-decoration-color: rgba(241, 237, 234, 1);
+    text-decoration-color: rgba(241, 237, 234, 1);
 }
 
 /* ===========================
@@ -2399,24 +2413,31 @@ body.dark-mode .section-divider {
     margin-bottom: 0.6rem;
 }
 
+/* See .schedule-link for the rationale. */
 .travel-link {
     color: inherit;
-    text-decoration: underline;
-    text-decoration-color: rgba(26, 58, 46, 0.55);
+    -webkit-text-decoration-line: underline;
+    -webkit-text-decoration-color: rgba(26, 58, 46, 0.9);
+    text-decoration-line: underline;
+    text-decoration-color: rgba(26, 58, 46, 0.9);
+    -webkit-text-decoration-thickness: 1px;
+    text-decoration-thickness: 1px;
     text-underline-offset: 3px;
-    transition: text-decoration-color 0.2s ease;
 }
 
 .travel-link:hover {
+    -webkit-text-decoration-color: var(--color-accent);
     text-decoration-color: var(--color-accent);
 }
 
 body.dark-mode .travel-link {
-    text-decoration-color: rgba(241, 237, 234, 0.55);
+    -webkit-text-decoration-color: rgba(241, 237, 234, 0.85);
+    text-decoration-color: rgba(241, 237, 234, 0.85);
 }
 
 body.dark-mode .travel-link:hover {
-    text-decoration-color: rgba(241, 237, 234, 0.7);
+    -webkit-text-decoration-color: rgba(241, 237, 234, 1);
+    text-decoration-color: rgba(241, 237, 234, 1);
 }
 
 .travel-directions {
