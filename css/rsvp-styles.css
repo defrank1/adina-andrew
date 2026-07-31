@@ -886,6 +886,19 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* .guest-suggestions is position: absolute (see its own rule), so it never
+       contributes to this card's normal-flow height — .form-hint's margin-top
+       is what reserves room for it, sized for the hint's own short/no-match
+       text. The MATCH state is taller than that: it stacks a pill (~42px)
+       ABOVE the cue, on top of the pill-to-cue gap, a shape the hint (which
+       never has a pill) can't model. Measured shortfall against the hint's
+       reserve was ~32px (getBoundingClientRect: pill+gap+cue needs ~96px
+       below the input, only ~64px was available) — the match-state cue was
+       rendering past this card's own padding-box, text visibly crossing the
+       ::after frame below. Extra padding-bottom (not more hint margin-top,
+       which would just over-space the plain default/no-dropdown view)
+       closes that gap without moving the hint relative to the input. */
+    padding-bottom: calc(8% + 40px);
 }
 
 /* .rsvp-card .form-group (below, shared with the review card's note/Send)
@@ -990,10 +1003,18 @@ body.dark-mode.page-rsvp .rsvp-stack .paper-card--page::after {
     max-width: 100%;
     max-height: none;
     overflow-y: visible;
-    display: flex;
+    /* !important: showLookupLoading/showSelectionLoading/displaySuggestions
+       (js/rsvp-flow.js) unconditionally set emailSuggestions.style.display =
+       'block' whenever this box is shown (a real inline value, not '' —
+       same shape as .rsvp-arrow.rsvp-nav-inflight's pointer-events case
+       below), which otherwise beats this rule regardless of selector
+       specificity and silently turns the whole flex column (this
+       align-items + gap included) into dead code while the box is visible.
+       Confirmed via computed style, not assumed. */
+    display: flex !important;
     flex-direction: column;
     align-items: center;
-    gap: 1.15rem;
+    gap: 1.5rem;
     opacity: 0;
     transition: opacity 0.18s ease, transform 0.18s ease;
     /* RESETS of the base .guest-suggestions panel (background-color, border,
@@ -1163,6 +1184,16 @@ body.dark-mode .paper-card--page[data-step="lookup"] .guest-suggestion-item.sele
     line-height: 1.5;
     text-align: center;
     max-width: 26ch;
+    /* The base .guest-suggestion-item rule sets width: 100% (it was a
+       full-width list row); this is a centred caption instead. Flex items
+       size to content by default (flex-basis: auto), so shrinking to width:
+       auto (then clamped by max-width above) plus align-self: center on the
+       now-forced-real flex column (see the !important above) centers this
+       box the same way the pill next to it is centered — do not read this
+       as depending on the container's own display: block; it isn't, see
+       that comment for why. */
+    width: auto;
+    align-self: center;
 }
 
 /* Gradient text-fill removed here too — see the light-mode rule above for
