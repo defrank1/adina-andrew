@@ -1095,7 +1095,7 @@
             group.appendChild(anchor);
 
             var hint = el('p', 'form-hint');
-            hint.appendChild(document.createTextNode('Type the email at which you'));
+            hint.appendChild(document.createTextNode('Type the email where you'));
             hint.appendChild(document.createElement('br'));
             hint.appendChild(document.createTextNode('received your invitation.'));
             group.appendChild(hint);
