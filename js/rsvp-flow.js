@@ -161,14 +161,14 @@
 
     var EVENT_ORDER = ['friday', 'saturday', 'sunday'];
 
-    // The reception dinner. `kosherable` meals carry the small "Kosher?"
+    // The reception dinner. `kosherable` meals carry the small "Kosher"
     // checkbox. `label` is the full name (used on the radio itself);
     // `shortLabel` is used wherever a kosher selection is summarized
     // elsewhere (review/schedule cards, confirmation email) — "Kosher
     // Branzino," never "Kosher Pan-Seared Herb Branzino."
     var MEAL_OPTIONS = [
         { key: 'branzino', label: 'Pan-Seared Herb Branzino', shortLabel: 'Branzino', kosherable: true },
-        { key: 'chicken', label: 'Lemon Thyme-Marinated Chicken', shortLabel: 'Chicken', kosherable: true },
+        { key: 'chicken', label: 'Lemon Thyme Chicken', shortLabel: 'Chicken', kosherable: true },
         { key: 'cauliflower', label: 'Cauliflower Steak', shortLabel: 'Cauliflower Steak', kosherable: false }
     ];
 
@@ -1572,7 +1572,7 @@
                     kInput.value = meal.key;
                     kInput.disabled = true;
                     kLabel.appendChild(kInput);
-                    kLabel.appendChild(el('span', null, 'Kosher?'));
+                    kLabel.appendChild(el('span', null, 'Kosher'));
                     row.appendChild(kLabel);
 
                     // Pre-fill: this meal is the saved selection, so its own
@@ -1670,7 +1670,9 @@
             var card = el('div', 'rsvp-card');
             card.tabIndex = -1;
 
-            card.appendChild(el('h2', 'rsvp-card-event-title', 'Review Rsvp'));
+            card.appendChild(el('h2', 'rsvp-card-event-title', 'Review'));
+
+            card.appendChild(el('p', 'rsvp-card-request', 'Please review and confirm your RSVP below'));
 
             reviewSummary = el('div', 'rsvp-review-summary');
             card.appendChild(reviewSummary);

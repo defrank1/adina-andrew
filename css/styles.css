@@ -105,6 +105,9 @@
     --emboss-rest: 0 1px 0 rgba(255, 255, 255, 0.6), 0 -0.5px 0 rgba(26, 58, 46, 0.06);
     --emboss-hover: 0 -1px 1px rgba(26, 58, 46, 0.15), 0 1px 0 rgba(255, 255, 255, 0.3);
 
+    --story-closing-size: 3.6rem;
+    --story-closing-size-mobile: 2.2rem;
+
     /* Smooth dark mode color transitions */
     transition:
         --color-dark-green 400ms ease,
@@ -2020,7 +2023,7 @@ body.dark-mode .story-divider {
 .story-closing {
     text-align: center;
     font-family: var(--font-title);
-    font-size: 2.4rem;
+    font-size: var(--story-closing-size);
     color: var(--color-dark-green);
     margin-top: 1rem;
     line-height: 1.4;
@@ -2762,7 +2765,7 @@ body.dark-mode .travel-link:hover {
     }
 
     .story-closing {
-        font-size: 1.5rem;
+        font-size: var(--story-closing-size-mobile);
     }
 
     /* Carousel arrows overlay inside the photo on mobile */
