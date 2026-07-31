@@ -98,7 +98,7 @@ var EVENT_NAMES = {
 // strings do.
 var MEAL_NAMES = {
   branzino: 'Pan-Seared Herb Branzino',
-  chicken: 'Lemon Thyme-Marinated Chicken',
+  chicken: 'Lemon Thyme Chicken',
   cauliflower: 'Cauliflower Steak'
 };
 var MEAL_SHORT_NAMES = {
