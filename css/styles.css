@@ -1310,11 +1310,15 @@ body.page-rsvp #protected-content.unlocked {
    VIEWPORT (not the document) so they hold still against the settled page's
    residual scroll instead of traveling with the card through it — the same
    reference frame the fixed nav already uses. bottom:0/right:0 match
-   .footer-content's own padding for the corner inset; z-index carries over
-   from the flow-active-only rule this replaces (see .replay-intro's own
-   comment and the collapsed rule below — both this and that one used to be
-   two different rules for two different states, now one rule each covers
-   both). */
+   .footer-content's own padding for the corner inset; z-index: 0 (July 2026)
+   puts the toggle BELOW #invitation-endstate's own z-index: 1, so the reply
+   cards paint over it the same way they paint over .rsvp-arrow /
+   .rsvp-stack-back at z-index 400 — the toggle reads as pressed into the
+   base paper surface, not floating on top of the sheets. It was 1600, which
+   put it in a layer above the entire card stack and landed the moon inside
+   the Saturday card's frame. Scrolling a tall card up reveals the toggle
+   from underneath; scrolling back down covers it again. That is intended:
+   being behind the card matters more than being permanently visible. */
 body.page-rsvp .site-footer {
     position: fixed;
     bottom: 0;
@@ -1322,7 +1326,7 @@ body.page-rsvp .site-footer {
     left: auto;
     width: auto;
     margin: 0;
-    z-index: 1600;
+    z-index: 0;
 }
 
 /* Replay icon — bottom-left, icon-only. Hidden until the settle; fades in with it.
@@ -1356,7 +1360,8 @@ body.page-rsvp .site-footer {
     position: fixed;
     bottom: 20px;
     left: 20px;
-    z-index: 1600;
+    /* z-index: 0 — see body.page-rsvp .site-footer's comment above. */
+    z-index: 0;
     width: 70px;
     height: 48px;
     padding: 0;
