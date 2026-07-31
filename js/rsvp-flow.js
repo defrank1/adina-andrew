@@ -123,7 +123,7 @@
             when: 'Friday, October 16th · 8:00–10:00 PM',
             venue: 'Sonoma Restaurant & Wine Bar',
             address: '223 Pennsylvania Avenue SE',
-            mapUrl: 'https://maps.google.com/?q=223+Pennsylvania+Avenue+SE+Washington+DC',
+            mapUrl: 'https://maps.app.goo.gl/gGV5ZCcvD53cRJir6',
             dress: 'Semi-Formal',
             dressInfo: 'Sport coats and trousers, or dresses, jumpsuits, and blouses.'
         },
@@ -133,7 +133,7 @@
             when: 'Saturday, October 17th · 5:30–11:00 PM',
             venue: 'InterContinental — The Wharf',
             address: '801 Wharf Street SW',
-            mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
+            mapUrl: 'https://maps.app.goo.gl/55wY65ySMocwF9ZG6',
             dress: 'Black Tie Preferred',
             dressInfo: 'Tuxedos and full-length gowns are encouraged. Dark suits with a white shirt and dark tie, or formal cocktail dresses, are also welcome.'
         },
@@ -142,7 +142,7 @@
             when: 'Sunday, October 18th · 9:00–11:00 AM',
             venue: 'InterContinental — The Wharf',
             address: '801 Wharf Street SW',
-            mapUrl: 'https://maps.google.com/?q=801+Wharf+Street+SW+Washington+DC',
+            mapUrl: 'https://maps.app.goo.gl/55wY65ySMocwF9ZG6',
             dress: 'Come as you are',
             dressInfo: 'Wear whatever feels comfortable — no need to dress up.'
         }
@@ -155,7 +155,7 @@
         time: '11:00 PM – 1:00 AM',
         venue: "Kirwan's on the Wharf",
         address: '749 Wharf Street SW, Second Floor',
-        mapUrl: 'https://maps.google.com/?q=749+Wharf+Street+SW+Washington+DC',
+        mapUrl: 'https://maps.app.goo.gl/6YwrfEGRp4ki2zPq6',
         note: 'All guests welcome — no need to RSVP!'
     };
 
@@ -722,7 +722,29 @@
             // document- rather than viewport-relative position) plus its
             // scrollHeight is the TRUE bottom edge of the rendered content.
             var trueBottom = card.getBoundingClientRect().top + window.scrollY + card.scrollHeight;
-            var neededDocHeight = trueBottom + 40;
+            // The nav controls are position:fixed on mobile and deliberately sit BEHIND
+            // the card (z-index) — so the scroll reserve has to be deep enough for the
+            // card's bottom to clear them, not a flat 40px. Measured from the live rect
+            // so it tracks the button's real size and offset. Desktop (Nav Unification,
+            // July 2026) is ALSO position:fixed — top:50%, flanking the card at the
+            // viewport's vertical center — so `position === 'fixed'` alone can't tell the
+            // two apart; only mobile's bottom-pinned placement traps the card's bottom
+            // edge, so this is additionally gated on the same <=900px breakpoint
+            // (rsvp-styles.css) that switches between the two layouts. On desktop this
+            // falls through to the 40px default.
+            var reserve = 40;
+            var navProbe = backBtn || arrowBtn;
+            var isMobileNav = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+            if (isMobileNav && navProbe && window.getComputedStyle(navProbe).position === 'fixed') {
+                var navRect = navProbe.getBoundingClientRect();
+                // A hidden/not-yet-laid-out control reports a zero rect (top/height 0),
+                // which would otherwise inflate the reserve to roughly a full viewport
+                // height — skip it and keep the 40px default instead.
+                if (navRect.height > 0) {
+                    reserve = Math.max(reserve, (window.innerHeight - navRect.top) + 24);
+                }
+            }
+            var neededDocHeight = trueBottom + reserve;
             var baselineDocHeight = document.documentElement.scrollHeight;
             // baselineDocHeight (spacer reset to '') is #protected-content's
             // min-height: 100vh FLOOR, not real stacked content underneath
@@ -1049,6 +1071,13 @@
             emailInput.autocomplete = 'off';
             emailInput.inputMode = 'email';
             emailInput.placeholder = 'Enter your email address';
+            // iOS defaults type="text" to autocapitalize=sentences / autocorrect=on and
+            // will rewrite the value AFTER the input event fires, which fails
+            // onEmailInput's staleness guard and hangs the dropdown on "Looking…".
+            // `autocorrect` is a non-standard Safari attribute — must be setAttribute.
+            emailInput.setAttribute('autocapitalize', 'off');
+            emailInput.setAttribute('autocorrect', 'off');
+            emailInput.spellcheck = false;
 
             emailSuggestions = el('div', 'guest-suggestions');
             emailSuggestions.id = 'rsvpFlowSuggestions';
@@ -1117,10 +1146,25 @@
                     // was in flight — a newer input event already owns the
                     // dropdown. Same discard-if-superseded shape as
                     // selectInvitation's own guard on fetchLatestResponse.
-                    if (emailInput.value.trim() !== term) { return; }
+                    var current = emailInput.value.trim();
+                    if (current !== term) {
+                        // Normally a newer input event already scheduled its own lookup and this
+                        // discard is correct. But a value can change WITHOUT an input event (iOS
+                        // autocorrect — see the attributes in buildEmailPanel), leaving no pending
+                        // request and the dropdown stuck on "Looking…". Re-dispatch so there's
+                        // never a dead end.
+                        if (EMAIL_SHAPE.test(current)) { onEmailInput(); }
+                        else { hideSuggestions(); }
+                        return;
+                    }
                     displaySuggestions(invitations);
                 }).catch(function () {
-                    if (emailInput.value.trim() !== term) { return; }
+                    var current = emailInput.value.trim();
+                    if (current !== term) {
+                        if (EMAIL_SHAPE.test(current)) { onEmailInput(); }
+                        else { hideSuggestions(); }
+                        return;
+                    }
                     displaySuggestions(null, 'Something went wrong — please try again.');
                 });
             }, DEBOUNCE_MS);
