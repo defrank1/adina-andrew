@@ -1852,38 +1852,35 @@ body.page-schedule .registry-cta {
     margin-bottom: 0.5rem;
 }
 
-/* Underline written as longhands with -webkit- prefixed twins, and with NO
-   transition on text-decoration-color (July 2026): the shorthand
-   `text-decoration` resets color and thickness, and an active transition on
-   the decoration color is the leading suspect for iOS Safari refusing to
-   paint the underline at all. Alpha raised 0.55 -> 0.9 in the same pass —
-   at 0.55 inside a paragraph that is itself opacity: 0.85, the effective
-   alpha was ~0.47, which read as a smudge rather than a link even where it
-   did render. */
+/* Manual underline (July 2026). text-decoration is not painted at all by iOS
+   Safari on this site — confirmed by device screenshot, and NOT fixed by
+   prefixed longhands, explicit text-decoration-thickness, or removing the
+   transition on text-decoration-color (all tried first). Root cause never
+   identified.
+
+   The line is drawn as a background gradient instead: a 1px band stretched to
+   the element width and pinned to the bottom of the padding box. Different
+   rendering path, so it is immune to whatever suppresses the decoration.
+
+   currentColor makes the rule follow the text, which means dark mode needs no
+   override — but it also means the line is full-strength rather than the 55%
+   alpha the original design used. That is deliberate: the whole defect was
+   that the underline could not be seen.
+
+   Do not "restore" text-decoration here. It does not work. */
 .schedule-link {
     color: inherit;
-    -webkit-text-decoration-line: underline;
-    -webkit-text-decoration-color: rgba(26, 58, 46, 0.9);
-    text-decoration-line: underline;
-    text-decoration-color: rgba(26, 58, 46, 0.9);
-    -webkit-text-decoration-thickness: 1px;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    padding-bottom: 3px;
+    transition: background-size 0.2s ease;
 }
 
 .schedule-link:hover {
-    -webkit-text-decoration-color: var(--color-accent);
-    text-decoration-color: var(--color-accent);
-}
-
-body.dark-mode .schedule-link {
-    -webkit-text-decoration-color: rgba(241, 237, 234, 0.85);
-    text-decoration-color: rgba(241, 237, 234, 0.85);
-}
-
-body.dark-mode .schedule-link:hover {
-    -webkit-text-decoration-color: rgba(241, 237, 234, 1);
-    text-decoration-color: rgba(241, 237, 234, 1);
+    background-size: 100% 2px;
 }
 
 /* ===========================
@@ -2421,28 +2418,17 @@ body.dark-mode .section-divider {
 /* See .schedule-link for the rationale. */
 .travel-link {
     color: inherit;
-    -webkit-text-decoration-line: underline;
-    -webkit-text-decoration-color: rgba(26, 58, 46, 0.9);
-    text-decoration-line: underline;
-    text-decoration-color: rgba(26, 58, 46, 0.9);
-    -webkit-text-decoration-thickness: 1px;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+    background-position: 0 100%;
+    padding-bottom: 3px;
+    transition: background-size 0.2s ease;
 }
 
 .travel-link:hover {
-    -webkit-text-decoration-color: var(--color-accent);
-    text-decoration-color: var(--color-accent);
-}
-
-body.dark-mode .travel-link {
-    -webkit-text-decoration-color: rgba(241, 237, 234, 0.85);
-    text-decoration-color: rgba(241, 237, 234, 0.85);
-}
-
-body.dark-mode .travel-link:hover {
-    -webkit-text-decoration-color: rgba(241, 237, 234, 1);
-    text-decoration-color: rgba(241, 237, 234, 1);
+    background-size: 100% 2px;
 }
 
 .travel-directions {
