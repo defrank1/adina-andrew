@@ -1715,6 +1715,30 @@ All four `mapUrl` values in `EVENT_DETAILS` (`friday`/`saturday`/`sunday`) and `
 
 ---
 
+## RSVP Card Flow — Static Summary for Wedding Week (October 7, 2026)
+
+### Decision AV: Returning guests see a static summary, with dress codes on accepted events
+
+One week out, a guest who enters their email and already has a response on file lands on the schedule/thank-you card as a **static reference sheet** — they can read their answers but cannot re-enter the form. Guests with no response on file still get the full blank form unchanged; late RSVPs remain allowed, and their post-Send thank-you card is the same static summary.
+
+`buildScheduleSummaryInto` now prints each **accepted** event's dress code between the date/time and the venue (when → dress → where, the same order `makeCardEventMeta` uses on the event cards): a plain, non-interactive `.weekend-event-dress` capsule, with the `dressInfo` definition printed directly beneath it as `.rsvp-schedule-dress-info` (Sentient, 0.85rem, 0.8 opacity). Deliberately **not** `makeDressTag()` — the popover suits a card you're filling in, but on a reference sheet the definition should just be there. Declined events stay a single `✗ Declines — …` line with no dress code; the afterparty block gets none (none is defined for it, and none was invented); non-invited events never appear. `makeDressTag` and the popover CSS are untouched — still used on the event cards for late responders. The card-scoped `.rsvp-card .weekend-event-dress` rule only bumps `letter-spacing` to 0.16em and does not touch margins, so the capsule keeps its base `0.5rem` top / `0.55rem` bottom margins here.
+
+### Decision AW: "Edit your RSVP" removed in favor of a contact line
+
+The schedule card's "Edit your RSVP" button is gone — for returning guests and for fresh submitters alike — replaced by a centered `.rsvp-schedule-contact` line: "Need to change something? Email us at [obfuscated address]." The address is held in `CONTACT_EMAIL_DISPLAY` (CONFIG block, next to `REPLY_BY`) in `[at]`/`[dot]` form, as **plain text with no `<a>` and no `mailto:`**, so the real address never appears in page source or the DOM (the repo is public). The schedule card has no Back or Forward either (`stackNavInfoFor`'s schedule branch, unchanged), so it is a deliberate dead end.
+
+`enterEditFlow()` and `replacePersonalCards()` are left in place, unused, with a comment marking them intentionally unwired; the `.rsvp-edit-link` CSS rule is also left as-is. Restoring editing only means re-adding the button in `buildScheduleCard`. Known and accepted: the confirmation email from `rsvp-workflow/google-apps-script.js` still tells guests to press "Edit Your RSVP" — not changed here; Andrew will decide separately.
+
+### Decision AX: The response check now has three states — a failed check no longer looks like "no RSVP"
+
+`fetchLatestResponse` used to resolve `null` for "never submitted," for a network error, and for its 6s timeout alike, and `selectInvitation` dealt the blank form in all three cases. Live lookups measure 1.5–6.7s, so that timeout tripped in normal use: a guest who had already RSVP'd could be handed a blank form instead of their summary, and re-submitting it would create a new "latest" response.
+
+It now resolves one of `{ state: 'found', response }`, `{ state: 'none' }` (the server's `{ none: true }`), or `{ state: 'error' }` (network error, non-OK HTTP status, timeout, or any other body — including the script's own HTTP-200 `{ status: 'error' }` from `doGet`'s catch, which the old code silently treated as a mismatched response). It still never rejects. `RESPONSE_FETCH_TIMEOUT_MS` went from 6000 to 15000 per attempt, and an `error` is retried once automatically before being reported. In `selectInvitation`: `found` + matching party → schedule card; `found` with a changed party (e.g. a plus-one added since) or `none` → blank form, as before; `error` → **no stack dealt, nothing files forward** — the guest stays on lookup, the email pill is re-shown under "We couldn't load your RSVP — select your email to try again.", and clicking it retries. The retained `.catch` (reachable only if building the cards throws) routes to the same error handling, never to the blank form. Placeholder mode maps a `PLACEHOLDER_RESPONSES` hit to `found` and a miss to `none`. No Apps Script change or redeploy was needed — `?action=response` already returned everything required.
+
+**Verified** in Playwright against a local server, serving a staging copy of `js/rsvp-flow.js` (`APPS_SCRIPT_URL` blanked at request time, so the repo file never changed): `laura.nelson@example.com` lands on the schedule card with SEMI-FORMAL and BLACK TIE PREFERRED capsules plus definitions, then Kosher Chicken; no dress code on the afterparty; Sunday as the decline line only; the contact line as plain text with no link, and no Edit, Back, or Next. `john.smith@example.com` still gets the blank form, and after Send the thank-you card shows dress codes and the contact line. Forcing `{ state: 'error' }` keeps the lookup card up with the error line above the pill, and clicking the pill retries through to the schedule card. Dark-mode contrast on the card surface: capsule 12.8:1, definition 8.7:1, contact line 12.8:1. A temporary four-person Garcia response showed no horizontal overflow on the schedule card at 375px or 768px.
+
+---
+
 ## Pending Launch Tasks
 
 None currently recorded — the last two open items (`rsvp.html`'s dev password, and `APPS_SCRIPT_URL` being empty/staging) are both resolved as of this entry: `rsvp.html` no longer has a password gate at all (Decision X above), and `APPS_SCRIPT_URL` in `js/rsvp-flow.js` has pointed at a live Apps Script deployment since an earlier session (confirmed directly in the file while verifying Decision X, rather than assumed from this stale note) — it is no longer empty/staging-mode. Reminder for whoever deploys future `rsvp-workflow/google-apps-script.js` changes: `APPS_SCRIPT_URL`'s value is not itself evidence that the *deployed* Apps Script code is current — see each Apps Script decision's own deploy caveat for what still needs to be pasted in and redeployed.

@@ -1791,6 +1791,16 @@ body.dark-mode .rsvp-review-person {
     margin: 1.8rem auto 0;
 }
 
+/* Replaces the retired "Edit your RSVP" button (Oct 2026). Centered,
+   matching .rsvp-card-thanks-line. */
+.rsvp-schedule-contact {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: center;
+    margin-top: 1.8rem;
+}
+
 /* Schedule card's per-event blocks (buildScheduleSummaryInto) — the event
    name is now a .label-heading (the same small PP Watch caps DC Guide uses
    for "Where to Eat"/"What to Do"), so it's a quiet label under the big
@@ -1817,6 +1827,17 @@ body.dark-mode .rsvp-review-person {
     font-size: 0.9rem;
     opacity: 0.85;
     margin-bottom: 0.2rem;
+}
+
+/* Dress-code definition on the schedule card — printed, not a popover,
+   since this card is a static reference sheet. Sentient body, same
+   size/opacity family as the schedule card's other body lines. */
+.paper-card--page[data-step="schedule"] .rsvp-schedule-dress-info {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    opacity: 0.8;
+    margin: 0 0 0.5rem;
 }
 
 /* The optional note + Send RSVP inside the review card. */

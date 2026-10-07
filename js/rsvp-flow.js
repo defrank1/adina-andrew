@@ -22,9 +22,10 @@
    way through:
 
      invitation <-> lookup <-> one card per INVITED event
-       <-> review & send <-> schedule/thank-you (no Back — "Edit your RSVP"
-       loops back into a pre-filled personal stack instead, see
-       enterEditFlow)
+       <-> review & send <-> schedule/thank-you (a dead end by design — no
+       Back, no Forward, and as of Oct 2026 no "Edit your RSVP" either: the
+       card is a static summary with a contact line for changes; see
+       enterEditFlow, kept but unwired)
 
    Cards for non-invited events are never built; stack depth is entirely
    data-driven. Re-selecting (a different invite, or the same one again after
@@ -34,8 +35,10 @@
    The email autocomplete keeps the staging form's privacy rule: no lookup
    until the guest has typed past the "@". Once an invitation is selected,
    the backend is also asked whether this guest has a prior response on file
-   (fetchLatestResponse) — if so, they land straight on a populated schedule
-   card instead of the blank flow; see selectInvitation.
+   (fetchLatestResponse) — if so, they land straight on a static schedule
+   card instead of the blank flow; if not, the blank flow; and if the check
+   itself failed, they stay on lookup with a retry prompt rather than being
+   handed a blank form they might re-submit. See selectInvitation.
 
    Three seams are the ONLY functions that touch the network (the first two
    share a contract with js/rsvp-form.js on the staging page; the third is
@@ -43,7 +46,10 @@
 
      searchInvitations(query) -> Promise<[{ email, invitedTo, people }]>
      submitRsvp(formData)     -> Promise<void>
-     fetchLatestResponse(email) -> Promise<submission shape | null>
+     fetchLatestResponse(email) -> Promise<{ state: 'found', response }
+                                          | { state: 'none' }
+                                          | { state: 'error' }>
+                                   (never rejects)
 
    APPS_SCRIPT_URL empty  -> placeholder invitations/responses + no-op submit
                              (fully testable front-end-only, identical to
@@ -76,6 +82,9 @@
     // address that isn't finished yet.
     var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     var REPLY_BY = 'the first of September'; // September 1, 2026 (confirmed)
+    // Deliberately obfuscated, plain text — no mailto link, so the real
+    // address never appears in page source or the DOM (repo is public).
+    var CONTACT_EMAIL_DISPLAY = 'andrewdefrank1 [at] gmail [dot] com';
 
     // ---- stack choreography timing -----------------------------------------
     // Set-aside metaphor (Motion Rework, July 2026 — supersedes file-to-back):
@@ -207,7 +216,9 @@
         }
     };
 
-    var RESPONSE_FETCH_TIMEOUT_MS = 6000;
+    // Live lookups measure 1.5–6.7s, so the old 6s timeout tripped in normal
+    // use. Per attempt; fetchLatestResponse retries once on error.
+    var RESPONSE_FETCH_TIMEOUT_MS = 15000;
 
     // ---- BACKEND SEAMS (the only network code) -------------------------------
 
@@ -246,27 +257,47 @@
         });
     }
 
-    // The guest's latest submitted response, if any, in submission shape —
-    // { people, message } — or null if they've never submitted. Resolves,
-    // never rejects (a network failure or timeout resolves null too), so
-    // callers can treat "no prior response" and "couldn't check" identically
-    // and never block an RSVP on this feature (Section G3).
+    // Whether this guest already has a response on file. Three states, so a
+    // failed check can never be mistaken for "never submitted" (Oct 2026 —
+    // timeouts used to resolve null too, silently dealing a returning guest
+    // the blank form, which they could then re-submit):
+    //   { state: 'found', response: { people, message } }  submission shape
+    //   { state: 'none' }   server says { none: true }
+    //   { state: 'error' }  network error, non-OK status, timeout, or any
+    //                       other body (e.g. the script's own
+    //                       { status: 'error' } from doGet's catch)
+    // On 'error' it retries once automatically before giving up. Resolves,
+    // never rejects. Placeholder mode maps a PLACEHOLDER_RESPONSES hit to
+    // 'found' and a miss to 'none'.
     function fetchLatestResponse(email) {
         if (!APPS_SCRIPT_URL) {
             var placeholder = PLACEHOLDER_RESPONSES[(email || '').trim().toLowerCase()];
-            return Promise.resolve(placeholder || null);
+            return Promise.resolve(placeholder
+                ? { state: 'found', response: placeholder }
+                : { state: 'none' });
         }
+        return fetchLatestResponseOnce(email).then(function (result) {
+            return result.state === 'error' ? fetchLatestResponseOnce(email) : result;
+        });
+    }
+
+    // One attempt, raced against RESPONSE_FETCH_TIMEOUT_MS. Never rejects.
+    function fetchLatestResponseOnce(email) {
         var url = APPS_SCRIPT_URL + '?action=response&email=' + encodeURIComponent(email);
         var timeout = new Promise(function (resolve) {
-            setTimeout(function () { resolve(null); }, RESPONSE_FETCH_TIMEOUT_MS);
+            setTimeout(function () { resolve({ state: 'error' }); }, RESPONSE_FETCH_TIMEOUT_MS);
         });
         var live = fetch(url)
             .then(function (r) {
                 if (!r.ok) { throw new Error('response fetch failed: ' + r.status); }
                 return r.json();
             })
-            .then(function (res) { return (!res || res.none) ? null : res; })
-            .catch(function () { return null; });
+            .then(function (res) {
+                if (res && res.none) { return { state: 'none' }; }
+                if (res && Array.isArray(res.people)) { return { state: 'found', response: res }; }
+                return { state: 'error' };
+            })
+            .catch(function () { return { state: 'error' }; });
         return Promise.race([live, timeout]);
     }
 
@@ -1297,15 +1328,20 @@
         // Tears down any previously-built personal-stack cards (a different
         // invitation, or the same one re-selected), then asks the backend
         // (see fetchLatestResponse) whether this guest has a prior response
-        // on file: if so, splices in a single read-only schedule card
-        // showing it — "enter your email, land right on your schedule," the
-        // returning-guest path (Section G3); if not (or the fetch fails —
-        // never block an RSVP on this), builds a fresh blank flow, same as
-        // always. Either way, plays the SAME fileForward move every other
-        // Next click uses — so this transition is choreographed identically
-        // to the rest of the flow (no special-cased dual exit), and Back
-        // from the first card naturally reveals lookup again (fileBackward
-        // on a unified array — see the stack engine above).
+        // on file:
+        //   found + matching party -> a single static schedule card — "enter
+        //     your email, land right on your schedule," the returning-guest
+        //     path (Section G3)
+        //   found but party changed (e.g. a plus-one added since), or none
+        //     -> a fresh blank flow; re-RSVPing for the full party is right
+        //   error -> stay on lookup with a retry prompt (see
+        //     showResponseLoadError) — NOT the blank form, which a guest who
+        //     already RSVP'd might re-submit (Oct 2026)
+        // Found/none play the SAME fileForward move every other Next click
+        // uses — so this transition is choreographed identically to the rest
+        // of the flow (no special-cased dual exit), and Back from the first
+        // card naturally reveals lookup again (fileBackward on a unified
+        // array — see the stack engine above).
         function selectInvitation(inv) {
             invitation = inv;
             unlockSite();
@@ -1314,26 +1350,48 @@
             removePersonalCards();
             latestResponse = null;
             fetchLatestResponse(inv.email)
-                .then(function (resp) {
+                .then(function (result) {
                     // A later selection (or a cleared/re-typed email)
                     // superseded this one while the fetch was in flight —
                     // let that newer call own the stack instead.
                     if (invitation !== inv) { return; }
-                    if (resp && responseMatchesInvitation(resp, inv)) {
-                        latestResponse = resp;
-                        dealScheduleStack(inv, resp);
+                    if (result.state === 'error') {
+                        showResponseLoadError(inv);
+                        return;
+                    }
+                    if (result.state === 'found' && responseMatchesInvitation(result.response, inv)) {
+                        latestResponse = result.response;
+                        dealScheduleStack(inv, result.response);
                     } else {
                         dealPersonalStack(inv, null);
                     }
                     hideSuggestions();
                     fileForward(afterMove);
                 })
-                .catch(function () {
+                .catch(function (err) {
+                    // fetchLatestResponse never rejects, but building the
+                    // cards above can still throw (e.g. a malformed
+                    // response). Treat that as a failed load, never as "no
+                    // RSVP on file".
+                    console.error('RSVP response load error:', err);
                     if (invitation !== inv) { return; }
-                    dealPersonalStack(inv, null);
-                    hideSuggestions();
-                    fileForward(afterMove);
+                    showResponseLoadError(inv);
                 });
+        }
+
+        // The response check failed (or timed out, twice): keep the guest on
+        // lookup — no stack is dealt, nothing files forward — and re-show
+        // their email pill under an error line, so clicking it retries via
+        // selectInvitation. `invitation` is cleared so the retry starts clean.
+        function showResponseLoadError(inv) {
+            removePersonalCards(); // a no-op unless a card build threw partway
+            invitation = null;
+            latestResponse = null;
+            displaySuggestions([inv]);
+            emailSuggestions.insertBefore(
+                el('div', 'guest-suggestion-item guest-suggestion-empty',
+                    "We couldn't load your RSVP — select your email to try again."),
+                emailSuggestions.firstChild);
         }
 
         // Defensive sanity check — if the invitation itself changed (e.g.
@@ -1830,10 +1888,11 @@
         // you" + a confirmation line) and for a returning guest whose email
         // matches a saved submission ("Your RSVP" + a plain intro line —
         // see selectInvitation/dealScheduleStack). Either way it shows the
-        // full weekend schedule (date/time + venue per ACCEPTED event, not
-        // just an accept/decline checkmark — the "operate as a schedule
-        // page" ask) plus an "Edit your RSVP" button that re-enters the
-        // (pre-filled) personal stack rather than reloading the page.
+        // full weekend schedule (date/time, dress code, and venue per
+        // ACCEPTED event, not just an accept/decline checkmark — the
+        // "operate as a schedule page" ask). As of Oct 2026 (wedding week)
+        // it's a static summary: no way back into the form, just a contact
+        // line for changes.
 
         function buildScheduleCard(inv, data, opts) {
             opts = opts || {};
@@ -1849,23 +1908,27 @@
             buildScheduleSummaryInto(summary, data);
             card.appendChild(summary);
 
-            var editBtn = el('button', 'btn-normal rsvp-edit-link', 'Edit your RSVP');
-            editBtn.type = 'button';
-            editBtn.addEventListener('click', enterEditFlow);
-            card.appendChild(editBtn);
+            // Replaces the retired "Edit your RSVP" button (Oct 2026) — for
+            // both returning guests and fresh/late submitters. Plain text,
+            // no mailto (see CONTACT_EMAIL_DISPLAY).
+            var contact = el('p', 'rsvp-schedule-contact',
+                'Need to change something? Email us at ' + CONTACT_EMAIL_DISPLAY + '.');
+            card.appendChild(contact);
 
-            // No Back control (mirrors stackNavInfoFor's schedule branch) —
-            // "Edit your RSVP" above is the only way back into the personal
-            // stack (Section G3).
+            // No Back/Forward control (mirrors stackNavInfoFor's schedule
+            // branch) — this card is the end of the flow.
             return makeStackCard(card, 'schedule');
         }
 
         // Per-person schedule: a declined event stays a plain accept/decline
         // line (nothing to show — they're not going); an accepted event gets
-        // its own block with the event name, date/time, and venue + address
-        // link (the same building blocks the personal-stack cards use), plus
-        // the meal line (kosher-prefixed plain text, matching the review
-        // summary) for Saturday. An accepted Saturday also gets an afterparty
+        // its own block with the event name, date/time, dress code, and
+        // venue + address link (when → dress → where, the same order as
+        // makeCardEventMeta), plus the meal line (kosher-prefixed plain text,
+        // matching the review summary) for Saturday. The dress code is a
+        // plain capsule with its definition printed beneath — not
+        // makeDressTag's popover, since this card is a static reference
+        // sheet. An accepted Saturday also gets an afterparty
         // entry appended right after it (Section G1) — same shape as
         // buildAfterpartyInfo's event section, since it's informational
         // regardless of anyone's answers.
@@ -1887,6 +1950,13 @@
                     var eventBlock = el('div', 'rsvp-schedule-event');
                     eventBlock.appendChild(el('p', 'rsvp-schedule-event-name label-heading', detail.shortName || detail.name));
                     eventBlock.appendChild(makeWhenLines(detail.when));
+
+                    if (detail.dress) {
+                        eventBlock.appendChild(el('span', 'weekend-event-dress', detail.dress));
+                        if (detail.dressInfo) {
+                            eventBlock.appendChild(el('p', 'rsvp-schedule-dress-info', detail.dressInfo));
+                        }
+                    }
 
                     var where = el('p', 'weekend-event-where');
                     where.appendChild(document.createTextNode(detail.venue));
@@ -1931,6 +2001,12 @@
             });
         }
 
+        // INTENTIONALLY UNWIRED as of Oct 2026 (static summary, wedding
+        // week): nothing calls this now that the schedule card's "Edit your
+        // RSVP" button is gone. Kept, along with replacePersonalCards, so
+        // restoring editing only means re-adding that button (wired to
+        // enterEditFlow) in buildScheduleCard.
+        //
         // Re-enters the personal-stack flow from the schedule card, pre-
         // filled from `latestResponse` — NOT a page reload (a reload would
         // land right back on this same card via the returning-guest fetch,
