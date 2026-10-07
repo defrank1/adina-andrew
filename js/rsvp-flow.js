@@ -216,9 +216,15 @@
         }
     };
 
-    // Live lookups measure 1.5–6.7s, so the old 6s timeout tripped in normal
-    // use. Per attempt; fetchLatestResponse retries once on error.
-    var RESPONSE_FETCH_TIMEOUT_MS = 15000;
+    // Live lookups measure 1.5–6.7s. If the first attempt hasn't answered by
+    // RESPONSE_HEDGE_MS, a second identical request starts ALONGSIDE it and
+    // whichever answers first wins; RESPONSE_DEADLINE_MS caps the whole check
+    // (worst case 15s, down from 15s + a sequential 15s retry).
+    var RESPONSE_HEDGE_MS = 7000;
+    var RESPONSE_DEADLINE_MS = 15000;
+    // How long "Loading your invitation…" shows before it's reworded, so a
+    // slow check reads as working rather than frozen.
+    var SLOW_LOAD_NOTICE_MS = 4000;
 
     // ---- BACKEND SEAMS (the only network code) -------------------------------
 
@@ -266,7 +272,10 @@
     //   { state: 'error' }  network error, non-OK status, timeout, or any
     //                       other body (e.g. the script's own
     //                       { status: 'error' } from doGet's catch)
-    // On 'error' it retries once automatically before giving up. Resolves,
+    // At most two attempts: a second starts immediately if the first fails
+    // fast, or alongside it (a "hedge") if the first is still pending at
+    // RESPONSE_HEDGE_MS. The first non-error answer wins; 'error' only once
+    // both attempts have failed or RESPONSE_DEADLINE_MS passes. Resolves,
     // never rejects. Placeholder mode maps a PLACEHOLDER_RESPONSES hit to
     // 'found' and a miss to 'none'.
     function fetchLatestResponse(email) {
@@ -276,18 +285,38 @@
                 ? { state: 'found', response: placeholder }
                 : { state: 'none' });
         }
-        return fetchLatestResponseOnce(email).then(function (result) {
-            return result.state === 'error' ? fetchLatestResponseOnce(email) : result;
+        return new Promise(function (resolve) {
+            var settled = false;
+            var started = 0;
+            var pending = 0;
+            function settle(result) {
+                if (settled) { return; }
+                settled = true;
+                resolve(result);
+            }
+            function attempt() {
+                started += 1;
+                pending += 1;
+                fetchLatestResponseOnce(email).then(function (result) {
+                    pending -= 1;
+                    if (result.state !== 'error') { settle(result); return; }
+                    if (started < 2) { attempt(); }             // failed fast: retry now
+                    else if (pending === 0) { settle(result); } // both attempts failed
+                });
+            }
+            attempt();
+            setTimeout(function () {
+                if (!settled && started < 2) { attempt(); }
+            }, RESPONSE_HEDGE_MS);
+            setTimeout(function () { settle({ state: 'error' }); }, RESPONSE_DEADLINE_MS);
         });
     }
 
-    // One attempt, raced against RESPONSE_FETCH_TIMEOUT_MS. Never rejects.
+    // One attempt, classified. No timeout of its own — fetchLatestResponse's
+    // deadline covers it. Never rejects.
     function fetchLatestResponseOnce(email) {
         var url = APPS_SCRIPT_URL + '?action=response&email=' + encodeURIComponent(email);
-        var timeout = new Promise(function (resolve) {
-            setTimeout(function () { resolve({ state: 'error' }); }, RESPONSE_FETCH_TIMEOUT_MS);
-        });
-        var live = fetch(url)
+        return fetch(url)
             .then(function (r) {
                 if (!r.ok) { throw new Error('response fetch failed: ' + r.status); }
                 return r.json();
@@ -298,7 +327,6 @@
                 return { state: 'error' };
             })
             .catch(function () { return { state: 'error' }; });
-        return Promise.race([live, timeout]);
     }
 
     // A successful lookup means the server matched this address EXACTLY against
@@ -1034,6 +1062,16 @@
         var emailInput, emailSuggestions;
         var debounceTimer = null;
         var lookupWrapper = null; // the .paper-card wrapper, once built
+        // The last dropdown actually rendered by displaySuggestions, so one
+        // hidden by an outside click can be brought back without a new
+        // lookup (see restoreSuggestions).
+        var lastSuggestions = null;
+        // True while the dropdown is showing the response-load error — the
+        // guest's only retry control, so an outside click leaves it up.
+        var loadErrorShown = false;
+        // "Already RSVP'd?" checks already started, keyed by lowercased
+        // email (see prefetchLatestResponse).
+        var responseCache = {};
 
         // Same arrow asset/markup as .rsvp-arrow's own icon (rsvp.html) —
         // just built here since the suggestion pill is constructed at
@@ -1134,6 +1172,7 @@
 
             emailInput.addEventListener('input', onEmailInput);
             emailInput.addEventListener('keydown', onEmailInputKeydown);
+            emailInput.addEventListener('click', restoreSuggestions);
             emailSuggestions.addEventListener('keydown', onSuggestionsKeydown);
             // Uses composedPath(), not a live emailSuggestions.contains(e.target)
             // check, because a suggestion button's own click handler
@@ -1148,6 +1187,7 @@
             document.addEventListener('click', function (e) {
                 var path = e.composedPath ? e.composedPath() : [e.target];
                 if (path.indexOf(emailInput) === -1 && path.indexOf(emailSuggestions) === -1) {
+                    if (loadErrorShown) { return; } // keep the retry pill up
                     hideSuggestions();
                 }
             });
@@ -1172,6 +1212,9 @@
             if (!EMAIL_SHAPE.test(term)) { hideSuggestions(); return; }
             debounceTimer = setTimeout(function () {
                 showLookupLoading();
+                // Start the "already RSVP'd?" check now, in parallel with
+                // the lookup, rather than waiting for the pill click.
+                prefetchLatestResponse(term);
                 searchInvitations(term).then(function (invitations) {
                     // The guest kept typing (or cleared the field) while this
                     // was in flight — a newer input event already owns the
@@ -1188,6 +1231,9 @@
                         else { hideSuggestions(); }
                         return;
                     }
+                    (invitations || []).forEach(function (inv) {
+                        aliasLatestResponse(term, inv.email);
+                    });
                     displaySuggestions(invitations);
                 }).catch(function () {
                     var current = emailInput.value.trim();
@@ -1210,6 +1256,7 @@
         // non-interactive styling as the "no match" state — rather than
         // adding new CSS.
         function showLookupLoading() {
+            loadErrorShown = false;
             emailSuggestions.innerHTML = '';
             emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty', 'Looking…'));
             emailSuggestions.style.display = 'block';
@@ -1222,15 +1269,31 @@
         // covers the fetchLatestResponse round trip AFTER a pill is pressed,
         // which is a couple of seconds. Without it, hideSuggestions() would
         // un-fade .form-hint and the card would sit showing "Type the
-        // email…" as if nothing happened.
+        // email…" as if nothing happened. Returns the row so selectInvitation
+        // can reword it if the check runs long (SLOW_LOAD_NOTICE_MS).
         function showSelectionLoading() {
+            loadErrorShown = false;
             emailSuggestions.innerHTML = '';
-            emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty', 'Loading your invitation…'));
+            var row = el('div', 'guest-suggestion-item guest-suggestion-empty', 'Loading your invitation…');
+            emailSuggestions.appendChild(row);
             emailSuggestions.style.display = 'block';
             openSuggestions();
+            return row;
         }
 
-        function displaySuggestions(invitations, errorText) {
+        // `loadError` (see showResponseLoadError): the invitation was found
+        // but the "already RSVP'd?" check failed — the pill is shown again
+        // under an error line as the retry control, and the usual "Select
+        // your email to continue" cue is left off, since the error line
+        // already says it (and with both, the dropdown overran the card).
+        function displaySuggestions(invitations, errorText, loadError) {
+            lastSuggestions = {
+                term: emailInput.value.trim(),
+                invitations: invitations,
+                errorText: errorText,
+                loadError: !!loadError
+            };
+            loadErrorShown = !!loadError;
             emailSuggestions.innerHTML = '';
             if (errorText || !invitations || invitations.length === 0) {
                 // Stays a plain, non-interactive div — nothing to select.
@@ -1245,6 +1308,10 @@
                 // rsvp-styles.css) so it keeps the body font instead of
                 // .btn-priority's uppercase heading type, and so the flex gap
                 // to the icon has something to apply between.
+                if (loadError) {
+                    emailSuggestions.appendChild(el('div', 'guest-suggestion-item guest-suggestion-empty',
+                        "We couldn't load your RSVP — select your email to try again."));
+                }
                 invitations.forEach(function (inv) {
                     var btn = el('button', 'guest-suggestion-item btn-priority');
                     btn.type = 'button';
@@ -1263,11 +1330,13 @@
                 // (muted, non-interactive) rather than the pill treatment above
                 // it, and rides along for free in focusableSuggestions'
                 // existing :not(.guest-suggestion-empty) filter — no separate
-                // exclusion needed. Shown only here, never during Looking… or
-                // no-match.
-                var cue = el('div', 'guest-suggestion-item guest-suggestion-empty',
-                    'Select your email to continue');
-                emailSuggestions.appendChild(cue);
+                // exclusion needed. Shown only here, never during Looking…,
+                // no-match, or a load error.
+                if (!loadError) {
+                    var cue = el('div', 'guest-suggestion-item guest-suggestion-empty',
+                        'Select your email to continue');
+                    emailSuggestions.appendChild(cue);
+                }
             }
             emailSuggestions.style.display = 'block';
             emailInput.classList.add('suggestions-open');
@@ -1275,10 +1344,23 @@
         }
 
         function hideSuggestions() {
+            loadErrorShown = false;
             emailSuggestions.style.display = 'none';
             emailSuggestions.classList.remove('is-open');
             emailSuggestions.innerHTML = '';
             emailInput.classList.remove('suggestions-open');
+        }
+
+        // Clicking back into the email field (or ArrowDown from it) re-shows
+        // a dropdown that an outside click hid, from the last one rendered —
+        // no new lookup. Only while nothing is selected and the field still
+        // holds the address that dropdown was for. Returns whether it did.
+        function restoreSuggestions() {
+            if (invitation || !lastSuggestions) { return false; }
+            if (emailSuggestions.style.display !== 'none') { return false; }
+            if (emailInput.value.trim() !== lastSuggestions.term) { return false; }
+            displaySuggestions(lastSuggestions.invitations, lastSuggestions.errorText, lastSuggestions.loadError);
+            return true;
         }
 
         // ---- lookup dropdown keyboard access ----
@@ -1297,6 +1379,7 @@
         function onEmailInputKeydown(e) {
             if (e.key !== 'ArrowDown') { return; }
             var items = focusableSuggestions();
+            if (!items.length && restoreSuggestions()) { items = focusableSuggestions(); }
             if (!items.length) { return; }
             e.preventDefault();
             items[0].focus();
@@ -1346,11 +1429,19 @@
             invitation = inv;
             unlockSite();
             emailInput.value = inv.email;
-            showSelectionLoading();
+            var loadingRow = showSelectionLoading();
             removePersonalCards();
             latestResponse = null;
-            fetchLatestResponse(inv.email)
+            var slowNotice = setTimeout(function () {
+                if (invitation === inv && loadingRow.parentNode) {
+                    loadingRow.textContent = 'Still loading — this can take a few more seconds…';
+                }
+            }, SLOW_LOAD_NOTICE_MS);
+            // Usually already in flight (or done) — started during the
+            // lookup, see prefetchLatestResponse.
+            prefetchLatestResponse(inv.email)
                 .then(function (result) {
+                    clearTimeout(slowNotice);
                     // A later selection (or a cleared/re-typed email)
                     // superseded this one while the fetch was in flight —
                     // let that newer call own the stack instead.
@@ -1374,24 +1465,64 @@
                     // response). Treat that as a failed load, never as "no
                     // RSVP on file".
                     console.error('RSVP response load error:', err);
+                    clearTimeout(slowNotice);
                     if (invitation !== inv) { return; }
                     showResponseLoadError(inv);
                 });
         }
 
-        // The response check failed (or timed out, twice): keep the guest on
-        // lookup — no stack is dealt, nothing files forward — and re-show
-        // their email pill under an error line, so clicking it retries via
-        // selectInvitation. `invitation` is cleared so the retry starts clean.
+        // The response check failed (both attempts, or the deadline passed):
+        // keep the guest on lookup — no stack is dealt, nothing files
+        // forward — and re-show their email pill under an error line, so
+        // clicking it retries via selectInvitation (prefetchLatestResponse
+        // has already dropped the failed check, so that's a fresh request).
+        // `invitation` is cleared so the retry starts clean. The error state
+        // survives outside clicks (see loadErrorShown).
         function showResponseLoadError(inv) {
             removePersonalCards(); // a no-op unless a card build threw partway
             invitation = null;
             latestResponse = null;
-            displaySuggestions([inv]);
-            emailSuggestions.insertBefore(
-                el('div', 'guest-suggestion-item guest-suggestion-empty',
-                    "We couldn't load your RSVP — select your email to try again."),
-                emailSuggestions.firstChild);
+            displaySuggestions([inv], null, true);
+        }
+
+        function responseKey(email) {
+            return (email || '').trim().toLowerCase();
+        }
+
+        // Starts — or reuses — the "already RSVP'd?" check for an address.
+        // Kicked off the moment a complete address is looked up, in parallel
+        // with searchInvitations, so the answer is usually in by the time the
+        // guest presses their pill; it used to start only on that click, so
+        // the guest sat through both round trips back to back (Oct 2026).
+        // A check that ends in 'error' drops itself from the cache, so the
+        // next selection asks the server again.
+        function prefetchLatestResponse(email) {
+            var key = responseKey(email);
+            if (!responseCache[key]) {
+                var check = fetchLatestResponse(email).then(function (result) {
+                    if (result.state === 'error') {
+                        Object.keys(responseCache).forEach(function (k) {
+                            if (responseCache[k] === check) { delete responseCache[k]; }
+                        });
+                    }
+                    return result;
+                });
+                responseCache[key] = check;
+            }
+            return responseCache[key];
+        }
+
+        // The lookup can return an invitation under a different address
+        // than the one typed (a guest with two emails is keyed by the first
+        // — see handleLookup in the Apps Script). The server resolves either
+        // address to the same response, so the check already started for the
+        // typed one is reused under the returned one too.
+        function aliasLatestResponse(typedEmail, invitationEmail) {
+            var from = responseKey(typedEmail);
+            var to = responseKey(invitationEmail);
+            if (from !== to && responseCache[from] && !responseCache[to]) {
+                responseCache[to] = responseCache[from];
+            }
         }
 
         // Defensive sanity check — if the invitation itself changed (e.g.
@@ -1861,6 +1992,8 @@
                     // record a RETURNING visit reads from (fetchLatestResponse),
                     // this is just what's current for the rest of THIS visit.
                     latestResponse = data;
+                    // Any cached "already RSVP'd?" answer is stale now.
+                    responseCache = {};
                     // Built now (not pre-built with the rest of the stack) so
                     // it's never visible at the stack edges before the send
                     // actually succeeds. replacePersonalCards swaps the whole
