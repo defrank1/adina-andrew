@@ -1759,7 +1759,7 @@ AX's sequential timing (15s, then a 15s retry) could leave a guest on "Loading y
 
 **Rule:** a guest never sees anything about an event outside their invitation's `invitedTo`. `invitedEventKeys(inv)` in `rsvp-flow.js` is the single gate; every event loop that renders to the DOM goes through it (`buildPersonalCards`, `buildSummaryInto`, `buildScheduleSummaryInto`). The two summary renderers additionally skip any invited event whose answer isn't `'yes'`/`'no'` (no false declines).
 
-**Status:** front-end layer shipped Oct 11, 2026. Planned second layer: `handleLatestResponse` omits uninvited keys server-side (requires an Apps Script redeploy via Manage deployments → New version, keeping `APPS_SCRIPT_URL`).
+**Status:** front-end layer shipped Oct 11, 2026. A server-side layer (`handleLatestResponse` omitting uninvited keys, which would need an Apps Script redeploy) was considered and **deliberately skipped** by Andrew (Oct 11, 2026, six days before the wedding): it changes nothing guests see, and the blank slots carry no event information.
 
 **Tradeoff accepted:** full event details (Friday/Sunday names, times, venues, dress codes) remain readable in public `js/rsvp-flow.js` and the public repo. Andrew decided (Oct 11, 2026) that dev-tools exposure is acceptable — the rule governs what the interface shows. Do not move event details server-side to "fix" this without asking.
 
