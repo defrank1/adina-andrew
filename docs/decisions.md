@@ -2,7 +2,7 @@
 
 This document records the major decisions made during the development of adinaandrew2026.com, including what was tried, what was rejected, and why. It complements CLAUDE.md (the locked spec) by preserving the reasoning behind each choice.
 
-Last updated: July 28, 2026
+Last updated: October 11, 2026
 
 ---
 
@@ -1748,6 +1748,22 @@ AX's sequential timing (15s, then a 15s retry) could leave a guest on "Loading y
 **Error state:** "Select your email to continue" is now left off when the error line is shown (the error line already says it, and with both the dropdown ran past the bottom of the lookup card's frame on desktop). `displaySuggestions` takes a `loadError` flag for this instead of `showResponseLoadError` patching the DOM afterward. The error state also **survives outside clicks** (`loadErrorShown`) — it's the guest's only retry control. Separately, any dropdown an outside click *does* hide (the normal pill) comes back when the guest clicks into the email field or presses ArrowDown from it, re-rendered from the last one shown (`restoreSuggestions`) with no new lookup — previously they had to edit the address to get it back.
 
 **Verified** against a mock Apps Script with controlled delays (staging copy of `js/rsvp-flow.js` served at request time; repo file untouched). Lookup 3s + response 3s: the response request starts at the same instant as the lookup, and the schedule card lands ~0.5s after the pill click (previously ~3s more); one response request total. First attempt hangs: the second starts at exactly 7s and the card lands ~7.9s after the click (previously up to 30s), with the reworded loading row visible at 4.7s. First attempt fails fast (HTTP 500): retried ~50ms later, card ~0.5s after the click. Both hang: error state at ~15.3s, and the retry click sends a fresh request and reaches the schedule card. Typed address differs from the invitation's: one response request, reused. Error state fits inside the card at 1440px and 375px, stays up after an outside click, and the retry reaches the schedule card. Normal pill: hidden by an outside click, restored by clicking the field (no second lookup), ArrowDown restores and focuses it, Enter selects it. Round-one regressions (Laura's schedule card with dress codes and contact line; John's blank form through to the thank-you card with no Edit button) still pass.
+
+---
+
+## RSVP — Guests Never See Uninvited Events (October 11, 2026)
+
+### Decision: Event visibility is decided by `invitation.invitedTo`, never by data keys
+
+**Bug (reported by a real guest):** a returning guest (Saturday-only invite) re-entered their email and the schedule card showed "✗ Declines — Farewell Brunch" (and Welcome Party). Cause: `?action=response` (`handleLatestResponse` in `rsvp-workflow/google-apps-script.js`) returns all three event keys per person, with `normalizeEventCell()` collapsing the stored `"not invited"` to `''`. `buildScheduleSummaryInto()` / `buildSummaryInto()` in `js/rsvp-flow.js` skipped an event only when `!(key in person.events)`, so `''` rendered as a decline. The fresh-submit path was unaffected (its `events` are built from `invitedTo`). Data was always correct: Responses stores `"not invited"`, and confirmation emails skip non-`yes`/`no` values.
+
+**Rule:** a guest never sees anything about an event outside their invitation's `invitedTo`. `invitedEventKeys(inv)` in `rsvp-flow.js` is the single gate; every event loop that renders to the DOM goes through it (`buildPersonalCards`, `buildSummaryInto`, `buildScheduleSummaryInto`). The two summary renderers additionally skip any invited event whose answer isn't `'yes'`/`'no'` (no false declines).
+
+**Status:** front-end layer shipped Oct 11, 2026. Planned second layer: `handleLatestResponse` omits uninvited keys server-side (requires an Apps Script redeploy via Manage deployments → New version, keeping `APPS_SCRIPT_URL`).
+
+**Tradeoff accepted:** full event details (Friday/Sunday names, times, venues, dress codes) remain readable in public `js/rsvp-flow.js` and the public repo. Andrew decided (Oct 11, 2026) that dev-tools exposure is acceptable — the rule governs what the interface shows. Do not move event details server-side to "fix" this without asking.
+
+**Testing:** `PLACEHOLDER_RESPONSES` now includes `dpatel@example.com` (Fri+Sat invite) in the live payload shape (`sunday: ''`) so the subset case is testable in placeholder mode.
 
 ---
 

@@ -170,6 +170,17 @@
 
     var EVENT_ORDER = ['friday', 'saturday', 'sunday'];
 
+    // The ONLY way to decide which events may be shown for an invitation.
+    // Never infer it from the keys of a response/events object: the
+    // ?action=response payload has historically carried every event key
+    // (with '' for not-invited), and key presence rendered false "Declines"
+    // lines for events a guest was never invited to. Rule: a guest never
+    // sees anything about an event outside their invitation's invitedTo.
+    function invitedEventKeys(inv) {
+        var invited = (inv && inv.invitedTo) || [];
+        return EVENT_ORDER.filter(function (key) { return invited.indexOf(key) !== -1; });
+    }
+
     // The reception dinner. `kosherable` meals carry the small "Kosher"
     // checkbox. `label` is the full name (used on the radio itself);
     // `shortLabel` is used wherever a kosher selection is summarized
@@ -213,6 +224,18 @@
                 mealKosher: true
             }],
             message: 'So excited!'
+        },
+        // Subset invite (Friday + Saturday only) with a prior response, in the
+        // exact shape the live ?action=response payload has returned: every
+        // event key present, '' for not-invited. Must show NO Sunday line.
+        'dpatel@example.com': {
+            people: [{
+                name: 'Dev Patel',
+                events: { friday: 'no', saturday: 'yes', sunday: '' },
+                meal: 'branzino',
+                mealKosher: false
+            }],
+            message: ''
         }
     };
 
@@ -865,7 +888,7 @@
         function afterMove() {
             var top = stack[0];
             if (top && top.dataset.step === 'review') {
-                buildSummaryInto(reviewSummary, collectData());
+                buildSummaryInto(reviewSummary, collectData(), invitation);
             }
             updateStackNav();
             setNavInFlight(false);
@@ -1568,9 +1591,7 @@
         // kosher choice so editing starts from their last answers instead of
         // blank.
         function buildPersonalCards(inv, savedData) {
-            var invited = EVENT_ORDER.filter(function (key) {
-                return (inv.invitedTo || []).indexOf(key) !== -1;
-            });
+            var invited = invitedEventKeys(inv);
             var cards = invited.map(function (key) {
                 return key === 'saturday'
                     ? buildSaturdayPanel(inv, savedData)
@@ -1905,14 +1926,15 @@
         // Summary grouped by person: each event ✓/✗, plus meal (kosher
         // meals prefixed "Kosher " as plain text, no capsule tag) for
         // Saturday acceptances. Rebuilt from the live radios on every visit.
-        function buildSummaryInto(container, data) {
+        function buildSummaryInto(container, data, inv) {
             container.innerHTML = '';
             data.people.forEach(function (person) {
                 var block = el('div', 'rsvp-review-person');
                 block.appendChild(el('p', 'rsvp-review-person-name', person.name));
 
-                EVENT_ORDER.forEach(function (key) {
-                    if (!(key in person.events)) { return; }
+                invitedEventKeys(inv).forEach(function (key) {
+                    var answer = person.events && person.events[key];
+                    if (answer !== 'yes' && answer !== 'no') { return; } // no recorded answer
                     var detail = EVENT_DETAILS[key];
                     var accepted = person.events[key] === 'yes';
                     var line = el('p', 'rsvp-review-line',
@@ -2038,7 +2060,7 @@
                 : "Here's your RSVP — we can't wait to celebrate with you!"));
 
             var summary = el('div', 'rsvp-review-summary');
-            buildScheduleSummaryInto(summary, data);
+            buildScheduleSummaryInto(summary, data, inv);
             card.appendChild(summary);
 
             // Replaces the retired "Edit your RSVP" button (Oct 2026) — for
@@ -2065,14 +2087,15 @@
         // entry appended right after it (Section G1) — same shape as
         // buildAfterpartyInfo's event section, since it's informational
         // regardless of anyone's answers.
-        function buildScheduleSummaryInto(container, data) {
+        function buildScheduleSummaryInto(container, data, inv) {
             container.innerHTML = '';
             data.people.forEach(function (person) {
                 var block = el('div', 'rsvp-review-person');
                 block.appendChild(el('p', 'rsvp-review-person-name rsvp-card-event-title', person.name));
 
-                EVENT_ORDER.forEach(function (key) {
-                    if (!(key in person.events)) { return; }
+                invitedEventKeys(inv).forEach(function (key) {
+                    var answer = person.events && person.events[key];
+                    if (answer !== 'yes' && answer !== 'no') { return; } // no recorded answer
                     var detail = EVENT_DETAILS[key];
                     var accepted = person.events[key] === 'yes';
                     if (!accepted) {
